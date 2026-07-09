@@ -260,9 +260,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           // TMDB Attribution
           Padding(
             padding: const EdgeInsets.only(bottom: 24),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
+            child: Wrap(
+              alignment: WrapAlignment.center,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 Text(
                   'Veriler ',

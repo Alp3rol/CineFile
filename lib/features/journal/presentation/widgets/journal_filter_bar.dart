@@ -82,6 +82,7 @@ class JournalMiniInsightsBar extends StatelessWidget {
         opacity: 0.6,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Icon(icon, size: 16, color: color),
             const SizedBox(width: 8),
@@ -92,10 +93,18 @@ class JournalMiniInsightsBar extends StatelessWidget {
                 Text(
                   title,
                   style: GoogleFonts.inter(fontSize: 9, color: AppTheme.textSecondary),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                Text(
-                  value,
-                  style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    value,
+                    style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ],
             ),
