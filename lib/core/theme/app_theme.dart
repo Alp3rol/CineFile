@@ -151,6 +151,15 @@ class AppTheme {
         valueIndicatorColor: surfaceColor,
         valueIndicatorTextStyle: GoogleFonts.outfit(color: textPrimary),
       ),
+
+      // Scrollbar Theme (Thin and Premium)
+      scrollbarTheme: ScrollbarThemeData(
+        thumbColor: MaterialStateProperty.all(Colors.white.withOpacity(0.12)),
+        trackColor: MaterialStateProperty.all(Colors.transparent),
+        thickness: MaterialStateProperty.all(4.0), // Thin scrollbar
+        radius: const Radius.circular(8),
+        interactive: true,
+      ),
     );
   }
 }

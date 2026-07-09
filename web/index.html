@@ -31,6 +31,40 @@
 
   <title>CineFile</title>
   <link rel="manifest" href="manifest.json">
+  <style>
+    /* Clean full-screen style for local development */
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      background-color: #0B0D13;
+    }
+
+    /* Custom Scrollbar Styles for WebKit Browsers (Chrome, Safari, Edge) */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.12) !important;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      background-clip: padding-box;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(232, 54, 46, 0.5) !important; /* Cinematic Red hover */
+    }
+    
+    /* Custom Scrollbar for Firefox */
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+    }
+  </style>
 </head>
 <body>
   <!--
