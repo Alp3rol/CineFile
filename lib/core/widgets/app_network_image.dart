@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:visibility_detector/visibility_detector.dart';
-import '../theme/dynamic_background_provider.dart';
 
 // Deterministic per-poster gradient used while loading and when no real
 // image is available, so placeholders read as an intentional stylized
@@ -51,50 +49,6 @@ class AppNetworkImage extends ConsumerStatefulWidget {
 }
 
 class _AppNetworkImageState extends ConsumerState<AppNetworkImage> {
-  late final String _posterKey;
-
-  bool get _isWidgetTest {
-    if (!kDebugMode) return false;
-    final stack = StackTrace.current.toString();
-    return stack.contains('package:flutter_test') || stack.contains('testWidgets');
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    if (_isWidgetTest) {
-      VisibilityDetectorController.instance.updateInterval = Duration.zero;
-    }
-    // Unique key for tracking this poster instance in the background provider.
-    _posterKey = widget.imageUrl.isNotEmpty
-        ? widget.imageUrl
-        : (widget.seed ?? 'image_${identityHashCode(this)}');
-  }
-
-  @override
-  void deactivate() {
-    if (!_isWidgetTest) {
-      try {
-        ref.read(dynamicBackgroundProvider.notifier).unregisterPoster(_posterKey);
-      } catch (_) {}
-    }
-    super.deactivate();
-  }
-
-  @override
-  void dispose() {
-    // Unregister this poster's color immediately on dispose to avoid color leak
-    // when navigating away from the page.
-    if (!_isWidgetTest) {
-      try {
-        ref.read(dynamicBackgroundProvider.notifier).unregisterPoster(_posterKey);
-      } catch (e) {
-        debugPrint('Error unregistering poster color in dispose: $e');
-      }
-    }
-    super.dispose();
-  }
-
   Widget _gradientPlaceholder() {
     return Container(
       decoration: BoxDecoration(gradient: posterPlaceholderGradient(widget.seed ?? widget.imageUrl)),
@@ -157,24 +111,6 @@ class _AppNetworkImageState extends ConsumerState<AppNetworkImage> {
       );
     }
 
-    return VisibilityDetector(
-      key: ValueKey(_posterKey),
-      onVisibilityChanged: (visibilityInfo) {
-        if (!mounted || _isWidgetTest) return;
-        final visiblePercentage = visibilityInfo.visibleFraction * 100;
-        // If more than 10% of the poster is visible, register it to the dynamic background.
-        if (visiblePercentage >= 10.0) {
-          ref.read(dynamicBackgroundProvider.notifier).registerPoster(
-                _posterKey,
-                imageUrl: widget.imageUrl,
-                seed: widget.seed,
-              );
-        } else {
-          // Otherwise, unregister it.
-          ref.read(dynamicBackgroundProvider.notifier).unregisterPoster(_posterKey);
-        }
-      },
-      child: childWidget,
-    );
+    return childWidget;
   }
 }

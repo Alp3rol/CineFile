@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/theme/app_theme.dart';
+import '../core/theme/dynamic_background_provider.dart';
 import '../core/widgets/glass_container.dart';
 import '../core/widgets/dynamic_background_wrapper.dart';
 import 'home/presentation/home_screen.dart';
@@ -32,6 +33,14 @@ class _MainShellState extends ConsumerState<MainShell> {
   @override
   Widget build(BuildContext context) {
     final selectedIndex = ref.watch(mainShellTabIndexProvider);
+
+    // Clear dynamic background when switching to tabs that don't use it (Journal, Calendar, Settings)
+    ref.listen<int>(mainShellTabIndexProvider, (previous, next) {
+      if (next == 2 || next == 3 || next == 4) {
+        ref.read(dynamicBackgroundProvider.notifier).clearColors();
+      }
+    });
+
     return DynamicBackgroundWrapper(
       child: Scaffold(
         backgroundColor: Colors.transparent,

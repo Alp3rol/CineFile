@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/theme/dynamic_background_provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/widgets/app_network_image.dart';
@@ -24,6 +25,22 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final watchRecordsAsync = ref.watch(allWatchRecordsProvider);
+
+    // Update dynamic background based on the last 3 watched movies whenever records change
+    final records = watchRecordsAsync.value ?? const <WatchRecordWithMovie>[];
+    final seenKeys = <MovieKey>{};
+    final last3 = <Movie>[];
+    for (final r in records) {
+      if (seenKeys.add((tmdbId: r.movie.tmdbId, isTv: r.movie.isTv))) {
+        last3.add(r.movie);
+        if (last3.length >= 3) break;
+      }
+    }
+    // Schedule update after build to avoid calling notifier during build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(dynamicBackgroundProvider.notifier).updateMoviesFromList(last3);
+    });
+
     final recentlyAddedAsync = ref.watch(recentlyAddedMoviesProvider);
     final insights = ref.watch(insightsProvider);
     final weeklyGoal = ref.watch(weeklyGoalProvider);

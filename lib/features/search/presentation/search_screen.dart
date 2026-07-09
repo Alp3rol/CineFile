@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/theme/dynamic_background_provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/widgets/app_network_image.dart';
@@ -47,6 +48,16 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         return genreIds != null && genreIds.contains(searchState.selectedGenreId);
       }).toList();
     }
+
+    // Update dynamic background based on first visible result (after build, to avoid setState-during-build)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final query = searchState.query.trim();
+      if (query.isNotEmpty && displayResults.isNotEmpty) {
+        ref.read(dynamicBackgroundProvider.notifier).updateMoviesFromMapList([displayResults.first]);
+      } else {
+        ref.read(dynamicBackgroundProvider.notifier).clearColors();
+      }
+    });
 
     return Scaffold(
       backgroundColor: Colors.transparent,

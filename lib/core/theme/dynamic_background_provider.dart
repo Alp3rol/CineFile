@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:palette_generator/palette_generator.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:visibility_detector/visibility_detector.dart';
+import '../constants/api_constants.dart';
+import '../database/app_database.dart';
 import '../../features/settings/presentation/settings_provider.dart';
 
 /// State containing active poster colors and feature toggle status.
@@ -136,8 +138,95 @@ class DynamicBackgroundNotifier extends StateNotifier<DynamicBackgroundState> {
         _updateActiveColor(key, color);
       }
     } catch (e) {
-      debugPrint('Error extracting color for key $key: $e');
+      debugPrint('Error extracting color for key $key: $e. Falling back to HSL color.');
+      final fallbackColor = _getPlaceholderColor(key);
+      _colorCache[key] = fallbackColor;
+      _updateActiveColor(key, fallbackColor);
     }
+  }
+
+  /// Directly updates the active colors based on a list of Movie database objects.
+  void updateMoviesFromList(List<Movie> movies) {
+    if (!state.isEnabled) return;
+
+    _visibleKeys.clear();
+    final Map<String, Color> activeColors = {};
+
+    for (int i = 0; i < movies.length; i++) {
+      final movie = movies[i];
+      final imageUrl = movie.posterPath;
+      final title = movie.title;
+
+      String? finalImageUrl;
+      if (imageUrl != null && imageUrl.isNotEmpty) {
+        finalImageUrl = imageUrl.startsWith('http')
+            ? imageUrl
+            : '${ApiConstants.imagePathW500}$imageUrl';
+      }
+
+      final key = finalImageUrl ?? title;
+      _visibleKeys.add(key);
+
+      if (_colorCache.containsKey(key)) {
+        activeColors[key] = _colorCache[key]!;
+      } else {
+        // Fallback HSL color
+        final fallbackColor = _getPlaceholderColor(title);
+        _colorCache[key] = fallbackColor;
+        activeColors[key] = fallbackColor;
+
+        if (finalImageUrl != null && finalImageUrl.isNotEmpty) {
+          _extractColor(key, finalImageUrl);
+        }
+      }
+    }
+
+    state = state.copyWith(activePosterColors: activeColors);
+  }
+
+  /// Directly updates the active colors based on a list of TMDb Map objects.
+  void updateMoviesFromMapList(List<Map<String, dynamic>> movies) {
+    if (!state.isEnabled) return;
+
+    _visibleKeys.clear();
+    final Map<String, Color> activeColors = {};
+
+    for (int i = 0; i < movies.length; i++) {
+      final movie = movies[i];
+      final imageUrl = movie['poster_path'] as String?;
+      final title = movie['title'] as String? ?? movie['name'] as String? ?? 'movie_$i';
+
+      String? finalImageUrl;
+      if (imageUrl != null && imageUrl.isNotEmpty) {
+        finalImageUrl = imageUrl.startsWith('http')
+            ? imageUrl
+            : '${ApiConstants.imagePathW500}$imageUrl';
+      }
+
+      final key = finalImageUrl ?? title;
+      _visibleKeys.add(key);
+
+      if (_colorCache.containsKey(key)) {
+        activeColors[key] = _colorCache[key]!;
+      } else {
+        // Fallback HSL color
+        final fallbackColor = _getPlaceholderColor(title);
+        _colorCache[key] = fallbackColor;
+        activeColors[key] = fallbackColor;
+
+        if (finalImageUrl != null && finalImageUrl.isNotEmpty) {
+          _extractColor(key, finalImageUrl);
+        }
+      }
+    }
+
+    state = state.copyWith(activePosterColors: activeColors);
+  }
+
+  /// Clears all active colors, resetting the background to the default solid dark theme.
+  void clearColors() {
+    _visibleKeys.clear();
+    state = state.copyWith(activePosterColors: {});
   }
 
   /// Generates a deterministic average color for seed-based placeholders.

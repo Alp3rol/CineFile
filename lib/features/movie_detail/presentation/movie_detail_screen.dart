@@ -13,15 +13,25 @@ import '../../../../core/widgets/dynamic_background_wrapper.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/database/database_provider.dart';
 import '../../../../core/database/app_database.dart';
+import '../../../../core/theme/dynamic_background_provider.dart';
+import '../../main_shell.dart';
 import 'movie_detail_provider.dart';
 import 'add_watch_record_sheet.dart';
 import '../../journal/presentation/widgets/add_to_list_sheet.dart';
 
-class MovieDetailScreen extends ConsumerWidget {
+class MovieDetailScreen extends ConsumerStatefulWidget {
   final int tmdbId;
   final bool isTv;
 
   const MovieDetailScreen({super.key, required this.tmdbId, this.isTv = false});
+
+  @override
+  ConsumerState<MovieDetailScreen> createState() => _MovieDetailScreenState();
+}
+
+class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
+  int get tmdbId => widget.tmdbId;
+  bool get isTv => widget.isTv;
 
   // Toggle Favorite Status
   Future<void> _toggleFavorite(WidgetRef ref, Map<String, dynamic> movieData) async {
@@ -272,10 +282,44 @@ class MovieDetailScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  void dispose() {
+    // Restore parent screen colors on pop.
+    // Wrapped in try/catch because ref may be invalid during widget teardown in tests.
+    try {
+      final activeTab = ref.read(mainShellTabIndexProvider);
+      if (activeTab == 0) {
+        final records = ref.read(allWatchRecordsProvider).value ?? const [];
+        final seenKeys = <MovieKey>{};
+        final last3 = <Movie>[];
+        for (final r in records) {
+          if (seenKeys.add((tmdbId: r.movie.tmdbId, isTv: r.movie.isTv))) {
+            last3.add(r.movie);
+            if (last3.length >= 3) break;
+          }
+        }
+        ref.read(dynamicBackgroundProvider.notifier).updateMoviesFromList(last3);
+      } else {
+        ref.read(dynamicBackgroundProvider.notifier).clearColors();
+      }
+    } catch (_) {
+      // ref is no longer valid during widget teardown — safe to ignore
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final detailAsync = ref.watch(movieDetailProvider((tmdbId: tmdbId, isTv: isTv)));
     final watchRecordsAsync = ref.watch(watchRecordsForMovieProvider((tmdbId: tmdbId, isTv: isTv)));
     final settingsAsync = ref.watch(movieSettingsProvider((tmdbId: tmdbId, isTv: isTv)));
+
+    // Update background color based on movie detail data (after build)
+    final movieDataValue = detailAsync.value;
+    if (movieDataValue != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(dynamicBackgroundProvider.notifier).updateMoviesFromMapList([movieDataValue]);
+      });
+    }
 
     return DynamicBackgroundWrapper(
       child: Scaffold(
