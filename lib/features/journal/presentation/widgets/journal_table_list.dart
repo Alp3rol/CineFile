@@ -92,7 +92,10 @@ class JournalRecordsTable extends StatelessWidget {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 500;
+
     // Group records to find the latest watch ID for each (tmdbId, isTv)
     final latestWatchIds = <MovieKey, int>{};
     final latestWatches = <MovieKey, WatchRecordWithMovie>{};
@@ -109,6 +112,7 @@ class JournalRecordsTable extends StatelessWidget {
       padding: const EdgeInsets.only(left: 16, right: 16, top: 4, bottom: 20),
       itemCount: items.length,
       onReorder: (oldIdx, newIdx) => onReorder(items, oldIdx, newIdx),
+      buildDefaultDragHandles: false, // Turn off default handles on the right to save space
       itemBuilder: (context, index) {
         final item = items[index];
         final record = item.record;
@@ -146,31 +150,35 @@ class JournalRecordsTable extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  // 1. Sıra Sütunu (Drag Handle & Rank Number)
+                  // 1. Sıra Sütunu (Drag Handle & Rank Number) - flex 1
                   Expanded(
                     flex: 1,
                     child: Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         ReorderableDragStartListener(
                           index: index,
                           child: const Icon(Icons.drag_indicator_rounded, size: 14, color: Colors.white30),
                         ),
                         const SizedBox(width: 4),
-                        Text(
-                          displayRank != null ? '#$displayRank' : '-',
-                          style: GoogleFonts.outfit(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            color: displayRank != null ? AppTheme.accentColor : Colors.white30,
+                        Flexible(
+                          child: Text(
+                            displayRank != null ? '#$displayRank' : '-',
+                            style: GoogleFonts.outfit(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: displayRank != null ? AppTheme.accentColor : Colors.white30,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
                     ),
                   ),
 
-                  // 2. Film Sütunu (Poster + Title)
+                  // 2. Film Sütunu (Poster + Title) - flex 4 on mobile, 3 on desktop
                   Expanded(
-                    flex: 3,
+                    flex: isMobile ? 4 : 3,
                     child: Row(
                       children: [
                         ClipRRect(
@@ -194,6 +202,7 @@ class JournalRecordsTable extends StatelessWidget {
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
                                 movie.title,
@@ -232,71 +241,90 @@ class JournalRecordsTable extends StatelessWidget {
                     ),
                   ),
 
-                  // 3. İzleme Tarihi Sütunu (Platform Simge Entegrasyonu)
+                  // 3. İzleme Bilgisi Sütunu - flex 3 on mobile, 2 on desktop
                   Expanded(
-                    flex: 2,
+                    flex: isMobile ? 3 : 2,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
                           dateStr,
                           style: GoogleFonts.inter(fontSize: 11, color: Colors.white70),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        if (record.watchPlace != null) ...[
-                          const SizedBox(height: 2),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
+                        const SizedBox(height: 2),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (record.watchPlace != null) ...[
                               buildPlatformIcon(record.watchPlace),
                               const SizedBox(width: 4),
-                              Flexible(
-                                child: Text(
-                                  record.watchPlace!,
-                                  style: GoogleFonts.inter(fontSize: 9, color: AppTheme.textSecondary),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
                             ],
-                          ),
-                        ],
+                            Flexible(
+                              child: Text(
+                                isMobile
+                                    ? '${record.watchNumber}. İzleme'
+                                    : (record.watchPlace ?? ''),
+                                style: GoogleFonts.inter(fontSize: 9, color: AppTheme.textSecondary),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
+                            ),
+                            if (isMobile && record.watchNumber > 1) ...[
+                              const SizedBox(width: 3),
+                              const Icon(Icons.sync_rounded, color: Colors.greenAccent, size: 9),
+                            ],
+                            if (isMobile && _isShowCompleted(item)) ...[
+                              const SizedBox(width: 3),
+                              const Icon(Icons.check_circle_rounded, color: Colors.greenAccent, size: 9),
+                            ],
+                          ],
+                        ),
                       ],
                     ),
                   ),
 
-                  // 4. İzleme Sırası Sütunu (Re-Watch Simge Entegrasyonu)
-                  Expanded(
-                    flex: 2,
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.05),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              '${record.watchNumber}. İzleme',
-                              style: GoogleFonts.inter(fontSize: 10, color: AppTheme.textSecondary),
-                            ),
-                            if (record.watchNumber > 1) ...[
-                              const SizedBox(width: 4),
-                              const Icon(Icons.sync_rounded, color: Colors.greenAccent, size: 10),
+                  // 4. İzleme Sırası Sütunu (Desktop Only) - flex 2
+                  if (!isMobile)
+                    Expanded(
+                      flex: 2,
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.05),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  '${record.watchNumber}. İzleme',
+                                  style: GoogleFonts.inter(fontSize: 10, color: AppTheme.textSecondary),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              if (record.watchNumber > 1) ...[
+                                const SizedBox(width: 4),
+                                const Icon(Icons.sync_rounded, color: Colors.greenAccent, size: 10),
+                              ],
+                              if (_isShowCompleted(item)) ...[
+                                const SizedBox(width: 4),
+                                const Icon(Icons.check_circle_rounded, color: Colors.greenAccent, size: 10),
+                              ],
                             ],
-                            if (_isShowCompleted(item)) ...[
-                              const SizedBox(width: 4),
-                              const Icon(Icons.check_circle_rounded, color: Colors.greenAccent, size: 10),
-                            ],
-                          ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
 
-                  // 5. Puanım Sütunu
+                  // 5. Puanım Sütunu - flex 2
                   Expanded(
                     flex: 2,
                     child: Column(
@@ -325,12 +353,6 @@ class JournalRecordsTable extends StatelessWidget {
                             ],
                           ],
                         ),
-                        // Actively-watched shows get a compact "Bölüm X/Y +"
-                        // tag under the rating on their latest record, so the
-                        // next episode can be logged in one tap without
-                        // opening any screen/dialog. Stacked below (not
-                        // squeezed onto the same line) since this column is
-                        // narrow and the two together would overlap/overflow.
                         if (isLatestWatch && item.setting?.isActivelyWatching == true) ...[
                           const SizedBox(height: 3),
                           QuickAdvanceTag(item: item),

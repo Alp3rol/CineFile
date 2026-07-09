@@ -172,10 +172,12 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
                 ),
               ),
 
-              // Custom styled sliding TabBar
+              // Custom styled sliding TabBar (Responsive: scrolls on mobile, fills on desktop)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                 child: TabBar(
+                  isScrollable: MediaQuery.of(context).size.width < 500,
+                  tabAlignment: MediaQuery.of(context).size.width < 500 ? TabAlignment.start : TabAlignment.fill,
                   indicatorSize: TabBarIndicatorSize.tab,
                   dividerColor: Colors.transparent,
                   indicator: BoxDecoration(
@@ -396,18 +398,24 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
                                   const SizedBox(height: 8),
 
                                   if (isTableView) ...[
-                                    // Column Headers
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                                      child: Row(
-                                        children: [
-                                          JournalHeaderCell(label: 'Sıra', columnKey: 'personal_ranking', flex: 1, activeSortColumn: _sortColumn, sortAscending: _sortAscending, onSort: _onSort),
-                                          JournalHeaderCell(label: 'Film Adı', columnKey: 'title', flex: 3, activeSortColumn: _sortColumn, sortAscending: _sortAscending, onSort: _onSort),
-                                          JournalHeaderCell(label: 'İzleme Tarihi', columnKey: 'date', flex: 2, activeSortColumn: _sortColumn, sortAscending: _sortAscending, onSort: _onSort),
-                                          JournalHeaderCell(label: 'İzleme Sırası', columnKey: 'watch_count', flex: 2, sortable: false, activeSortColumn: _sortColumn, sortAscending: _sortAscending, onSort: _onSort),
-                                          JournalHeaderCell(label: 'Puanım', columnKey: 'rating', flex: 2, activeSortColumn: _sortColumn, sortAscending: _sortAscending, onSort: _onSort),
-                                        ],
-                                      ),
+                                    // Column Headers (Adaptive: 4 columns on mobile, 5 on desktop)
+                                    Builder(
+                                      builder: (context) {
+                                        final isMobile = MediaQuery.of(context).size.width < 500;
+                                        return Padding(
+                                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                                          child: Row(
+                                            children: [
+                                              JournalHeaderCell(label: 'Sıra', columnKey: 'personal_ranking', flex: 1, activeSortColumn: _sortColumn, sortAscending: _sortAscending, onSort: _onSort),
+                                              JournalHeaderCell(label: 'Film Adı', columnKey: 'title', flex: isMobile ? 4 : 3, activeSortColumn: _sortColumn, sortAscending: _sortAscending, onSort: _onSort),
+                                              JournalHeaderCell(label: isMobile ? 'İzleme' : 'İzleme Tarihi', columnKey: 'date', flex: isMobile ? 3 : 2, activeSortColumn: _sortColumn, sortAscending: _sortAscending, onSort: _onSort),
+                                              if (!isMobile)
+                                                JournalHeaderCell(label: 'İzleme Sırası', columnKey: 'watch_count', flex: 2, sortable: false, activeSortColumn: _sortColumn, sortAscending: _sortAscending, onSort: _onSort),
+                                              JournalHeaderCell(label: 'Puanım', columnKey: 'rating', flex: 2, activeSortColumn: _sortColumn, sortAscending: _sortAscending, onSort: _onSort),
+                                            ],
+                                          ),
+                                        );
+                                      }
                                     ),
                                     const Divider(color: Colors.white10, height: 1, indent: 16, endIndent: 16),
                                     Expanded(
