@@ -4,80 +4,82 @@
   <img src="assets/images/tmdb_logo.png" alt="TMDB Logo" width="120"/>
 </p>
 
-**CineFile** is a premium, privacy-focused personal watch diary and analytics application for movie and TV show enthusiasts. It features a modern, dark-themed glassmorphism UI, a robust offline-first architecture, and interactive data insights.
+**CineFile: Film & Dizi Listem**, sinema ve dizi tutkunları için özel olarak tasarlanmış, koyu tema odaklı ve cam efekti (glassmorphism) detaylarına sahip **premium bir kişisel izleme günlüğü ve analiz uygulamasıdır.** 
 
-👉 **[Live Web Demo (Mobile view) / Canlı Web Demosu](https://Alp3rol.github.io/CineFile/)**
+Tamamen yerel veritabanında çalışarak verilerinizin gizliliğini korur ve zengin veri görselleştirmeleri ile izleme alışkanlıklarınızı analiz eder.
 
----
-
-## 🇹🇷 CineFile Nedir?
-**CineFile: Film & Dizi Listem**, izlediğiniz tüm yapımları puanlayıp notlar alarak kişisel bir sinema arşivi oluşturmanızı sağlayan premium bir günlük uygulamasıdır. Tamamen yerel veritabanında çalışarak verilerinizin gizliliğini korur.
-
-## 🇬🇧 What is CineFile?
-**CineFile: Movie & TV Tracker** is a personal watch diary that allows you to keep track of your watch history, rate movies and TV shows, organize custom collections, and explore rich charts of your viewing habits.
+👉 **[Canlı Web Demosu (Mobil Görünüm)](https://Alp3rol.github.io/CineFile/)**
 
 ---
 
-## ✨ Features / Özellikler
+## ✨ Özellikler
 
-*   **🔍 Search & Discover (Keşfet):** Bypasses ISP-level blocks automatically via DNS-over-HTTPS (DoH) connection layer to query TMDb API for movies and TV shows.
-*   **📖 Detailed Watch Diary (Günlük):** Add multiple watch records per title. Log date, time, watch place (Cinema, Home, Netflix, etc.), companion, mood, rating (1-10), and personal notes/tags.
-*   **🔄 TV Show Episode Tracker (Aktif İzliyorum):** Seamlessly track TV shows episode-by-episode. System remembers where you left off, suggests the next episode, and updates the status automatically.
-*   **📊 Rich Insights & Analytics (İçgörüler):**
-    *   **Contribution Heatmap:** A GitHub-style calendar grid tracking your watch frequency over the year.
-    *   **Rating Distribution & Critic Profile:** Sarcastic and fun analysis of your rating profile.
-    *   **Streak Counter:** Current and longest consecutive watch streaks.
-    *   **Viewing Habit Charts:** Top directors, actors, genres, seasonal trends, and time-of-day stats.
-*   **📁 Custom Collections (Listeler):** Create customized lists, track completion progress with a neon progress bar, and reorder titles using drag-and-drop.
-*   **🔒 Local-First Privacy (Gizlilik):** Your data stays entirely on your device (SQLite/Drift). You can manually export/import everything as a JSON backup from settings.
-
----
-
-## 🛠️ Tech Stack / Teknolojik Altyapı
-
-*   **Framework:** Flutter (Web, Android, iOS, Windows compatibility)
-*   **State Management:** Riverpod
-*   **Local Database:** Drift (SQLite) with custom schema migrations (v8) & in-memory web simulated fallbacks.
-*   **Network Client:** Dio with failover host interceptors & DNS-over-HTTPS (`DohResolver`).
-*   **Charts:** `fl_chart`
+*   **🔍 Keşfet ve Engelsiz Arama:** Türkiye'deki internet engellerini (TMDb engelleri) DNS-over-HTTPS (DoH) katmanıyla otomatik aşarak film ve dizileri bulur, detaylarını ve fragmanlarını getirir.
+*   **📖 Detaylı İzleme Günlüğü:** Bir yapımı kaç kez, ne zaman, nerede (Sinema, Ev vb.) ve kiminle izlediğinizi kaydedin. Puanlama (1-10), ruh hali emojileri ve kişisel notlar/etiketler ekleyin.
+*   **🔄 Dizi Bölüm Takip Sistemi (Aktif İzliyorum):** Dizileri bölüm bölüm kolayca takip edin. Sistem nerede kaldığınızı hatırlar, sıradaki bölümü otomatik önerir ve tamamlandığında durumu günceller.
+*   **➕ Hızlı Ekleme:** Ana Sayfa ve Günlük listesindeki hızlı ekleme butonlarıyla, detay sayfasına girmeden tek dokunuşla sıradaki bölümü loglayın.
+*   **📺 Otomatik Platform Simgeleri:** Girdiğiniz mekandan (ör. Netflix, Prime Video, Sinema) izleme platformunu otomatik tanır ve satırlara şık simgeler yerleştirir.
+*   **📁 Özel Koleksiyonlar ve Maratonlar:** Kendi listelerinizi oluşturun, sürükle-bırak ile sıralayın ve neon ilerleme çubuklarıyla tamamlanma oranlarını takip edin.
+*   **📊 Zengin Analizler & İstatistikler (İçgörüler):**
+    *   **İzleme Yoğunluğu Haritası:** Yıllık izleme sıklığınızı gün gün gösteren GitHub tarzı bir takvim ısı haritası.
+    *   **Puan Dağılım Grafiği:** Verdiğiniz puanların dağılımı ve buna göre esprili bir *Eleştirmen Profili* yorumu.
+    *   **İzleme Serileri (Streak):** Üst üste film izlenen gün serileriniz (Mevcut ve en uzun seri).
+    *   **İzleyici Alışkanlıkları:** En çok izlenen yönetmenler, oyuncular, türler, mevsimsel eğilimler ve gün içi aktif saatler.
+*   **🔒 Yerel Öncelikli Gizlilik:** Tüm verileriniz tamamen cihazınızda (SQLite/Drift) saklanır. İstediğiniz zaman verilerinizi JSON formatında dışa aktarabilir veya yedekten geri yükleyebilirsiniz.
 
 ---
 
-## 🚀 Getting Started / Nasıl Çalıştırılır?
+## 🛠️ Teknolojik Altyapı
 
-To run this project locally, make sure you have the Flutter SDK installed on your system.
+*   **Arayüz & Framework:** Flutter (Mobil, Web, Windows uyumluluğu)
+*   **Durum Yönetimi (State Management):** Riverpod
+*   **Veritabanı:** Drift (SQLite) — *Web platformu için bellek içi (in-memory) veri simülasyonu.*
+*   **Ağ İstemcisi:** Dio (Özel proxy yönlendiricileri ve DoH entegrasyonu ile).
+*   **Grafikler:** `fl_chart`
 
-1. **Clone the repository / Depoyu kopyalayın:**
+---
+
+## 🚀 Kurulum ve Yerel Çalıştırma
+
+Projeyi bilgisayarınızda yerel olarak çalıştırmak için sisteminizde Flutter SDK'nın kurulu olduğundan emin olun.
+
+1. **Depoyu kopyalayın:**
    ```bash
    git clone https://github.com/Alp3rol/CineFile.git
    cd CineFile
    ```
 
-2. **Install dependencies / Bağımlılıkları yükleyin:**
+2. **Bağımlılıkları yükleyin:**
    ```bash
    flutter pub get
    ```
 
-3. **Configure API Key (Optional) / API Anahtarını Yapılandırın:**
-   Add your TMDb API key under `lib/core/constants/api_key.dart` to make live searches work locally:
+3. **TMDb API Anahtarını Yapılandırın (İsteğe Bağlı):**
+   Aramaların çalışması için kendi TMDb API anahtarınızı `lib/core/constants/api_key.dart` dosyası altına ekleyin:
    ```dart
    // lib/core/constants/api_key.dart
-   const String tmdbApiKey = 'YOUR_TMDB_API_KEY';
+   const String tmdbApiKey = 'BURAYA_API_ANAHTARINIZI_YAZIN';
    ```
 
-4. **Run code generator / Kod üreticiyi çalıştırın:**
+4. **Kod üreticiyi çalıştırın:**
    ```bash
    dart run build_runner build --delete-conflicting-outputs
    ```
 
-5. **Run the app / Uygulamayı başlatın:**
+5. **Uygulamayı başlatın:**
    ```bash
    flutter run
    ```
 
 ---
 
-## 📝 TMDB Attribution
+## 📝 TMDb Atfı
 
-This product uses the TMDB API but is not endorsed or certified by TMDB.
-*Bu ürün TMDB API'sini kullanır ancak TMDB tarafından desteklenmez veya onaylanmaz.*
+Bu uygulama TMDB API'sini kullanır ancak TMDB tarafından desteklenmez veya onaylanmaz.
+*(This product uses the TMDB API but is not endorsed or certified by TMDB.)*
+
+<p align="center">
+  <a href="https://www.themoviedb.org/">
+    <img src="assets/images/tmdb_logo.png" alt="The Movie Database" width="120"/>
+  </a>
+</p>
