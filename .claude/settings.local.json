@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dart analyze *)",
+      "Bash(curl -s \"https://api.themoviedb.org/3/search/multi?api_key=69c105e672b14c99a16b9b59187a7680&query=dune&language=tr-TR\")",
+      "Bash(curl -sv \"https://api.themoviedb.org/3/search/multi?api_key=69c105e672b14c99a16b9b59187a7680&query=dune&language=tr-TR\")",
+      "Bash(powershell -NoProfile -Command \"Resolve-DnsName api.themoviedb.org -ErrorAction SilentlyContinue | Format-Table -AutoSize; Resolve-DnsName api.tmdb.org -ErrorAction SilentlyContinue | Format-Table -AutoSize; Resolve-DnsName images.weserv.nl -ErrorAction SilentlyContinue | Format-Table -AutoSize\")",
+      "Bash(powershell -NoProfile -Command \"Get-DnsClientServerAddress | Format-Table -AutoSize; Write-Host '---'; Get-NetAdapter | Where-Object Status -eq 'Up' | Format-Table Name,InterfaceDescription -AutoSize\")",
+      "Bash(powershell -NoProfile -Command \"Resolve-DnsName api.themoviedb.org -Server 8.8.8.8 -ErrorAction SilentlyContinue | Format-Table -AutoSize\")",
+      "PowerShell(Get-Process | Where-Object { $_.ProcessName -match 'adguard|pihole|nextdns|kaspersky|norton|mcafee|eset|bitdefender|family|netlimiter|proxifier|fortiguard|opendns|cleanbrowsing|comodo|qustodio|circle|netnanny|cloudflare|warp' } | Select-Object ProcessName, Id | Format-Table -AutoSize)",
+      "Bash(curl -s -H \"Accept: application/dns-json\" \"https://cloudflare-dns.com/dns-query?name=api.themoviedb.org&type=A\")",
+      "Bash(flutter test *)",
+      "Bash(timeout 60 flutter run -d windows --release)",
+      "Bash(flutter devices *)",
+      "Bash(flutter run *)",
+      "Bash(python3 -c ' *)",
+      "Read(//c/Users/alp3r/OneDrive/Documents/**)"
+    ]
+  }
+}
