@@ -36,6 +36,32 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Only update the background when the API results list itself changes —
+    // NOT on every keystroke. ref.listen fires only when the value differs,
+    // so typing that changes query but hasn't gotten new results yet won't
+    // trigger a background update at all.
+    ref.listen<SearchState>(searchProvider, (prev, next) {
+      // Skip if results haven't changed (e.g. only query text changed mid-typing)
+      if (prev?.results == next.results && prev?.selectedGenreId == next.selectedGenreId) return;
+
+      final query = next.query.trim();
+      var filtered = next.results;
+      if (next.selectedGenreId != null) {
+        filtered = filtered.where((m) {
+          final g = m['genre_ids'] as List<dynamic>?;
+          return g != null && g.contains(next.selectedGenreId);
+        }).toList();
+      }
+
+      if (query.isNotEmpty && filtered.isNotEmpty) {
+        ref.read(dynamicBackgroundProvider.notifier).updateMoviesFromMapList([filtered.first]);
+      } else if (query.isEmpty) {
+        ref.read(dynamicBackgroundProvider.notifier).clearColors();
+      }
+      // If query is non-empty but results are empty (still loading / no match),
+      // leave the background as-is rather than flickering to dark.
+    });
+
     final searchState = ref.watch(searchProvider);
     final searchNotifier = ref.read(searchProvider.notifier);
     final isApiKeyEmpty = ApiConstants.tmdbApiKey.isEmpty;
@@ -48,16 +74,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         return genreIds != null && genreIds.contains(searchState.selectedGenreId);
       }).toList();
     }
-
-    // Update dynamic background based on first visible result (after build, to avoid setState-during-build)
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final query = searchState.query.trim();
-      if (query.isNotEmpty && displayResults.isNotEmpty) {
-        ref.read(dynamicBackgroundProvider.notifier).updateMoviesFromMapList([displayResults.first]);
-      } else {
-        ref.read(dynamicBackgroundProvider.notifier).clearColors();
-      }
-    });
 
     return Scaffold(
       backgroundColor: Colors.transparent,
