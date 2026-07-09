@@ -267,15 +267,41 @@ graph TD
 
 ---
 
-### **Aşama 3: MVP Tamamlanması (v1.0.0)**
+### **Aşama 4: Post-Launch İyileştirmeler (v1.0.x)**
 
-#### **✅ v1.0.0: MVP Lansmanı ve Kararlı Sürüm**
-*   **Hedef**: Uygulamanın tüm temel işlevlerinin (Arama, Detay Çekme, Çoklu İzleme Kaydı, Detaylı İstatistikler/Heatmap, Dizi Takip Sistemi) kararlı bir şekilde yayına hazır hale getirilmesi.
-*   **Not**: Kullanıcı kararıyla yapay zeka entegrasyonu (Gemini AI), otomatik bulut yedekleme ve ek yedekleme özellikleri kapsam dışı bırakılmıştır. v0.9.9 itibarıyla tüm hedeflenen özellikler tamamlanmıştır.
+#### **✅ v1.0.1: Dinamik Arka Plan Sistemi (Sinemasal Renk Efekti)**
+*   **Hedef**: Her sayfada ekranda görünen film posterlerinin baskın renklerine göre arka planın canlı ve pürüzsüz şekilde değişmesi.
+*   **İşler**:
+    *   `DynamicBackgroundProvider` (Riverpod `StateNotifier`) ile merkezi renk yönetim sistemi kuruldu.
+    *   `DynamicBackgroundWrapper` widgetı oluşturuldu: `BackdropFilter` yerine donanım hızlandırmalı 4 katmanlı `RadialGradient` animasyonu (web uyumlu, dikey çizgi artefaktsız).
+    *   `AppNetworkImage` bileşenine `VisibilityDetector` entegrasyonu ile ekrana giren posterlerin renkleri asenkron olarak çıkarılıp kayıt edildi.
+    *   Web'de `palette_generator` CORS kısıtlamasına karşı `?cors=1` proxy parametresi eklendi.
+    *   Sekme değişimlerinde eski renklerin sızmasını önlemek için `deactivate()` yaşam döngüsü hook'u eklendi.
+
+#### **✅ v1.0.2: Web Uyumluluğu ve Yerleşim Kararlılığı Düzeltmeleri**
+*   **Hedef**: Web tarayıcısında görüntülenen iframe simülatöründe oluşan dikey çizgi bozulmalarını, sayfa kayma ve zıplama sorunlarını gidermek.
+*   **İşler**:
+    *   `DynamicBackgroundWrapper` içindeki iç içe `Scaffold` yapısı kaldırıldı; sadece `Stack` döndürülerek Flutter'ın tek kök Scaffold kuralına uyuldu — tüm sayfa kayma ve zıplama sorunları çözüldü.
+    *   Keşfet sayfasının boş durumundaki `Column` yapısı `SizedBox(width: double.infinity)` ile sarmalanarak içeriğin tam ortada hizalanması sağlandı.
+    *   `VisibilityDetector`'ın `updateInterval = Duration.zero` ayarı sadece widget test ortamında uygulanacak şekilde kısıtlandı; debug/release modda render döngüsüne müdahale etmesi engellendi.
+
+#### **✅ v1.0.3: Dinamik Arka Plan Sisteminin Yeniden Tasarımı (Sayfa Tabanlı Mimari)**
+*   **Hedef**: Kaydırma sırasındaki kasılma/zıplama sorununu köklü olarak çözmek; web'de CORS nedeniyle `palette_generator`'ın renk çıkaramadığı durumlarda arka planın çalışmaya devam etmesini sağlamak; renk kaynağını her sayfanın veri modeliyle doğrudan ilişkilendirmek.
+*   **İşler**:
+    *   **`VisibilityDetector` tamamen kaldırıldı.** `AppNetworkImage` artık arka plan sistemiyle hiçbir şekilde iletişim kurmuyor; hafif, bağımsız bir resim gösterme bileşenine dönüştürüldü. Bu değişiklik kaydırma sırasındaki kasılma ve zıplama sorununu kalıcı olarak çözdü.
+    *   **Sayfa tabanlı renk koordinasyonu**: Tüm arka plan güncellemeleri artık `WidgetsBinding.instance.addPostFrameCallback()` aracılığıyla render döngüsünden bağımsız olarak tetikleniyor.
+    *   **Ana Sayfa**: `allWatchRecordsProvider` izlenerek son izlenen **3 filmin** posterleri renk kaynağı olarak kullanılıyor.
+    *   **Keşfet Sayfası**: Arama sonuçlarının **ilk filmi** renk kaynağı olarak kullanılıyor; sorgu boşsa veya sonuç yoksa arka plan temizleniyor.
+    *   **Film Detay**: Sayfaya girildiğinde ilgili filmin poster rengi uygulanıyor; sayfa kapatıldığında (`dispose`) önceki sayfanın renkleri otomatik olarak geri yükleniyor.
+    *   **Günlük / Takvim / Ayarlar**: Bu sekmelere geçildiğinde arka plan renkleri temizlenerek varsayılan koyu temaya dönülüyor (`clearColors()`).
+    *   **HSL Fallback**: Web'de CORS nedeniyle `palette_generator` görsel renk çıkartamazsa, filmin başlığından deterministik bir HSL rengi üretiliyor — arka plan sistemi her koşulda çalışıyor.
+    *   `DynamicBackgroundNotifier`'a `updateMoviesFromList`, `updateMoviesFromMapList` ve `clearColors` metodları eklendi.
+    *   Renk çıkarma hatalarında HSL fallback rengi hem state'e hem cache'e yazılıyor; hatalı `ApiConstants.imageHost` referansı `ApiConstants.imagePathW500` ile düzeltildi.
+    *   20 otomatik test başarıyla geçiyor; `MovieDetailScreen` `ConsumerStatefulWidget`'a dönüştürüldü ve `dispose()` içindeki `ref.read()` çağrıları `try/catch` ile korundu.
 
 ---
 
 ## 📈 Proje Durumu
 
-Uygulama planlanan tüm MVP aşamalarını başarıyla tamamlamıştır ve yayına hazırdır.
+Uygulama planlanan tüm MVP aşamalarını başarıyla tamamlamıştır. Post-launch iyileştirmeler (v1.0.x) aktif olarak devam etmektedir.
 
