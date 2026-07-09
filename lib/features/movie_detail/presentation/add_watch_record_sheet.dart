@@ -494,11 +494,24 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
             ),
             SliderTheme(
               data: SliderTheme.of(context).copyWith(
+                trackHeight: 2.0, // Thinner track
                 activeTrackColor: AppTheme.accentColor,
-                inactiveTrackColor: Colors.grey.shade800,
+                inactiveTrackColor: Colors.white.withOpacity(0.08),
                 thumbColor: AppTheme.ratingColor,
-                overlayColor: AppTheme.ratingColor.withOpacity(0.2),
+                overlayColor: AppTheme.ratingColor.withOpacity(0.12),
                 valueIndicatorColor: AppTheme.surfaceColor,
+                thumbShape: const RoundSliderThumbShape(
+                  enabledThumbRadius: 6.0, // Smaller thumb
+                ),
+                overlayShape: const RoundSliderOverlayShape(
+                  overlayRadius: 16.0,
+                ),
+                tickMarkShape: SliderTickMarkShape.noTickMark, // Hide tick marks for a cleaner look
+                valueIndicatorTextStyle: GoogleFonts.outfit(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
               ),
               child: Slider(
                 value: _rating,

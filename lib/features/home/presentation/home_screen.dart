@@ -170,93 +170,148 @@ class HomeScreen extends ConsumerWidget {
             ? 'Bu haftaki hedefine ulaştın!'
             : 'Bu hafta $remaining film/dizi daha izlemelisin.';
 
-    return GlassContainer(
-      padding: const EdgeInsets.all(18),
-      borderRadius: 20,
-      child: Row(
-        children: [
-          // Total Stats
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildMiniStat('Toplam İzleme', '$totalWatchCount', Icons.movie_outlined),
-                const SizedBox(height: 16),
-                _buildMiniStat(
-                  'Ortalama Puan',
-                  totalWatchCount == 0 ? '-' : averageRating.toStringAsFixed(1),
-                  Icons.star_border_rounded,
-                  isRating: totalWatchCount > 0,
-                ),
-              ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Switch to a vertical layout if the dashboard card's width is narrow
+        final useVerticalLayout = constraints.maxWidth < 320;
+
+        final totalStatsColumn = Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildMiniStat('Toplam İzleme', '$totalWatchCount', Icons.movie_outlined),
+            const SizedBox(height: 12),
+            _buildMiniStat(
+              'Ortalama Puan',
+              totalWatchCount == 0 ? '-' : averageRating.toStringAsFixed(1),
+              Icons.star_border_rounded,
+              isRating: totalWatchCount > 0,
             ),
-          ),
+          ],
+        );
 
-          // Divider Line
-          Container(
-            height: 80,
-            width: 1,
-            color: AppTheme.borderColor,
-            margin: const EdgeInsets.symmetric(horizontal: 16),
-          ),
-
-          // Weekly Goal Progress
-          Expanded(
-            child: Row(
+        final weeklyGoalRow = Row(
+          children: [
+            Stack(
+              alignment: Alignment.center,
               children: [
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    SizedBox(
-                      height: 70,
-                      width: 70,
-                      child: CircularProgressIndicator(
-                        value: progress,
-                        strokeWidth: 6,
-                        backgroundColor: AppTheme.borderColor,
-                        valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.accentColor),
-                      ),
-                    ),
-                    Text(
-                      '$thisWeekCount/$weeklyGoal',
-                      style: GoogleFonts.outfit(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
+                SizedBox(
+                  height: 60,
+                  width: 60,
+                  child: CircularProgressIndicator(
+                    value: progress,
+                    strokeWidth: 5,
+                    backgroundColor: AppTheme.borderColor,
+                    valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.accentColor),
+                  ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Haftalık Hedef',
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        goalText,
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
-                          color: AppTheme.textSecondary,
-                        ),
-                      ),
-                    ],
+                Text(
+                  '$thisWeekCount/$weeklyGoal',
+                  style: GoogleFonts.outfit(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
                 ),
               ],
             ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Haftalık Hedef',
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    goalText,
+                    style: GoogleFonts.inter(
+                      fontSize: 11,
+                      color: AppTheme.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+
+        if (useVerticalLayout) {
+          return GlassContainer(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            borderRadius: 20,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Expanded(
+                      child: Center(
+                        child: _buildMiniStat('Toplam İzleme', '$totalWatchCount', Icons.movie_outlined),
+                      ),
+                    ),
+                    Container(
+                      height: 24,
+                      width: 1,
+                      color: AppTheme.borderColor,
+                    ),
+                    Expanded(
+                      child: Center(
+                        child: _buildMiniStat(
+                          'Ortalama Puan',
+                          totalWatchCount == 0 ? '-' : averageRating.toStringAsFixed(1),
+                          Icons.star_border_rounded,
+                          isRating: totalWatchCount > 0,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Divider(color: AppTheme.borderColor, height: 1),
+                const SizedBox(height: 10),
+                weeklyGoalRow,
+              ],
+            ),
+          );
+        }
+
+        // Default layout for wider screens
+        return GlassContainer(
+          padding: const EdgeInsets.all(18),
+          borderRadius: 20,
+          child: Row(
+            children: [
+              // Total Stats
+              Expanded(
+                child: totalStatsColumn,
+              ),
+
+              // Divider Line
+              Container(
+                height: 70,
+                width: 1,
+                color: AppTheme.borderColor,
+                margin: const EdgeInsets.symmetric(horizontal: 16),
+              ),
+
+              // Weekly Goal Progress
+              Expanded(
+                child: weeklyGoalRow,
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
