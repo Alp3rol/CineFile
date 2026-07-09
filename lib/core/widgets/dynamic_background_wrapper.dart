@@ -32,101 +32,98 @@ class DynamicBackgroundWrapper extends ConsumerWidget {
     final color3 = _getBlobColor(2, activeColors);
     final color4 = _getBlobColor(3, activeColors);
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Stack(
-        children: [
-          // 1. Deep Cinematic Dark Base Layer
-          Container(
-            color: AppTheme.backgroundColor,
-          ),
+    return Stack(
+      children: [
+        // 1. Deep Cinematic Dark Base Layer
+        Container(
+          color: AppTheme.backgroundColor,
+        ),
 
-          // 2. Radial Gradient Layers (Web-safe & high-performance mesh gradient)
-          // Top-Left Glow
-          Positioned.fill(
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 1500),
-              curve: Curves.easeInOut,
-              decoration: BoxDecoration(
-                gradient: RadialGradient(
-                  center: Alignment.topLeft,
-                  radius: 1.3,
-                  colors: [
-                    color1.withOpacity(0.20),
-                    Colors.transparent,
-                  ],
-                ),
+        // 2. Radial Gradient Layers (Web-safe & high-performance mesh gradient)
+        // Top-Left Glow
+        Positioned.fill(
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 1500),
+            curve: Curves.easeInOut,
+            decoration: BoxDecoration(
+              gradient: RadialGradient(
+                center: Alignment.topLeft,
+                radius: 1.3,
+                colors: [
+                  color1.withOpacity(0.20),
+                  Colors.transparent,
+                ],
               ),
             ),
           ),
+        ),
 
-          // Middle-Right Glow
-          Positioned.fill(
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 1500),
-              curve: Curves.easeInOut,
-              decoration: BoxDecoration(
-                gradient: RadialGradient(
-                  center: const Alignment(0.8, -0.3),
-                  radius: 1.1,
-                  colors: [
-                    color2.withOpacity(0.16),
-                    Colors.transparent,
-                  ],
-                ),
+        // Middle-Right Glow
+        Positioned.fill(
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 1500),
+            curve: Curves.easeInOut,
+            decoration: BoxDecoration(
+              gradient: RadialGradient(
+                center: const Alignment(0.8, -0.3),
+                radius: 1.1,
+                colors: [
+                  color2.withOpacity(0.16),
+                  Colors.transparent,
+                ],
               ),
             ),
           ),
+        ),
 
-          // Middle-Left Glow
-          Positioned.fill(
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 1500),
-              curve: Curves.easeInOut,
-              decoration: BoxDecoration(
-                gradient: RadialGradient(
-                  center: const Alignment(-0.8, 0.3),
-                  radius: 1.1,
-                  colors: [
-                    color3.withOpacity(0.16),
-                    Colors.transparent,
-                  ],
-                ),
+        // Middle-Left Glow
+        Positioned.fill(
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 1500),
+            curve: Curves.easeInOut,
+            decoration: BoxDecoration(
+              gradient: RadialGradient(
+                center: const Alignment(-0.8, 0.3),
+                radius: 1.1,
+                colors: [
+                  color3.withOpacity(0.16),
+                  Colors.transparent,
+                ],
               ),
             ),
           ),
+        ),
 
-          // Bottom-Right Glow
-          Positioned.fill(
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 1500),
-              curve: Curves.easeInOut,
-              decoration: BoxDecoration(
-                gradient: RadialGradient(
-                  center: Alignment.bottomRight,
-                  radius: 1.3,
-                  colors: [
-                    color4.withOpacity(0.20),
-                    Colors.transparent,
-                  ],
-                ),
+        // Bottom-Right Glow
+        Positioned.fill(
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 1500),
+            curve: Curves.easeInOut,
+            decoration: BoxDecoration(
+              gradient: RadialGradient(
+                center: Alignment.bottomRight,
+                radius: 1.3,
+                colors: [
+                  color4.withOpacity(0.20),
+                  Colors.transparent,
+                ],
               ),
             ),
           ),
+        ),
 
-          // 3. Subdued Dimming Overlay to ensure text readability
-          Positioned.fill(
-            child: Container(
-              color: Colors.black.withOpacity(0.12),
-            ),
+        // 3. Subdued Dimming Overlay to ensure text readability
+        Positioned.fill(
+          child: Container(
+            color: Colors.black.withOpacity(0.12),
           ),
+        ),
 
-          // 4. Content Page
-          Positioned.fill(
-            child: child,
-          ),
-        ],
-      ),
+        // 4. Content Page
+        Positioned.fill(
+          child: child,
+        ),
+      ],
     );
   }
 
