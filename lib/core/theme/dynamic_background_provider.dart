@@ -1,4 +1,3 @@
-import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -51,11 +50,7 @@ class DynamicBackgroundNotifier extends StateNotifier<DynamicBackgroundState> {
           isEnabled: isEnabled,
         )) {
     if (kDebugMode) {
-      try {
-        if (!kIsWeb && Platform.environment.containsKey('FLUTTER_TEST')) {
-          VisibilityDetectorController.instance.updateInterval = Duration.zero;
-        }
-      } catch (_) {}
+      VisibilityDetectorController.instance.updateInterval = Duration.zero;
     }
   }
 

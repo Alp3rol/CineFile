@@ -1,4 +1,3 @@
-import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -58,11 +57,7 @@ class _AppNetworkImageState extends ConsumerState<AppNetworkImage> {
   void initState() {
     super.initState();
     if (kDebugMode) {
-      try {
-        if (!kIsWeb && Platform.environment.containsKey('FLUTTER_TEST')) {
-          VisibilityDetectorController.instance.updateInterval = Duration.zero;
-        }
-      } catch (_) {}
+      VisibilityDetectorController.instance.updateInterval = Duration.zero;
     }
     // Unique key for tracking this poster instance in the background provider.
     _posterKey = widget.imageUrl.isNotEmpty
