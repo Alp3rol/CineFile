@@ -50,7 +50,11 @@ class DynamicBackgroundNotifier extends StateNotifier<DynamicBackgroundState> {
           isEnabled: isEnabled,
         )) {
     if (kDebugMode) {
-      VisibilityDetectorController.instance.updateInterval = Duration.zero;
+      final isWidgetTest = StackTrace.current.toString().contains('package:flutter_test') ||
+          StackTrace.current.toString().contains('testWidgets');
+      if (isWidgetTest) {
+        VisibilityDetectorController.instance.updateInterval = Duration.zero;
+      }
     }
   }
 

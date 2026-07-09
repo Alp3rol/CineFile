@@ -231,63 +231,66 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
     // Default view: If search is empty
     if (state.query.trim().isEmpty) {
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Spacer(),
-          Icon(
-            Icons.explore_outlined,
-            size: 64,
-            color: AppTheme.textSecondary.withOpacity(0.5),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'Keşfetmeye Başlayın',
-            style: GoogleFonts.outfit(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+      return SizedBox(
+        width: double.infinity,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Spacer(),
+            Icon(
+              Icons.explore_outlined,
+              size: 64,
+              color: AppTheme.textSecondary.withOpacity(0.5),
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Milyonlarca film arasından arama yapın.',
-            style: GoogleFonts.inter(
-              fontSize: 13,
-              color: AppTheme.textSecondary,
+            const SizedBox(height: 12),
+            Text(
+              'Keşfetmeye Başlayın',
+              style: GoogleFonts.outfit(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
             ),
-          ),
-          const Spacer(),
-          // TMDB Attribution
-          Padding(
-            padding: const EdgeInsets.only(bottom: 24),
-            child: Wrap(
-              alignment: WrapAlignment.center,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                Text(
-                  'Veriler ',
-                  style: GoogleFonts.inter(
-                    fontSize: 10,
-                    color: AppTheme.textSecondary,
+            const SizedBox(height: 4),
+            Text(
+              'Milyonlarca film arasından arama yapın.',
+              style: GoogleFonts.inter(
+                fontSize: 13,
+                color: AppTheme.textSecondary,
+              ),
+            ),
+            const Spacer(),
+            // TMDB Attribution
+            Padding(
+              padding: const EdgeInsets.only(bottom: 24),
+              child: Wrap(
+                alignment: WrapAlignment.center,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  Text(
+                    'Veriler ',
+                    style: GoogleFonts.inter(
+                      fontSize: 10,
+                      color: AppTheme.textSecondary,
+                    ),
                   ),
-                ),
-                Image.asset(
-                  'assets/images/tmdb_logo.png',
-                  height: 10,
-                  fit: BoxFit.contain,
-                ),
-                Text(
-                  ' tarafından sağlanmaktadır.',
-                  style: GoogleFonts.inter(
-                    fontSize: 10,
-                    color: AppTheme.textSecondary,
+                  Image.asset(
+                    'assets/images/tmdb_logo.png',
+                    height: 10,
+                    fit: BoxFit.contain,
                   ),
-                ),
-              ],
+                  Text(
+                    ' tarafından sağlanmaktadır.',
+                    style: GoogleFonts.inter(
+                      fontSize: 10,
+                      color: AppTheme.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       );
     }
 

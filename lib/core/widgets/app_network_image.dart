@@ -62,7 +62,7 @@ class _AppNetworkImageState extends ConsumerState<AppNetworkImage> {
   @override
   void initState() {
     super.initState();
-    if (kDebugMode) {
+    if (_isWidgetTest) {
       VisibilityDetectorController.instance.updateInterval = Duration.zero;
     }
     // Unique key for tracking this poster instance in the background provider.
