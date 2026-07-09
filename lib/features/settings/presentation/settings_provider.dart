@@ -389,3 +389,52 @@ class JournalViewModeNotifier extends StateNotifier<bool> {
     }
   }
 }
+
+final dynamicBackgroundEnabledProvider = StateNotifierProvider<DynamicBackgroundEnabledNotifier, bool>((ref) {
+  return DynamicBackgroundEnabledNotifier();
+});
+
+class DynamicBackgroundEnabledNotifier extends StateNotifier<bool> {
+  DynamicBackgroundEnabledNotifier() : super(true) {
+    _load();
+  }
+
+  Future<File?> get _settingsFile async {
+    if (kIsWeb) return null;
+    final dir = await getApplicationDocumentsDirectory();
+    return File(p.join(dir.path, 'app_settings.json'));
+  }
+
+  Future<void> _load() async {
+    if (kIsWeb) return;
+    try {
+      final file = await _settingsFile;
+      if (file != null && await file.exists()) {
+        final content = await file.readAsString();
+        final json = jsonDecode(content) as Map<String, dynamic>;
+        state = json['dynamic_background_enabled'] as bool? ?? true;
+      }
+    } catch (e) {
+      debugPrint('dynamic background load failed: $e');
+    }
+  }
+
+  Future<void> setEnabled(bool enabled) async {
+    state = enabled;
+    if (kIsWeb) return;
+    try {
+      final file = await _settingsFile;
+      if (file != null) {
+        Map<String, dynamic> json = {};
+        if (await file.exists()) {
+          final content = await file.readAsString();
+          json = jsonDecode(content) as Map<String, dynamic>;
+        }
+        json['dynamic_background_enabled'] = enabled;
+        await file.writeAsString(jsonEncode(json));
+      }
+    } catch (e) {
+      debugPrint('dynamic background save failed: $e');
+    }
+  }
+}

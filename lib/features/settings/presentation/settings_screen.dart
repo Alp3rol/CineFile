@@ -25,6 +25,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -59,6 +60,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       label: 'Otomatik Fragman Oynat',
                       value: _autoPlayTrailer,
                       onChanged: (v) => setState(() => _autoPlayTrailer = v),
+                    ),
+                    _buildDivider(),
+                    _buildToggleRow(
+                      icon: Icons.palette_outlined,
+                      label: 'Dinamik Arka Plan',
+                      value: ref.watch(dynamicBackgroundEnabledProvider),
+                      onChanged: (v) => ref.read(dynamicBackgroundEnabledProvider.notifier).setEnabled(v),
                     ),
                     _buildDivider(),
                     _buildNavRow(

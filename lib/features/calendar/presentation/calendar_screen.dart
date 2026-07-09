@@ -59,6 +59,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     final watchRecordsAsync = ref.watch(allWatchRecordsProvider);
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         bottom: false,
         child: Column(

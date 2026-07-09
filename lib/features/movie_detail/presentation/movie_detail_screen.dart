@@ -9,6 +9,7 @@ import 'package:drift/drift.dart' show Value;
 import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
+import '../../../../core/widgets/dynamic_background_wrapper.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/database/database_provider.dart';
 import '../../../../core/database/app_database.dart';
@@ -276,12 +277,14 @@ class MovieDetailScreen extends ConsumerWidget {
     final watchRecordsAsync = ref.watch(watchRecordsForMovieProvider((tmdbId: tmdbId, isTv: isTv)));
     final settingsAsync = ref.watch(movieSettingsProvider((tmdbId: tmdbId, isTv: isTv)));
 
-    return Scaffold(
-      bottomNavigationBar: detailAsync.maybeWhen(
-        data: (movieData) => movieData == null ? null : _buildStickyCta(context, movieData),
-        orElse: () => null,
-      ),
-      body: detailAsync.when(
+    return DynamicBackgroundWrapper(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        bottomNavigationBar: detailAsync.maybeWhen(
+          data: (movieData) => movieData == null ? null : _buildStickyCta(context, movieData),
+          orElse: () => null,
+        ),
+        body: detailAsync.when(
         loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.accentColor)),
         error: (error, stack) => Center(child: Text('Hata: $error', style: const TextStyle(color: Colors.white))),
         data: (movieData) {
@@ -333,7 +336,7 @@ class MovieDetailScreen extends ConsumerWidget {
                       colors: [
                         Colors.black.withOpacity(0.4),
                         Colors.black.withOpacity(0.85),
-                        AppTheme.backgroundColor,
+                        AppTheme.backgroundColor.withOpacity(0.45),
                       ],
                       stops: const [0.0, 0.4, 0.75],
                     ),
@@ -690,6 +693,7 @@ class MovieDetailScreen extends ConsumerWidget {
           );
         },
       ),
+    ),
     );
   }
 

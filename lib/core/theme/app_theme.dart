@@ -163,3 +163,16 @@ class AppTheme {
     );
   }
 }
+
+class CineFileScrollBehavior extends MaterialScrollBehavior {
+  @override
+  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
+    return Scrollbar(
+      controller: details.controller,
+      thickness: 4.0,
+      radius: const Radius.circular(8),
+      interactive: true,
+      child: child,
+    );
+  }
+}

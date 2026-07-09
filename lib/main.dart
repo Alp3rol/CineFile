@@ -19,6 +19,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'CineFile',
       theme: AppTheme.darkTheme,
+      scrollBehavior: CineFileScrollBehavior(),
       home: const MainShell(),
     );
   }

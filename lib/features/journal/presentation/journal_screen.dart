@@ -136,6 +136,7 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
     return DefaultTabController(
       length: 3,
       child: Scaffold(
+        backgroundColor: Colors.transparent,
         body: SafeArea(
           bottom: false,
           child: Column(

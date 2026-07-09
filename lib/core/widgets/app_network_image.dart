@@ -1,6 +1,10 @@
+import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:visibility_detector/visibility_detector.dart';
+import '../theme/dynamic_background_provider.dart';
 
 // Deterministic per-poster gradient used while loading and when no real
 // image is available, so placeholders read as an intentional stylized
@@ -21,7 +25,7 @@ LinearGradient posterPlaceholderGradient(String seed) {
   );
 }
 
-class AppNetworkImage extends StatelessWidget {
+class AppNetworkImage extends ConsumerStatefulWidget {
   final String imageUrl;
   final double? width;
   final double? height;
@@ -43,66 +47,121 @@ class AppNetworkImage extends StatelessWidget {
     this.seed,
   });
 
+  @override
+  ConsumerState<AppNetworkImage> createState() => _AppNetworkImageState();
+}
+
+class _AppNetworkImageState extends ConsumerState<AppNetworkImage> {
+  late final String _posterKey;
+
+  @override
+  void initState() {
+    super.initState();
+    if (kDebugMode) {
+      try {
+        if (!kIsWeb && Platform.environment.containsKey('FLUTTER_TEST')) {
+          VisibilityDetectorController.instance.updateInterval = Duration.zero;
+        }
+      } catch (_) {}
+    }
+    // Unique key for tracking this poster instance in the background provider.
+    _posterKey = widget.imageUrl.isNotEmpty
+        ? widget.imageUrl
+        : (widget.seed ?? 'image_${identityHashCode(this)}');
+  }
+
+  @override
+  void dispose() {
+    // Unregister this poster's color immediately on dispose to avoid color leak
+    // when navigating away from the page.
+    try {
+      ref.read(dynamicBackgroundProvider.notifier).unregisterPoster(_posterKey);
+    } catch (e) {
+      debugPrint('Error unregistering poster color in dispose: $e');
+    }
+    super.dispose();
+  }
+
   Widget _gradientPlaceholder() {
     return Container(
-      decoration: BoxDecoration(gradient: posterPlaceholderGradient(seed ?? imageUrl)),
+      decoration: BoxDecoration(gradient: posterPlaceholderGradient(widget.seed ?? widget.imageUrl)),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    String finalUrl = imageUrl;
+    String finalUrl = widget.imageUrl;
     if (kIsWeb && finalUrl.isNotEmpty) {
       finalUrl = finalUrl.contains('?') ? '$finalUrl&cors=1' : '$finalUrl?cors=1';
     }
 
-    if (finalUrl.isEmpty) {
-      return SizedBox(
-        width: width,
-        height: height,
-        child: errorWidget ?? _gradientPlaceholder(),
-      );
-    }
+    Widget childWidget;
 
-    if (kIsWeb) {
-      return Image.network(
+    if (finalUrl.isEmpty) {
+      childWidget = SizedBox(
+        width: widget.width,
+        height: widget.height,
+        child: widget.errorWidget ?? _gradientPlaceholder(),
+      );
+    } else if (kIsWeb) {
+      childWidget = Image.network(
         finalUrl,
-        width: width,
-        height: height,
-        fit: fit,
+        width: widget.width,
+        height: widget.height,
+        fit: widget.fit,
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null) return child;
           return SizedBox(
-            width: width,
-            height: height,
-            child: placeholder ?? _gradientPlaceholder(),
+            width: widget.width,
+            height: widget.height,
+            child: widget.placeholder ?? _gradientPlaceholder(),
           );
         },
         errorBuilder: (context, error, stackTrace) {
           return SizedBox(
-            width: width,
-            height: height,
-            child: errorWidget ?? _gradientPlaceholder(),
+            width: widget.width,
+            height: widget.height,
+            child: widget.errorWidget ?? _gradientPlaceholder(),
           );
         },
       );
+    } else {
+      childWidget = CachedNetworkImage(
+        imageUrl: widget.imageUrl,
+        width: widget.width,
+        height: widget.height,
+        fit: widget.fit,
+        placeholder: (context, url) => SizedBox(
+          width: widget.width,
+          height: widget.height,
+          child: widget.placeholder ?? _gradientPlaceholder(),
+        ),
+        errorWidget: (context, url, error) => SizedBox(
+          width: widget.width,
+          height: widget.height,
+          child: widget.errorWidget ?? _gradientPlaceholder(),
+        ),
+      );
     }
 
-    return CachedNetworkImage(
-      imageUrl: imageUrl,
-      width: width,
-      height: height,
-      fit: fit,
-      placeholder: (context, url) => SizedBox(
-        width: width,
-        height: height,
-        child: placeholder ?? _gradientPlaceholder(),
-      ),
-      errorWidget: (context, url, error) => SizedBox(
-        width: width,
-        height: height,
-        child: errorWidget ?? _gradientPlaceholder(),
-      ),
+    return VisibilityDetector(
+      key: ValueKey(_posterKey),
+      onVisibilityChanged: (visibilityInfo) {
+        if (!mounted) return;
+        final visiblePercentage = visibilityInfo.visibleFraction * 100;
+        // If more than 10% of the poster is visible, register it to the dynamic background.
+        if (visiblePercentage >= 10.0) {
+          ref.read(dynamicBackgroundProvider.notifier).registerPoster(
+                _posterKey,
+                imageUrl: widget.imageUrl,
+                seed: widget.seed,
+              );
+        } else {
+          // Otherwise, unregister it.
+          ref.read(dynamicBackgroundProvider.notifier).unregisterPoster(_posterKey);
+        }
+      },
+      child: childWidget,
     );
   }
 }

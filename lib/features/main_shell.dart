@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/theme/app_theme.dart';
 import '../core/widgets/glass_container.dart';
+import '../core/widgets/dynamic_background_wrapper.dart';
 import 'home/presentation/home_screen.dart';
 import 'search/presentation/search_screen.dart';
 import 'journal/presentation/journal_screen.dart';
@@ -31,27 +32,30 @@ class _MainShellState extends ConsumerState<MainShell> {
   @override
   Widget build(BuildContext context) {
     final selectedIndex = ref.watch(mainShellTabIndexProvider);
-    return Scaffold(
-      extendBody: true, // Crucial for showing blurred content behind the bottom navigation bar
-      body: _screens[selectedIndex],
-      bottomNavigationBar: SafeArea(
-        minimum: const EdgeInsets.only(bottom: 20),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: GlassContainer(
-            height: 68,
-            borderRadius: 24,
-            opacity: 0.8,
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildNavItem(selectedIndex, 0, Icons.home_rounded, Icons.home_outlined, 'Ana Sayfa'),
-                _buildNavItem(selectedIndex, 1, Icons.search_rounded, Icons.search_outlined, 'Keşfet'),
-                _buildNavItem(selectedIndex, 2, Icons.book_rounded, Icons.book_outlined, 'Günlük'),
-                _buildNavItem(selectedIndex, 3, Icons.calendar_month_rounded, Icons.calendar_month_outlined, 'Takvim'),
-                _buildNavItem(selectedIndex, 4, Icons.settings_rounded, Icons.settings_outlined, 'Ayarlar'),
-              ],
+    return DynamicBackgroundWrapper(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        extendBody: true, // Crucial for showing blurred content behind the bottom navigation bar
+        body: _screens[selectedIndex],
+        bottomNavigationBar: SafeArea(
+          minimum: const EdgeInsets.only(bottom: 20),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: GlassContainer(
+              height: 68,
+              borderRadius: 24,
+              opacity: 0.8,
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildNavItem(selectedIndex, 0, Icons.home_rounded, Icons.home_outlined, 'Ana Sayfa'),
+                  _buildNavItem(selectedIndex, 1, Icons.search_rounded, Icons.search_outlined, 'Keşfet'),
+                  _buildNavItem(selectedIndex, 2, Icons.book_rounded, Icons.book_outlined, 'Günlük'),
+                  _buildNavItem(selectedIndex, 3, Icons.calendar_month_rounded, Icons.calendar_month_outlined, 'Takvim'),
+                  _buildNavItem(selectedIndex, 4, Icons.settings_rounded, Icons.settings_outlined, 'Ayarlar'),
+                ],
+              ),
             ),
           ),
         ),

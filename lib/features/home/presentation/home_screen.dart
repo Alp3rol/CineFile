@@ -60,6 +60,7 @@ class HomeScreen extends ConsumerWidget {
     }
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         bottom: false,
         child: SingleChildScrollView(
@@ -172,8 +173,8 @@ class HomeScreen extends ConsumerWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Switch to a vertical layout if the dashboard card's width is narrow
-        final useVerticalLayout = constraints.maxWidth < 320;
+        // Switch to a vertical layout if screen width is mobile (< 500px)
+        final useVerticalLayout = MediaQuery.of(context).size.width < 500;
 
         final totalStatsColumn = Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -317,32 +318,43 @@ class HomeScreen extends ConsumerWidget {
 
   Widget _buildMiniStat(String label, String value, IconData icon, {bool isRating = false}) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Icon(icon, color: isRating ? AppTheme.ratingColor : AppTheme.accentColor, size: 22),
         const SizedBox(width: 8),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary),
-            ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
-              children: [
-                Text(
-                  value,
-                  style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
-                ),
-                if (isRating)
-                  Text(
-                    ' /10',
-                    style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary),
+        Flexible(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                label,
+                style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: Text(
+                      value,
+                      style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-              ],
-            ),
-          ],
+                  if (isRating)
+                    Text(
+                      ' /10',
+                      style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary),
+                    ),
+                ],
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -363,9 +375,13 @@ class HomeScreen extends ConsumerWidget {
         children: [
           const Icon(Icons.local_fire_department_rounded, size: 22, color: Colors.orange),
           const SizedBox(width: 10),
-          Text(
-            '$streak günlük seri devam ediyor!',
-            style: GoogleFonts.inter(fontSize: 12.5, fontWeight: FontWeight.w600, color: Colors.white),
+          Expanded(
+            child: Text(
+              '$streak günlük seri devam ediyor!',
+              style: GoogleFonts.inter(fontSize: 12.5, fontWeight: FontWeight.w600, color: Colors.white),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         ],
       ),
@@ -379,10 +395,15 @@ class HomeScreen extends ConsumerWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            title,
-            style: Theme.of(context).textTheme.titleLarge,
+          Expanded(
+            child: Text(
+              title,
+              style: Theme.of(context).textTheme.titleLarge,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
+          const SizedBox(width: 8),
           TextButton(
             onPressed: () => ref.read(mainShellTabIndexProvider.notifier).state = 2, // Günlük sekmesi
             child: Text(
@@ -403,10 +424,15 @@ class HomeScreen extends ConsumerWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            'Bu Hafta Ne İzlesem?',
-            style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+          Expanded(
+            child: Text(
+              'Bu Hafta Ne İzlesem?',
+              style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
+          const SizedBox(width: 8),
           IconButton(
             icon: const Icon(Icons.refresh_rounded, color: AppTheme.accentColor, size: 20),
             onPressed: () => ref.read(_homeSuggestionSeedProvider.notifier).state++,
