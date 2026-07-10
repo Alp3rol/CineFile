@@ -267,7 +267,22 @@ class _PhoneFrame extends StatelessWidget {
                   child: SizedBox(
                     width: device.width,
                     height: device.height,
-                    child: child,
+                    child: MediaQuery(
+                      data: MediaQuery.of(context).copyWith(
+                        size: Size(device.width, device.height),
+                        padding: EdgeInsets.only(
+                          top: device.isIos ? 47.0 : 24.0,
+                          bottom: device.isIos ? 34.0 : 20.0,
+                        ),
+                        viewInsets: EdgeInsets.zero,
+                        viewPadding: EdgeInsets.only(
+                          top: device.isIos ? 47.0 : 24.0,
+                          bottom: device.isIos ? 34.0 : 20.0,
+                        ),
+                        devicePixelRatio: 2.0,
+                      ),
+                      child: child,
+                    ),
                   ),
                 ),
               ),
