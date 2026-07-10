@@ -42,7 +42,22 @@ class WebDeviceFrame extends StatefulWidget {
 }
 
 class _WebDeviceFrameState extends State<WebDeviceFrame> {
-  DeviceModel? _selected = allDevices.firstWhere((d) => d.name == 'iPhone 16');
+  // Varsayılan olarak her zaman iPhone 16 seçili
+  late DeviceModel _selected = allDevices.firstWhere((d) => d.name == 'iPhone 16');
+  bool _isMenuOpen = false;
+
+  void _toggleMenu() {
+    setState(() {
+      _isMenuOpen = !_isMenuOpen;
+    });
+  }
+
+  void _selectDevice(DeviceModel device) {
+    setState(() {
+      _selected = device;
+      _isMenuOpen = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,6 +66,7 @@ class _WebDeviceFrameState extends State<WebDeviceFrame> {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
+    // Çok küçük ekranlarda cihaz çerçevesini kapat
     if (screenWidth < 700) return widget.child;
 
     return Scaffold(
@@ -62,104 +78,114 @@ class _WebDeviceFrameState extends State<WebDeviceFrame> {
 
           Column(
             children: [
-              // ÜST TOOLBAR - Cihaz seçici
-              _DeviceToolbar(
-                selected: _selected,
-                onSelect: (d) => setState(() => _selected = d),
+              // ÜST TOOLBAR
+              Container(
+                height: 56,
+                width: double.infinity,
+                color: const Color(0xFF13151A),
+                child: Center(
+                  child: GestureDetector(
+                    onTap: _toggleMenu,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.white.withOpacity(0.1)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            _selected.isIos ? Icons.phone_iphone : Icons.phone_android,
+                            size: 16,
+                            color: _selected.isIos ? const Color(0xFF64D2FF) : const Color(0xFF78C257),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            _selected.name,
+                            style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500),
+                          ),
+                          const SizedBox(width: 8),
+                          Icon(_isMenuOpen ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, color: Colors.white54, size: 18),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
               ),
 
-              // Uygulama alanı
+              // Uygulama alanı (Telefon Çerçevesi)
               Expanded(
                 child: Center(
-                  child: _selected != null
-                      ? _PhoneFrame(
-                          device: _selected!,
-                          screenHeight: screenHeight - 56,
-                          child: widget.child,
-                        )
-                      : ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 480),
-                          child: widget.child,
-                        ),
+                  child: _PhoneFrame(
+                    device: _selected,
+                    screenHeight: screenHeight - 56,
+                    child: widget.child,
+                  ),
                 ),
               ),
             ],
           ),
+
+          // Özel Açılır Menü (Dropdown Overlay)
+          if (_isMenuOpen)
+            Positioned(
+              top: 52,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Container(
+                  width: 250,
+                  margin: const EdgeInsets.only(top: 4),
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1C1C1E),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.white.withOpacity(0.1)),
+                    boxShadow: [
+                      BoxShadow(color: Colors.black.withOpacity(0.5), blurRadius: 20, offset: const Offset(0, 10)),
+                    ],
+                  ),
+                  constraints: const BoxConstraints(maxHeight: 400),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: allDevices.map((d) {
+                        final isSelected = d == _selected;
+                        return InkWell(
+                          onTap: () => _selectDevice(d),
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            color: isSelected ? Colors.white.withOpacity(0.05) : Colors.transparent,
+                            child: Row(
+                              children: [
+                                Icon(
+                                  d.isIos ? Icons.phone_iphone : Icons.phone_android,
+                                  size: 14,
+                                  color: d.isIos ? const Color(0xFF64D2FF) : const Color(0xFF78C257),
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  d.name,
+                                  style: TextStyle(
+                                    color: isSelected ? Colors.white : Colors.white70,
+                                    fontSize: 14,
+                                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+              ),
+            ),
         ],
-      ),
-    );
-  }
-}
-
-class _DeviceToolbar extends StatelessWidget {
-  final DeviceModel? selected;
-  final Function(DeviceModel?) onSelect;
-
-  const _DeviceToolbar({required this.selected, required this.onSelect});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 56,
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.04),
-        border: Border(
-          bottom: BorderSide(color: Colors.white.withOpacity(0.08)),
-        ),
-      ),
-      child: Center(
-        child: PopupMenuButton<DeviceModel?>(
-          initialValue: selected,
-          color: const Color(0xFF1C1C1E),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          onSelected: onSelect,
-          itemBuilder: (context) => [
-            const PopupMenuItem(
-              enabled: false,
-              height: 30,
-              child: Text('── iOS ──', style: TextStyle(color: Color(0xFF64D2FF), fontSize: 12, fontWeight: FontWeight.bold)),
-            ),
-            ...allDevices.where((d) => d.isIos).map((d) => PopupMenuItem(
-              value: d,
-              child: Text('${d.name} (${d.width.toInt()}×${d.height.toInt()})', style: const TextStyle(color: Colors.white, fontSize: 14)),
-            )),
-            const PopupMenuDivider(),
-            const PopupMenuItem(
-              enabled: false,
-              height: 30,
-              child: Text('── ANDROID ──', style: TextStyle(color: Color(0xFF78C257), fontSize: 12, fontWeight: FontWeight.bold)),
-            ),
-            ...allDevices.where((d) => !d.isIos).map((d) => PopupMenuItem(
-              value: d,
-              child: Text('${d.name} (${d.width.toInt()}×${d.height.toInt()})', style: const TextStyle(color: Colors.white, fontSize: 14)),
-            )),
-          ],
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.05),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.white.withOpacity(0.1)),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  selected == null ? Icons.devices : (selected!.isIos ? Icons.phone_iphone : Icons.phone_android),
-                  size: 16,
-                  color: selected == null ? Colors.white54 : (selected!.isIos ? const Color(0xFF64D2FF) : const Color(0xFF78C257)),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  selected?.name ?? 'Cihaz Seçin',
-                  style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500),
-                ),
-                const SizedBox(width: 8),
-                const Icon(Icons.keyboard_arrow_down, color: Colors.white54, size: 18),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }
