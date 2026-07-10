@@ -20,17 +20,26 @@ class DeviceModel {
 const List<DeviceModel> allDevices = [
   // iOS
   DeviceModel(name: 'iPhone SE', width: 375, height: 667, screenSize: '4.7"', isIos: true),
+  DeviceModel(name: 'iPhone 13 mini', width: 375, height: 812, screenSize: '5.4"', isIos: true),
+  DeviceModel(name: 'iPhone 14', width: 390, height: 844, screenSize: '6.1"', isIos: true),
+  DeviceModel(name: 'iPhone 15', width: 393, height: 852, screenSize: '6.1"', isIos: true),
+  DeviceModel(name: 'iPhone 15 Pro Max', width: 430, height: 932, screenSize: '6.7"', isIos: true),
   DeviceModel(name: 'iPhone 16', width: 390, height: 844, screenSize: '6.1"', isIos: true),
   DeviceModel(name: 'iPhone 16 Pro', width: 393, height: 852, screenSize: '6.3"', isIos: true),
   DeviceModel(name: 'iPhone 16 Pro Max', width: 430, height: 932, screenSize: '6.9"', isIos: true),
   DeviceModel(name: 'iPad mini', width: 744, height: 1133, screenSize: '8.3"', isIos: true),
   // Android
+  DeviceModel(name: 'Galaxy Z Flip 6', width: 420, height: 1011, screenSize: '6.7"', isIos: false),
+  DeviceModel(name: 'Galaxy Z Fold 6', width: 884, height: 1060, screenSize: '7.6"', isIos: false),
   DeviceModel(name: 'Galaxy S24', width: 360, height: 780, screenSize: '6.2"', isIos: false),
   DeviceModel(name: 'Galaxy S24+', width: 384, height: 854, screenSize: '6.7"', isIos: false),
   DeviceModel(name: 'Galaxy S24 Ultra', width: 412, height: 915, screenSize: '6.8"', isIos: false),
-  DeviceModel(name: 'Pixel 9 Pro', width: 411, height: 914, screenSize: '6.3"', isIos: false),
+  DeviceModel(name: 'Pixel 8a', width: 412, height: 892, screenSize: '6.1"', isIos: false),
   DeviceModel(name: 'Pixel 9', width: 393, height: 873, screenSize: '6.3"', isIos: false),
+  DeviceModel(name: 'Pixel 9 Pro', width: 411, height: 914, screenSize: '6.3"', isIos: false),
   DeviceModel(name: 'OnePlus 13', width: 412, height: 919, screenSize: '6.8"', isIos: false),
+  DeviceModel(name: 'Nothing Phone (2)', width: 412, height: 915, screenSize: '6.7"', isIos: false),
+  DeviceModel(name: 'Xiaomi 14 Ultra', width: 412, height: 915, screenSize: '6.7"', isIos: false),
 ];
 
 class WebDeviceFrame extends StatefulWidget {
@@ -77,52 +86,44 @@ class _WebDeviceFrameState extends State<WebDeviceFrame> {
           Positioned.fill(child: CustomPaint(painter: _GridPainter())),
 
           Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // ÜST TOOLBAR
-              Container(
-                height: 56,
-                width: double.infinity,
-                color: const Color(0xFF13151A),
-                child: Center(
-                  child: GestureDetector(
-                    onTap: _toggleMenu,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.05),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.white.withOpacity(0.1)),
+              // Basit, hap şeklinde açılır menü butonu
+              GestureDetector(
+                onTap: _toggleMenu,
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 24),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.06),
+                    borderRadius: BorderRadius.circular(30),
+                    border: Border.all(color: Colors.white.withOpacity(0.1)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '${_selected.name} • ${_selected.width.toInt()}×${_selected.height.toInt()} • ${_selected.screenSize}',
+                        style: const TextStyle(
+                          color: Colors.white70, 
+                          fontSize: 13, 
+                          fontFamily: 'monospace',
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            _selected.isIos ? Icons.phone_iphone : Icons.phone_android,
-                            size: 16,
-                            color: _selected.isIos ? const Color(0xFF64D2FF) : const Color(0xFF78C257),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            _selected.name,
-                            style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500),
-                          ),
-                          const SizedBox(width: 8),
-                          Icon(_isMenuOpen ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, color: Colors.white54, size: 18),
-                        ],
-                      ),
-                    ),
+                      const SizedBox(width: 12),
+                      Icon(_isMenuOpen ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, color: Colors.white54, size: 18),
+                    ],
                   ),
                 ),
               ),
 
               // Uygulama alanı (Telefon Çerçevesi)
-              Expanded(
-                child: Center(
-                  child: _PhoneFrame(
-                    device: _selected,
-                    screenHeight: screenHeight - 56,
-                    child: widget.child,
-                  ),
+              Flexible(
+                child: _PhoneFrame(
+                  device: _selected,
+                  screenHeight: screenHeight - 120, // Menü butonu için biraz daha yer bırak
+                  child: widget.child,
                 ),
               ),
             ],
@@ -131,23 +132,22 @@ class _WebDeviceFrameState extends State<WebDeviceFrame> {
           // Özel Açılır Menü (Dropdown Overlay)
           if (_isMenuOpen)
             Positioned(
-              top: 52,
+              top: screenHeight / 2 - (screenHeight - 120) / 2 - 20, // Butonun hemen altına denk gelmesi için
               left: 0,
               right: 0,
               child: Center(
                 child: Container(
-                  width: 250,
-                  margin: const EdgeInsets.only(top: 4),
+                  width: 320,
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   decoration: BoxDecoration(
                     color: const Color(0xFF1C1C1E),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: Colors.white.withOpacity(0.1)),
                     boxShadow: [
-                      BoxShadow(color: Colors.black.withOpacity(0.5), blurRadius: 20, offset: const Offset(0, 10)),
+                      BoxShadow(color: Colors.black.withOpacity(0.6), blurRadius: 30, offset: const Offset(0, 15)),
                     ],
                   ),
-                  constraints: const BoxConstraints(maxHeight: 400),
+                  constraints: const BoxConstraints(maxHeight: 450),
                   child: SingleChildScrollView(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -157,22 +157,32 @@ class _WebDeviceFrameState extends State<WebDeviceFrame> {
                           onTap: () => _selectDevice(d),
                           child: Container(
                             width: double.infinity,
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                            color: isSelected ? Colors.white.withOpacity(0.05) : Colors.transparent,
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                            color: isSelected ? Colors.white.withOpacity(0.06) : Colors.transparent,
                             child: Row(
                               children: [
                                 Icon(
                                   d.isIos ? Icons.phone_iphone : Icons.phone_android,
-                                  size: 14,
+                                  size: 16,
                                   color: d.isIos ? const Color(0xFF64D2FF) : const Color(0xFF78C257),
                                 ),
                                 const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    d.name,
+                                    style: TextStyle(
+                                      color: isSelected ? Colors.white : Colors.white70,
+                                      fontSize: 14,
+                                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                                    ),
+                                  ),
+                                ),
                                 Text(
-                                  d.name,
+                                  '${d.width.toInt()}×${d.height.toInt()} • ${d.screenSize}',
                                   style: TextStyle(
-                                    color: isSelected ? Colors.white : Colors.white70,
-                                    fontSize: 14,
-                                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                                    color: isSelected ? Colors.white70 : Colors.white38,
+                                    fontSize: 12,
+                                    fontFamily: 'monospace',
                                   ),
                                 ),
                               ],
