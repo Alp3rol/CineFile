@@ -261,8 +261,8 @@ class _PhoneFrame extends StatelessWidget {
               child: SizedBox(
                 width: displayW,
                 height: displayH,
-                child: Transform.scale(
-                  scale: scale,
+                child: FittedBox(
+                  fit: BoxFit.contain,
                   alignment: Alignment.topLeft,
                   child: SizedBox(
                     width: device.width,
