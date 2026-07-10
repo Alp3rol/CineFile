@@ -1,54 +1,40 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-// Telefon modeli veri sınıfı
 class DeviceModel {
   final String name;
   final double width;
   final double height;
   final String screenSize;
+  final bool isIos;
 
   const DeviceModel({
     required this.name,
     required this.width,
     required this.height,
     required this.screenSize,
+    required this.isIos,
   });
 }
 
-// Seçili cihazı tutan provider (Riverpod kullanmadan basit ValueNotifier)
-final ValueNotifier<DeviceModel?> selectedDeviceNotifier = ValueNotifier(null);
-
-// iOS Cihazları
-const List<DeviceModel> iosDevices = [
-  DeviceModel(name: 'iPhone SE', width: 375, height: 667, screenSize: '4.7"'),
-  DeviceModel(name: 'iPhone 16', width: 390, height: 844, screenSize: '6.1"'),
-  DeviceModel(name: 'iPhone 16 Pro', width: 393, height: 852, screenSize: '6.3"'),
-  DeviceModel(
-      name: 'iPhone 16 Pro Max', width: 430, height: 932, screenSize: '6.9"'),
-  DeviceModel(
-      name: 'iPhone 16 Plus', width: 430, height: 932, screenSize: '6.7"'),
-  DeviceModel(name: 'iPad mini', width: 744, height: 1133, screenSize: '8.3"'),
-];
-
-// Android Cihazları
-const List<DeviceModel> androidDevices = [
-  DeviceModel(
-      name: 'Galaxy S24', width: 360, height: 780, screenSize: '6.2"'),
-  DeviceModel(
-      name: 'Galaxy S24+', width: 384, height: 854, screenSize: '6.7"'),
-  DeviceModel(
-      name: 'Galaxy S24 Ultra', width: 412, height: 915, screenSize: '6.8"'),
-  DeviceModel(
-      name: 'Pixel 9 Pro', width: 411, height: 914, screenSize: '6.3"'),
-  DeviceModel(name: 'Pixel 9', width: 393, height: 873, screenSize: '6.3"'),
-  DeviceModel(
-      name: 'OnePlus 13', width: 412, height: 919, screenSize: '6.8"'),
+const List<DeviceModel> allDevices = [
+  // iOS
+  DeviceModel(name: 'iPhone SE', width: 375, height: 667, screenSize: '4.7"', isIos: true),
+  DeviceModel(name: 'iPhone 16', width: 390, height: 844, screenSize: '6.1"', isIos: true),
+  DeviceModel(name: 'iPhone 16 Pro', width: 393, height: 852, screenSize: '6.3"', isIos: true),
+  DeviceModel(name: 'iPhone 16 Pro Max', width: 430, height: 932, screenSize: '6.9"', isIos: true),
+  DeviceModel(name: 'iPad mini', width: 744, height: 1133, screenSize: '8.3"', isIos: true),
+  // Android
+  DeviceModel(name: 'Galaxy S24', width: 360, height: 780, screenSize: '6.2"', isIos: false),
+  DeviceModel(name: 'Galaxy S24+', width: 384, height: 854, screenSize: '6.7"', isIos: false),
+  DeviceModel(name: 'Galaxy S24 Ultra', width: 412, height: 915, screenSize: '6.8"', isIos: false),
+  DeviceModel(name: 'Pixel 9 Pro', width: 411, height: 914, screenSize: '6.3"', isIos: false),
+  DeviceModel(name: 'Pixel 9', width: 393, height: 873, screenSize: '6.3"', isIos: false),
+  DeviceModel(name: 'OnePlus 13', width: 412, height: 919, screenSize: '6.8"', isIos: false),
 ];
 
 class WebDeviceFrame extends StatefulWidget {
   final Widget child;
-
   const WebDeviceFrame({super.key, required this.child});
 
   @override
@@ -56,147 +42,46 @@ class WebDeviceFrame extends StatefulWidget {
 }
 
 class _WebDeviceFrameState extends State<WebDeviceFrame> {
-  DeviceModel? _selectedDevice;
-  bool _isIosExpanded = false;
-  bool _isAndroidExpanded = false;
-
-  void _selectDevice(DeviceModel? device) {
-    setState(() {
-      _selectedDevice = device;
-      selectedDeviceNotifier.value = device;
-    });
-  }
-
-  void _clearDevice() {
-    setState(() {
-      _selectedDevice = null;
-      selectedDeviceNotifier.value = null;
-    });
-  }
+  DeviceModel? _selected;
 
   @override
   Widget build(BuildContext context) {
-    // Sadece web'de göster
     if (!kIsWeb) return widget.child;
 
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    // Ekran dar ise panel gösterme, sadece uygulamayı göster
-    if (screenWidth < 800) {
-      return widget.child;
-    }
-
-    final double appWidth = _selectedDevice?.width ?? 480;
-    final double appHeight = _selectedDevice?.height ?? screenHeight;
+    if (screenWidth < 700) return widget.child;
 
     return Scaffold(
       backgroundColor: const Color(0xFF07090F),
       body: Stack(
         children: [
-          // Arka plan ızgara deseni
-          Positioned.fill(
-            child: CustomPaint(
-              painter: _GridPainter(),
-            ),
-          ),
+          // Arka plan ızgara
+          Positioned.fill(child: CustomPaint(painter: _GridPainter())),
 
-          Row(
+          Column(
             children: [
-              // SOL PANEL - iOS
-              _DevicePanel(
-                title: 'iOS',
-                icon: Icons.phone_iphone,
-                iconColor: const Color(0xFF64D2FF),
-                accentColor: const Color(0xFF64D2FF),
-                devices: iosDevices,
-                selectedDevice: _selectedDevice,
-                isExpanded: _isIosExpanded,
-                onToggle: () =>
-                    setState(() => _isIosExpanded = !_isIosExpanded),
-                onSelect: _selectDevice,
+              // ÜST TOOLBAR - Cihaz seçici
+              _DeviceToolbar(
+                selected: _selected,
+                onSelect: (d) => setState(() => _selected = d),
               ),
 
-              // ORTA - Uygulama
+              // Uygulama alanı
               Expanded(
                 child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Cihaz ismi başlık
-                      if (_selectedDevice != null)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.08),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                  color: Colors.white.withOpacity(0.12)),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  iosDevices.contains(_selectedDevice)
-                                      ? Icons.phone_iphone
-                                      : Icons.phone_android,
-                                  size: 14,
-                                  color: Colors.white70,
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  '${_selectedDevice!.name}  •  ${_selectedDevice!.width.toInt()}×${_selectedDevice!.height.toInt()}  •  ${_selectedDevice!.screenSize}',
-                                  style: const TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 12,
-                                    fontFamily: 'monospace',
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                GestureDetector(
-                                  onTap: _clearDevice,
-                                  child: const Icon(Icons.close,
-                                      size: 14, color: Colors.white38),
-                                ),
-                              ],
-                            ),
-                          ),
+                  child: _selected != null
+                      ? _PhoneFrame(
+                          device: _selected!,
+                          screenHeight: screenHeight - 56,
+                          child: widget.child,
+                        )
+                      : ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 480),
+                          child: widget.child,
                         ),
-
-                      // Telefon çerçevesi + uygulama
-                      Flexible(
-                        child: _selectedDevice != null
-                            ? _PhoneFrame(
-                                device: _selectedDevice!,
-                                screenHeight: screenHeight,
-                                child: widget.child,
-                              )
-                            : ConstrainedBox(
-                                constraints:
-                                    BoxConstraints(maxWidth: appWidth),
-                                child: widget.child,
-                              ),
-                      ),
-                    ],
-                  ),
                 ),
-              ),
-
-              // SAĞ PANEL - Android
-              _DevicePanel(
-                title: 'Android',
-                icon: Icons.phone_android,
-                iconColor: const Color(0xFF78C257),
-                accentColor: const Color(0xFF78C257),
-                devices: androidDevices,
-                selectedDevice: _selectedDevice,
-                isExpanded: _isAndroidExpanded,
-                onToggle: () =>
-                    setState(() => _isAndroidExpanded = !_isAndroidExpanded),
-                onSelect: _selectDevice,
               ),
             ],
           ),
@@ -206,7 +91,177 @@ class _WebDeviceFrameState extends State<WebDeviceFrame> {
   }
 }
 
-// Telefon çerçevesi widget'ı
+class _DeviceToolbar extends StatelessWidget {
+  final DeviceModel? selected;
+  final Function(DeviceModel?) onSelect;
+
+  const _DeviceToolbar({required this.selected, required this.onSelect});
+
+  @override
+  Widget build(BuildContext context) {
+    const iosColor = Color(0xFF64D2FF);
+    const androidColor = Color(0xFF78C257);
+
+    return Container(
+      height: 52,
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.04),
+        border: Border(
+          bottom: BorderSide(color: Colors.white.withOpacity(0.08)),
+        ),
+      ),
+      child: Row(
+        children: [
+          // iOS etiketi
+          _PlatformLabel(
+            icon: Icons.phone_iphone,
+            label: 'iOS',
+            color: iosColor,
+          ),
+
+          // iOS cihazları
+          ...allDevices.where((d) => d.isIos).map((d) => _DeviceChip(
+                device: d,
+                isSelected: selected == d,
+                accentColor: iosColor,
+                onTap: () => onSelect(selected == d ? null : d),
+              )),
+
+          // Ayırıcı
+          Container(
+            width: 1,
+            height: 28,
+            margin: const EdgeInsets.symmetric(horizontal: 8),
+            color: Colors.white.withOpacity(0.12),
+          ),
+
+          // Android etiketi
+          _PlatformLabel(
+            icon: Icons.phone_android,
+            label: 'Android',
+            color: androidColor,
+          ),
+
+          // Android cihazları
+          ...allDevices.where((d) => !d.isIos).map((d) => _DeviceChip(
+                device: d,
+                isSelected: selected == d,
+                accentColor: androidColor,
+                onTap: () => onSelect(selected == d ? null : d),
+              )),
+
+          const Spacer(),
+
+          // Seçili cihaz bilgisi
+          if (selected != null)
+            Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.06),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.white.withOpacity(0.1)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '${selected!.width.toInt()}×${selected!.height.toInt()} · ${selected!.screenSize}',
+                      style: const TextStyle(
+                        color: Colors.white54,
+                        fontSize: 11,
+                        fontFamily: 'monospace',
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    GestureDetector(
+                      onTap: () => onSelect(null),
+                      child: const Icon(Icons.close, size: 13, color: Colors.white38),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PlatformLabel extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+
+  const _PlatformLabel({required this.icon, required this.label, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: color, size: 14),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DeviceChip extends StatelessWidget {
+  final DeviceModel device;
+  final bool isSelected;
+  final Color accentColor;
+  final VoidCallback onTap;
+
+  const _DeviceChip({
+    required this.device,
+    required this.isSelected,
+    required this.accentColor,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        margin: const EdgeInsets.symmetric(horizontal: 3, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: isSelected ? accentColor.withOpacity(0.18) : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isSelected ? accentColor.withOpacity(0.6) : Colors.white.withOpacity(0.08),
+          ),
+        ),
+        child: Text(
+          device.name,
+          style: TextStyle(
+            color: isSelected ? accentColor : Colors.white54,
+            fontSize: 11,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Telefon çerçevesi
 class _PhoneFrame extends StatelessWidget {
   final DeviceModel device;
   final double screenHeight;
@@ -220,22 +275,20 @@ class _PhoneFrame extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Ekrana sığdır
-    final maxH = screenHeight * 0.88;
+    final maxH = screenHeight * 0.90;
     final scale = device.height > maxH ? maxH / device.height : 1.0;
     final displayW = device.width * scale;
     final displayH = device.height * scale;
 
     const frameThickness = 10.0;
     const cornerRadius = 40.0;
-    const notchHeight = 28.0;
 
     return SizedBox(
       width: displayW + frameThickness * 2,
       height: displayH + frameThickness * 2,
       child: Stack(
         children: [
-          // Telefon dış çerçevesi
+          // Dış çerçeve
           Positioned.fill(
             child: Container(
               decoration: BoxDecoration(
@@ -247,23 +300,17 @@ class _PhoneFrame extends StatelessWidget {
                     blurRadius: 30,
                     spreadRadius: 2,
                   ),
-                  BoxShadow(
-                    color: Colors.white.withOpacity(0.05),
-                    blurRadius: 1,
-                    spreadRadius: 0,
-                  ),
                 ],
               ),
             ),
           ),
 
-          // İç ekran alanı
+          // Ekran içeriği
           Positioned(
             left: frameThickness,
             top: frameThickness,
             child: ClipRRect(
-              borderRadius:
-                  BorderRadius.circular(cornerRadius - frameThickness),
+              borderRadius: BorderRadius.circular(cornerRadius - frameThickness),
               child: SizedBox(
                 width: displayW,
                 height: displayH,
@@ -280,13 +327,13 @@ class _PhoneFrame extends StatelessWidget {
             ),
           ),
 
-          // Üst notch/Dynamic Island
+          // Dynamic Island / Notch
           Positioned(
             top: frameThickness + 8,
-            left: frameThickness + displayW / 2 - 50,
+            left: frameThickness + displayW / 2 - 45,
             child: Container(
-              width: 100,
-              height: notchHeight * scale,
+              width: 90,
+              height: 24 * scale,
               decoration: BoxDecoration(
                 color: const Color(0xFF1C1C1E),
                 borderRadius: BorderRadius.circular(20),
@@ -299,181 +346,13 @@ class _PhoneFrame extends StatelessWidget {
   }
 }
 
-// Cihaz seçim paneli
-class _DevicePanel extends StatelessWidget {
-  final String title;
-  final IconData icon;
-  final Color iconColor;
-  final Color accentColor;
-  final List<DeviceModel> devices;
-  final DeviceModel? selectedDevice;
-  final bool isExpanded;
-  final VoidCallback onToggle;
-  final Function(DeviceModel?) onSelect;
-
-  const _DevicePanel({
-    required this.title,
-    required this.icon,
-    required this.iconColor,
-    required this.accentColor,
-    required this.devices,
-    required this.selectedDevice,
-    required this.isExpanded,
-    required this.onToggle,
-    required this.onSelect,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 250),
-      curve: Curves.easeInOut,
-      width: isExpanded ? 175 : 48,
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 24, horizontal: 4),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.04),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withOpacity(0.08)),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(20),
-          child: Column(
-            children: [
-              // Başlık butonu
-              GestureDetector(
-                onTap: onToggle,
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  decoration: BoxDecoration(
-                    color: accentColor.withOpacity(0.08),
-                    border: Border(
-                      bottom: BorderSide(
-                          color: accentColor.withOpacity(0.2), width: 1),
-                    ),
-                  ),
-                  child: isExpanded
-                      ? Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(icon, color: iconColor, size: 16),
-                            const SizedBox(width: 6),
-                            Text(
-                              title,
-                              style: TextStyle(
-                                color: iconColor,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            Icon(Icons.chevron_left,
-                                color: iconColor.withOpacity(0.6), size: 16),
-                          ],
-                        )
-                      : Column(
-                          children: [
-                            Icon(icon, color: iconColor, size: 18),
-                            const SizedBox(height: 4),
-                            RotatedBox(
-                              quarterTurns: 1,
-                              child: Text(
-                                title,
-                                style: TextStyle(
-                                  color: iconColor,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w600,
-                                  letterSpacing: 1,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                ),
-              ),
-
-              // Cihaz listesi
-              if (isExpanded)
-                Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    itemCount: devices.length,
-                    itemBuilder: (context, index) {
-                      final device = devices[index];
-                      final isSelected = selectedDevice == device;
-
-                      return GestureDetector(
-                        onTap: () =>
-                            onSelect(isSelected ? null : device),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 150),
-                          margin: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 3),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 9),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? accentColor.withOpacity(0.15)
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: isSelected
-                                  ? accentColor.withOpacity(0.5)
-                                  : Colors.transparent,
-                            ),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                device.name,
-                                style: TextStyle(
-                                  color: isSelected
-                                      ? accentColor
-                                      : Colors.white70,
-                                  fontSize: 12,
-                                  fontWeight: isSelected
-                                      ? FontWeight.w600
-                                      : FontWeight.normal,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                '${device.width.toInt()}×${device.height.toInt()} · ${device.screenSize}',
-                                style: TextStyle(
-                                  color: isSelected
-                                      ? accentColor.withOpacity(0.7)
-                                      : Colors.white30,
-                                  fontSize: 10,
-                                  fontFamily: 'monospace',
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// Arka plan ızgara çizici
 class _GridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.white.withOpacity(0.03)
+      ..color = Colors.white.withOpacity(0.025)
       ..strokeWidth = 1;
-
     const spacing = 40.0;
-
     for (double x = 0; x < size.width; x += spacing) {
       canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
     }
