@@ -25,6 +25,7 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
   String _activeFilter = 'all'; // all, favorites, cinema, notes
   String _sortColumn = 'personal_ranking'; // table view only
   bool _sortAscending = true;
+  bool _showSearch = false; // search bar toggled by search icon
 
   final _searchController = TextEditingController();
 
@@ -144,7 +145,7 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
             children: [
               // 1. Top Title Banner
               Padding(
-                padding: const EdgeInsets.only(left: 20, right: 20, top: 16, bottom: 4),
+                padding: const EdgeInsets.only(left: 20, right: 12, top: 16, bottom: 4),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -152,22 +153,55 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
                       'Günlüğüm',
                       style: Theme.of(context).textTheme.displayLarge,
                     ),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const SearchScreen()),
-                        );
-                      },
-                      child: Container(
-                        width: 36,
-                        height: 36,
-                        decoration: const BoxDecoration(
-                          color: AppTheme.accentColor,
-                          shape: BoxShape.circle,
+                    Row(
+                      children: [
+                        // Search toggle button
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _showSearch = !_showSearch;
+                              if (!_showSearch) {
+                                _searchController.clear();
+                                _searchQuery = '';
+                              }
+                            });
+                          },
+                          child: Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: _showSearch
+                                  ? AppTheme.accentColor.withOpacity(0.2)
+                                  : Colors.white10,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              _showSearch ? Icons.search_off_rounded : Icons.search_rounded,
+                              color: _showSearch ? AppTheme.accentColor : Colors.white70,
+                              size: 18,
+                            ),
+                          ),
                         ),
-                        child: const Icon(Icons.add_rounded, color: Colors.white, size: 20),
-                      ),
+                        const SizedBox(width: 8),
+                        // Add new record button
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const SearchScreen()),
+                            );
+                          },
+                          child: Container(
+                            width: 36,
+                            height: 36,
+                            decoration: const BoxDecoration(
+                              color: AppTheme.accentColor,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.add_rounded, color: Colors.white, size: 20),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -204,41 +238,45 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // 2. Search Field Bar
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                          child: TextField(
-                            controller: _searchController,
-                            style: GoogleFonts.inter(fontSize: 13, color: Colors.white),
-                            onChanged: (val) {
-                              setState(() {
-                                _searchQuery = val.trim().toLowerCase();
-                              });
-                            },
-                            decoration: InputDecoration(
-                              hintText: 'Günlük içinde ara (Film, yönetmen, not, mekan...)...',
-                              hintStyle: GoogleFonts.inter(color: Colors.grey.shade600, fontSize: 12),
-                              prefixIcon: const Icon(Icons.search_rounded, color: Colors.grey, size: 20),
-                              suffixIcon: _searchQuery.isNotEmpty
-                                  ? IconButton(
-                                      icon: const Icon(Icons.clear_rounded, color: Colors.grey, size: 20),
-                                      onPressed: () {
-                                        _searchController.clear();
-                                        setState(() {
-                                          _searchQuery = '';
-                                        });
-                                      },
-                                    )
-                                  : null,
-                              filled: true,
-                              fillColor: Colors.black26,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide.none,
+                        // 2. Collapsible Search Field (shown only when _showSearch is true)
+                        AnimatedCrossFade(
+                          firstChild: const SizedBox(height: 0),
+                          secondChild: Padding(
+                            padding: const EdgeInsets.only(left: 16, right: 16, bottom: 6),
+                            child: TextField(
+                              controller: _searchController,
+                              autofocus: true,
+                              style: GoogleFonts.inter(fontSize: 13, color: Colors.white),
+                              onChanged: (val) {
+                                setState(() {
+                                  _searchQuery = val.trim().toLowerCase();
+                                });
+                              },
+                              decoration: InputDecoration(
+                                hintText: 'Film, yönetmen, not, mekan...',
+                                hintStyle: GoogleFonts.inter(color: Colors.grey.shade600, fontSize: 12),
+                                prefixIcon: const Icon(Icons.search_rounded, color: Colors.grey, size: 20),
+                                suffixIcon: _searchQuery.isNotEmpty
+                                    ? IconButton(
+                                        icon: const Icon(Icons.clear_rounded, color: Colors.grey, size: 20),
+                                        onPressed: () {
+                                          _searchController.clear();
+                                          setState(() => _searchQuery = '');
+                                        },
+                                      )
+                                    : null,
+                                filled: true,
+                                fillColor: Colors.black26,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide.none,
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(vertical: 10),
                               ),
-                              contentPadding: const EdgeInsets.symmetric(vertical: 10),
                             ),
                           ),
+                          crossFadeState: _showSearch ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+                          duration: const Duration(milliseconds: 200),
                         ),
 
                         // 3. Quick Filter Chips Bar + View Mode Toggle

@@ -64,7 +64,9 @@ void main() {
     expect(find.text('MART 2026'), findsOneWidget);
     expect(find.text('ŞUBAT 2026'), findsOneWidget);
 
-    // Search filters the list down to a single match.
+    // Search filters the list: tap the search toggle icon first, then type.
+    await tester.tap(find.byIcon(Icons.search_rounded).first);
+    await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField).first, 'Movie 2');
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
