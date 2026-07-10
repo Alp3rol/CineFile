@@ -241,12 +241,9 @@ class _PhoneFrame extends StatelessWidget {
               decoration: BoxDecoration(
                 color: const Color(0xFF1C1C1E),
                 borderRadius: BorderRadius.circular(cornerRadius),
+                border: Border.all(color: Colors.white.withOpacity(0.2), width: 1.5),
                 boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.6),
-                    blurRadius: 30,
-                    spreadRadius: 2,
-                  ),
+                  BoxShadow(color: Colors.black.withOpacity(0.5), blurRadius: 40, spreadRadius: 10),
                 ],
               ),
             ),
@@ -270,15 +267,9 @@ class _PhoneFrame extends StatelessWidget {
                     child: MediaQuery(
                       data: MediaQuery.of(context).copyWith(
                         size: Size(device.width, device.height),
-                        padding: EdgeInsets.only(
-                          top: device.isIos ? 47.0 : 24.0,
-                          bottom: device.isIos ? 34.0 : 20.0,
-                        ),
+                        padding: EdgeInsets.zero,
                         viewInsets: EdgeInsets.zero,
-                        viewPadding: EdgeInsets.only(
-                          top: device.isIos ? 47.0 : 24.0,
-                          bottom: device.isIos ? 34.0 : 20.0,
-                        ),
+                        viewPadding: EdgeInsets.zero,
                         devicePixelRatio: 2.0,
                       ),
                       child: child,
@@ -289,19 +280,6 @@ class _PhoneFrame extends StatelessWidget {
             ),
           ),
 
-          // Dynamic Island / Notch
-          Positioned(
-            top: frameThickness + 8,
-            left: frameThickness + displayW / 2 - 45,
-            child: Container(
-              width: 90,
-              height: 24 * scale,
-              decoration: BoxDecoration(
-                color: const Color(0xFF1C1C1E),
-                borderRadius: BorderRadius.circular(20),
-              ),
-            ),
-          ),
         ],
       ),
     );
