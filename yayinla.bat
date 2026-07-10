@@ -20,7 +20,14 @@ call git config user.name "CineFile Deploy"
 call git config user.email "deploy@cinefile.local"
 call git checkout -b main
 call git add .
-call git commit -m "otomatik deploy"
+
+set MSG=%~1
+if "%MSG%"=="" (
+    set /p MSG="Guncelleme aciklamasini girin (Bos birakilirsa 'otomatik deploy' yazilacak): "
+)
+if "%MSG%"=="" set MSG=otomatik deploy
+
+call git commit -m "%MSG%"
 call git push --force https://github.com/Alp3rol/CineFile.git main:gh-pages
 cd ..\..
 

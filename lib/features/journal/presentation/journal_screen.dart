@@ -443,7 +443,7 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
                                               JournalHeaderCell(label: isMobile ? 'İzleme' : 'İzleme Tarihi', columnKey: 'date', flex: null, width: isMobile ? 80 : 100, activeSortColumn: _sortColumn, sortAscending: _sortAscending, onSort: _onSort),
                                               if (!isMobile)
                                                 JournalHeaderCell(label: 'İzleme Sırası', columnKey: 'watch_count', flex: null, width: 80, sortable: false, activeSortColumn: _sortColumn, sortAscending: _sortAscending, onSort: _onSort),
-                                              JournalHeaderCell(label: 'Puanım', columnKey: 'rating', flex: null, width: isMobile ? 55 : 70, activeSortColumn: _sortColumn, sortAscending: _sortAscending, onSort: _onSort),
+                                              JournalHeaderCell(label: 'Puanım', columnKey: 'rating', flex: null, width: isMobile ? 65 : 70, activeSortColumn: _sortColumn, sortAscending: _sortAscending, onSort: _onSort),
                                             ],
                                           ),
                                         );

@@ -321,7 +321,7 @@ class JournalRecordsTable extends StatelessWidget {
 
                   // 5. Puanım Sütunu - fixed width
                   SizedBox(
-                    width: isMobile ? 55 : 70,
+                    width: isMobile ? 65 : 70,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
