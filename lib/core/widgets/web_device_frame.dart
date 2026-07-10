@@ -42,7 +42,7 @@ class WebDeviceFrame extends StatefulWidget {
 }
 
 class _WebDeviceFrameState extends State<WebDeviceFrame> {
-  DeviceModel? _selected;
+  DeviceModel? _selected = allDevices.firstWhere((d) => d.name == 'iPhone 16');
 
   @override
   Widget build(BuildContext context) {
@@ -99,161 +99,65 @@ class _DeviceToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const iosColor = Color(0xFF64D2FF);
-    const androidColor = Color(0xFF78C257);
-
     return Container(
-      height: 52,
+      height: 56,
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.04),
         border: Border(
           bottom: BorderSide(color: Colors.white.withOpacity(0.08)),
         ),
       ),
-      child: Row(
-        children: [
-          // iOS etiketi
-          _PlatformLabel(
-            icon: Icons.phone_iphone,
-            label: 'iOS',
-            color: iosColor,
-          ),
-
-          // iOS cihazları
-          ...allDevices.where((d) => d.isIos).map((d) => _DeviceChip(
-                device: d,
-                isSelected: selected == d,
-                accentColor: iosColor,
-                onTap: () => onSelect(selected == d ? null : d),
-              )),
-
-          // Ayırıcı
-          Container(
-            width: 1,
-            height: 28,
-            margin: const EdgeInsets.symmetric(horizontal: 8),
-            color: Colors.white.withOpacity(0.12),
-          ),
-
-          // Android etiketi
-          _PlatformLabel(
-            icon: Icons.phone_android,
-            label: 'Android',
-            color: androidColor,
-          ),
-
-          // Android cihazları
-          ...allDevices.where((d) => !d.isIos).map((d) => _DeviceChip(
-                device: d,
-                isSelected: selected == d,
-                accentColor: androidColor,
-                onTap: () => onSelect(selected == d ? null : d),
-              )),
-
-          const Spacer(),
-
-          // Seçili cihaz bilgisi
-          if (selected != null)
-            Padding(
-              padding: const EdgeInsets.only(right: 12),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.06),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.white.withOpacity(0.1)),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      '${selected!.width.toInt()}×${selected!.height.toInt()} · ${selected!.screenSize}',
-                      style: const TextStyle(
-                        color: Colors.white54,
-                        fontSize: 11,
-                        fontFamily: 'monospace',
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    GestureDetector(
-                      onTap: () => onSelect(null),
-                      child: const Icon(Icons.close, size: 13, color: Colors.white38),
-                    ),
-                  ],
-                ),
-              ),
+      child: Center(
+        child: PopupMenuButton<DeviceModel?>(
+          initialValue: selected,
+          color: const Color(0xFF1C1C1E),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          onSelected: onSelect,
+          itemBuilder: (context) => [
+            const PopupMenuItem(
+              enabled: false,
+              height: 30,
+              child: Text('── iOS ──', style: TextStyle(color: Color(0xFF64D2FF), fontSize: 12, fontWeight: FontWeight.bold)),
             ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PlatformLabel extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color color;
-
-  const _PlatformLabel({required this.icon, required this.label, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: color, size: 14),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: TextStyle(
-              color: color,
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.5,
+            ...allDevices.where((d) => d.isIos).map((d) => PopupMenuItem(
+              value: d,
+              child: Text('${d.name} (${d.width.toInt()}×${d.height.toInt()})', style: const TextStyle(color: Colors.white, fontSize: 14)),
+            )),
+            const PopupMenuDivider(),
+            const PopupMenuItem(
+              enabled: false,
+              height: 30,
+              child: Text('── ANDROID ──', style: TextStyle(color: Color(0xFF78C257), fontSize: 12, fontWeight: FontWeight.bold)),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _DeviceChip extends StatelessWidget {
-  final DeviceModel device;
-  final bool isSelected;
-  final Color accentColor;
-  final VoidCallback onTap;
-
-  const _DeviceChip({
-    required this.device,
-    required this.isSelected,
-    required this.accentColor,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        margin: const EdgeInsets.symmetric(horizontal: 3, vertical: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        decoration: BoxDecoration(
-          color: isSelected ? accentColor.withOpacity(0.18) : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: isSelected ? accentColor.withOpacity(0.6) : Colors.white.withOpacity(0.08),
-          ),
-        ),
-        child: Text(
-          device.name,
-          style: TextStyle(
-            color: isSelected ? accentColor : Colors.white54,
-            fontSize: 11,
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+            ...allDevices.where((d) => !d.isIos).map((d) => PopupMenuItem(
+              value: d,
+              child: Text('${d.name} (${d.width.toInt()}×${d.height.toInt()})', style: const TextStyle(color: Colors.white, fontSize: 14)),
+            )),
+          ],
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.05),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.white.withOpacity(0.1)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  selected == null ? Icons.devices : (selected!.isIos ? Icons.phone_iphone : Icons.phone_android),
+                  size: 16,
+                  color: selected == null ? Colors.white54 : (selected!.isIos ? const Color(0xFF64D2FF) : const Color(0xFF78C257)),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  selected?.name ?? 'Cihaz Seçin',
+                  style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(width: 8),
+                const Icon(Icons.keyboard_arrow_down, color: Colors.white54, size: 18),
+              ],
+            ),
           ),
         ),
       ),
