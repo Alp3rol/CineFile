@@ -76,7 +76,8 @@ class JournalMiniInsightsBar extends StatelessWidget {
 
   Widget _buildInsightCard(String title, String value, IconData icon, Color color) {
     return SizedBox(
-      width: 112,
+      width: 128,
+      height: 60,
       child: Container(
         margin: const EdgeInsets.only(right: 10),
         child: GlassContainer(
@@ -91,6 +92,7 @@ class JournalMiniInsightsBar extends StatelessWidget {
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
@@ -99,6 +101,7 @@ class JournalMiniInsightsBar extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
+                    const SizedBox(height: 2),
                     Text(
                       value,
                       style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),

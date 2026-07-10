@@ -155,6 +155,9 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
                     ),
                     Row(
                       children: [
+                        // Card/Table view toggle — moved here from filter row
+                        _buildViewModeToggle(isTableView),
+                        const SizedBox(width: 8),
                         // Search toggle button
                         GestureDetector(
                           onTap: () {
@@ -279,20 +282,10 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
                           duration: const Duration(milliseconds: 200),
                         ),
 
-                        // 3. Quick Filter Chips Bar + View Mode Toggle
-                        Row(
-                          children: [
-                            Expanded(
-                              child: JournalFiltersBar(
-                                activeFilter: _activeFilter,
-                                onFilterChanged: (key) => setState(() => _activeFilter = key),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(right: 16),
-                              child: _buildViewModeToggle(isTableView),
-                            ),
-                          ],
+                        // 3. Quick Filter Chips Bar (full width — toggle moved to title bar)
+                        JournalFiltersBar(
+                          activeFilter: _activeFilter,
+                          onFilterChanged: (key) => setState(() => _activeFilter = key),
                         ),
 
                         const SizedBox(height: 6),
