@@ -438,12 +438,12 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
                                           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
                                           child: Row(
                                             children: [
-                                              JournalHeaderCell(label: 'Sıra', columnKey: 'personal_ranking', flex: null, width: 28, activeSortColumn: _sortColumn, sortAscending: _sortAscending, onSort: _onSort),
-                                              JournalHeaderCell(label: 'Film Adı', columnKey: 'title', flex: isMobile ? 4 : 3, activeSortColumn: _sortColumn, sortAscending: _sortAscending, onSort: _onSort),
-                                              JournalHeaderCell(label: isMobile ? 'İzleme' : 'İzleme Tarihi', columnKey: 'date', flex: isMobile ? 3 : 2, activeSortColumn: _sortColumn, sortAscending: _sortAscending, onSort: _onSort),
+                                              JournalHeaderCell(label: 'Sıra', columnKey: 'personal_ranking', flex: null, width: 24, activeSortColumn: _sortColumn, sortAscending: _sortAscending, onSort: _onSort),
+                                              JournalHeaderCell(label: 'Film Adı', columnKey: 'title', flex: 1, activeSortColumn: _sortColumn, sortAscending: _sortAscending, onSort: _onSort),
+                                              JournalHeaderCell(label: isMobile ? 'İzleme' : 'İzleme Tarihi', columnKey: 'date', flex: null, width: isMobile ? 80 : 100, activeSortColumn: _sortColumn, sortAscending: _sortAscending, onSort: _onSort),
                                               if (!isMobile)
-                                                JournalHeaderCell(label: 'İzleme Sırası', columnKey: 'watch_count', flex: 2, sortable: false, activeSortColumn: _sortColumn, sortAscending: _sortAscending, onSort: _onSort),
-                                              JournalHeaderCell(label: 'Puanım', columnKey: 'rating', flex: 2, activeSortColumn: _sortColumn, sortAscending: _sortAscending, onSort: _onSort),
+                                                JournalHeaderCell(label: 'İzleme Sırası', columnKey: 'watch_count', flex: null, width: 80, sortable: false, activeSortColumn: _sortColumn, sortAscending: _sortAscending, onSort: _onSort),
+                                              JournalHeaderCell(label: 'Puanım', columnKey: 'rating', flex: null, width: isMobile ? 55 : 70, activeSortColumn: _sortColumn, sortAscending: _sortAscending, onSort: _onSort),
                                             ],
                                           ),
                                         );

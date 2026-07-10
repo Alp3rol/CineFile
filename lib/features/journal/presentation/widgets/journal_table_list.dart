@@ -156,7 +156,7 @@ class JournalRecordsTable extends StatelessWidget {
                 children: [
                   // 1. Sıra Sütunu (Rank Number only — drag handle removed) - fixed width
                   SizedBox(
-                    width: 28,
+                    width: 24,
                     child: Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
@@ -171,9 +171,9 @@ class JournalRecordsTable extends StatelessWidget {
                     ),
                   ),
 
-                  // 2. Film Sütunu (Poster + Title) - flex 4 on mobile, 3 on desktop
+                  // 2. Film Sütunu (Poster + Title) - flex 1 (takes all remaining space)
                   Expanded(
-                    flex: isMobile ? 4 : 3,
+                    flex: 1,
                     child: Row(
                       children: [
                         ClipRRect(
@@ -211,7 +211,7 @@ class JournalRecordsTable extends StatelessWidget {
                               ),
                               const SizedBox(height: 3),
                               Text(
-                                movie.director ?? "Yönetmen Yok",
+                                '${year.isNotEmpty ? "$year • " : ""}${movie.director ?? "Yönetmen Yok"}',
                                 style: GoogleFonts.inter(fontSize: 11, color: AppTheme.textSecondary),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -236,9 +236,9 @@ class JournalRecordsTable extends StatelessWidget {
                     ),
                   ),
 
-                  // 3. İzleme Bilgisi Sütunu - flex 3 on mobile, 2 on desktop
-                  Expanded(
-                    flex: isMobile ? 3 : 2,
+                  // 3. İzleme Bilgisi Sütunu - fixed width
+                  SizedBox(
+                    width: isMobile ? 80 : 100,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -282,10 +282,10 @@ class JournalRecordsTable extends StatelessWidget {
                     ),
                   ),
 
-                  // 4. İzleme Sırası Sütunu (Desktop Only) - flex 2
+                  // 4. İzleme Sırası Sütunu (Desktop Only) - fixed width
                   if (!isMobile)
-                    Expanded(
-                      flex: 2,
+                    SizedBox(
+                      width: 80,
                       child: Align(
                         alignment: Alignment.centerLeft,
                         child: Container(
@@ -319,9 +319,9 @@ class JournalRecordsTable extends StatelessWidget {
                       ),
                     ),
 
-                  // 5. Puanım Sütunu - flex 2
-                  Expanded(
-                    flex: 2,
+                  // 5. Puanım Sütunu - fixed width
+                  SizedBox(
+                    width: isMobile ? 55 : 70,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
