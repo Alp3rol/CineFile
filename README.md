@@ -39,39 +39,6 @@ Tamamen yerel veritabanında çalışarak verilerinizin gizliliğini korur ve ze
 
 ---
 
-## 🚀 Kurulum ve Yerel Çalıştırma
-
-Projeyi bilgisayarınızda yerel olarak çalıştırmak için sisteminizde Flutter SDK'nın kurulu olduğundan emin olun.
-
-1. **Depoyu kopyalayın:**
-   ```bash
-   git clone https://github.com/Alp3rol/CineFile.git
-   cd CineFile
-   ```
-
-2. **Bağımlılıkları yükleyin:**
-   ```bash
-   flutter pub get
-   ```
-
-3. **TMDb API Anahtarını Yapılandırın (İsteğe Bağlı):**
-   Aramaların çalışması için kendi TMDb API anahtarınızı `lib/core/constants/api_key.dart` dosyası altına ekleyin:
-   ```dart
-   // lib/core/constants/api_key.dart
-   const String tmdbApiKey = 'BURAYA_API_ANAHTARINIZI_YAZIN';
-   ```
-
-4. **Kod üreticiyi çalıştırın:**
-   ```bash
-   dart run build_runner build --delete-conflicting-outputs
-   ```
-
-5. **Uygulamayı başlatın:**
-   ```bash
-   flutter run
-   ```
-
----
 
 ## 📝 TMDb Atfı
 
