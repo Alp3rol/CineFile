@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
@@ -73,9 +74,10 @@ class JournalHeaderCell extends StatelessWidget {
 }
 
 // Sortable table with drag-to-reorder personal ranking (the original journal
+// Sortable table with drag-to-reorder personal ranking (the original journal
 // list design, kept alongside the newer month-grouped card list so the user
 // can switch between the two).
-class JournalRecordsTable extends StatelessWidget {
+class JournalRecordsTable extends ConsumerWidget {
   final List<WatchRecordWithMovie> items;
   final void Function(List<WatchRecordWithMovie> items, int oldIndex, int newIndex) onReorder;
   final Future<void> Function(Map<MovieKey, int?> rankings) onUpdateRanking;
@@ -96,8 +98,7 @@ class JournalRecordsTable extends StatelessWidget {
   }
 
   @override
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isMobile = MediaQuery.of(context).size.width < 500;
 
     // Group records to find the latest watch ID for each (tmdbId, isTv)
@@ -146,6 +147,9 @@ class JournalRecordsTable extends StatelessWidget {
               record,
               item.setting,
               onUpdateRanking: onUpdateRanking,
+              onDelete: () => deleteWatchRecord(ref, record.id),
+              onUpdateDate: (newDate) => updateWatchRecord(ref, record.id, watchDate: newDate),
+              onUpdateEpisodes: (newCount) => updateWatchRecord(ref, record.id, episodeCount: newCount),
             ),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),

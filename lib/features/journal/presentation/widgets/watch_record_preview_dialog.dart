@@ -8,7 +8,7 @@ import '../../../../core/constants/api_constants.dart';
 import '../../../../core/database/app_database.dart';
 import '../../../../core/database/database_provider.dart';
 
-Widget _buildPreviewDetailRow(IconData icon, String label, String value) {
+Widget _buildPreviewDetailRow(IconData icon, String label, String value, {VoidCallback? onEdit}) {
   return Row(
     children: [
       Icon(icon, size: 14, color: AppTheme.textSecondary),
@@ -24,6 +24,15 @@ Widget _buildPreviewDetailRow(IconData icon, String label, String value) {
           overflow: TextOverflow.ellipsis,
         ),
       ),
+      if (onEdit != null)
+        InkWell(
+          onTap: onEdit,
+          borderRadius: BorderRadius.circular(4),
+          child: const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0),
+            child: Icon(Icons.edit_rounded, size: 14, color: AppTheme.accentColor),
+          ),
+        ),
     ],
   );
 }
@@ -35,14 +44,22 @@ void showWatchRecordPreviewDialog(
   WatchRecord record,
   UserMovieSetting? setting, {
   required Future<void> Function(Map<MovieKey, int?> rankings) onUpdateRanking,
+  required Future<void> Function() onDelete,
+  required Future<void> Function(DateTime newDate) onUpdateDate,
+  required Future<void> Function(int newCount) onUpdateEpisodes,
 }) {
-  final dateStr = DateFormat('dd.MM.yyyy').format(record.watchDate);
-  final timeStr = DateFormat('HH:mm').format(record.watchDate);
+  DateTime currentDate = record.watchDate;
+  int currentEpisodeCount = record.episodeCount;
   final rankController = TextEditingController(text: setting?.personalRanking?.toString() ?? '');
 
   showDialog(
     context: context,
     builder: (context) {
+      return StatefulBuilder(
+        builder: (context, setState) {
+          final dateStr = DateFormat('dd.MM.yyyy').format(currentDate);
+          final timeStr = DateFormat('HH:mm').format(currentDate);
+
       return Dialog(
         backgroundColor: Colors.transparent,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -117,7 +134,85 @@ void showWatchRecordPreviewDialog(
               const SizedBox(height: 16),
 
               // Details Grid
-              _buildPreviewDetailRow(Icons.calendar_today_rounded, 'Tarih & Saat', '$dateStr - $timeStr'),
+              _buildPreviewDetailRow(
+                Icons.calendar_today_rounded, 
+                'Tarih & Saat', 
+                '$dateStr - $timeStr',
+                onEdit: () async {
+                  final pickedDate = await showDatePicker(
+                    context: context,
+                    initialDate: currentDate,
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime.now(),
+                  );
+                  if (pickedDate != null) {
+                    final pickedTime = await showTimePicker(
+                      context: context,
+                      initialTime: TimeOfDay.fromDateTime(currentDate),
+                    );
+                    if (pickedTime != null) {
+                      final newDateTime = DateTime(
+                        pickedDate.year,
+                        pickedDate.month,
+                        pickedDate.day,
+                        pickedTime.hour,
+                        pickedTime.minute,
+                      );
+                      await onUpdateDate(newDateTime);
+                      setState(() {
+                        currentDate = newDateTime;
+                      });
+                    }
+                  }
+                },
+              ),
+              if (movie.isTv) ...[
+                const SizedBox(height: 10),
+                _buildPreviewDetailRow(
+                  Icons.ondemand_video_rounded,
+                  'İzlenen Bölüm Sayısı',
+                  '$currentEpisodeCount Bölüm',
+                  onEdit: () async {
+                    final ctrl = TextEditingController(text: currentEpisodeCount.toString());
+                    final newCount = await showDialog<int>(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        backgroundColor: AppTheme.backgroundColor,
+                        title: Text('Bölüm Sayısı', style: GoogleFonts.outfit(color: Colors.white)),
+                        content: TextField(
+                          controller: ctrl,
+                          keyboardType: TextInputType.number,
+                          style: const TextStyle(color: Colors.white),
+                          decoration: const InputDecoration(
+                            hintText: 'Kaç bölüm izlendi?',
+                          ),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('İptal', style: TextStyle(color: Colors.white70)),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              final val = int.tryParse(ctrl.text);
+                              if (val != null && val > 0) {
+                                Navigator.pop(context, val);
+                              }
+                            },
+                            child: const Text('Kaydet', style: TextStyle(color: AppTheme.accentColor)),
+                          ),
+                        ],
+                      ),
+                    );
+                    if (newCount != null) {
+                      await onUpdateEpisodes(newCount);
+                      setState(() {
+                        currentEpisodeCount = newCount;
+                      });
+                    }
+                  },
+                ),
+              ],
               if (record.watchPlace != null) ...[
                 const SizedBox(height: 10),
                 _buildPreviewDetailRow(Icons.location_on_outlined, 'İzleme Mekanı', record.watchPlace!),
@@ -211,23 +306,61 @@ void showWatchRecordPreviewDialog(
               ),
 
               const SizedBox(height: 20),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text(
-                    'Kapat',
-                    style: GoogleFonts.outfit(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.accentColor,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TextButton(
+                    onPressed: () async {
+                      final confirm = await showDialog<bool>(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          backgroundColor: AppTheme.backgroundColor,
+                          title: Text('Emin misiniz?', style: GoogleFonts.outfit(color: Colors.white)),
+                          content: const Text('Bu izleme kaydı silinecek.', style: TextStyle(color: Colors.white70)),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: const Text('İptal', style: TextStyle(color: Colors.white70)),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              child: const Text('Sil', style: TextStyle(color: Colors.redAccent)),
+                            ),
+                          ],
+                        ),
+                      );
+                      if (confirm == true) {
+                        await onDelete();
+                        if (context.mounted) Navigator.pop(context);
+                      }
+                    },
+                    child: Text(
+                      'Kaydı Sil',
+                      style: GoogleFonts.outfit(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.redAccent,
+                      ),
                     ),
                   ),
-                ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(
+                      'Kapat',
+                      style: GoogleFonts.outfit(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.accentColor,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
         ),
+      );
+        },
       );
     },
   );

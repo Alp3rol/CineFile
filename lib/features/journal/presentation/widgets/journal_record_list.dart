@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -35,7 +36,7 @@ bool _isShowCompleted(WatchRecordWithMovie item) {
 // simplified card-list design. Replaces the former sortable table +
 // drag-to-reorder list; personal ranking can still be edited via the
 // long-press preview dialog.
-class JournalRecordsList extends StatelessWidget {
+class JournalRecordsList extends ConsumerWidget {
   final List<WatchRecordWithMovie> items;
   final Future<void> Function(Map<MovieKey, int?> rankings) onUpdateRanking;
 
@@ -46,7 +47,7 @@ class JournalRecordsList extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final sorted = List<WatchRecordWithMovie>.from(items)
       ..sort((a, b) => b.record.watchDate.compareTo(a.record.watchDate));
 
@@ -106,7 +107,7 @@ class JournalRecordsList extends StatelessWidget {
   }
 }
 
-class _JournalRecordCard extends StatelessWidget {
+class _JournalRecordCard extends ConsumerWidget {
   final WatchRecordWithMovie item;
   final Future<void> Function(Map<MovieKey, int?> rankings) onUpdateRanking;
   final bool isLatestWatch;
@@ -114,7 +115,7 @@ class _JournalRecordCard extends StatelessWidget {
   const _JournalRecordCard({required this.item, required this.onUpdateRanking, required this.isLatestWatch});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final movie = item.movie;
     final record = item.record;
     final dateStr = _formatDayMonthYear(record.watchDate);
@@ -137,6 +138,9 @@ class _JournalRecordCard extends StatelessWidget {
           record,
           item.setting,
           onUpdateRanking: onUpdateRanking,
+          onDelete: () => deleteWatchRecord(ref, record.id),
+          onUpdateDate: (newDate) => updateWatchRecord(ref, record.id, watchDate: newDate),
+          onUpdateEpisodes: (newCount) => updateWatchRecord(ref, record.id, episodeCount: newCount),
         ),
         child: GlassContainer(
           borderRadius: 16,

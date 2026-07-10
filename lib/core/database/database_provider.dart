@@ -344,3 +344,58 @@ Future<void> removeMovieFromCustomList(WidgetRef ref, int listId, int tmdbId, bo
 
 Future<void> reorderCustomListMovies(WidgetRef ref, int listId, Map<MovieKey, int> rankings) =>
     ref.read(movieRepositoryProvider).reorderCustomListMovies(listId, rankings);
+
+// --- WATCH RECORD ACTIONS ---
+
+Future<void> deleteWatchRecord(WidgetRef ref, int recordId) async {
+  if (kIsWeb) {
+    final notifier = ref.read(webWatchRecordsProvider.notifier);
+    final currentList = ref.read(webWatchRecordsProvider);
+    notifier.state = currentList.where((r) => r.id != recordId).toList();
+    return;
+  }
+  
+  final db = ref.read(databaseProvider);
+  await (db.delete(db.watchRecords)..where((t) => t.id.equals(recordId))).go();
+}
+
+Future<void> updateWatchRecord(
+  WidgetRef ref,
+  int recordId, {
+  DateTime? watchDate,
+  int? episodeCount,
+}) async {
+  if (kIsWeb) {
+    final notifier = ref.read(webWatchRecordsProvider.notifier);
+    final currentList = ref.read(webWatchRecordsProvider);
+    notifier.state = currentList.map((r) {
+      if (r.id == recordId) {
+        return WatchRecord(
+          id: r.id,
+          movieId: r.movieId,
+          isTv: r.isTv,
+          watchDate: watchDate ?? r.watchDate,
+          watchPlace: r.watchPlace,
+          watchCompanion: r.watchCompanion,
+          rating: r.rating,
+          mood: r.mood,
+          notes: r.notes,
+          watchNumber: r.watchNumber,
+          tags: r.tags,
+          createdAt: r.createdAt,
+          episodeCount: episodeCount ?? r.episodeCount,
+        );
+      }
+      return r;
+    }).toList();
+    return;
+  }
+
+  final db = ref.read(databaseProvider);
+  await (db.update(db.watchRecords)..where((t) => t.id.equals(recordId))).write(
+    WatchRecordsCompanion(
+      watchDate: watchDate != null ? Value(watchDate) : const Value.absent(),
+      episodeCount: episodeCount != null ? Value(episodeCount) : const Value.absent(),
+    ),
+  );
+}
