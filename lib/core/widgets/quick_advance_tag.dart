@@ -17,7 +17,7 @@ class QuickAdvanceTag extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final total = item.movie.totalEpisodes;
-    final last = item.setting!.lastWatchedEpisode ?? 0;
+    final next = (item.setting!.lastWatchedEpisode ?? 0) + 1;
 
     return GestureDetector(
       onTap: () async {
@@ -42,7 +42,7 @@ class QuickAdvanceTag extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              total != null ? '$last/$total' : '$last',
+              total != null ? '$next/$total' : '$next',
               style: GoogleFonts.outfit(fontSize: 9, fontWeight: FontWeight.bold, color: AppTheme.accentColor),
             ),
             const SizedBox(width: 2),
