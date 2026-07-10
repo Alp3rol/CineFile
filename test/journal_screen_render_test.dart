@@ -82,13 +82,12 @@ void main() {
     Navigator.of(tester.element(find.text('Kapat'))).pop();
     await tester.pumpAndSettle();
 
-    // Switch to the table view: column headers and drag handles appear.
+    // Switch to the table view: column headers appear (drag handle removed in v1.0.4).
     await tester.tap(find.byIcon(Icons.table_rows_rounded));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
     expect(find.text('Film Adı'), findsOneWidget);
     expect(find.text('Puanım'), findsOneWidget);
-    expect(find.byIcon(Icons.drag_indicator_rounded), findsWidgets);
     expect(find.text('MART 2026'), findsNothing);
 
     // Switch back to the card view.

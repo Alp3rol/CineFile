@@ -144,35 +144,26 @@ class JournalRecordsTable extends StatelessWidget {
               onUpdateRanking: onUpdateRanking,
             ),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
               decoration: const BoxDecoration(
                 border: Border(bottom: BorderSide(color: Colors.white10, width: 0.5)),
               ),
               child: Row(
                 children: [
-                  // 1. Sıra Sütunu (Drag Handle & Rank Number) - flex 1
+                  // 1. Sıra Sütunu (Rank Number only — drag handle removed) - flex 1
                   Expanded(
                     flex: 1,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ReorderableDragStartListener(
-                          index: index,
-                          child: const Icon(Icons.drag_indicator_rounded, size: 14, color: Colors.white30),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        displayRank != null ? '#$displayRank' : '-',
+                        style: GoogleFonts.outfit(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: displayRank != null ? AppTheme.accentColor : Colors.white30,
                         ),
-                        const SizedBox(width: 4),
-                        Flexible(
-                          child: Text(
-                            displayRank != null ? '#$displayRank' : '-',
-                            style: GoogleFonts.outfit(
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              color: displayRank != null ? AppTheme.accentColor : Colors.white30,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ),
 
@@ -182,23 +173,23 @@ class JournalRecordsTable extends StatelessWidget {
                     child: Row(
                       children: [
                         ClipRRect(
-                          borderRadius: BorderRadius.circular(4),
+                          borderRadius: BorderRadius.circular(5),
                           child: CachedNetworkImage(
                             imageUrl: movie.posterPath != null
                                 ? '${ApiConstants.imagePathW185}${movie.posterPath}'
                                 : '',
-                            width: 32,
-                            height: 48,
+                            width: 52,
+                            height: 76,
                             fit: BoxFit.cover,
                             errorWidget: (context, url, error) => Container(
                               color: AppTheme.surfaceColor,
-                              width: 32,
-                              height: 48,
-                              child: const Icon(Icons.movie, size: 14, color: Colors.grey),
+                              width: 52,
+                              height: 76,
+                              child: const Icon(Icons.movie, size: 18, color: Colors.grey),
                             ),
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 10),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -207,17 +198,17 @@ class JournalRecordsTable extends StatelessWidget {
                               Text(
                                 movie.title,
                                 style: GoogleFonts.inter(
-                                  fontSize: 12,
+                                  fontSize: 13,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white,
                                 ),
-                                maxLines: 1,
+                                maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                               ),
-                              const SizedBox(height: 2),
+                              const SizedBox(height: 3),
                               Text(
                                 '${year.isNotEmpty ? "$year • " : ""}${movie.director ?? "Yönetmen Yok"}',
-                                style: GoogleFonts.inter(fontSize: 10, color: AppTheme.textSecondary),
+                                style: GoogleFonts.inter(fontSize: 11, color: AppTheme.textSecondary),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -226,7 +217,7 @@ class JournalRecordsTable extends StatelessWidget {
                                 Text(
                                   record.tags!,
                                   style: GoogleFonts.inter(
-                                    fontSize: 9,
+                                    fontSize: 10,
                                     fontWeight: FontWeight.w600,
                                     color: AppTheme.accentColor.withOpacity(0.85),
                                   ),
@@ -251,11 +242,11 @@ class JournalRecordsTable extends StatelessWidget {
                       children: [
                         Text(
                           dateStr,
-                          style: GoogleFonts.inter(fontSize: 11, color: Colors.white70),
+                          style: GoogleFonts.inter(fontSize: 12, color: Colors.white70),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 2),
+                        const SizedBox(height: 3),
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -268,18 +259,18 @@ class JournalRecordsTable extends StatelessWidget {
                                 isMobile
                                     ? '${record.watchNumber}. İzleme'
                                     : (record.watchPlace ?? ''),
-                                style: GoogleFonts.inter(fontSize: 9, color: AppTheme.textSecondary),
+                                style: GoogleFonts.inter(fontSize: 10, color: AppTheme.textSecondary),
                                 overflow: TextOverflow.ellipsis,
                                 maxLines: 1,
                               ),
                             ),
                             if (isMobile && record.watchNumber > 1) ...[
                               const SizedBox(width: 3),
-                              const Icon(Icons.sync_rounded, color: Colors.greenAccent, size: 9),
+                              const Icon(Icons.sync_rounded, color: Colors.greenAccent, size: 10),
                             ],
                             if (isMobile && _isShowCompleted(item)) ...[
                               const SizedBox(width: 3),
-                              const Icon(Icons.check_circle_rounded, color: Colors.greenAccent, size: 9),
+                              const Icon(Icons.check_circle_rounded, color: Colors.greenAccent, size: 10),
                             ],
                           ],
                         ),
@@ -334,12 +325,12 @@ class JournalRecordsTable extends StatelessWidget {
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.star_rounded, color: AppTheme.ratingColor, size: 12),
+                            const Icon(Icons.star_rounded, color: AppTheme.ratingColor, size: 13),
                             const SizedBox(width: 2),
                             Text(
                               '${record.rating}',
                               style: GoogleFonts.outfit(
-                                fontSize: 11,
+                                fontSize: 12,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
                               ),
@@ -348,7 +339,7 @@ class JournalRecordsTable extends StatelessWidget {
                               const SizedBox(width: 4),
                               Text(
                                 record.mood ?? '🍿',
-                                style: const TextStyle(fontSize: 12),
+                                style: const TextStyle(fontSize: 14),
                               ),
                             ],
                           ],

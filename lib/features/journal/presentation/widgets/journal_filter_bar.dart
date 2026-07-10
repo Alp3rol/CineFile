@@ -118,7 +118,8 @@ class JournalMiniInsightsBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      clipBehavior: Clip.none,
+      padding: const EdgeInsets.only(left: 16, right: 16, top: 4, bottom: 4),
       child: Row(
         children: [
           _buildInsightCard('Bu Ay', '$thisMonthCount Film', Icons.calendar_month_rounded, Colors.orangeAccent),
