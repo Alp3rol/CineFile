@@ -86,117 +86,122 @@ class _WebDeviceFrameState extends State<WebDeviceFrame> {
           Positioned.fill(child: CustomPaint(painter: _GridPainter())),
 
           Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Basit, hap şeklinde açılır menü butonu
-                GestureDetector(
-                  onTap: _toggleMenu,
-                  child: Container(
-                    margin: const EdgeInsets.only(bottom: 24),
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.06),
-                      borderRadius: BorderRadius.circular(30),
-                      border: Border.all(color: Colors.white.withOpacity(0.1)),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          '${_selected.name} • ${_selected.width.toInt()}×${_selected.height.toInt()} • ${_selected.screenSize}',
-                          style: const TextStyle(
-                            color: Colors.white70, 
-                            fontSize: 13, 
-                            fontFamily: 'monospace',
-                            fontWeight: FontWeight.w600,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Stack(
+                clipBehavior: Clip.none,
+                alignment: Alignment.topCenter,
+                children: [
+                  // Ana İçerik
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Basit, hap şeklinde açılır menü butonu
+                      GestureDetector(
+                        onTap: _toggleMenu,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.06),
+                            borderRadius: BorderRadius.circular(30),
+                            border: Border.all(color: Colors.white.withOpacity(0.1)),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                '${_selected.name} • ${_selected.width.toInt()}×${_selected.height.toInt()} • ${_selected.screenSize}',
+                                style: const TextStyle(
+                                  color: Colors.white70, 
+                                  fontSize: 13, 
+                                  fontFamily: 'monospace',
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Icon(_isMenuOpen ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, color: Colors.white54, size: 18),
+                            ],
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        Icon(_isMenuOpen ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, color: Colors.white54, size: 18),
-                      ],
-                    ),
-                  ),
-                ),
+                      ),
 
-                // Uygulama alanı (Telefon Çerçevesi)
-                Flexible(
-                  child: _PhoneFrame(
-                    device: _selected,
-                    screenHeight: screenHeight - 120, // Menü butonu için biraz daha yer bırak
-                    child: widget.child,
-                  ),
-                ),
-              ],
-            ),
-          ),
+                      const SizedBox(height: 24), // Buton ile cihaz arası boşluk
 
-          // Özel Açılır Menü (Dropdown Overlay)
-          if (_isMenuOpen)
-            Positioned(
-              top: screenHeight / 2 - (screenHeight - 120) / 2 - 20, // Butonun hemen altına denk gelmesi için
-              left: 0,
-              right: 0,
-              child: Center(
-                child: Container(
-                  width: 320,
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1C1C1E),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.white.withOpacity(0.1)),
-                    boxShadow: [
-                      BoxShadow(color: Colors.black.withOpacity(0.6), blurRadius: 30, offset: const Offset(0, 15)),
+                      // Uygulama alanı (Telefon Çerçevesi)
+                      _PhoneFrame(
+                        device: _selected,
+                        screenHeight: screenHeight - 120, // Menü butonu için biraz daha yer bırak
+                        child: widget.child,
+                      ),
                     ],
                   ),
-                  constraints: const BoxConstraints(maxHeight: 450),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: allDevices.map((d) {
-                        final isSelected = d == _selected;
-                        return InkWell(
-                          onTap: () => _selectDevice(d),
-                          child: Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                            color: isSelected ? Colors.white.withOpacity(0.06) : Colors.transparent,
-                            child: Row(
-                              children: [
-                                Icon(
-                                  d.isIos ? Icons.phone_iphone : Icons.phone_android,
-                                  size: 16,
-                                  color: d.isIos ? const Color(0xFF64D2FF) : const Color(0xFF78C257),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Text(
-                                    d.name,
-                                    style: TextStyle(
-                                      color: isSelected ? Colors.white : Colors.white70,
-                                      fontSize: 14,
-                                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                                    ),
+
+                  // Özel Açılır Menü (Dropdown Overlay) - Ana içeriğin üstünde (Z-index)
+                  if (_isMenuOpen)
+                    Positioned(
+                      top: 48, // Butonun hemen altı
+                      child: Container(
+                        width: 320,
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1C1C1E),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.white.withOpacity(0.1)),
+                          boxShadow: [
+                            BoxShadow(color: Colors.black.withOpacity(0.6), blurRadius: 30, offset: const Offset(0, 15)),
+                          ],
+                        ),
+                        constraints: const BoxConstraints(maxHeight: 450),
+                        child: SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: allDevices.map((d) {
+                              final isSelected = d == _selected;
+                              return InkWell(
+                                onTap: () => _selectDevice(d),
+                                child: Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                                  color: isSelected ? Colors.white.withOpacity(0.06) : Colors.transparent,
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        d.isIos ? Icons.phone_iphone : Icons.phone_android,
+                                        size: 16,
+                                        color: d.isIos ? const Color(0xFF64D2FF) : const Color(0xFF78C257),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Text(
+                                          d.name,
+                                          style: TextStyle(
+                                            color: isSelected ? Colors.white : Colors.white70,
+                                            fontSize: 14,
+                                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                                          ),
+                                        ),
+                                      ),
+                                      Text(
+                                        '${d.width.toInt()}×${d.height.toInt()} • ${d.screenSize}',
+                                        style: TextStyle(
+                                          color: isSelected ? Colors.white70 : Colors.white38,
+                                          fontSize: 12,
+                                          fontFamily: 'monospace',
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                Text(
-                                  '${d.width.toInt()}×${d.height.toInt()} • ${d.screenSize}',
-                                  style: TextStyle(
-                                    color: isSelected ? Colors.white70 : Colors.white38,
-                                    fontSize: 12,
-                                    fontFamily: 'monospace',
-                                  ),
-                                ),
-                              ],
-                            ),
+                              );
+                            }).toList(),
                           ),
-                        );
-                      }).toList(),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
+                ],
               ),
             ),
+          ),
         ],
       ),
     );
