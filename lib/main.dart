@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/theme/app_theme.dart';
+import 'core/widgets/web_device_frame.dart';
 import 'features/main_shell.dart';
 
 void main() {
@@ -20,6 +22,14 @@ class MyApp extends StatelessWidget {
       title: 'CineFile',
       theme: AppTheme.darkTheme,
       scrollBehavior: CineFileScrollBehavior(),
+      builder: (context, child) {
+        // Web'de geniş ekranda cihaz seçici frame'i göster
+        if (kIsWeb) {
+          return WebDeviceFrame(child: child!);
+        }
+        // Mobilde normal görünüm
+        return child!;
+      },
       home: const MainShell(),
     );
   }
