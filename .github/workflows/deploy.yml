@@ -18,6 +18,11 @@ jobs:
         with:
           channel: 'stable'
 
+      - name: Create API Key file
+        run: |
+          mkdir -p lib/core/constants
+          echo "const String defaultTmdbApiKey = '${{ secrets.TMDB_API_KEY }}';" > lib/core/constants/api_key.dart
+
       - name: Install dependencies
         run: flutter pub get
 
