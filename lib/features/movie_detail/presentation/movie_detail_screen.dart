@@ -1,9 +1,7 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:drift/drift.dart' show Value;
 import '../../../../core/widgets/app_network_image.dart';
@@ -17,6 +15,10 @@ import '../../../../core/theme/dynamic_background_provider.dart';
 import '../../main_shell.dart';
 import 'movie_detail_provider.dart';
 import 'add_watch_record_sheet.dart';
+import 'widgets/movie_detail_action_widgets.dart';
+import 'widgets/movie_detail_timeline_item.dart';
+import 'widgets/movie_watch_status_badge.dart';
+import 'widgets/rank_dialog.dart';
 import '../../journal/presentation/widgets/add_to_list_sheet.dart';
 
 class MovieDetailScreen extends ConsumerStatefulWidget {
@@ -113,136 +115,6 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
     } catch (_) {}
   }
 
-  // Show dialog to update personal ranking
-  void _showRankDialog(BuildContext context, WidgetRef ref, Map<String, dynamic> movieData, UserMovieSetting? settings) {
-    final controller = TextEditingController(text: settings?.personalRanking?.toString() ?? '');
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: AppTheme.surfaceColor,
-          title: Text(
-            'Favori Sırası Belirle',
-            style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Bu film için favori sıralama numarasını girin (Örn: 1, 2, 5). Boş bırakırsanız sıralamadan çıkarılır.',
-                style: GoogleFonts.inter(color: AppTheme.textSecondary, fontSize: 12),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: controller,
-                keyboardType: TextInputType.number,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  labelText: 'Sıra Numarası',
-                  labelStyle: const TextStyle(color: Colors.white70),
-                  filled: true,
-                  fillColor: Colors.black26,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                ),
-                onChanged: (val) async {
-                  final newRank = val.trim().isEmpty ? null : int.tryParse(val.trim());
-                  await _updateRank(ref, movieData, settings, newRank);
-                },
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('İptal', style: TextStyle(color: Colors.white70)),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: AppTheme.accentColor),
-              onPressed: () async {
-                final input = controller.text.trim();
-                final int? newRank = input.isEmpty ? null : int.tryParse(input);
-                
-                await _updateRank(ref, movieData, settings, newRank);
-                if (context.mounted) Navigator.pop(context);
-              },
-              child: const Text('Kaydet', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Future<void> _updateRank(WidgetRef ref, Map<String, dynamic> movieData, UserMovieSetting? settings, int? rank) async {
-    final crew = movieData['credits']?['crew'] as List<dynamic>?;
-    final directorName = crew?.where((e) => e['job'] == 'Director').firstOrNull?['name'] as String?;
-    
-    final cast = movieData['credits']?['cast'] as List<dynamic>?;
-    final actorsString = cast?.take(5).map((e) => e['name']).join(', ');
-
-    final genresData = movieData['genres'] as List<dynamic>?;
-    final genresString = genresData?.map((e) => e['name']).join(', ');
-
-    final releaseDateStr = movieData['release_date'] as String? ?? '';
-    final releaseYear = DateTime.tryParse(releaseDateStr)?.year;
-
-    if (kIsWeb) {
-      final notifier = ref.read(webMovieSettingsProvider.notifier);
-      final currentMap = ref.read(webMovieSettingsProvider);
-      final updatedMap = Map<MovieKey, UserMovieSetting>.from(currentMap);
-      updatedMap[(tmdbId: tmdbId, isTv: isTv)] = UserMovieSetting(
-        tmdbId: tmdbId,
-        isTv: isTv,
-        isFavorite: settings?.isFavorite ?? false,
-        isReWatchList: settings?.isReWatchList ?? false,
-        personalNotes: settings?.personalNotes,
-        personalTags: settings?.personalTags,
-        personalRanking: rank,
-        updatedAt: DateTime.now(),
-        isActivelyWatching: settings?.isActivelyWatching ?? false,
-        lastWatchedEpisode: settings?.lastWatchedEpisode,
-      );
-      notifier.state = updatedMap;
-      return;
-    }
-
-    final db = ref.read(databaseProvider);
-    try {
-      // createdAt intentionally absent, see _toggleFavorite for why.
-      await db.into(db.movies).insertOnConflictUpdate(
-            MoviesCompanion.insert(
-              tmdbId: tmdbId,
-              title: movieData['title'] as String,
-              originalTitle: Value(movieData['original_title'] as String?),
-              posterPath: Value(movieData['poster_path'] as String?),
-              backdropPath: Value(movieData['backdrop_path'] as String?),
-              releaseYear: Value(releaseYear),
-              runtime: Value(movieData['runtime'] as int?),
-              genres: Value(genresString),
-              director: Value(directorName),
-              actors: Value(actorsString),
-              overview: Value(movieData['overview'] as String?),
-              isTv: Value(isTv),
-            ),
-          );
-
-      await db.into(db.userMovieSettings).insertOnConflictUpdate(
-            UserMovieSetting(
-              tmdbId: tmdbId,
-              isTv: isTv,
-              isFavorite: settings?.isFavorite ?? false,
-              isReWatchList: settings?.isReWatchList ?? false,
-              personalNotes: settings?.personalNotes,
-              personalTags: settings?.personalTags,
-              personalRanking: rank,
-              updatedAt: DateTime.now(),
-              isActivelyWatching: settings?.isActivelyWatching ?? false,
-              lastWatchedEpisode: settings?.lastWatchedEpisode,
-            ),
-          );
-    } catch (_) {}
-  }
-
   // Delete Watch Record
   Future<void> _deleteRecord(BuildContext context, WidgetRef ref, int recordId) async {
     if (kIsWeb) {
@@ -325,7 +197,9 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         bottomNavigationBar: detailAsync.maybeWhen(
-          data: (movieData) => movieData == null ? null : _buildStickyCta(context, movieData),
+          data: (movieData) => movieData == null
+              ? null
+              : MovieDetailStickyCta(onTap: () => _openAddWatchRecordSheet(context, movieData)),
           orElse: () => null,
         ),
         body: detailAsync.when(
@@ -429,7 +303,7 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
                                 
                                 // Rank button
                                 GestureDetector(
-                                  onTap: () => _showRankDialog(context, ref, movieData, settingsAsync.value),
+                                  onTap: () => showRankDialog(context, ref, tmdbId: tmdbId, isTv: isTv, movieData: movieData, settings: settingsAsync.value),
                                   child: GlassContainer(
                                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                     borderRadius: 12,
@@ -514,7 +388,7 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
                                     ].join(' • '),
                                     style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary),
                                   ),
-                                  if (isTv) _buildWatchStatusBadge(settingsAsync.value, movieData['number_of_episodes'] as int?),
+                                  if (isTv) MovieWatchStatusBadge(setting: settingsAsync.value, totalEpisodes: movieData['number_of_episodes'] as int?),
                                 ],
                               ),
                             ),
@@ -526,7 +400,7 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
                         Row(
                           children: [
                             Expanded(
-                              child: _buildInfoCard(
+                              child: MovieInfoCard(
                                 icon: Icons.star_rounded,
                                 iconColor: AppTheme.ratingColor,
                                 value: latestRecord != null ? latestRecord.rating.toStringAsFixed(1) : '—',
@@ -535,7 +409,7 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
                             ),
                             const SizedBox(width: 10),
                             Expanded(
-                              child: _buildInfoCard(
+                              child: MovieInfoCard(
                                 icon: Icons.movie_creation_outlined,
                                 iconColor: Colors.white,
                                 value: director,
@@ -544,7 +418,7 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
                             ),
                             const SizedBox(width: 10),
                             Expanded(
-                              child: _buildInfoCard(
+                              child: MovieInfoCard(
                                 icon: Icons.location_on_outlined,
                                 iconColor: Colors.white,
                                 value: latestRecord?.watchPlace ?? '—',
@@ -559,13 +433,13 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            _buildQuickAction(
+                            MovieQuickActionButton(
                               icon: Icons.add_rounded,
                               label: 'Günlüğe Ekle',
                               isPrimary: true,
                               onTap: () => _openAddWatchRecordSheet(context, movieData),
                             ),
-                            _buildQuickAction(
+                            MovieQuickActionButton(
                               icon: Icons.bookmark_add_outlined,
                               label: 'Listeye Ekle',
                               onTap: () {
@@ -587,7 +461,7 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
                                 AddToListSheet.show(context, movie);
                               },
                             ),
-                            _buildQuickAction(
+                            MovieQuickActionButton(
                               icon: Icons.share_rounded,
                               label: 'Paylaş',
                               onTap: () => _shareMovie(title, tmdbId),
@@ -693,7 +567,11 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
                               itemCount: records.length,
                               itemBuilder: (context, idx) {
                                 final record = records[idx];
-                                return _buildTimelineItem(context, ref, record, idx == records.length - 1);
+                                return MovieDetailTimelineItem(
+                                  record: record,
+                                  isLast: idx == records.length - 1,
+                                  onDelete: () => _deleteRecord(context, ref, record.id),
+                                );
                               },
                             );
                           },
@@ -741,40 +619,6 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
     );
   }
 
-  Widget _buildStickyCta(BuildContext context, Map<String, dynamic> movieData) {
-    return Container(
-      color: AppTheme.backgroundColor,
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
-          child: SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: ElevatedButton.icon(
-              onPressed: () => _openAddWatchRecordSheet(context, movieData),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.accentColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              icon: const Icon(Icons.add_task_rounded, color: Colors.white),
-              label: Text(
-                'Yeni İzleme Kaydı Ekle',
-                style: GoogleFonts.outfit(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   void _openAddWatchRecordSheet(BuildContext context, Map<String, dynamic> movieData) {
     showModalBottomSheet(
       context: context,
@@ -790,276 +634,4 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
     );
   }
 
-  // One of the 3 "Puanım / Yönetmen / Ortam" summary cards under the poster.
-  Widget _buildInfoCard({
-    required IconData icon,
-    required Color iconColor,
-    required String value,
-    required String label,
-  }) {
-    return GlassContainer(
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-      borderRadius: 14,
-      opacity: 0.5,
-      child: Column(
-        children: [
-          Icon(icon, color: iconColor, size: 18),
-          const SizedBox(height: 6),
-          Text(
-            value,
-            style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 2),
-          Text(
-            label,
-            style: GoogleFonts.inter(fontSize: 10, color: AppTheme.textSecondary),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // One of the 3 quick action buttons (Günlüğe Ekle / Listeye Ekle / Paylaş).
-  Widget _buildQuickAction({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-    bool isPrimary = false,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        children: [
-          Container(
-            width: 52,
-            height: 52,
-            decoration: BoxDecoration(
-              color: isPrimary ? AppTheme.accentColor : AppTheme.surfaceColor.withOpacity(0.6),
-              shape: BoxShape.circle,
-              border: isPrimary ? null : Border.all(color: AppTheme.borderColor),
-            ),
-            child: Icon(icon, color: Colors.white, size: 22),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            label,
-            style: GoogleFonts.inter(fontSize: 11, color: AppTheme.textSecondary),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Beautiful Timeline Item
-  Widget _buildTimelineItem(BuildContext context, WidgetRef ref, WatchRecord record, bool isLast) {
-    final dateStr = DateFormat('dd.MM.yyyy • HH:mm').format(record.watchDate);
-    
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Indicator Left Pillar
-        Column(
-          children: [
-            // Circular badge watch order number (e.g. 1, 2)
-            Container(
-              width: 32,
-              height: 32,
-              decoration: const BoxDecoration(
-                color: AppTheme.accentColor,
-                shape: BoxShape.circle,
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                '${record.watchNumber}',
-                style: GoogleFonts.outfit(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-            // Vertical connecting line
-            if (!isLast)
-              Container(
-                width: 2,
-                height: 100, // Fixed height connecting timeline items
-                color: AppTheme.accentColor.withOpacity(0.5),
-              ),
-          ],
-        ),
-        const SizedBox(width: 14),
-
-        // Record content card
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: GlassContainer(
-              padding: const EdgeInsets.all(14),
-              borderRadius: 16,
-              opacity: 0.6,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Date and rating row
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        dateStr,
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                      
-                      // Star Rating
-                      Row(
-                        children: [
-                          const Icon(Icons.star_rounded, color: AppTheme.ratingColor, size: 16),
-                          const SizedBox(width: 4),
-                          Text(
-                            '${record.rating}',
-                            style: GoogleFonts.outfit(
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                          Text(
-                            '/10',
-                            style: GoogleFonts.inter(fontSize: 10, color: AppTheme.textSecondary),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Place, companion, mood info
-                  Row(
-                    children: [
-                      Text(
-                        'Mod: ${record.mood ?? "🍿"}',
-                        style: GoogleFonts.inter(fontSize: 11, color: Colors.white),
-                      ),
-                      const Spacer(),
-                      
-                      // Place / Companion
-                      if (record.watchPlace != null) ...[
-                        Icon(Icons.location_on_outlined, color: AppTheme.textSecondary, size: 12),
-                        const SizedBox(width: 2),
-                        Text(
-                          record.watchPlace!,
-                          style: GoogleFonts.inter(fontSize: 11, color: AppTheme.textSecondary),
-                        ),
-                      ],
-                      if (record.watchCompanion != null) ...[
-                        const SizedBox(width: 10),
-                        Icon(Icons.people_alt_outlined, color: AppTheme.textSecondary, size: 12),
-                        const SizedBox(width: 2),
-                        Text(
-                          record.watchCompanion!,
-                          style: GoogleFonts.inter(fontSize: 11, color: AppTheme.textSecondary),
-                        ),
-                      ],
-                    ],
-                  ),
-                  
-                  // Notes (if any) & delete button
-                  if (record.notes != null) ...[
-                    const SizedBox(height: 8),
-                    Divider(color: Colors.white.withOpacity(0.1)),
-                    const SizedBox(height: 4),
-                    Text(
-                      record.notes!,
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        color: AppTheme.textSecondary,
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                  ],
-                  
-                  const SizedBox(height: 8),
-                  Align(
-                    alignment: Alignment.bottomRight,
-                    child: IconButton(
-                      icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 18),
-                      onPressed: () {
-                        // Confirm deletion dialog
-                        showDialog(
-                          context: context,
-                          builder: (dialogCtx) => AlertDialog(
-                            backgroundColor: AppTheme.surfaceColor,
-                            title: Text('Kaydı Sil?', style: GoogleFonts.outfit(color: Colors.white)),
-                            content: Text(
-                              'Bu izleme kaydını günlüğünüzden kalıcı olarak silmek istediğinize emin misiniz?',
-                              style: GoogleFonts.inter(color: AppTheme.textSecondary),
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(dialogCtx),
-                                child: Text('Vazgeç', style: GoogleFonts.inter(color: AppTheme.textSecondary)),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(dialogCtx);
-                                  _deleteRecord(context, ref, record.id);
-                                },
-                                child: const Text('Sil', style: TextStyle(color: Colors.redAccent)),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  // Read-only "Aktif İzliyorum" / "Tamamlandı" indicator for TV shows.
-  // Actual state is only changed via the Add Watch Record flow.
-  Widget _buildWatchStatusBadge(UserMovieSetting? setting, int? totalEpisodes) {
-    if (setting == null) return const SizedBox.shrink();
-
-    String? label;
-    IconData icon = Icons.play_circle_fill_rounded;
-    Color color = AppTheme.accentColor;
-
-    if (setting.isActivelyWatching) {
-      final last = setting.lastWatchedEpisode ?? 0;
-      label = totalEpisodes != null ? 'İzleniyor ($last/$totalEpisodes)' : 'İzleniyor (Bölüm $last)';
-    } else if (totalEpisodes != null && setting.lastWatchedEpisode != null && setting.lastWatchedEpisode! >= totalEpisodes) {
-      label = 'Tamamlandı';
-      icon = Icons.check_circle_rounded;
-      color = Colors.greenAccent;
-    }
-
-    if (label == null) return const SizedBox.shrink();
-
-    return Padding(
-      padding: const EdgeInsets.only(top: 6),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: color),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w600, color: color),
-          ),
-        ],
-      ),
-    );
-  }
 }

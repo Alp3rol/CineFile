@@ -30,13 +30,13 @@ Bu dosya, önceki bir kod denetiminde bulunan ve düzeltilen sorunların **tekra
 
 ## Mock/Demo veri
 
-- Mock film verisi (Interstellar, Inception, Dune: Part Two, The Dark Knight, Oppenheimer, Spider-Verse) şu an **4 farklı dosyada** birebir kopyalanmış durumda: `lib/core/network/tmdb_service.dart`, `lib/features/movie_detail/presentation/movie_detail_provider.dart`, `lib/features/search/presentation/search_provider.dart`, `lib/features/home/presentation/home_screen.dart`. Bu tekrarın somut bir sonucu yaşandı: iki filmin `poster_path` alanı uydurma/geçersizdi ve TMDb CDN'de 404 dönüyordu (Ana Sayfa'da bozuk poster olarak görüldü).
-  - Bu dosyalardan birindeki bir mock filmi değiştirirsen, **diğer 3 dosyayı da güncellemeyi unutma** (veya bunları ortak bir `MockDataSource`'a taşımayı öner).
+- Mock film verisi (Interstellar, Inception, Dune: Part Two, The Dark Knight, Oppenheimer, Spider-Verse) şu an **3 farklı dosyada** birebir kopyalanmış durumda: `lib/core/network/tmdb_service.dart`, `lib/features/movie_detail/presentation/movie_detail_provider.dart`, `lib/features/search/presentation/search_provider.dart`. (`home_screen.dart`'taki kopya daha sonraki bir refactor'da kaldırıldı — mock veri artık orada yok.) Bu tekrarın somut bir sonucu yaşandı: iki filmin `poster_path` alanı uydurma/geçersizdi ve TMDb CDN'de 404 dönüyordu (Ana Sayfa'da bozuk poster olarak görüldü).
+  - Bu dosyalardan birindeki bir mock filmi değiştirirsen, **diğer 2 dosyayı da güncellemeyi unutma** (veya bunları ortak bir `MockDataSource`'a taşımayı öner).
   - Yeni bir mock film eklerken `poster_path`/`backdrop_path` gibi TMDb hash'lerini **uydurma** — gerçek TMDb sayfasından doğrula (örn. `https://www.themoviedb.org/movie/<id>` üzerinden gerçek CDN path'ini al) veya `null` bırak (placeholder gösterilsin, kırık görsel değil).
 
 ## Widget dosya boyutu
 
-- Tek bir ekran dosyası ~300-400 satırı geçmeye başlarsa, bağımsız bölümleri (kart, liste, dialog, filtre çubuğu vb.) `widgets/` alt klasörüne ayrı dosyalar olarak çıkar. Örnek desenler: `lib/features/insights/presentation/widgets/` (contribution_heatmap.dart, insights_charts.dart, insights_lists.dart, insights_misc_cards.dart) ve `lib/features/journal/presentation/widgets/` (journal_filter_bar.dart, journal_record_list.dart, watch_record_preview_dialog.dart, platform_icon.dart). State'i olan bir metodu ayırırken, state'i callback/parametre olarak geçir (`ValueChanged<T>`, `Future<void> Function(...)` gibi) — State sınıfının private alanlarına doğrudan erişmeye çalışma.
+- Tek bir ekran dosyası ~300-400 satırı geçmeye başlarsa, bağımsız bölümleri (kart, liste, dialog, filtre çubuğu vb.) `widgets/` alt klasörüne ayrı dosyalar olarak çıkar. Örnek desenler: `lib/features/insights/presentation/widgets/` (contribution_heatmap.dart, insights_charts.dart, insights_lists.dart, insights_misc_cards.dart), `lib/features/journal/presentation/widgets/` (journal_filter_bar.dart, journal_record_list.dart, watch_record_preview_dialog.dart, platform_icon.dart) ve `lib/features/movie_detail/presentation/widgets/` (movie_detail_timeline_item.dart, movie_detail_action_widgets.dart, movie_watch_status_badge.dart, rank_dialog.dart). State'i olan bir metodu ayırırken, state'i callback/parametre olarak geçir (`ValueChanged<T>`, `Future<void> Function(...)` gibi) — State sınıfının private alanlarına doğrudan erişmeye çalışma.
 
 ## Lint ve test
 
@@ -56,5 +56,5 @@ Bu dosya, önceki bir kod denetiminde bulunan ve düzeltilen sorunların **tekra
 
 ## Yol haritası
 
-- `roadmap.md` dosyasında sürüm bazlı yol haritası var. v0.1'den v1.0.0'a kadar tüm kararlaştırılan aşamalar tamamlandı (✅). Yapay zeka entegrasyonu ve bulut yedekleme özellikleri kullanıcı kararıyla devre dışı bırakılmış ve kapsamdan çıkarılmıştır. Uygulama şu an stabil ve yayına hazırdır.
+- `roadmap.md` dosyasında sürüm bazlı yol haritası var. v0.1'den v1.0.4'e kadar tüm kararlaştırılan aşamalar tamamlandı (✅) — `pubspec.yaml`'daki `version:` alanını da bu son roadmap sürümüyle senkron tut. Yapay zeka entegrasyonu ve bulut yedekleme özellikleri kullanıcı kararıyla devre dışı bırakılmış ve kapsamdan çıkarılmıştır. Uygulama şu an stabil ve yayına hazırdır.
 

@@ -14,7 +14,9 @@
       "Bash(flutter devices *)",
       "Bash(flutter run *)",
       "Bash(python3 -c ' *)",
-      "Read(//c/Users/alp3r/OneDrive/Documents/**)"
+      "Read(//c/Users/alp3r/OneDrive/Documents/**)",
+      "Bash(git add *)",
+      "Bash(git commit -m 'Refactor: split movie_detail_screen, fix regressions, remove mock search fallback *)"
     ]
   }
 }

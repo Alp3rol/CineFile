@@ -251,8 +251,16 @@ void showWatchRecordPreviewDialog(
                       ),
                       onSubmitted: (val) async {
                         final newRank = val.trim().isEmpty ? null : int.tryParse(val.trim());
-                        await onUpdateRanking({(tmdbId: movie.tmdbId, isTv: movie.isTv): newRank});
-                        if (context.mounted) Navigator.pop(context);
+                        try {
+                          await onUpdateRanking({(tmdbId: movie.tmdbId, isTv: movie.isTv): newRank});
+                          if (context.mounted) Navigator.pop(context);
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Sıralama kaydedilemedi: $e')),
+                            );
+                          }
+                        }
                       },
                     ),
                   ),
@@ -260,8 +268,16 @@ void showWatchRecordPreviewDialog(
                   if (setting?.personalRanking != null)
                      TextButton(
                       onPressed: () async {
-                        await onUpdateRanking({(tmdbId: movie.tmdbId, isTv: movie.isTv): null});
-                        if (context.mounted) Navigator.pop(context);
+                        try {
+                          await onUpdateRanking({(tmdbId: movie.tmdbId, isTv: movie.isTv): null});
+                          if (context.mounted) Navigator.pop(context);
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Sıralama kaydedilemedi: $e')),
+                            );
+                          }
+                        }
                       },
                       style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero),
                       child: Text(

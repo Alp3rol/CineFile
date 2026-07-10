@@ -58,9 +58,12 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('4/26'), findsOneWidget);
+    // The tag shows the *next* episode to log (lastWatchedEpisode + 1), not
+    // the last one logged — see commit "Fix episode number mismatch between
+    // home and journal".
+    expect(find.text('5/26'), findsOneWidget);
 
-    await tester.tap(find.text('4/26'));
+    await tester.tap(find.text('5/26'));
     await tester.pumpAndSettle();
 
     // No dialog/screen appears — this must not have navigated anywhere.

@@ -123,7 +123,15 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
       }
     }
 
-    await _updateRankingsInDatabase(newRanks);
+    try {
+      await _updateRankingsInDatabase(newRanks);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Sıralama kaydedilemedi: $e')),
+        );
+      }
+    }
   }
 
   @override

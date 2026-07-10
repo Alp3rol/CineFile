@@ -81,74 +81,9 @@ class SearchNotifier extends StateNotifier<SearchState> {
       } catch (e) {
         // Race condition guard: ignore if user has changed the query since request started
         if (state.query != searchTargetQuery) return;
-        
-        // Offline fallback: Search local DB and mock movies list
-        try {
-          final lowerQuery = searchTargetQuery.toLowerCase();
-          
-          final List<Map<String, dynamic>> mockList = [
-            {'id': 157336, 'title': 'Interstellar', 'original_title': 'Interstellar', 'poster_path': '/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg', 'release_date': '2014-11-05', 'media_type': 'movie'},
-            {'id': 27205, 'title': 'Inception', 'original_title': 'Inception', 'poster_path': '/8ZTVqvKDQ8emSGUEMjsS4yHAwrp.jpg', 'release_date': '2010-07-15', 'media_type': 'movie'},
-            {'id': 693134, 'title': 'Dune: Part Two', 'original_title': 'Dune: Part Two', 'poster_path': '/tihf8Trht9zP3scmUQfvGlAY9FU.jpg', 'release_date': '2024-02-27', 'media_type': 'movie'},
-            {'id': 155, 'title': 'The Dark Knight', 'original_title': 'The Dark Knight', 'poster_path': '/7IPCEr7ifdH5CtU97QG7XgAAtOp.jpg', 'release_date': '2008-07-16', 'media_type': 'movie'},
-            {'id': 872585, 'title': 'Oppenheimer', 'original_title': 'Oppenheimer', 'poster_path': '/ptpr0kGAckfQkJeJIt8st5dglvd.jpg', 'release_date': '2023-07-19', 'media_type': 'movie'},
-            {'id': 569094, 'title': 'Spider-Man: Across the Spider-Verse', 'original_title': 'Spider-Man: Across the Spider-Verse', 'poster_path': '/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg', 'release_date': '2023-05-31', 'media_type': 'movie'},
-          ];
-          
-          final filteredMock = mockList.where((m) =>
-              (m['title'] as String).toLowerCase().contains(lowerQuery) ||
-              (m['original_title'] as String).toLowerCase().contains(lowerQuery)).toList();
-              
-          final List<Map<String, dynamic>> dbResults = [];
-          if (kIsWeb) {
-            final webMovies = _ref.read(webMoviesProvider);
-            final matched = webMovies.values.where((m) =>
-                m.title.toLowerCase().contains(lowerQuery) ||
-                (m.originalTitle ?? '').toLowerCase().contains(lowerQuery));
-            for (final m in matched) {
-              dbResults.add({
-                'id': m.tmdbId,
-                'title': m.title,
-                'original_title': m.originalTitle,
-                'poster_path': m.posterPath,
-                'release_date': m.releaseYear != null ? '${m.releaseYear}-01-01' : '',
-                'media_type': m.isTv ? 'tv' : 'movie',
-              });
-            }
-          } else {
-            final db = _ref.read(databaseProvider);
-            final allMovies = await db.select(db.movies).get();
-            final matched = allMovies.where((m) =>
-                m.title.toLowerCase().contains(lowerQuery) ||
-                (m.originalTitle ?? '').toLowerCase().contains(lowerQuery));
-            for (final m in matched) {
-              dbResults.add({
-                'id': m.tmdbId,
-                'title': m.title,
-                'original_title': m.originalTitle,
-                'poster_path': m.posterPath,
-                'release_date': m.releaseYear != null ? '${m.releaseYear}-01-01' : '',
-                'media_type': m.isTv ? 'tv' : 'movie',
-              });
-            }
-          }
-
-          final Map<(int, bool), Map<String, dynamic>> mergedMap = {};
-          for (final m in filteredMock) {
-            mergedMap[(m['id'] as int, m['media_type'] == 'tv')] = m;
-          }
-          for (final m in dbResults) {
-            mergedMap[(m['id'] as int, m['media_type'] == 'tv')] = m;
-          }
-
-          if (mergedMap.isNotEmpty) {
-            state = state.copyWith(results: mergedMap.values.toList(), isLoading: false, errorMessage: null);
-            return;
-          }
-        } catch (_) {}
 
         state = state.copyWith(
-          isLoading: false, 
+          isLoading: false,
           results: const [],
           errorMessage: null,
         );

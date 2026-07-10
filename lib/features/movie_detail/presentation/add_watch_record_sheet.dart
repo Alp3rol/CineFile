@@ -88,8 +88,6 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
     if (_isActivelyWatching) {
       final next = (_lastWatchedEpisode ?? 0) + 1;
       _selectedEpisode = _totalEpisodes != null ? next.clamp(1, _totalEpisodes!) : next;
-    } else {
-      _episodeCount = _totalEpisodes ?? 1;
     }
   }
 

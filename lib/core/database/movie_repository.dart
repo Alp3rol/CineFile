@@ -154,8 +154,9 @@ class NativeMovieRepository implements MovieRepository {
           }
         }
       });
-    } catch (e) {
-      debugPrint('updateWatchRecordRankings failed: $e');
+    } catch (e, st) {
+      debugPrint('updateWatchRecordRankings failed: $e\n$st');
+      rethrow;
     }
   }
 }
