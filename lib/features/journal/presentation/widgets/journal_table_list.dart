@@ -14,7 +14,8 @@ import 'watch_record_preview_dialog.dart';
 class JournalHeaderCell extends StatelessWidget {
   final String label;
   final String columnKey;
-  final int flex;
+  final int? flex;
+  final double? width;
   final bool sortable;
   final String activeSortColumn;
   final bool sortAscending;
@@ -24,7 +25,8 @@ class JournalHeaderCell extends StatelessWidget {
     super.key,
     required this.label,
     required this.columnKey,
-    required this.flex,
+    this.flex,
+    this.width,
     required this.activeSortColumn,
     required this.sortAscending,
     required this.onSort,
@@ -34,37 +36,39 @@ class JournalHeaderCell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isActive = activeSortColumn == columnKey;
-    return Expanded(
-      flex: flex,
-      child: InkWell(
-        onTap: sortable ? () => onSort(columnKey) : null,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Flexible(
-              child: Text(
-                label,
-                style: GoogleFonts.outfit(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  color: isActive ? AppTheme.accentColor : AppTheme.textSecondary,
-                ),
-                overflow: TextOverflow.ellipsis,
+    final child = InkWell(
+      onTap: sortable ? () => onSort(columnKey) : null,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Flexible(
+            child: Text(
+              label,
+              style: GoogleFonts.outfit(
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+                color: isActive ? AppTheme.accentColor : AppTheme.textSecondary,
               ),
+              overflow: TextOverflow.ellipsis,
             ),
-            if (isActive) ...[
-              const SizedBox(width: 2),
-              Icon(
-                sortAscending ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded,
-                size: 11,
-                color: AppTheme.accentColor,
-              ),
-            ],
+          ),
+          if (isActive) ...[
+            const SizedBox(width: 2),
+            Icon(
+              sortAscending ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded,
+              size: 11,
+              color: AppTheme.accentColor,
+            ),
           ],
-        ),
+        ],
       ),
     );
+
+    if (width != null) {
+      return SizedBox(width: width, child: child);
+    }
+    return Expanded(flex: flex ?? 1, child: child);
   }
 }
 
@@ -150,9 +154,9 @@ class JournalRecordsTable extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  // 1. Sıra Sütunu (Rank Number only — drag handle removed) - flex 1
-                  Expanded(
-                    flex: 1,
+                  // 1. Sıra Sütunu (Rank Number only — drag handle removed) - fixed width
+                  SizedBox(
+                    width: 28,
                     child: Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
@@ -178,13 +182,13 @@ class JournalRecordsTable extends StatelessWidget {
                             imageUrl: movie.posterPath != null
                                 ? '${ApiConstants.imagePathW185}${movie.posterPath}'
                                 : '',
-                            width: 52,
-                            height: 76,
+                            width: 40,
+                            height: 58,
                             fit: BoxFit.cover,
                             errorWidget: (context, url, error) => Container(
                               color: AppTheme.surfaceColor,
-                              width: 52,
-                              height: 76,
+                              width: 40,
+                              height: 58,
                               child: const Icon(Icons.movie, size: 18, color: Colors.grey),
                             ),
                           ),
@@ -207,7 +211,7 @@ class JournalRecordsTable extends StatelessWidget {
                               ),
                               const SizedBox(height: 3),
                               Text(
-                                '${year.isNotEmpty ? "$year • " : ""}${movie.director ?? "Yönetmen Yok"}',
+                                movie.director ?? "Yönetmen Yok",
                                 style: GoogleFonts.inter(fontSize: 11, color: AppTheme.textSecondary),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
