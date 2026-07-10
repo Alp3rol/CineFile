@@ -299,6 +299,14 @@ graph TD
     *   Renk çıkarma hatalarında HSL fallback rengi hem state'e hem cache'e yazılıyor; hatalı `ApiConstants.imageHost` referansı `ApiConstants.imagePathW500` ile düzeltildi.
     *   20 otomatik test başarıyla geçiyor; `MovieDetailScreen` `ConsumerStatefulWidget`'a dönüştürüldü ve `dispose()` içindeki `ref.read()` çağrıları `try/catch` ile korundu.
 
+#### **✅ v1.0.4: Günlük Kayıtları Düzenleme ve Akıllı Bölüm Sayısı Doldurma**
+*   **Hedef**: Günlük kayıtlarını esnetmek, yanlış girilen verileri (tarih, bölüm sayısı) doğrudan liste üzerinden düzenleyebilmek veya silebilmek. Ayrıca dizi izlerken tekrar eden manuel girişleri azaltmak.
+*   **İşler**:
+    *   Günlük sayfasında bir kayda basılı tutulunca açılan Önizleme (Preview) ekranına "Tarih ve Saat Düzenleme", "Bölüm Sayısı Düzenleme" (diziler için) ve "Kaydı Sil" özellikleri eklendi.
+    *   `showDatePicker`, `showTimePicker` ve özel bölüm giriş dialoglarıyla, sayfa değiştirmeden ve anında listeye yansıyan veri güncellemesi.
+    *   Kayıt ekleme (`add_watch_record_sheet.dart`) formunda, "Aktif İzliyorum" kapalıysa "Kaç bölüm izledin?" seçeneğinin varsayılan olarak dizinin **toplam bölüm sayısına** eşitlenmesi sağlandı (böylece tüm diziyi bitirenler için otomatik tamamlama).
+    *   Drift `WatchRecords` tablosu işlemleri (deleteWatchRecord, updateWatchRecord) native/web platformları için ayrıştırılarak eklendi.
+
 ---
 
 ## 📈 Proje Durumu
