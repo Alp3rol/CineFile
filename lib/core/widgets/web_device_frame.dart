@@ -85,48 +85,50 @@ class _WebDeviceFrameState extends State<WebDeviceFrame> {
           // Arka plan ızgara
           Positioned.fill(child: CustomPaint(painter: _GridPainter())),
 
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Basit, hap şeklinde açılır menü butonu
-              GestureDetector(
-                onTap: _toggleMenu,
-                child: Container(
-                  margin: const EdgeInsets.only(bottom: 24),
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.06),
-                    borderRadius: BorderRadius.circular(30),
-                    border: Border.all(color: Colors.white.withOpacity(0.1)),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        '${_selected.name} • ${_selected.width.toInt()}×${_selected.height.toInt()} • ${_selected.screenSize}',
-                        style: const TextStyle(
-                          color: Colors.white70, 
-                          fontSize: 13, 
-                          fontFamily: 'monospace',
-                          fontWeight: FontWeight.w600,
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Basit, hap şeklinde açılır menü butonu
+                GestureDetector(
+                  onTap: _toggleMenu,
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 24),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.06),
+                      borderRadius: BorderRadius.circular(30),
+                      border: Border.all(color: Colors.white.withOpacity(0.1)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '${_selected.name} • ${_selected.width.toInt()}×${_selected.height.toInt()} • ${_selected.screenSize}',
+                          style: const TextStyle(
+                            color: Colors.white70, 
+                            fontSize: 13, 
+                            fontFamily: 'monospace',
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Icon(_isMenuOpen ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, color: Colors.white54, size: 18),
-                    ],
+                        const SizedBox(width: 12),
+                        Icon(_isMenuOpen ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, color: Colors.white54, size: 18),
+                      ],
+                    ),
                   ),
                 ),
-              ),
 
-              // Uygulama alanı (Telefon Çerçevesi)
-              Flexible(
-                child: _PhoneFrame(
-                  device: _selected,
-                  screenHeight: screenHeight - 120, // Menü butonu için biraz daha yer bırak
-                  child: widget.child,
+                // Uygulama alanı (Telefon Çerçevesi)
+                Flexible(
+                  child: _PhoneFrame(
+                    device: _selected,
+                    screenHeight: screenHeight - 120, // Menü butonu için biraz daha yer bırak
+                    child: widget.child,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
 
           // Özel Açılır Menü (Dropdown Overlay)
