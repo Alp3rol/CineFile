@@ -179,22 +179,23 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                 child: TabBar(
-                  isScrollable: MediaQuery.of(context).size.width < 500,
-                  tabAlignment: MediaQuery.of(context).size.width < 500 ? TabAlignment.start : TabAlignment.fill,
+                  isScrollable: false,
                   indicatorSize: TabBarIndicatorSize.tab,
                   dividerColor: Colors.transparent,
+                  splashBorderRadius: BorderRadius.circular(12),
+                  overlayColor: WidgetStateProperty.all(Colors.white.withOpacity(0.05)),
                   indicator: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(12),
                     color: AppTheme.accentColor,
                   ),
                   labelColor: Colors.black,
                   unselectedLabelColor: Colors.white70,
-                  labelStyle: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 12),
-                  unselectedLabelStyle: GoogleFonts.outfit(fontWeight: FontWeight.normal, fontSize: 12),
+                  labelStyle: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 15),
+                  unselectedLabelStyle: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 15),
                   tabs: const [
-                    Tab(text: 'İzleme Günlüğü'),
-                    Tab(text: 'Özel Listeler'),
-                    Tab(text: 'Analiz & İstatistik'),
+                    Tab(text: 'Günlük'),
+                    Tab(text: 'Listeler'),
+                    Tab(text: 'Analiz'),
                   ],
                 ),
               ),
@@ -247,13 +248,7 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
                           duration: const Duration(milliseconds: 200),
                         ),
 
-                        // 3. Quick Filter Chips Bar (full width — toggle moved to title bar)
-                        JournalFiltersBar(
-                          activeFilter: _activeFilter,
-                          onFilterChanged: (key) => setState(() => _activeFilter = key),
-                        ),
 
-                        const SizedBox(height: 6),
 
                         // 4. Table Body Logic & Calculations
                         Expanded(

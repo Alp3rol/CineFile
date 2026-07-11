@@ -7,7 +7,7 @@ import '../core/widgets/dynamic_background_wrapper.dart';
 import 'home/presentation/home_screen.dart';
 import 'search/presentation/search_screen.dart';
 import 'journal/presentation/journal_screen.dart';
-import 'calendar/presentation/calendar_screen.dart';
+import 'community/presentation/community_feed_screen.dart';
 import 'settings/presentation/settings_screen.dart';
 
 // Lets other screens (e.g. Home's "Tümünü Gör" buttons) switch the active
@@ -26,7 +26,7 @@ class _MainShellState extends ConsumerState<MainShell> {
     HomeScreen(),
     SearchScreen(),
     JournalScreen(),
-    CalendarScreen(),
+    CommunityFeedScreen(),
     SettingsScreen(),
   ];
 
@@ -61,7 +61,7 @@ class _MainShellState extends ConsumerState<MainShell> {
                   _buildNavItem(selectedIndex, 0, Icons.home_rounded, Icons.home_outlined, 'Ana Sayfa'),
                   _buildNavItem(selectedIndex, 1, Icons.search_rounded, Icons.search_outlined, 'Keşfet'),
                   _buildNavItem(selectedIndex, 2, Icons.book_rounded, Icons.book_outlined, 'Günlük'),
-                  _buildNavItem(selectedIndex, 3, Icons.calendar_month_rounded, Icons.calendar_month_outlined, 'Takvim'),
+                  _buildNavItem(selectedIndex, 3, Icons.people_rounded, Icons.people_outline_rounded, 'Topluluk'),
                   _buildNavItem(selectedIndex, 4, Icons.settings_rounded, Icons.settings_outlined, 'Ayarlar'),
                 ],
               ),

@@ -252,8 +252,12 @@ class TmdbService {
       };
     } else {
       final crewList = (data['credits']['crew'] as List<dynamic>?) ?? [];
-      if (creatorName != null && crewList.isEmpty) {
-        data['credits']['crew'] = [{'name': creatorName, 'job': 'Director'}];
+      final hasDirector = crewList.any((e) => e['job'] == 'Director');
+      if (creatorName != null && !hasDirector) {
+        data['credits']['crew'] = [
+          ...crewList,
+          {'name': creatorName, 'job': 'Director'}
+        ];
       }
     }
     

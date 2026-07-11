@@ -17,9 +17,13 @@ class LeadersCard extends StatelessWidget {
           children: [
             Icon(headerIcon, size: 16, color: AppTheme.accentColor),
             const SizedBox(width: 6),
-            Text(
-              title,
-              style: GoogleFonts.outfit(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
+            Flexible(
+              child: Text(
+                title,
+                style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
         ),

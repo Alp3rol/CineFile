@@ -10,11 +10,21 @@ import '../../../../core/database/database_provider.dart';
 import '../../../../core/database/app_database.dart';
 import 'custom_list_detail_screen.dart';
 
-class CustomListsTab extends ConsumerWidget {
+class CustomListsTab extends ConsumerStatefulWidget {
   const CustomListsTab({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CustomListsTab> createState() => _CustomListsTabState();
+}
+
+class _CustomListsTabState extends ConsumerState<CustomListsTab>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context); // Required by AutomaticKeepAliveClientMixin
     final customListsAsync = ref.watch(customListsProvider);
     final allWatchRecordsAsync = ref.watch(allWatchRecordsProvider);
 

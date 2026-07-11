@@ -8,11 +8,21 @@ import 'widgets/insights_charts.dart';
 import 'widgets/insights_lists.dart';
 import 'widgets/insights_misc_cards.dart';
 
-class InsightsScreen extends ConsumerWidget {
+class InsightsScreen extends ConsumerStatefulWidget {
   const InsightsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<InsightsScreen> createState() => _InsightsScreenState();
+}
+
+class _InsightsScreenState extends ConsumerState<InsightsScreen>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context); // Required by AutomaticKeepAliveClientMixin
     final insights = ref.watch(insightsProvider);
 
     if (insights == null) {
@@ -25,49 +35,45 @@ class InsightsScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 0. Yıllık İzleme Sıklığı Haritası (Heatmap)
-          ContributionHeatmap(insights: insights),
-          const SizedBox(height: 20),
-
           // 1. Summary Cards Grid
           SummaryCardsGrid(data: insights),
-          const SizedBox(height: 20),
+          const SizedBox(height: 12),
 
           // 1b. Haftalık İzleme Hedefi (v0.9.0)
           WeeklyGoalCard(data: insights),
-          const SizedBox(height: 20),
+          const SizedBox(height: 12),
 
           // 2. Monthly Trend Chart Card
           MonthlyChartCard(data: insights),
-          const SizedBox(height: 20),
+          const SizedBox(height: 12),
 
           // 3. Genre Breakdown Chart Card
           GenreChartCard(data: insights),
-          const SizedBox(height: 20),
+          const SizedBox(height: 12),
 
           // 3b. Puan Dağılım Grafiği & Eleştirmen Profili (v0.8.3)
           RatingDistributionCard(data: insights),
-          const SizedBox(height: 20),
+          const SizedBox(height: 12),
 
           // 4. Time of Day Analysis
           TimeOfDayCard(data: insights),
-          const SizedBox(height: 20),
+          const SizedBox(height: 12),
 
           // 4b. Zaman Kıyaslama Paneli (v0.8.4)
           TimeVisualizerCard(data: insights),
-          const SizedBox(height: 20),
+          const SizedBox(height: 12),
 
           // 4c. Mevsimsel Analiz (v0.8.4)
           SeasonalTrendsCard(data: insights),
-          const SizedBox(height: 20),
+          const SizedBox(height: 12),
 
           // 5. Leaders Column (Directors & Actors)
           LeadersCard(data: insights),
-          const SizedBox(height: 20),
+          const SizedBox(height: 12),
 
           // 5b. En Popüler Etiketler (v0.9.0)
           TagsSection(data: insights),
-          const SizedBox(height: 20),
+          const SizedBox(height: 12),
 
           // 6. Badges Grid Section
           BadgesSection(data: insights),

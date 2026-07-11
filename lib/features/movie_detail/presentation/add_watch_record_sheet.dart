@@ -79,17 +79,12 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
     _isActivelyWatching = existing?.isActivelyWatching ?? false;
     _lastWatchedEpisode = existing?.lastWatchedEpisode;
 
-    // Default to 1 episode per record — NOT the show's total episode count.
-    // Defaulting to "all episodes" here would apply to every single record
-    // added, so logging the same show 4 separate times would each count as
-    // a full rewatch of the whole series (this caused a real bug: duration
-    // stats ballooned to 1000+ hours). The user can still raise it manually
-    // via the stepper for a genuine "watched the whole thing in one sitting"
-    // entry.
-    _episodeCount = 1;
     if (_isActivelyWatching) {
+      _episodeCount = 1;
       final next = (_lastWatchedEpisode ?? 0) + 1;
       _selectedEpisode = _totalEpisodes != null ? next.clamp(1, _totalEpisodes!) : next;
+    } else {
+      _episodeCount = _totalEpisodes ?? 1;
     }
   }
 
@@ -483,6 +478,9 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
                         if (value) {
                           final next = (_lastWatchedEpisode ?? 0) + 1;
                           _selectedEpisode = _totalEpisodes != null ? next.clamp(1, _totalEpisodes!) : next;
+                          _episodeCount = 1;
+                        } else {
+                          _episodeCount = _totalEpisodes ?? 1;
                         }
                       });
                     },

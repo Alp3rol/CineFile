@@ -89,7 +89,54 @@ class WatchRecordWithMovie {
   WatchRecordWithMovie(this.record, this.movie, {this.setting});
 }
 
-// Stream provider to get all watch records with movie details
+// Stream provider to get watch records for any user with movie details
+final watchRecordsForUserProvider = StreamProvider.family<List<WatchRecordWithMovie>, String>((ref, userId) {
+  return FirebaseFirestore.instance
+      .collection('logs')
+      .where('userId', isEqualTo: userId)
+      .snapshots()
+      .asyncMap((snapshot) async {
+        final logs = snapshot.docs.map((doc) => DiaryLogModel.fromMap(doc.data(), doc.id)).toList();
+        // Sort descending by watchDate
+        logs.sort((a, b) => b.watchDate.compareTo(a.watchDate));
+        
+        final list = <WatchRecordWithMovie>[];
+        for (final log in logs) {
+          final key = (tmdbId: log.movieId, isTv: log.isTv);
+          
+          // Get settings from Firestore
+          final settingsDoc = await FirebaseFirestore.instance
+              .collection('users')
+              .doc(userId)
+              .collection('movie_settings')
+              .doc('${key.tmdbId}_${key.isTv}')
+              .get();
+              
+          UserMovieSetting? setting;
+          if (settingsDoc.exists) {
+            final data = settingsDoc.data()!;
+            setting = UserMovieSetting(
+              tmdbId: key.tmdbId,
+              isTv: key.isTv,
+              isFavorite: data['isFavorite'] ?? false,
+              isReWatchList: data['isReWatchList'] ?? false,
+              personalRanking: data['personalRanking'] as int?,
+              personalNotes: data['personalNotes'] as String?,
+              personalTags: data['personalTags'] as String?,
+              updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+              isActivelyWatching: data['isActivelyWatching'] ?? false,
+              lastWatchedEpisode: data['lastWatchedEpisode'] as int?,
+            );
+          }
+          
+          final wRecord = log.toWatchRecordWithMovie();
+          list.add(WatchRecordWithMovie(wRecord.record, wRecord.movie, setting: setting));
+        }
+        return list;
+      });
+});
+
+// Stream provider to get all watch records with movie details (current logged in user)
 final allWatchRecordsProvider = StreamProvider<List<WatchRecordWithMovie>>((ref) {
   final authState = ref.watch(authStateProvider);
   final user = authState.value;
@@ -140,6 +187,38 @@ final allWatchRecordsProvider = StreamProvider<List<WatchRecordWithMovie>>((ref)
         }
         return list;
       });
+});
+
+// Stream provider to get all followed user IDs for the current user
+final followedUserIdsProvider = StreamProvider<Set<String>>((ref) {
+  final authState = ref.watch(authStateProvider);
+  final user = authState.value;
+  if (user == null) {
+    return Stream.value(<String>{});
+  }
+
+  return FirebaseFirestore.instance
+      .collection('follows')
+      .where('followerId', isEqualTo: user.uid)
+      .snapshots()
+      .map((snapshot) {
+        return snapshot.docs.map((doc) => doc.data()['followingId'] as String).toSet();
+      });
+});
+
+// Stream provider to check if a specific user is followed by the current user
+final isFollowingProvider = StreamProvider.family<bool, String>((ref, targetUserId) {
+  final authState = ref.watch(authStateProvider);
+  final user = authState.value;
+  if (user == null) {
+    return Stream.value(false);
+  }
+
+  return FirebaseFirestore.instance
+      .collection('follows')
+      .doc('${user.uid}_$targetUserId')
+      .snapshots()
+      .map((doc) => doc.exists);
 });
 
 // Stream provider to get a set of favorite movie IDs

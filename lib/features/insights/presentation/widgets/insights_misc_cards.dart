@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -57,15 +58,23 @@ class SummaryCardsGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     final totalHours = data.totalDurationMinutes ~/ 60;
     final totalMinutes = data.totalDurationMinutes % 60;
-    final durationStr = totalHours > 0 ? '${totalHours}sa ${totalMinutes}dk' : '${totalMinutes}dk';
+    
+    final days = totalHours ~/ 24;
+    final hours = totalHours % 24;
+    final durationParts = <String>[];
+    if (days > 0) durationParts.add('${days}g');
+    if (hours > 0 || days == 0) durationParts.add('${hours}s');
+    if (totalMinutes > 0) durationParts.add('${totalMinutes}dk');
+    final durationStr = durationParts.join('');
 
     return GridView.count(
       crossAxisCount: 2,
       shrinkWrap: true,
+      padding: EdgeInsets.zero,
       physics: const NeverScrollableScrollPhysics(),
       crossAxisSpacing: 12,
       mainAxisSpacing: 12,
-      childAspectRatio: 1.55,
+      childAspectRatio: 2.0,
       children: [
         _buildMiniStatCard('Toplam İzleme', '${data.totalWatchCount}', Icons.movie_filter_rounded, Colors.blueAccent),
         _buildMiniStatCard('Tekil İçerik', '${data.uniqueTitleCount}', Icons.local_play_rounded, Colors.purpleAccent),
@@ -148,34 +157,97 @@ class TimeOfDayCard extends StatelessWidget {
   }
 }
 
-class TimeVisualizerCard extends StatelessWidget {
+class TimeVisualizerCard extends StatefulWidget {
   final InsightsData data;
   const TimeVisualizerCard({super.key, required this.data});
 
-  Widget _buildComparisonRow(String emoji, String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Row(
-        children: [
-          Text(emoji, style: const TextStyle(fontSize: 20)),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              text,
-              style: GoogleFonts.inter(fontSize: 11.5, color: AppTheme.textSecondary, height: 1.3),
-            ),
-          ),
-        ],
-      ),
-    );
+  @override
+  State<TimeVisualizerCard> createState() => _TimeVisualizerCardState();
+}
+
+class _TimeVisualizerCardState extends State<TimeVisualizerCard> {
+  late final int _randomIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _randomIndex = Random().nextInt(16); // 16 different fun options
   }
 
   @override
   Widget build(BuildContext context) {
-    final totalMins = data.totalDurationMinutes;
-    final lotrMarathons = (totalMins / 682).toStringAsFixed(1); // Extended LotR trilogy is approx 682 mins
-    final flights = (totalMins / 210).toStringAsFixed(1);       // Istanbul-London is approx 210 mins (3.5 hours)
-    final seriesWatches = (totalMins / 40).toStringAsFixed(0);   // Approx single episode is 40 mins
+    final totalMins = widget.data.totalDurationMinutes;
+
+    String formatNum(double val, int decimals) => val.toStringAsFixed(decimals);
+
+    final comparisons = [
+      (
+        emoji: '💍',
+        text: 'Yüzüklerin Efendisi (Uzatılmış Versiyon) Üçlemesi\'ni aralıksız ${formatNum(totalMins / 682, 1)} kez baştan sona izleyebilirdin!'
+      ),
+      (
+        emoji: '✈️',
+        text: 'İstanbul - Londra arası uçakla tam ${formatNum(totalMins / 210, 1)} kez gidiş-dönüş seyahat edebilirdin!'
+      ),
+      (
+        emoji: '🧪',
+        text: 'Kült dizi Breaking Bad\'i baştan sona tam ${formatNum(totalMins / 3100, 1)} kez maraton yapabilirdin!'
+      ),
+      (
+        emoji: '🥾',
+        text: 'Hiç durmadan yürüyerek İstanbul\'dan Ankara\'ya tam ${formatNum(totalMins / 5400, 1)} kez gidip gelebilirdin!'
+      ),
+      (
+        emoji: '📚',
+        text: 'Ortalama 8 saatlik okuma süresiyle tam ${formatNum(totalMins / 480, 0)} adet kitap bitirebilirdin!'
+      ),
+      (
+        emoji: '🌯',
+        text: 'Arka arkaya hiç durmadan tam ${formatNum(totalMins / 3, 0)} lahmacun yiyebilirdin! (Afiyet olsun)'
+      ),
+      (
+        emoji: '🛰️',
+        text: 'Uluslararası Uzay İstasyonu (ISS) Dünya\'nın etrafını tam ${formatNum(totalMins / 90, 0)} kez turlardı!'
+      ),
+      (
+        emoji: '⚡',
+        text: 'Bu sürede ışık uzay boşluğunda tam ${formatNum(totalMins * 18.0, 0)} milyon kilometre yol alırdı!'
+      ),
+      (
+        emoji: '🧱',
+        text: 'Minecraft\'ta hiç durmadan tam ${formatNum(totalMins * 120.0, 0)} blok yerleştirebilirdin!'
+      ),
+      (
+        emoji: '☕',
+        text: 'Arkadaşlarınla sohbet edip tam ${formatNum(totalMins / 15, 0)} fincan kahve içebilirdin!'
+      ),
+      (
+        emoji: '🎵',
+        text: 'Spotify\'da favori çalma listenden tam ${formatNum(totalMins / 3.5, 0)} şarkı dinleyebilirdin!'
+      ),
+      (
+        emoji: '🎲',
+        text: 'Hiç bitmeyecekmiş gibi hissettiren tam ${formatNum(totalMins / 180, 1)} Monopoly partisi yapabilirdin!'
+      ),
+      (
+        emoji: '😴',
+        text: 'Deliksiz ve huzurlu bir şekilde tam ${formatNum(totalMins / 480, 1)} gece uykusu çekebilirdin!'
+      ),
+      (
+        emoji: '💇',
+        text: 'Bu sürede saç tellerin toplamda tam ${formatNum(totalMins * 0.000287, 3)} milimetre uzardı!'
+      ),
+      (
+        emoji: '🧬',
+        text: 'Vücudun sen ekran karşısındayken tam ${formatNum(totalMins * 200.0, 0)} milyon yeni hücre üretti!'
+      ),
+      (
+        emoji: '🌍',
+        text: 'Dünya güneşin etrafındaki yörüngesinde tam ${formatNum(totalMins * 1.785, 0)} bin kilometre yol katetti!'
+      ),
+    ];
+
+    final selected = comparisons[_randomIndex % comparisons.length];
 
     return GlassContainer(
       borderRadius: 20,
@@ -188,10 +260,48 @@ class TimeVisualizerCard extends StatelessWidget {
             '🍿 Bu Sürede Neler Yapabilirdin?',
             style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
           ),
-          const SizedBox(height: 18),
-          _buildComparisonRow('💍', 'Yüzüklerin Efendisi (Uzatılmış Versiyon) Üçlemesi\'ni aralıksız $lotrMarathons kez baştan sona izleyebilirdin!'),
-          _buildComparisonRow('✈️', 'İstanbul - Londra arası uçakla tam $flights kez gidiş-dönüş seyahat edebilirdin!'),
-          _buildComparisonRow('📺', 'Ortalama 40 dakikalık dizilerden tam $seriesWatches bölüm tüketebilirdin!'),
+          const SizedBox(height: 14),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.05),
+                  shape: BoxShape.circle,
+                ),
+                child: Text(
+                  selected.emoji,
+                  style: const TextStyle(fontSize: 24),
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      selected.text,
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: Colors.white.withOpacity(0.85),
+                        height: 1.4,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Ama film/dizi izlemek de harika bir tercih! 🎬',
+                      style: GoogleFonts.inter(
+                        fontSize: 9,
+                        color: AppTheme.textSecondary.withOpacity(0.7),
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );

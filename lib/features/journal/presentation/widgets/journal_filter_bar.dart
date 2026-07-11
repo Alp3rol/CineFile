@@ -90,39 +90,44 @@ class JournalMiniInsightsBar extends StatelessWidget {
   Widget _buildInsightCard(String title, String value, IconData icon, Color color) {
     return Expanded(
       child: GlassContainer(
-        borderRadius: 12,
-        opacity: 0.6,
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
+        borderRadius: 16,
+        opacity: 0.65,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        child: Row(
           children: [
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(icon, size: 13, color: color),
-                const SizedBox(width: 4),
-                Flexible(
-                  child: Text(
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, size: 16, color: color),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
                     title,
-                    style: GoogleFonts.inter(fontSize: 9, color: AppTheme.textSecondary),
+                    style: GoogleFonts.inter(fontSize: 9, color: AppTheme.textSecondary, fontWeight: FontWeight.w500),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 3),
-            Text(
-              value,
-              style: GoogleFonts.outfit(
-                fontSize: 11,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+                  const SizedBox(height: 2),
+                  Text(
+                    value,
+                    style: GoogleFonts.outfit(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
@@ -132,21 +137,34 @@ class JournalMiniInsightsBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final days = totalHours ~/ 24;
+    final hours = totalHours % 24;
+    final durationParts = <String>[];
+    if (days > 0) durationParts.add('${days}g');
+    if (hours > 0 || days == 0) durationParts.add('${hours}s');
+    if (totalMinutes > 0) durationParts.add('${totalMinutes}dk');
+    final durationStr = durationParts.join('');
+
     return Padding(
-      padding: const EdgeInsets.only(left: 16, right: 16, top: 4, bottom: 4),
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _buildInsightCard('Bu Ay', '$thisMonthCount Film', Icons.calendar_month_rounded, Colors.orangeAccent),
-            const SizedBox(width: 8),
-            _buildInsightCard('Ort. Puan', '${avgRating.toStringAsFixed(1)} ★', Icons.star_rounded, AppTheme.ratingColor),
-            const SizedBox(width: 8),
-            _buildInsightCard('Favori Tür', favoriteGenre, Icons.movie_filter_rounded, AppTheme.accentColor),
-            const SizedBox(width: 8),
-            _buildInsightCard('Toplam Süre', '${totalHours}s ${totalMinutes}dk', Icons.hourglass_bottom_rounded, Colors.tealAccent),
-          ],
-        ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              _buildInsightCard('Bu Ay', '$thisMonthCount Film', Icons.calendar_month_rounded, Colors.orangeAccent),
+              const SizedBox(width: 8),
+              _buildInsightCard('Ort. Puan', '${avgRating.toStringAsFixed(1)} ★', Icons.star_rounded, AppTheme.ratingColor),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              _buildInsightCard('Favori Tür', favoriteGenre, Icons.movie_filter_rounded, AppTheme.accentColor),
+              const SizedBox(width: 8),
+              _buildInsightCard('Toplam Süre', durationStr, Icons.hourglass_bottom_rounded, Colors.tealAccent),
+            ],
+          ),
+        ],
       ),
     );
   }

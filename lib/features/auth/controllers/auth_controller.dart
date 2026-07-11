@@ -12,6 +12,14 @@ final authStateProvider = StreamProvider<User?>((ref) {
 
 final userModelProvider = StateProvider<UserModel?>((ref) => null);
 
+final userModelStreamProvider = StreamProvider.family<UserModel?, String>((ref, userId) {
+  return FirebaseFirestore.instance
+      .collection('users')
+      .doc(userId)
+      .snapshots()
+      .map((doc) => doc.exists ? UserModel.fromMap(doc.data()!, doc.id) : null);
+});
+
 final authControllerProvider = Provider<AuthController>((ref) {
   return AuthController(ref);
 });
