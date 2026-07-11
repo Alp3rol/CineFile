@@ -309,7 +309,43 @@ graph TD
 
 ---
 
+### **Aşama 5: Büyük Sürümler & Sosyal Entegrasyonlar (v1.1.0 - v1.3.x)**
+
+#### **✅ v1.1.0 (Faz 3): Dizi Desteği & Çoklu Sezon İzleme Takip Sistemi**
+*   **Hedef**: Dizilerin ve sezonların bölüm bazlı takibi için gerekli altyapıyı ve arayüz entegrasyonunu tamamlamak.
+*   **İşler**:
+    *   TMDb servisinin (`tmdb_service.dart`) dizi yaratıcılarını (creators) algılayacak şekilde güncellenmesi ve film/dizi yönetmen bilgisinin ayrıştırılması.
+    *   Dizi izleme kayıtlarında veritabanı şemasının composite keys (`movieId`, `isTv`) ile çakışmaları tamamen engelleyecek hale getirilmesi.
+    *   "Aktif İzliyorum" modunun varsayılan olarak en son kalınan bölümden başlatılması ve son bölüme ulaşınca otomatik tamamlanması.
+
+#### **✅ v1.2.0 (Faz 4): Topluluk Akışı & Etkileşimli Yorum Sistemi**
+*   **Hedef**: Kullanıcıların izleme günlüklerini paylaşabileceği dinamik bir sosyal akış ve yorum altyapısı kurmak.
+*   **İşler**:
+    *   Firestore üzerinde `logs` koleksiyonu ile tüm kullanıcıların paylaşımlarını bir araya getiren Topluluk Akışı (Community Feed) sayfası oluşturulması.
+    *   Gönderilere beğeni (star) bırakma ve gerçek zamanlı yorum yapabilme altyapısının (`comments_sheet.dart`) entegre edilmesi.
+    *   Kullanıcı avatarları ve kullanıcı isimleriyle sosyal profillere yönlendirme linklerinin kurulması.
+
+#### **✅ v1.3.0 (Faz 5): Sosyalleşme & Takip Sistemi ve Akış Filtreleme**
+*   **Hedef**: Kullanıcılar arası takip etme/bırakma mekanizmalarını kurmak ve sosyal akışı kişiselleştirmek.
+*   **İşler**:
+    *   Firestore'da `follows` koleksiyonu oluşturularak takipçi/takip edilen takibi ve kullanıcı belgelerinde sayaçların güncellenmesi.
+    *   Sosyal Profil ekranının (`user_profile_screen.dart`) tasarlanması, diğer kullanıcıların profillerinde "Takip Et / Takibi Bırak" butonu ve o kişilerin günlük poster listelerinin görüntülenmesi.
+    *   Topluluk Akışına "Tümü" ve "Takip Ettiklerim" filtre sekmelerinin eklenmesi.
+
+#### **✅ v1.3.1: Hata Çözümleri & Arayüz Cilalaması**
+*   **Hedef**: Büyük sürümlerin ardından gelen kullanıcı geri bildirimleriyle donma hatalarını gidermek ve arayüzü kusursuzlaştırmak.
+*   **İşler**:
+    *   **Giriş/Çıkış Yüklenme Hatası**: Riverpod stream dinleyicilerindeki caching/initial data sorunu çözülerek çıkış yapıp tekrar girildiğinde donması engellendi.
+    *   **Dizi Yönetmen Düzeltmesi**: Firestore'daki `movieDirector` ile `DiaryLogModel`'deki `director` alan uyuşmazlığı giderildi, eski kayıtları da koruyacak geriye dönük uyumluluk filtreleri eklendi.
+    *   **İstatistik Kartları Redesign**: Kutucuklar 2x2 grid yapısına geçirilerek büyütüldü ve yanlarına ikonlar eklenerek premium bir görünüme kavuşturuldu.
+    *   **Sürelerin Güne Çevrilmesi**: Toplam izleme süreleri 24 saati geçtiğinde gün formatına (`7g23s30dk` gibi) çevrilecek şekilde güncellendi.
+    *   **Filtre Çubuğunun Kaldırılması**: Ekran sadeleştirilerek Günlük sayfasındaki filtre çubukları kaldırıldı.
+    *   **Sekme Çubuğu (TabBar) Ortalama & Yazı Büyütme**: Sekmeler tam ekran genişliğine yayılacak şekilde ortalandı, yazı boyutu 15px'e çıkarıldı ve "Analiz" olarak kısaltıldı. Tıklama esnasında oluşan kare renk taşması (splash) dairesel hale getirildi.
+    *   **Zaman Kıyaslama Paneli Dinamik Karşılaştırmalar**: "Bu Sürede Neler Yapabilirdin?" kartı, her ekran açılışında 16 farklı eğlenceli ve ilginç seçenek arasından rastgele 1 tanesini seçecek ve özel emojisiyle gösterecek şekilde güncellendi.
+
+---
+
 ## 📈 Proje Durumu
 
-Uygulama planlanan tüm MVP aşamalarını başarıyla tamamlamıştır. Post-launch iyileştirmeler (v1.0.x) aktif olarak devam etmektedir.
+Uygulama planlanan tüm MVP aşamalarını ve büyük sosyal özellikleri (Faz 3, 4, 5) başarıyla tamamlamıştır. Arayüz geliştirmeleri ve kullanıcı deneyimi optimizasyonları aktif olarak devam etmektedir.
 
