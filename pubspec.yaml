@@ -48,6 +48,9 @@ dependencies:
   share_plus: ^13.2.0
   palette_generator: ^0.3.3+7
   visibility_detector: ^0.4.0+2
+  firebase_core: ^4.11.0
+  firebase_auth: ^6.5.4
+  cloud_firestore: ^6.6.0
 
 dev_dependencies:
   flutter_test:

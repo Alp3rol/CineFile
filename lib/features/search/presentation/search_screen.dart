@@ -8,6 +8,7 @@ import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/constants/api_constants.dart';
 import 'search_provider.dart';
 import '../../movie_detail/presentation/movie_detail_screen.dart';
+import '../../auth/presentation/widgets/user_profile_avatar_button.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});
@@ -85,9 +86,16 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             // Header Title
             Padding(
               padding: const EdgeInsets.only(left: 20, right: 20, top: 16, bottom: 8),
-              child: Text(
-                'Keşfet',
-                style: Theme.of(context).textTheme.displayLarge,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    'Keşfet',
+                    style: Theme.of(context).textTheme.displayLarge,
+                  ),
+                  const UserProfileAvatarButton(),
+                ],
               ),
             ),
 

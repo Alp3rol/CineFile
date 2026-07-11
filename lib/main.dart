@@ -4,8 +4,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/theme/app_theme.dart';
 import 'core/widgets/web_device_frame.dart';
 import 'features/main_shell.dart';
+import 'features/auth/presentation/auth_gate.dart';
 
-void main() {
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  
   runApp(
     const ProviderScope(
       child: MyApp(),
@@ -30,7 +39,7 @@ class MyApp extends StatelessWidget {
         // Mobilde normal görünüm
         return child!;
       },
-      home: const MainShell(),
+      home: const AuthGate(),
     );
   }
 }

@@ -14,6 +14,7 @@ import '../../insights/presentation/widgets/insights_charts.dart';
 import '../../movie_detail/presentation/movie_detail_screen.dart';
 import '../../settings/presentation/settings_provider.dart';
 import '../../main_shell.dart';
+import '../../auth/presentation/widgets/user_profile_avatar_button.dart';
 
 // Lets the user tap "Başka Öner" on the suggestion card to cycle to a
 // different unwatched title without waiting for the next calendar day.
@@ -88,21 +89,28 @@ class HomeScreen extends ConsumerWidget {
               // Welcome Header
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text(
-                      'Hoş Geldin,',
-                      style: GoogleFonts.inter(
-                        fontSize: 16,
-                        color: AppTheme.textSecondary,
-                        fontWeight: FontWeight.w400,
-                      ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Hoş Geldin,',
+                          style: GoogleFonts.inter(
+                            fontSize: 16,
+                            color: AppTheme.textSecondary,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        Text(
+                          'CineFile',
+                          style: Theme.of(context).textTheme.displayLarge,
+                        ),
+                      ],
                     ),
-                    Text(
-                      'CineFile',
-                      style: Theme.of(context).textTheme.displayLarge,
-                    ),
+                    const UserProfileAvatarButton(size: 40),
                   ],
                 ),
               ),

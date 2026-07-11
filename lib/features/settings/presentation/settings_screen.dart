@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
 import 'settings_provider.dart';
+import '../../auth/presentation/widgets/user_profile_avatar_button.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -33,9 +34,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Screen Title
-              Text(
-                'Ayarlar',
-                style: Theme.of(context).textTheme.displayLarge,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    'Ayarlar',
+                    style: Theme.of(context).textTheme.displayLarge,
+                  ),
+                  const UserProfileAvatarButton(),
+                ],
               ),
               const SizedBox(height: 24),
 

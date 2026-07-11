@@ -12,6 +12,7 @@ import 'widgets/journal_table_list.dart';
 import '../../insights/presentation/insights_screen.dart';
 import '../../search/presentation/search_screen.dart';
 import '../../settings/presentation/settings_provider.dart';
+import '../../auth/presentation/widgets/user_profile_avatar_button.dart';
 
 class JournalScreen extends ConsumerStatefulWidget {
   const JournalScreen({super.key});
@@ -165,53 +166,9 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
                       children: [
                         // Card/Table view toggle — moved here from filter row
                         _buildViewModeToggle(isTableView),
-                        const SizedBox(width: 8),
-                        // Search toggle button
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _showSearch = !_showSearch;
-                              if (!_showSearch) {
-                                _searchController.clear();
-                                _searchQuery = '';
-                              }
-                            });
-                          },
-                          child: Container(
-                            width: 36,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              color: _showSearch
-                                  ? AppTheme.accentColor.withOpacity(0.2)
-                                  : Colors.white10,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              _showSearch ? Icons.search_off_rounded : Icons.search_rounded,
-                              color: _showSearch ? AppTheme.accentColor : Colors.white70,
-                              size: 18,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        // Add new record button
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => const SearchScreen()),
-                            );
-                          },
-                          child: Container(
-                            width: 36,
-                            height: 36,
-                            decoration: const BoxDecoration(
-                              color: AppTheme.accentColor,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(Icons.add_rounded, color: Colors.white, size: 20),
-                          ),
-                        ),
+                        const SizedBox(width: 12),
+                        // Profile Avatar Button
+                        const UserProfileAvatarButton(),
                       ],
                     ),
                   ],
