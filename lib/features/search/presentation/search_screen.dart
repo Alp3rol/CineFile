@@ -9,6 +9,8 @@ import '../../../../core/constants/api_constants.dart';
 import 'search_provider.dart';
 import '../../movie_detail/presentation/movie_detail_screen.dart';
 import '../../auth/presentation/widgets/user_profile_avatar_button.dart';
+import '../../../../core/widgets/scroll_to_top_button.dart';
+
 
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});
@@ -19,6 +21,8 @@ class SearchScreen extends ConsumerStatefulWidget {
 
 class _SearchScreenState extends ConsumerState<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  bool _showScrollToTop = false;
 
   // TMDb Genre IDs
   final Map<String, int> _genres = {
@@ -30,10 +34,28 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   };
 
   @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
     _searchController.dispose();
     super.dispose();
   }
+
+  void _onScroll() {
+    final show = _scrollController.offset > 200;
+    if (show != _showScrollToTop) {
+      setState(() {
+        _showScrollToTop = show;
+      });
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -174,6 +196,16 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             ),
           ],
         ),
+      ),
+      floatingActionButton: ScrollToTopButton(
+        onPressed: () {
+          _scrollController.animateTo(
+            0,
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeInOut,
+          );
+        },
+        show: _showScrollToTop,
       ),
     );
   }
@@ -363,7 +395,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
     // Grid presentation (Letterboxd stili 3'lü poster grid)
     return GridView.builder(
+      controller: _scrollController,
       padding: const EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 120),
+
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
         crossAxisSpacing: 10,

@@ -5,6 +5,8 @@ import '../theme/app_theme.dart';
 import '../database/database_provider.dart';
 import '../database/episode_logging.dart';
 
+import '../widgets/premium_toast.dart';
+
 // Compact "Bölüm X/Y +" pill for the latest watch record of an
 // actively-watched show (see UserMovieSettings.isActivelyWatching). Tapping
 // "+" logs the next episode immediately — no dialog, no screen — reusing
@@ -19,36 +21,44 @@ class QuickAdvanceTag extends ConsumerWidget {
     final total = item.movie.totalEpisodes;
     final next = (item.setting!.lastWatchedEpisode ?? 0) + 1;
 
-    return GestureDetector(
-      onTap: () async {
+    return TextButton(
+      onPressed: () async {
         try {
           await logNextEpisode(ref: ref, movie: item.movie, setting: item.setting!, rating: item.record.rating);
         } catch (e) {
           if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Bölüm kaydedilemedi: $e'), backgroundColor: Colors.redAccent),
-            );
+            showPremiumToast(context, 'Bölüm kaydedilemedi: $e', isError: true);
           }
         }
       },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-        decoration: BoxDecoration(
-          color: AppTheme.accentColor.withOpacity(0.12),
-          borderRadius: BorderRadius.circular(4),
-          border: Border.all(color: AppTheme.accentColor.withOpacity(0.4), width: 0.5),
+      style: TextButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        minimumSize: Size.zero,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        backgroundColor: AppTheme.accentColor.withOpacity(0.12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(6),
+          side: BorderSide(color: AppTheme.accentColor.withOpacity(0.4), width: 0.8),
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              total != null ? '$next/$total' : '$next',
-              style: GoogleFonts.outfit(fontSize: 9, fontWeight: FontWeight.bold, color: AppTheme.accentColor),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            total != null ? '$next/$total' : '$next',
+            style: GoogleFonts.outfit(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.accentColor,
             ),
-            const SizedBox(width: 2),
-            const Icon(Icons.add_circle_rounded, color: AppTheme.accentColor, size: 12),
-          ],
-        ),
+          ),
+          const SizedBox(width: 4),
+          const Icon(
+            Icons.add_circle_rounded,
+            color: AppTheme.accentColor,
+            size: 14,
+          ),
+        ],
       ),
     );
   }

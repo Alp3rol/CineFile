@@ -343,6 +343,14 @@ graph TD
     *   **Sekme Çubuğu (TabBar) Ortalama & Yazı Büyütme**: Sekmeler tam ekran genişliğine yayılacak şekilde ortalandı, yazı boyutu 15px'e çıkarıldı ve "Analiz" olarak kısaltıldı. Tıklama esnasında oluşan kare renk taşması (splash) dairesel hale getirildi.
     *   **Zaman Kıyaslama Paneli Dinamik Karşılaştırmalar**: "Bu Sürede Neler Yapabilirdin?" kartı, her ekran açılışında 16 farklı eğlenceli ve ilginç seçenek arasından rastgele 1 tanesini seçecek ve özel emojisiyle gösterecek şekilde güncellendi.
 
+#### **✅ v1.3.2: İzleme Girişi Sadeleştirmesi ve Kaydırma Çubuğu Optimizasyonu**
+*   **Hedef**: Günlük kayıt formunu sadeleştirmek, mobil ekranlarda istatistik taşmasını engellemek ve kaydırma çubuklarını tamamen temizleyerek mobil kaydırma deneyimi sunmak.
+*   **İşler**:
+    *   **Saat Seçiminin Kaldırılması**: Film/dizi günlüğe eklenirken saat bilgisinin elle girilmesi zorunluluğu (ve seçici alanı) formdan tamamen kaldırıldı.
+    *   **İstatistik Paneli Taşma Çözümü**: Mobil ekran genişliğinde (<500px) İstatistik Dashboard'undaki mini veri kartlarının taşmasını önlemek amacıyla `_buildMiniStat` bileşenleri `FittedBox` ile sarmalandı, yazılar dar ekranlarda otomatik olarak küçülecektir.
+    *   **Scrollbar'ların Komple Kaldırılması**: Uygulama genelinde afişlerin üzerine binen veya çirkin görüntü oluşturan tüm kaydırma çubukları hem Flutter (`CineFileScrollBehavior`) hem de tarayıcı (Gölge DOM / Shadow DOM) seviyesinde tamamen görünmez kılındı.
+    *   **Fareyle Kaydırma (Mouse Drag to Scroll) Desteği**: Masaüstü tarayıcılarda yatay listelerin dokunmatik ekranlardaki gibi fareyle sürüklenerek (mouse-drag) veya izleme paneliyle akıcı şekilde kaydırılabilmesi sağlandı.
+
 ---
 
 ## 📈 Proje Durumu

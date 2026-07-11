@@ -463,8 +463,8 @@ final listsForMovieProvider = StreamProvider.family<Set<int>, MovieKey>((ref, ke
 // which picks the native (Drift/SQLite) or web (in-memory) implementation.
 // Kept as free functions so existing call sites don't need to change.
 
-Future<void> createCustomList(WidgetRef ref, String name, String? description) =>
-    ref.read(movieRepositoryProvider).createCustomList(name, description);
+Future<void> createCustomList(WidgetRef ref, String name, String? description, {DateTime? targetDate}) =>
+    ref.read(movieRepositoryProvider).createCustomList(name, description, targetDate: targetDate);
 
 Future<void> updateCustomList(
   WidgetRef ref,
@@ -496,7 +496,82 @@ Future<void> reorderCustomListMovies(WidgetRef ref, int listId, Map<MovieKey, in
 
 // --- WATCH RECORD ACTIONS ---
 
-Future<void> deleteWatchRecord(WidgetRef ref, int recordId) async {
+Future<void> deleteWatchRecord(WidgetRef ref, WatchRecord record) async {
+  final recordId = record.id;
+  final authState = ref.read(authStateProvider);
+  final user = authState.value;
+
+  if (user != null) {
+    final query = await FirebaseFirestore.instance
+        .collection('logs')
+        .where('userId', isEqualTo: user.uid)
+        .where('movieId', isEqualTo: record.movieId)
+        .where('isTv', isEqualTo: record.isTv)
+        .get();
+
+    bool deleted = false;
+    for (final doc in query.docs) {
+      final data = doc.data();
+      final docWatchDate = (data['watchDate'] as Timestamp?)?.toDate();
+      
+      final isHashCodeMatch = doc.id.hashCode == recordId;
+      final isExactMatch = docWatchDate != null && 
+          docWatchDate.isAtSameMomentAs(record.watchDate) &&
+          data['watchNumber'] == record.watchNumber &&
+          data['episodeCount'] == record.episodeCount;
+          
+      if (isHashCodeMatch || isExactMatch) {
+        await doc.reference.delete();
+        deleted = true;
+        break;
+      }
+    }
+    
+    if (!deleted) {
+      throw Exception('Firestore üzerinde silinecek eşleşen kayıt bulunamadı. (Sorgulanan film ID: ${record.movieId}, Log sayısı: ${query.docs.length})');
+    }
+
+    // Recalculate movie settings progress for this user & movie/show in Firestore
+    final remainingQuery = await FirebaseFirestore.instance
+        .collection('logs')
+        .where('userId', isEqualTo: user.uid)
+        .where('movieId', isEqualTo: record.movieId)
+        .where('isTv', isEqualTo: record.isTv)
+        .get();
+
+    final settingsRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .collection('movie_settings')
+        .doc('${record.movieId}_${record.isTv}');
+
+    if (remainingQuery.docs.isEmpty) {
+      await settingsRef.set({
+        'isActivelyWatching': false,
+        'lastWatchedEpisode': null,
+      }, SetOptions(merge: true));
+    } else {
+      final remainingLogs = remainingQuery.docs.map((doc) => DiaryLogModel.fromMap(doc.data(), doc.id)).toList();
+      remainingLogs.sort((a, b) => b.watchDate.compareTo(a.watchDate));
+      
+      final latestLog = remainingLogs.first;
+      final latestWatchNumber = latestLog.watchNumber;
+      
+      final currentEpisodeProgress = remainingLogs
+          .where((log) => log.watchNumber == latestWatchNumber)
+          .fold<int>(0, (sum, log) => sum + log.episodeCount);
+          
+      final totalEpisodes = latestLog.totalEpisodes;
+      final newIsActivelyWatching = totalEpisodes == null || currentEpisodeProgress < totalEpisodes;
+
+      await settingsRef.set({
+        'isActivelyWatching': newIsActivelyWatching,
+        'lastWatchedEpisode': currentEpisodeProgress,
+      }, SetOptions(merge: true));
+    }
+    return;
+  }
+
   if (kIsWeb) {
     final notifier = ref.read(webWatchRecordsProvider.notifier);
     final currentList = ref.read(webWatchRecordsProvider);
@@ -506,14 +581,96 @@ Future<void> deleteWatchRecord(WidgetRef ref, int recordId) async {
   
   final db = ref.read(databaseProvider);
   await (db.delete(db.watchRecords)..where((t) => t.id.equals(recordId))).go();
+
+  // Recalculate Drift settings progress
+  final remainingRecords = await (db.select(db.watchRecords)
+    ..where((t) => t.movieId.equals(record.movieId) & t.isTv.equals(record.isTv))
+    ..orderBy([(t) => OrderingTerm.desc(t.watchDate)]))
+    .get();
+
+  final settingsQuery = db.select(db.userMovieSettings)
+    ..where((t) => t.tmdbId.equals(record.movieId) & t.isTv.equals(record.isTv));
+  final existingSetting = await settingsQuery.getSingleOrNull();
+
+  if (existingSetting != null) {
+    if (remainingRecords.isEmpty) {
+      await db.into(db.userMovieSettings).insertOnConflictUpdate(
+        existingSetting.copyWith(
+          isActivelyWatching: false,
+          lastWatchedEpisode: const Value(null),
+        ),
+      );
+    } else {
+      final latestRecord = remainingRecords.first;
+      final latestWatchNumber = latestRecord.watchNumber;
+      
+      final currentEpisodeProgress = remainingRecords
+          .where((r) => r.watchNumber == latestWatchNumber)
+          .fold<int>(0, (sum, r) => sum + r.episodeCount);
+
+      final movieQuery = db.select(db.movies)
+        ..where((t) => t.tmdbId.equals(record.movieId) & t.isTv.equals(record.isTv));
+      final movie = await movieQuery.getSingleOrNull();
+      final totalEpisodes = movie?.totalEpisodes;
+      
+      final newIsActivelyWatching = totalEpisodes == null || currentEpisodeProgress < totalEpisodes;
+
+      await db.into(db.userMovieSettings).insertOnConflictUpdate(
+        existingSetting.copyWith(
+          isActivelyWatching: newIsActivelyWatching,
+          lastWatchedEpisode: Value(currentEpisodeProgress),
+        ),
+      );
+    }
+  }
 }
 
 Future<void> updateWatchRecord(
   WidgetRef ref,
-  int recordId, {
+  WatchRecord record, {
   DateTime? watchDate,
   int? episodeCount,
 }) async {
+  final recordId = record.id;
+  final authState = ref.read(authStateProvider);
+  final user = authState.value;
+
+  if (user != null) {
+    final query = await FirebaseFirestore.instance
+        .collection('logs')
+        .where('userId', isEqualTo: user.uid)
+        .where('movieId', isEqualTo: record.movieId)
+        .where('isTv', isEqualTo: record.isTv)
+        .get();
+
+    for (final doc in query.docs) {
+      final data = doc.data();
+      final docWatchDate = (data['watchDate'] as Timestamp?)?.toDate();
+      
+      final isHashCodeMatch = doc.id.hashCode == recordId;
+      final isExactMatch = docWatchDate != null && 
+          docWatchDate.isAtSameMomentAs(record.watchDate) &&
+          data['watchNumber'] == record.watchNumber &&
+          data['episodeCount'] == record.episodeCount;
+
+      if (isHashCodeMatch || isExactMatch) {
+        final updates = <String, dynamic>{};
+        if (watchDate != null) {
+          updates['watchDate'] = Timestamp.fromDate(watchDate);
+        }
+        if (episodeCount != null) {
+          updates['episodeCount'] = episodeCount;
+        }
+
+        if (updates.isNotEmpty) {
+          await doc.reference.update(updates);
+        }
+        break;
+      }
+    }
+    return;
+  }
+
   if (kIsWeb) {
     final notifier = ref.read(webWatchRecordsProvider.notifier);
     final currentList = ref.read(webWatchRecordsProvider);

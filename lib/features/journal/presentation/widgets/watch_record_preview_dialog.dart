@@ -7,6 +7,8 @@ import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/database/app_database.dart';
 import '../../../../core/database/database_provider.dart';
+import '../../../../core/widgets/premium_date_picker.dart';
+import '../../../../core/widgets/premium_toast.dart';
 
 Widget _buildPreviewDetailRow(IconData icon, String label, String value, {VoidCallback? onEdit}) {
   return Row(
@@ -58,7 +60,6 @@ void showWatchRecordPreviewDialog(
       return StatefulBuilder(
         builder: (context, setState) {
           final dateStr = DateFormat('dd.MM.yyyy').format(currentDate);
-          final timeStr = DateFormat('HH:mm').format(currentDate);
 
       return Dialog(
         backgroundColor: Colors.transparent,
@@ -136,33 +137,27 @@ void showWatchRecordPreviewDialog(
               // Details Grid
               _buildPreviewDetailRow(
                 Icons.calendar_today_rounded, 
-                'Tarih & Saat', 
-                '$dateStr - $timeStr',
+                'İzleme Tarihi', 
+                dateStr,
                 onEdit: () async {
-                  final pickedDate = await showDatePicker(
-                    context: context,
+                  final pickedDate = await PremiumDatePicker.show(
+                    context,
                     initialDate: currentDate,
                     firstDate: DateTime(2000),
                     lastDate: DateTime.now(),
                   );
                   if (pickedDate != null) {
-                    final pickedTime = await showTimePicker(
-                      context: context,
-                      initialTime: TimeOfDay.fromDateTime(currentDate),
+                    final newDateTime = DateTime(
+                      pickedDate.year,
+                      pickedDate.month,
+                      pickedDate.day,
+                      currentDate.hour,
+                      currentDate.minute,
                     );
-                    if (pickedTime != null) {
-                      final newDateTime = DateTime(
-                        pickedDate.year,
-                        pickedDate.month,
-                        pickedDate.day,
-                        pickedTime.hour,
-                        pickedTime.minute,
-                      );
-                      await onUpdateDate(newDateTime);
-                      setState(() {
-                        currentDate = newDateTime;
-                      });
-                    }
+                    await onUpdateDate(newDateTime);
+                    setState(() {
+                      currentDate = newDateTime;
+                    });
                   }
                 },
               ),
@@ -256,9 +251,7 @@ void showWatchRecordPreviewDialog(
                           if (context.mounted) Navigator.pop(context);
                         } catch (e) {
                           if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Sıralama kaydedilemedi: $e')),
-                            );
+                            showPremiumToast(context, 'Sıralama kaydedilemedi: $e', isError: true);
                           }
                         }
                       },
@@ -273,9 +266,7 @@ void showWatchRecordPreviewDialog(
                           if (context.mounted) Navigator.pop(context);
                         } catch (e) {
                           if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Sıralama kaydedilemedi: $e')),
-                            );
+                            showPremiumToast(context, 'Sıralama kaydedilemedi: $e', isError: true);
                           }
                         }
                       },
@@ -346,8 +337,14 @@ void showWatchRecordPreviewDialog(
                         ),
                       );
                       if (confirm == true) {
-                        await onDelete();
-                        if (context.mounted) Navigator.pop(context);
+                        try {
+                          await onDelete();
+                          if (context.mounted) Navigator.pop(context);
+                        } catch (e) {
+                          if (context.mounted) {
+                            showPremiumToast(context, 'Silme başarısız: $e', isError: true);
+                          }
+                        }
                       }
                     },
                     child: Text(

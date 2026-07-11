@@ -21,7 +21,7 @@ class MovieDetailTimelineItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dateStr = DateFormat('dd.MM.yyyy • HH:mm').format(record.watchDate);
+    final dateStr = DateFormat('dd.MM.yyyy').format(record.watchDate);
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,

@@ -5,6 +5,8 @@ import '../../../core/network/tmdb_service.dart';
 import '../../../core/database/database_provider.dart';
 import '../../../core/database/app_database.dart';
 
+const Object _sentinel = Object();
+
 class SearchState {
   final String query;
   final List<Map<String, dynamic>> results;
@@ -34,17 +36,17 @@ class SearchState {
     String? query,
     List<Map<String, dynamic>>? results,
     bool? isLoading,
-    String? errorMessage,
-    int? selectedGenreId,
-    int? selectedYear,
+    Object? errorMessage = _sentinel,
+    Object? selectedGenreId = _sentinel,
+    Object? selectedYear = _sentinel,
   }) {
     return SearchState(
       query: query ?? this.query,
       results: results ?? this.results,
       isLoading: isLoading ?? this.isLoading,
-      errorMessage: errorMessage ?? this.errorMessage,
-      selectedGenreId: selectedGenreId ?? this.selectedGenreId,
-      selectedYear: selectedYear ?? this.selectedYear,
+      errorMessage: errorMessage == _sentinel ? this.errorMessage : (errorMessage as String?),
+      selectedGenreId: selectedGenreId == _sentinel ? this.selectedGenreId : (selectedGenreId as int?),
+      selectedYear: selectedYear == _sentinel ? this.selectedYear : (selectedYear as int?),
     );
   }
 }

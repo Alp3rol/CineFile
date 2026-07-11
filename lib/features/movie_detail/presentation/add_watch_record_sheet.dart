@@ -9,6 +9,8 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/database/database_provider.dart';
 import '../../../../core/database/app_database.dart';
+import '../../../../core/widgets/premium_date_picker.dart';
+import '../../../../core/widgets/premium_toast.dart';
 import '../../auth/controllers/auth_controller.dart';
 
 class AddWatchRecordSheet extends ConsumerStatefulWidget {
@@ -22,7 +24,6 @@ class AddWatchRecordSheet extends ConsumerStatefulWidget {
 
 class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
   late DateTime _selectedDate;
-  late TimeOfDay _selectedTime;
   double _rating = 7.0;
   String _selectedMood = '🍿';
   int _episodeCount = 1;
@@ -52,7 +53,6 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
   void initState() {
     super.initState();
     _selectedDate = DateTime.now();
-    _selectedTime = TimeOfDay.now();
     _totalEpisodes = widget.movieData['number_of_episodes'] as int?;
   }
 
@@ -111,24 +111,11 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
 
   Future<void> _pickDate() async {
     final firstDate = _earliestWatchDate;
-    final picked = await showDatePicker(
-      context: context,
+    final picked = await PremiumDatePicker.show(
+      context,
       initialDate: _selectedDate.isBefore(firstDate) ? firstDate : _selectedDate,
       firstDate: firstDate,
       lastDate: DateTime.now(),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.dark(
-              primary: AppTheme.accentColor,
-              onPrimary: Colors.white,
-              surface: AppTheme.surfaceColor,
-              onSurface: Colors.white,
-            ),
-          ),
-          child: child!,
-        );
-      },
     );
     if (picked != null) {
       setState(() {
@@ -137,41 +124,11 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
     }
   }
 
-  Future<void> _pickTime() async {
-    final picked = await showTimePicker(
-      context: context,
-      initialTime: _selectedTime,
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.dark(
-              primary: AppTheme.accentColor,
-              onPrimary: Colors.white,
-              surface: AppTheme.surfaceColor,
-              onSurface: Colors.white,
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-    if (picked != null) {
-      setState(() {
-        _selectedTime = picked;
-      });
-    }
-  }
-
   Future<void> _saveRecord() async {
     final authState = ref.read(authStateProvider);
     final user = authState.value;
     if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Lütfen önce giriş yapın.'),
-          backgroundColor: Colors.redAccent,
-        ),
-      );
+      showPremiumToast(context, 'Lütfen önce giriş yapın.', isError: true);
       return;
     }
 
@@ -181,13 +138,14 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
 
     final movieId = widget.movieData['id'] as int;
 
-    // Combine date and time
+    // Combine date and current time
+    final now = DateTime.now();
     final watchDateTime = DateTime(
       _selectedDate.year,
       _selectedDate.month,
       _selectedDate.day,
-      _selectedTime.hour,
-      _selectedTime.minute,
+      now.hour,
+      now.minute,
     );
 
     // Extract director and actors
@@ -293,21 +251,11 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
 
       if (mounted) {
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${widget.movieData['title']} günlüğünüze başarıyla eklendi!'),
-            backgroundColor: Colors.green.shade800,
-          ),
-        );
+        showPremiumToast(context, '${widget.movieData['title']} günlüğünüze başarıyla eklendi!');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Kayıt kaydedilirken hata oluştu: $e'),
-            backgroundColor: Colors.redAccent,
-          ),
-        );
+        showPremiumToast(context, 'Kayıt kaydedilirken hata oluştu: $e', isError: true);
       }
     }
   }
@@ -324,12 +272,14 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
         color: AppTheme.backgroundColor,
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
-      padding: EdgeInsets.fromLTRB(20, 20, 20, 20 + bottomInset),
+      padding: EdgeInsets.only(bottom: bottomInset),
       child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
             // Sheet Handle bar
             Center(
               child: Container(
@@ -353,7 +303,7 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
             ),
             const SizedBox(height: 18),
 
-            // Date and Time Pickers Row
+            // Date Picker Row
             Row(
               children: [
                 Expanded(
@@ -370,28 +320,6 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
                           const SizedBox(width: 10),
                           Text(
                             DateFormat('dd.MM.yyyy').format(_selectedDate),
-                            style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: InkWell(
-                    onTap: _pickTime,
-                    borderRadius: BorderRadius.circular(12),
-                    child: GlassContainer(
-                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                      borderRadius: 12,
-                      opacity: 0.5,
-                      child: Row(
-                        children: [
-                          const Icon(Icons.access_time_rounded, color: AppTheme.accentColor, size: 20),
-                          const SizedBox(width: 10),
-                          Text(
-                            _selectedTime.format(context),
                             style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
                           ),
                         ],
@@ -724,7 +652,8 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
           ],
         ),
       ),
-    );
+    ),
+  );
   }
 
   Widget _buildStepperButton({required IconData icon, required VoidCallback? onTap}) {

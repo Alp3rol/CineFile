@@ -39,11 +39,13 @@ bool _isShowCompleted(WatchRecordWithMovie item) {
 class JournalRecordsList extends ConsumerWidget {
   final List<WatchRecordWithMovie> items;
   final Future<void> Function(Map<MovieKey, int?> rankings) onUpdateRanking;
+  final ScrollController? scrollController;
 
   const JournalRecordsList({
     super.key,
     required this.items,
     required this.onUpdateRanking,
+    this.scrollController,
   });
 
   @override
@@ -71,7 +73,9 @@ class JournalRecordsList extends ConsumerWidget {
     }
 
     return ListView.builder(
+      controller: scrollController,
       padding: const EdgeInsets.only(left: 16, right: 16, top: 4, bottom: 20),
+
       itemCount: groupOrder.length,
       itemBuilder: (context, groupIndex) {
         final monthLabel = groupOrder[groupIndex];
@@ -138,9 +142,9 @@ class _JournalRecordCard extends ConsumerWidget {
           record,
           item.setting,
           onUpdateRanking: onUpdateRanking,
-          onDelete: () => deleteWatchRecord(ref, record.id),
-          onUpdateDate: (newDate) => updateWatchRecord(ref, record.id, watchDate: newDate),
-          onUpdateEpisodes: (newCount) => updateWatchRecord(ref, record.id, episodeCount: newCount),
+          onDelete: () => deleteWatchRecord(ref, record),
+          onUpdateDate: (newDate) => updateWatchRecord(ref, record, watchDate: newDate),
+          onUpdateEpisodes: (newCount) => updateWatchRecord(ref, record, episodeCount: newCount),
         ),
         child: GlassContainer(
           borderRadius: 16,

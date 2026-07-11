@@ -37,6 +37,22 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
   int get tmdbId => widget.tmdbId;
   bool get isTv => widget.isTv;
 
+  final ScrollController _scrollController = ScrollController();
+  double _scrollOffset = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (!mounted) return;
+    setState(() {
+      _scrollOffset = _scrollController.offset;
+    });
+  }
+
   // Toggle Favorite Status
   Future<void> _toggleFavorite(WidgetRef ref, Map<String, dynamic> movieData) async {
     final authState = ref.read(authStateProvider);
@@ -102,6 +118,8 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
     // Restore parent screen colors on pop.
     // Wrapped in try/catch because ref may be invalid during widget teardown in tests.
     try {
@@ -179,106 +197,91 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
           // watchRecordsForMovieProvider already orders by watchDate desc.
           final latestRecord = watchRecordsAsync.value?.firstOrNull;
 
+          final double backdropOpacity = (1.0 - (_scrollOffset / 200.0)).clamp(0.0, 1.0);
+          final double backdropTop = _scrollOffset < 0 ? 0.0 : -_scrollOffset;
+
           return Stack(
             children: [
               // 1. Blurred Backdrop Image
-              Positioned.fill(
-                child: backdropPath != null
-                    ? AppNetworkImage(
+              if (backdropOpacity > 0 && backdropPath != null)
+                Positioned(
+                  top: backdropTop,
+                  left: 0,
+                  right: 0,
+                  height: 480,
+                  child: Opacity(
+                    opacity: backdropOpacity,
+                    child: ShaderMask(
+                      shaderCallback: (rect) {
+                        return const LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.black,
+                            Colors.transparent,
+                          ],
+                          stops: [0.65, 1.0],
+                        ).createShader(Rect.fromLTRB(0, 0, rect.width, rect.height));
+                      },
+                      blendMode: BlendMode.dstIn,
+                      child: AppNetworkImage(
                         imageUrl: '${ApiConstants.imagePathOriginal}$backdropPath',
                         fit: BoxFit.cover,
-                      )
-                    : const SizedBox(),
-              ),
-              
-              // 2. Black Fading Mask
-              Positioned.fill(
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.black.withOpacity(0.4),
-                        Colors.black.withOpacity(0.85),
-                        AppTheme.backgroundColor.withOpacity(0.45),
-                      ],
-                      stops: const [0.0, 0.4, 0.75],
+                      ),
                     ),
                   ),
                 ),
-              ),
+              
+              // 2. Black Fading Mask
+              if (backdropOpacity > 0)
+                Positioned(
+                  top: backdropTop,
+                  left: 0,
+                  right: 0,
+                  height: 480,
+                  child: Opacity(
+                    opacity: backdropOpacity,
+                    child: ShaderMask(
+                      shaderCallback: (rect) {
+                        return const LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.black,
+                            Colors.transparent,
+                          ],
+                          stops: [0.65, 1.0],
+                        ).createShader(Rect.fromLTRB(0, 0, rect.width, rect.height));
+                      },
+                      blendMode: BlendMode.dstIn,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.black.withOpacity(0.4),
+                              Colors.black.withOpacity(0.85),
+                            ],
+                            stops: const [0.0, 1.0],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
 
               // 3. Main Scrollable Content
               Positioned.fill(
                 child: SafeArea(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    controller: _scrollController,
+                    padding: const EdgeInsets.fromLTRB(20, 72, 20, 16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Floating Header Buttons
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            GestureDetector(
-                              onTap: () => Navigator.pop(context),
-                              child: GlassContainer(
-                                padding: const EdgeInsets.all(8),
-                                borderRadius: 12,
-                                opacity: 0.7,
-                                child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
-                              ),
-                            ),
-                            Row(
-                              children: [
-                                // Favorite toggle button
-                                GestureDetector(
-                                  onTap: () => _toggleFavorite(ref, movieData),
-                                  child: GlassContainer(
-                                    padding: const EdgeInsets.all(8),
-                                    borderRadius: 12,
-                                    opacity: 0.7,
-                                    child: Icon(
-                                      isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-                                      color: isFavorite ? Colors.red : Colors.white,
-                                      size: 20,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                
-                                // Rank button
-                                GestureDetector(
-                                  onTap: () => showRankDialog(context, ref, tmdbId: tmdbId, isTv: isTv, movieData: movieData, settings: settingsAsync.value),
-                                  child: GlassContainer(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                                    borderRadius: 12,
-                                    opacity: 0.7,
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        const Icon(Icons.format_list_numbered_rounded, color: AppTheme.accentColor, size: 16),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          settingsAsync.value?.personalRanking != null
-                                              ? '#${settingsAsync.value!.personalRanking}'
-                                              : 'Sıra Belirle',
-                                          style: GoogleFonts.outfit(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 24),
+
 
                         // Poster, Title & Metadata row
                         Row(
@@ -553,6 +556,78 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
                           ),
                         ),
                         const SizedBox(height: 40),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              
+              // 4. Sticky Floating Header Buttons
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: GlassContainer(
+                            padding: const EdgeInsets.all(8),
+                            borderRadius: 12,
+                            opacity: 0.7,
+                            child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            // Favorite toggle button
+                            GestureDetector(
+                              onTap: () => _toggleFavorite(ref, movieData),
+                              child: GlassContainer(
+                                padding: const EdgeInsets.all(8),
+                                borderRadius: 12,
+                                opacity: 0.7,
+                                child: Icon(
+                                  isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                                  color: isFavorite ? Colors.red : Colors.white,
+                                  size: 20,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            
+                            // Rank button
+                            GestureDetector(
+                              onTap: () => showRankDialog(context, ref, tmdbId: tmdbId, isTv: isTv, movieData: movieData, settings: settingsAsync.value),
+                              child: GlassContainer(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                borderRadius: 12,
+                                opacity: 0.7,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.format_list_numbered_rounded, color: AppTheme.accentColor, size: 16),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      settingsAsync.value?.personalRanking != null
+                                          ? '#${settingsAsync.value!.personalRanking}'
+                                          : 'Sıra Belirle',
+                                      style: GoogleFonts.outfit(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ),

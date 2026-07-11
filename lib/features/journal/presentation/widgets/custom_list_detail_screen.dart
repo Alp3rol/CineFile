@@ -9,6 +9,7 @@ import '../../../../core/constants/api_constants.dart';
 import '../../../../core/database/database_provider.dart';
 import '../../../../core/database/app_database.dart';
 import '../../../movie_detail/presentation/movie_detail_screen.dart';
+import 'create_collection_dialog.dart';
 
 class CustomListDetailScreen extends ConsumerStatefulWidget {
   final CustomList list;
@@ -413,138 +414,9 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
 
   // Edit dialog
   void _showEditListDialog(BuildContext context) {
-    final nameController = TextEditingController(text: widget.list.name);
-    final descController = TextEditingController(text: widget.list.description ?? '');
-    DateTime? selectedTargetDate = widget.list.targetDate;
-
     showDialog(
       context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return AlertDialog(
-              backgroundColor: AppTheme.surfaceColor,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              title: Text(
-                'Koleksiyonu Düzenle',
-                style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  TextField(
-                    controller: nameController,
-                    style: const TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      labelText: 'Koleksiyon Adı',
-                      labelStyle: const TextStyle(color: Colors.white70),
-                      filled: true,
-                      fillColor: Colors.black26,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: descController,
-                    style: const TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      labelText: 'Açıklama',
-                      labelStyle: const TextStyle(color: Colors.white70),
-                      filled: true,
-                      fillColor: Colors.black26,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    '🏁 Maraton Hedef Tarihi:',
-                    style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white70),
-                  ),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          selectedTargetDate == null
-                              ? 'Belirlenmedi (Normal Liste)'
-                              : DateFormat('dd.MM.yyyy').format(selectedTargetDate!),
-                          style: GoogleFonts.inter(fontSize: 12, color: selectedTargetDate == null ? Colors.white30 : AppTheme.accentColor, fontWeight: FontWeight.w600),
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.calendar_today_rounded, color: Colors.white60, size: 20),
-                        onPressed: () async {
-                          final picked = await showDatePicker(
-                            context: context,
-                            initialDate: selectedTargetDate ?? DateTime.now().add(const Duration(days: 30)),
-                            firstDate: DateTime.now(),
-                            lastDate: DateTime(2030),
-                            builder: (context, child) {
-                              return Theme(
-                                data: Theme.of(context).copyWith(
-                                  colorScheme: const ColorScheme.dark(
-                                    primary: AppTheme.accentColor,
-                                    onPrimary: Colors.white,
-                                    surface: AppTheme.surfaceColor,
-                                    onSurface: Colors.white,
-                                  ),
-                                ),
-                                child: child!,
-                              );
-                            },
-                          );
-                          if (picked != null) {
-                            setDialogState(() {
-                              selectedTargetDate = picked;
-                            });
-                          }
-                        },
-                      ),
-                      if (selectedTargetDate != null)
-                        IconButton(
-                          icon: const Icon(Icons.clear_rounded, color: Colors.redAccent, size: 20),
-                          onPressed: () {
-                            setDialogState(() {
-                              selectedTargetDate = null;
-                            });
-                          },
-                        ),
-                    ],
-                  ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('İptal', style: TextStyle(color: Colors.white70)),
-                ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: AppTheme.accentColor),
-                  onPressed: () async {
-                    final name = nameController.text.trim();
-                    if (name.isNotEmpty) {
-                      await updateCustomList(
-                        ref,
-                        widget.list.id,
-                        name,
-                        descController.text.trim(),
-                        targetDate: selectedTargetDate,
-                        clearTargetDate: selectedTargetDate == null,
-                      );
-                      if (context.mounted) {
-                        Navigator.pop(context); // Close dialog
-                        Navigator.pop(context); // Go back to refresh list detail
-                      }
-                    }
-                  },
-                  child: const Text('Kaydet', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
-                ),
-              ],
-            );
-          },
-        );
-      },
+      builder: (context) => CreateCollectionDialog(list: widget.list),
     );
   }
 

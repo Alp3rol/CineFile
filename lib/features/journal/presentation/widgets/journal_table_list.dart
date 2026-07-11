@@ -81,13 +81,16 @@ class JournalRecordsTable extends ConsumerWidget {
   final List<WatchRecordWithMovie> items;
   final void Function(List<WatchRecordWithMovie> items, int oldIndex, int newIndex) onReorder;
   final Future<void> Function(Map<MovieKey, int?> rankings) onUpdateRanking;
+  final ScrollController? scrollController;
 
   const JournalRecordsTable({
     super.key,
     required this.items,
     required this.onReorder,
     required this.onUpdateRanking,
+    this.scrollController,
   });
+
 
   // Whether the show this watch record belongs to has been fully watched
   // via "Aktif İzliyorum" episode tracking (see UserMovieSettings).
@@ -114,7 +117,9 @@ class JournalRecordsTable extends ConsumerWidget {
     }
 
     return ReorderableListView.builder(
+      scrollController: scrollController,
       padding: const EdgeInsets.only(left: 16, right: 16, top: 4, bottom: 20),
+
       itemCount: items.length,
       onReorder: (oldIdx, newIdx) => onReorder(items, oldIdx, newIdx),
       buildDefaultDragHandles: false, // Turn off default handles on the right to save space
@@ -147,9 +152,9 @@ class JournalRecordsTable extends ConsumerWidget {
               record,
               item.setting,
               onUpdateRanking: onUpdateRanking,
-              onDelete: () => deleteWatchRecord(ref, record.id),
-              onUpdateDate: (newDate) => updateWatchRecord(ref, record.id, watchDate: newDate),
-              onUpdateEpisodes: (newCount) => updateWatchRecord(ref, record.id, episodeCount: newCount),
+              onDelete: () => deleteWatchRecord(ref, record),
+              onUpdateDate: (newDate) => updateWatchRecord(ref, record, watchDate: newDate),
+              onUpdateEpisodes: (newCount) => updateWatchRecord(ref, record, episodeCount: newCount),
             ),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),

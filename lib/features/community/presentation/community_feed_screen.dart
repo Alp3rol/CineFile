@@ -13,12 +13,44 @@ import 'community_feed_provider.dart';
 import '../../../core/database/database_provider.dart';
 import '../../journal/models/diary_log_model.dart';
 import 'widgets/comments_sheet.dart';
+import '../../../../core/widgets/scroll_to_top_button.dart';
+
 
 enum FeedTab { all, following }
 final feedTabProvider = StateProvider<FeedTab>((ref) => FeedTab.all);
 
-class CommunityFeedScreen extends ConsumerWidget {
+class CommunityFeedScreen extends ConsumerStatefulWidget {
   const CommunityFeedScreen({super.key});
+
+  @override
+  ConsumerState<CommunityFeedScreen> createState() => _CommunityFeedScreenState();
+}
+
+class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
+  final ScrollController _scrollController = ScrollController();
+  bool _showScrollToTop = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    final show = _scrollController.offset > 200;
+    if (show != _showScrollToTop) {
+      setState(() {
+        _showScrollToTop = show;
+      });
+    }
+  }
 
   String _formatRelativeTime(DateTime dateTime) {
     final difference = DateTime.now().difference(dateTime);
@@ -49,7 +81,7 @@ class CommunityFeedScreen extends ConsumerWidget {
     }
   }
 
-  Widget _buildTabButton(WidgetRef ref, FeedTab tab, String label) {
+  Widget _buildTabButton(FeedTab tab, String label) {
     final activeTab = ref.watch(feedTabProvider);
     final isActive = activeTab == tab;
 
@@ -79,7 +111,7 @@ class CommunityFeedScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final feedAsync = ref.watch(communityFeedProvider);
     final authState = ref.watch(authStateProvider);
     final currentUser = authState.value;
@@ -114,9 +146,9 @@ class CommunityFeedScreen extends ConsumerWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                   child: Row(
                     children: [
-                      _buildTabButton(ref, FeedTab.all, 'Tümü'),
+                      _buildTabButton(FeedTab.all, 'Tümü'),
                       const SizedBox(width: 12),
-                      _buildTabButton(ref, FeedTab.following, 'Takip Ettiklerim'),
+                      _buildTabButton(FeedTab.following, 'Takip Ettiklerim'),
                     ],
                   ),
                 ),
@@ -150,7 +182,9 @@ class CommunityFeedScreen extends ConsumerWidget {
                     }
 
                     return ListView.builder(
+                      controller: _scrollController,
                       padding: const EdgeInsets.fromLTRB(16, 8, 16, 100), // extra padding at bottom for navigation bar
+
                       itemCount: filteredLogs.length,
                       itemBuilder: (context, index) {
                         final log = filteredLogs[index];
@@ -518,6 +552,16 @@ class CommunityFeedScreen extends ConsumerWidget {
               ),
             ],
           ),
+        ),
+        floatingActionButton: ScrollToTopButton(
+          onPressed: () {
+            _scrollController.animateTo(
+              0,
+              duration: const Duration(milliseconds: 500),
+              curve: Curves.easeInOut,
+            );
+          },
+          show: _showScrollToTop,
         ),
       ),
     );

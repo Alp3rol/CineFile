@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -166,13 +167,15 @@ class AppTheme {
 
 class CineFileScrollBehavior extends MaterialScrollBehavior {
   @override
+  Set<PointerDeviceKind> get dragDevices => {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.trackpad,
+      };
+
+  @override
   Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
-    return Scrollbar(
-      controller: details.controller,
-      thickness: 4.0,
-      radius: const Radius.circular(8),
-      interactive: true,
-      child: child,
-    );
+    // Tüm otomatik scrollbar çizimlerini tamamen engelle
+    return child;
   }
 }

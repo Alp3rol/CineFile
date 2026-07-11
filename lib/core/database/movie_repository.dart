@@ -10,7 +10,7 @@ import '../../features/auth/controllers/auth_controller.dart';
 /// behind one interface, so call sites don't need to branch on kIsWeb
 /// themselves and each platform's logic lives in exactly one place.
 abstract class MovieRepository {
-  Future<void> createCustomList(String name, String? description);
+  Future<void> createCustomList(String name, String? description, {DateTime? targetDate});
   Future<void> updateCustomList(
     int id,
     String name,
@@ -35,11 +35,12 @@ class NativeMovieRepository implements MovieRepository {
   AppDatabase get _db => _ref.read(databaseProvider);
 
   @override
-  Future<void> createCustomList(String name, String? description) async {
+  Future<void> createCustomList(String name, String? description, {DateTime? targetDate}) async {
     await _db.into(_db.customLists).insert(
           CustomListsCompanion.insert(
             name: name,
             description: Value(description),
+            targetDate: Value(targetDate),
             createdAt: Value(DateTime.now()),
           ),
         );
@@ -170,7 +171,7 @@ class WebMovieRepository implements MovieRepository {
   final Ref _ref;
 
   @override
-  Future<void> createCustomList(String name, String? description) async {
+  Future<void> createCustomList(String name, String? description, {DateTime? targetDate}) async {
     final notifier = _ref.read(webCustomListsProvider.notifier);
     final map = _ref.read(webCustomListsProvider);
     final newMap = Map<int, CustomList>.from(map);
@@ -179,6 +180,7 @@ class WebMovieRepository implements MovieRepository {
       id: nextId,
       name: name,
       description: description,
+      targetDate: targetDate,
       createdAt: DateTime.now(),
     );
     notifier.state = newMap;

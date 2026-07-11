@@ -15,16 +15,48 @@ import '../../movie_detail/presentation/movie_detail_screen.dart';
 import '../../settings/presentation/settings_provider.dart';
 import '../../main_shell.dart';
 import '../../auth/presentation/widgets/user_profile_avatar_button.dart';
+import '../../../../core/widgets/scroll_to_top_button.dart';
+
 
 // Lets the user tap "Başka Öner" on the suggestion card to cycle to a
 // different unwatched title without waiting for the next calendar day.
 final _homeSuggestionSeedProvider = StateProvider<int>((ref) => 0);
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  final ScrollController _scrollController = ScrollController();
+  bool _showScrollToTop = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    final show = _scrollController.offset > 200;
+    if (show != _showScrollToTop) {
+      setState(() {
+        _showScrollToTop = show;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final watchRecordsAsync = ref.watch(allWatchRecordsProvider);
 
     // Update dynamic background based on the last 3 watched movies whenever records change
@@ -81,104 +113,123 @@ class HomeScreen extends ConsumerWidget {
       backgroundColor: Colors.transparent,
       body: SafeArea(
         bottom: false,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.only(bottom: 120), // Spacing for floating bottom bar
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Welcome Header
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Welcome Header (Sticky!)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Hoş Geldin,',
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          color: AppTheme.textSecondary,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                      Text(
+                        'CineFile',
+                        style: Theme.of(context).textTheme.displayLarge,
+                      ),
+                    ],
+                  ),
+                  const UserProfileAvatarButton(size: 40),
+                ],
+              ),
+            ),
+
+            // Scrollable Content
+            Expanded(
+              child: SingleChildScrollView(
+                controller: _scrollController,
+                padding: const EdgeInsets.only(bottom: 120), // Spacing for floating bottom bar
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Hoş Geldin,',
-                          style: GoogleFonts.inter(
-                            fontSize: 16,
-                            color: AppTheme.textSecondary,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                        Text(
-                          'CineFile',
-                          style: Theme.of(context).textTheme.displayLarge,
-                        ),
-                      ],
+                    // Stats Dashboard Section
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: _buildStatsDashboard(context, insights, weeklyGoal),
                     ),
-                    const UserProfileAvatarButton(size: 40),
+
+                    // Streak Chip (only shown once a streak actually exists)
+                    if (insights != null && insights.currentStreak >= 1) ...[
+                      const SizedBox(height: 12),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: _buildStreakChip(insights.currentStreak),
+                      ),
+                    ],
+
+                    // "Aktif İzlediklerin" quick-add row (hidden if nothing active)
+                    if ((ref.watch(activelyWatchingProvider).value ?? const []).isNotEmpty) ...[
+                      const SizedBox(height: 20),
+                      ActivelyWatchingRow(
+                        onOpenDetail: (tmdbId, isTv) => Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => MovieDetailScreen(tmdbId: tmdbId, isTv: isTv)),
+                        ),
+                      ),
+                    ],
+
+                    // "Bu Hafta Ne İzlesem?" Suggestion Card (hidden if there's
+                    // nothing unwatched in the library to suggest)
+                    if (suggestion != null) ...[
+                      const SizedBox(height: 28),
+                      _buildSuggestionSectionTitle(ref),
+                      const SizedBox(height: 12),
+                      _buildSuggestionCard(context, suggestion),
+                    ],
+
+                    const SizedBox(height: 28),
+
+                    // Recently Watched Section
+                    _buildSectionTitle(context, ref, 'Son İzlediklerim'),
+                    const SizedBox(height: 12),
+                    recentlyWatched.isEmpty
+                        ? _buildEmptySection('Henüz izleme kaydın yok. Keşfet\'ten film arayıp günlüğe ekleyebilirsin.')
+                        : _buildRecentlyWatchedList(recentlyWatched),
+
+                    // Genre Distribution (reuses the existing Insights chart card)
+                    if (insights != null && insights.topGenres.isNotEmpty) ...[
+                      const SizedBox(height: 28),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: GenreChartCard(data: insights),
+                      ),
+                    ],
+
+                    const SizedBox(height: 28),
+
+                    // Recently Added Section
+                    _buildSectionTitle(context, ref, 'Son Eklediklerim'),
+                    const SizedBox(height: 12),
+                    recentlyAdded.isEmpty
+                        ? _buildEmptySection('Henüz kütüphanene film eklemedin.')
+                        : _buildRecentlyAddedList(recentlyAdded),
                   ],
                 ),
               ),
-
-              // Stats Dashboard Section
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: _buildStatsDashboard(context, insights, weeklyGoal),
-              ),
-
-              // Streak Chip (only shown once a streak actually exists)
-              if (insights != null && insights.currentStreak >= 1) ...[
-                const SizedBox(height: 12),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: _buildStreakChip(insights.currentStreak),
-                ),
-              ],
-
-              // "Aktif İzlediklerin" quick-add row (hidden if nothing active)
-              if ((ref.watch(activelyWatchingProvider).value ?? const []).isNotEmpty) ...[
-                const SizedBox(height: 20),
-                ActivelyWatchingRow(
-                  onOpenDetail: (tmdbId, isTv) => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => MovieDetailScreen(tmdbId: tmdbId, isTv: isTv)),
-                  ),
-                ),
-              ],
-
-              // "Bu Hafta Ne İzlesem?" Suggestion Card (hidden if there's
-              // nothing unwatched in the library to suggest)
-              if (suggestion != null) ...[
-                const SizedBox(height: 28),
-                _buildSuggestionSectionTitle(ref),
-                const SizedBox(height: 12),
-                _buildSuggestionCard(context, suggestion),
-              ],
-
-              const SizedBox(height: 28),
-
-              // Recently Watched Section
-              _buildSectionTitle(context, ref, 'Son İzlediklerim'),
-              const SizedBox(height: 12),
-              recentlyWatched.isEmpty
-                  ? _buildEmptySection('Henüz izleme kaydın yok. Keşfet\'ten film arayıp günlüğe ekleyebilirsin.')
-                  : _buildRecentlyWatchedList(recentlyWatched),
-
-              // Genre Distribution (reuses the existing Insights chart card)
-              if (insights != null && insights.topGenres.isNotEmpty) ...[
-                const SizedBox(height: 28),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: GenreChartCard(data: insights),
-                ),
-              ],
-
-              const SizedBox(height: 28),
-
-              // Recently Added Section
-              _buildSectionTitle(context, ref, 'Son Eklediklerim'),
-              const SizedBox(height: 12),
-              recentlyAdded.isEmpty
-                  ? _buildEmptySection('Henüz kütüphanene film eklemedin.')
-                  : _buildRecentlyAddedList(recentlyAdded),
-            ],
-          ),
+            ),
+          ],
         ),
+      ),
+      floatingActionButton: ScrollToTopButton(
+        onPressed: () {
+          _scrollController.animateTo(
+            0,
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeInOut,
+          );
+        },
+        show: _showScrollToTop,
       ),
     );
   }
@@ -282,7 +333,10 @@ class HomeScreen extends ConsumerWidget {
                   children: [
                     Expanded(
                       child: Center(
-                        child: _buildMiniStat('Toplam İzleme', '$totalWatchCount', Icons.movie_outlined),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: _buildMiniStat('Toplam İzleme', '$totalWatchCount', Icons.movie_outlined),
+                        ),
                       ),
                     ),
                     Container(
@@ -292,11 +346,14 @@ class HomeScreen extends ConsumerWidget {
                     ),
                     Expanded(
                       child: Center(
-                        child: _buildMiniStat(
-                          'Ortalama Puan',
-                          totalWatchCount == 0 ? '-' : averageRating.toStringAsFixed(1),
-                          Icons.star_border_rounded,
-                          isRating: totalWatchCount > 0,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: _buildMiniStat(
+                            'Ortalama Puan',
+                            totalWatchCount == 0 ? '-' : averageRating.toStringAsFixed(1),
+                            Icons.star_border_rounded,
+                            isRating: totalWatchCount > 0,
+                          ),
                         ),
                       ),
                     ),

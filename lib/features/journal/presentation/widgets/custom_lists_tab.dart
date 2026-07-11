@@ -9,9 +9,11 @@ import '../../../../core/constants/api_constants.dart';
 import '../../../../core/database/database_provider.dart';
 import '../../../../core/database/app_database.dart';
 import 'custom_list_detail_screen.dart';
+import 'create_collection_dialog.dart';
 
 class CustomListsTab extends ConsumerStatefulWidget {
-  const CustomListsTab({super.key});
+  final ScrollController? scrollController;
+  const CustomListsTab({super.key, this.scrollController});
 
   @override
   ConsumerState<CustomListsTab> createState() => _CustomListsTabState();
@@ -68,7 +70,9 @@ class _CustomListsTabState extends ConsumerState<CustomListsTab>
 
               Expanded(
                 child: GridView.builder(
+                  controller: widget.scrollController,
                   padding: const EdgeInsets.only(left: 16, right: 16, bottom: 120),
+
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     crossAxisSpacing: 12,
@@ -234,67 +238,9 @@ class _CustomListsTabState extends ConsumerState<CustomListsTab>
 
   // Create List Modal Dialog
   void _showCreateListDialog(BuildContext context, WidgetRef ref) {
-    final nameController = TextEditingController();
-    final descController = TextEditingController();
-
     showDialog(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: AppTheme.surfaceColor,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: Text(
-            'Yeni Koleksiyon Oluştur',
-            style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                autofocus: true,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  labelText: 'Koleksiyon Adı',
-                  labelStyle: const TextStyle(color: Colors.white70),
-                  filled: true,
-                  fillColor: Colors.black26,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: descController,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  labelText: 'Açıklama (İsteğe Bağlı)',
-                  labelStyle: const TextStyle(color: Colors.white70),
-                  filled: true,
-                  fillColor: Colors.black26,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('İptal', style: TextStyle(color: Colors.white70)),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: AppTheme.accentColor),
-              onPressed: () async {
-                final name = nameController.text.trim();
-                if (name.isNotEmpty) {
-                  await createCustomList(ref, name, descController.text.trim());
-                  if (context.mounted) Navigator.pop(context);
-                }
-              },
-              child: const Text('Oluştur', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
-            ),
-          ],
-        );
-      },
+      builder: (context) => const CreateCollectionDialog(),
     );
   }
 

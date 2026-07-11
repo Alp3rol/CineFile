@@ -6,7 +6,8 @@ import '../constants/api_constants.dart';
 import '../database/database_provider.dart';
 import 'app_network_image.dart';
 import 'glass_container.dart';
-import 'quick_episode_dialog.dart';
+import 'premium_toast.dart';
+import '../database/episode_logging.dart';
 
 // Horizontal "Aktif İzlediklerin" strip — shared by Home and Journal so a
 // show being actively tracked (see UserMovieSettings.isActivelyWatching)
@@ -69,7 +70,20 @@ class ActivelyWatchingRow extends ConsumerWidget {
                             right: 6,
                             bottom: 6,
                             child: GestureDetector(
-                              onTap: () => showQuickEpisodeDialog(context, ref, show),
+                              onTap: () async {
+                                try {
+                                  await logNextEpisode(
+                                    ref: ref,
+                                    movie: show.movie,
+                                    setting: show.setting,
+                                    rating: show.setting.personalRanking?.toDouble() ?? 7.0,
+                                  );
+                                } catch (e) {
+                                  if (context.mounted) {
+                                    showPremiumToast(context, 'Bölüm kaydedilemedi: $e', isError: true);
+                                  }
+                                }
+                              },
                               child: GlassContainer(
                                 padding: const EdgeInsets.all(6),
                                 borderRadius: 100,

@@ -9,7 +9,8 @@ import 'widgets/insights_lists.dart';
 import 'widgets/insights_misc_cards.dart';
 
 class InsightsScreen extends ConsumerStatefulWidget {
-  const InsightsScreen({super.key});
+  final ScrollController? scrollController;
+  const InsightsScreen({super.key, this.scrollController});
 
   @override
   ConsumerState<InsightsScreen> createState() => _InsightsScreenState();
@@ -30,8 +31,10 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen>
     }
 
     return SingleChildScrollView(
+      controller: widget.scrollController,
       physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 100), // Extra bottom padding for bottom navigation bar
+
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
