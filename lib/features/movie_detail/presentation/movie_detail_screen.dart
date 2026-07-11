@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:drift/drift.dart' show Value;
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
@@ -20,6 +21,7 @@ import 'widgets/movie_detail_timeline_item.dart';
 import 'widgets/movie_watch_status_badge.dart';
 import 'widgets/rank_dialog.dart';
 import '../../journal/presentation/widgets/add_to_list_sheet.dart';
+import '../../auth/controllers/auth_controller.dart';
 
 class MovieDetailScreen extends ConsumerStatefulWidget {
   final int tmdbId;
@@ -37,110 +39,55 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
 
   // Toggle Favorite Status
   Future<void> _toggleFavorite(WidgetRef ref, Map<String, dynamic> movieData) async {
-    if (kIsWeb) {
-      final notifier = ref.read(webMovieSettingsProvider.notifier);
-      final currentMap = ref.read(webMovieSettingsProvider);
-      final key = (tmdbId: tmdbId, isTv: isTv);
-      final currentSetting = currentMap[key];
-      final isFavorite = currentSetting?.isFavorite ?? false;
+    final authState = ref.read(authStateProvider);
+    final user = authState.value;
+    if (user == null) return;
 
-      final updatedMap = Map<MovieKey, UserMovieSetting>.from(currentMap);
-      updatedMap[key] = UserMovieSetting(
-        tmdbId: tmdbId,
-        isTv: isTv,
-        isFavorite: !isFavorite,
-        isReWatchList: currentSetting?.isReWatchList ?? false,
-        personalRanking: currentSetting?.personalRanking,
-        updatedAt: DateTime.now(),
-        isActivelyWatching: currentSetting?.isActivelyWatching ?? false,
-        lastWatchedEpisode: currentSetting?.lastWatchedEpisode,
-      );
-      notifier.state = updatedMap;
-      return;
-    }
-
-    final db = ref.read(databaseProvider);
     final settings = ref.read(movieSettingsProvider((tmdbId: tmdbId, isTv: isTv))).value;
     final isFavorite = settings?.isFavorite ?? false;
 
-    // Combine crew & cast details
-    final crew = movieData['credits']?['crew'] as List<dynamic>?;
-    final directorName = crew?.where((e) => e['job'] == 'Director').firstOrNull?['name'] as String?;
-    
-    final cast = movieData['credits']?['cast'] as List<dynamic>?;
-    final actorsString = cast?.take(5).map((e) => e['name']).join(', ');
-
-    final genresData = movieData['genres'] as List<dynamic>?;
-    final genresString = genresData?.map((e) => e['name']).join(', ');
-
-    final releaseDateStr = movieData['release_date'] as String? ?? '';
-    final releaseYear = DateTime.tryParse(releaseDateStr)?.year;
-
     try {
-      // 1. Ensure movie exists. createdAt is intentionally left absent so it
-      // keeps its original insert value instead of being bumped to "now" on
-      // every favorite toggle (that would corrupt "recently added" ordering).
-      await db.into(db.movies).insertOnConflictUpdate(
-            MoviesCompanion.insert(
-              tmdbId: tmdbId,
-              title: movieData['title'] as String,
-              originalTitle: Value(movieData['original_title'] as String?),
-              posterPath: Value(movieData['poster_path'] as String?),
-              backdropPath: Value(movieData['backdrop_path'] as String?),
-              releaseYear: Value(releaseYear),
-              runtime: Value(movieData['runtime'] as int?),
-              genres: Value(genresString),
-              director: Value(directorName),
-              actors: Value(actorsString),
-              overview: Value(movieData['overview'] as String?),
-              isTv: Value(isTv),
-            ),
-          );
+      final settingsRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('movie_settings')
+          .doc('${tmdbId}_$isTv');
 
-      // 2. Insert or update user setting
-      await db.into(db.userMovieSettings).insertOnConflictUpdate(
-            UserMovieSetting(
-              tmdbId: tmdbId,
-              isTv: isTv,
-              isFavorite: !isFavorite,
-              isReWatchList: settings?.isReWatchList ?? false,
-              personalNotes: settings?.personalNotes,
-              personalTags: settings?.personalTags,
-              personalRanking: settings?.personalRanking,
-              updatedAt: DateTime.now(),
-              isActivelyWatching: settings?.isActivelyWatching ?? false,
-              lastWatchedEpisode: settings?.lastWatchedEpisode,
-            ),
-          );
+      await settingsRef.set({
+        'movieId': tmdbId,
+        'isTv': isTv,
+        'isFavorite': !isFavorite,
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
     } catch (_) {}
   }
 
   // Delete Watch Record
   Future<void> _deleteRecord(BuildContext context, WidgetRef ref, int recordId) async {
-    if (kIsWeb) {
-      final notifier = ref.read(webWatchRecordsProvider.notifier);
-      final currentList = ref.read(webWatchRecordsProvider);
-      notifier.state = currentList.where((r) => r.id != recordId).toList();
-      
+    final authState = ref.read(authStateProvider);
+    final user = authState.value;
+    if (user == null) return;
+
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('logs')
+          .where('userId', isEqualTo: user.uid)
+          .where('movieId', isEqualTo: tmdbId)
+          .where('isTv', isEqualTo: isTv)
+          .get();
+
+      for (final doc in snapshot.docs) {
+        if (doc.id.hashCode == recordId) {
+          await doc.reference.delete();
+          break;
+        }
+      }
+
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('İzleme kaydı silindi.'),
             duration: Duration(milliseconds: 1500),
-          ),
-        );
-      }
-      return;
-    }
-
-    final db = ref.read(databaseProvider);
-    try {
-      await (db.delete(db.watchRecords)..where((t) => t.id.equals(recordId))).go();
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('İzleme kaydı silindi.'),
-            duration: const Duration(milliseconds: 1500),
           ),
         );
       }

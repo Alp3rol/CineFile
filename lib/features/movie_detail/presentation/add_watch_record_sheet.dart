@@ -4,10 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:drift/drift.dart' as drift;
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/database/database_provider.dart';
 import '../../../../core/database/app_database.dart';
+import '../../auth/controllers/auth_controller.dart';
 
 class AddWatchRecordSheet extends ConsumerStatefulWidget {
   final Map<String, dynamic> movieData;
@@ -166,7 +168,22 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
   }
 
   Future<void> _saveRecord() async {
-    final db = ref.read(databaseProvider);
+    final authState = ref.read(authStateProvider);
+    final user = authState.value;
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Lütfen önce giriş yapın.'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
+
+    final userModel = ref.read(userModelProvider);
+    final username = userModel?.username ?? user.email!.split('@')[0];
+    final avatarUrl = userModel?.avatarUrl ?? 'https://api.dicebear.com/7.x/bottts/png?seed=$username';
+
     final movieId = widget.movieData['id'] as int;
 
     // Combine date and time
@@ -193,8 +210,7 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
     final releaseYear = DateTime.tryParse(releaseDateStr)?.year;
     final isTv = widget.movieData['media_type'] == 'tv';
 
-    // "Aktif İzliyorum" bookkeeping: how many episodes this record covers,
-    // and the new persisted watch-progress state for the show.
+    // Episode count
     var episodeCountForRecord = _episodeCount;
     var newIsActivelyWatching = false;
     var newLastWatchedEpisode = _lastWatchedEpisode;
@@ -212,155 +228,73 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
     }
 
     try {
-      if (kIsWeb) {
-        final watchListNotifier = ref.read(webWatchRecordsProvider.notifier);
-        final currentList = ref.read(webWatchRecordsProvider);
-
-        final existingRecords = currentList.where((r) => r.movieId == movieId && r.isTv == isTv).toList();
-        final watchNumber = existingRecords.length + 1;
-
-        final nextId = currentList.isEmpty ? 1 : currentList.map((r) => r.id).reduce((a, b) => a > b ? a : b) + 1;
-
-        final newRecord = WatchRecord(
-          id: nextId,
-          movieId: movieId,
-          isTv: isTv,
-          watchDate: watchDateTime,
-          watchPlace: _placeController.text.trim().isEmpty ? null : _placeController.text.trim(),
-          watchCompanion: _companionController.text.trim().isEmpty ? null : _companionController.text.trim(),
-          rating: _rating,
-          mood: _selectedMood,
-          notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
-          watchNumber: watchNumber,
-          tags: _tagsController.text.trim().isEmpty ? null : _tagsController.text.trim(),
-          createdAt: DateTime.now(),
-          episodeCount: episodeCountForRecord,
-        );
-
-        // Save movie metadata too
-        final moviesNotifier = ref.read(webMoviesProvider.notifier);
-        final currentMovies = ref.read(webMoviesProvider);
-        final movieKey = (tmdbId: movieId, isTv: isTv);
-        final updatedMovies = Map<MovieKey, Movie>.from(currentMovies);
-        // Preserve the existing "added at" timestamp if this movie is
-        // already in the library, instead of bumping it to "now".
-        final existingMovie = currentMovies[movieKey];
-        updatedMovies[movieKey] = Movie(
-          tmdbId: movieId,
-          title: widget.movieData['title'] as String,
-          originalTitle: widget.movieData['original_title'] as String?,
-          posterPath: widget.movieData['poster_path'] as String?,
-          backdropPath: widget.movieData['backdrop_path'] as String?,
-          releaseYear: releaseYear,
-          runtime: widget.movieData['runtime'] as int?,
-          genres: genresString,
-          director: directorName,
-          actors: actorsString,
-          overview: widget.movieData['overview'] as String?,
-          isTv: isTv,
-          createdAt: existingMovie?.createdAt ?? DateTime.now(),
-          totalEpisodes: _totalEpisodes,
-        );
-
-        moviesNotifier.state = updatedMovies;
-        watchListNotifier.state = [...currentList, newRecord];
-
-        if (isTv) {
-          final settingsNotifier = ref.read(webMovieSettingsProvider.notifier);
-          final currentSettings = ref.read(webMovieSettingsProvider);
-          final existingSetting = currentSettings[movieKey];
-          final updatedSettings = Map<MovieKey, UserMovieSetting>.from(currentSettings);
-          updatedSettings[movieKey] = UserMovieSetting(
-            tmdbId: movieId,
-            isTv: isTv,
-            isFavorite: existingSetting?.isFavorite ?? false,
-            isReWatchList: existingSetting?.isReWatchList ?? false,
-            personalRanking: existingSetting?.personalRanking,
-            personalNotes: existingSetting?.personalNotes,
-            personalTags: existingSetting?.personalTags,
-            updatedAt: DateTime.now(),
-            isActivelyWatching: newIsActivelyWatching,
-            lastWatchedEpisode: newLastWatchedEpisode,
-          );
-          settingsNotifier.state = updatedSettings;
-        }
-
-        if (mounted) {
-          Navigator.pop(context);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('${widget.movieData['title']} günlüğünüze başarıyla eklendi!'),
-              backgroundColor: Colors.green.shade800,
-            ),
-          );
-        }
-        return;
-      }
-
-      // 1. Insert movie if not exists. createdAt is intentionally absent so
-      // re-watching an existing movie doesn't bump its "added at" timestamp.
-      await db.into(db.movies).insertOnConflictUpdate(
-            MoviesCompanion.insert(
-              tmdbId: movieId,
-              title: widget.movieData['title'] as String,
-              originalTitle: drift.Value(widget.movieData['original_title'] as String?),
-              posterPath: drift.Value(widget.movieData['poster_path'] as String?),
-              backdropPath: drift.Value(widget.movieData['backdrop_path'] as String?),
-              releaseYear: drift.Value(releaseYear),
-              runtime: drift.Value(widget.movieData['runtime'] as int?),
-              genres: drift.Value(genresString),
-              director: drift.Value(directorName),
-              actors: drift.Value(actorsString),
-              overview: drift.Value(widget.movieData['overview'] as String?),
-              isTv: drift.Value(isTv),
-              totalEpisodes: drift.Value(_totalEpisodes),
-            ),
-          );
-
-      // 2. Query existing records to calculate watch number
-      final existingRecords = await (db.select(db.watchRecords)
-            ..where((t) => t.movieId.equals(movieId) & t.isTv.equals(isTv)))
+      // 1. Calculate watch number (how many times they watched this movie)
+      final existingRecordsQuery = await FirebaseFirestore.instance
+          .collection('logs')
+          .where('userId', isEqualTo: user.uid)
+          .where('movieId', isEqualTo: movieId)
+          .where('isTv', isEqualTo: isTv)
           .get();
-      final watchNumber = existingRecords.length + 1;
+      final watchNumber = existingRecordsQuery.docs.length + 1;
 
-      // 3. Insert Watch Record
-      await db.into(db.watchRecords).insert(
-            WatchRecordsCompanion.insert(
-              movieId: movieId,
-              isTv: drift.Value(isTv),
-              watchDate: watchDateTime,
-              watchPlace: drift.Value(_placeController.text.trim().isEmpty ? null : _placeController.text.trim()),
-              watchCompanion: drift.Value(_companionController.text.trim().isEmpty ? null : _companionController.text.trim()),
-              rating: _rating,
-              mood: drift.Value(_selectedMood),
-              notes: drift.Value(_notesController.text.trim().isEmpty ? null : _notesController.text.trim()),
-              watchNumber: watchNumber,
-              tags: drift.Value(_tagsController.text.trim().isEmpty ? null : _tagsController.text.trim()),
-              createdAt: drift.Value(DateTime.now()),
-              episodeCount: drift.Value(episodeCountForRecord),
-            ),
-          );
+      // 2. Generate a new log document
+      final logRef = FirebaseFirestore.instance.collection('logs').doc();
+      final logData = {
+        'id': logRef.id,
+        'userId': user.uid,
+        'username': username,
+        'userAvatarUrl': avatarUrl,
+        'movieId': movieId,
+        'isTv': isTv,
+        'watchDate': Timestamp.fromDate(watchDateTime),
+        'watchPlace': _placeController.text.trim().isEmpty ? null : _placeController.text.trim(),
+        'watchCompanion': _companionController.text.trim().isEmpty ? null : _companionController.text.trim(),
+        'rating': _rating,
+        'mood': _selectedMood,
+        'notes': _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
+        'watchNumber': watchNumber,
+        'tags': _tagsController.text.trim().isEmpty ? null : _tagsController.text.trim(),
+        'episodeCount': episodeCountForRecord,
+        'createdAt': FieldValue.serverTimestamp(),
+        'movieTitle': widget.movieData['title'] as String,
+        'movieOriginalTitle': widget.movieData['original_title'] as String?,
+        'moviePosterPath': widget.movieData['poster_path'] as String?,
+        'movieBackdropPath': widget.movieData['backdrop_path'] as String?,
+        'movieReleaseYear': releaseYear,
+        'movieRuntime': widget.movieData['runtime'] as int?,
+        'movieGenres': genresString,
+        'movieDirector': directorName,
+        'movieActors': actorsString,
+        'movieOverview': widget.movieData['overview'] as String?,
+        'movieTotalEpisodes': _totalEpisodes,
+        'starredBy': <String>[],
+        'commentCount': 0,
+      };
 
-      // 4. Update episode-tracking settings for TV shows.
-      if (isTv) {
-        final existingSetting = await (db.select(db.userMovieSettings)
-              ..where((t) => t.tmdbId.equals(movieId) & t.isTv.equals(isTv)))
-            .getSingleOrNull();
-        await db.into(db.userMovieSettings).insertOnConflictUpdate(
-              UserMovieSetting(
-                tmdbId: movieId,
-                isTv: isTv,
-                isFavorite: existingSetting?.isFavorite ?? false,
-                isReWatchList: existingSetting?.isReWatchList ?? false,
-                personalRanking: existingSetting?.personalRanking,
-                personalNotes: existingSetting?.personalNotes,
-                personalTags: existingSetting?.personalTags,
-                updatedAt: DateTime.now(),
-                isActivelyWatching: newIsActivelyWatching,
-                lastWatchedEpisode: newLastWatchedEpisode,
-              ),
-            );
-      }
+      await logRef.set(logData);
+
+      // 3. Update movie settings for favorite/rewatch status
+      final settingsRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('movie_settings')
+          .doc('${movieId}_$isTv');
+
+      final settingsDoc = await settingsRef.get();
+      final existingSetting = settingsDoc.data();
+
+      await settingsRef.set({
+        'movieId': movieId,
+        'isTv': isTv,
+        'isFavorite': existingSetting?['isFavorite'] ?? false,
+        'isReWatchList': existingSetting?['isReWatchList'] ?? false,
+        'personalRanking': existingSetting?['personalRanking'],
+        'personalNotes': existingSetting?['personalNotes'],
+        'personalTags': existingSetting?['personalTags'],
+        'updatedAt': FieldValue.serverTimestamp(),
+        'isActivelyWatching': newIsActivelyWatching,
+        'lastWatchedEpisode': newLastWatchedEpisode,
+      }, SetOptions(merge: true));
 
       if (mounted) {
         Navigator.pop(context);

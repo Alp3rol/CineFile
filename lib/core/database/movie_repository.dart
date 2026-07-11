@@ -1,8 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'app_database.dart';
 import 'database_provider.dart';
+import '../../features/auth/controllers/auth_controller.dart';
 
 /// Centralizes the native (Drift/SQLite) vs. web (in-memory) write paths
 /// behind one interface, so call sites don't need to branch on kIsWeb
@@ -135,25 +137,27 @@ class NativeMovieRepository implements MovieRepository {
   @override
   Future<void> updateWatchRecordRankings(Map<MovieKey, int?> rankings) async {
     try {
-      await _db.transaction(() async {
-        for (final entry in rankings.entries) {
-          final key = entry.key;
-          final rank = entry.value;
+      final authState = _ref.read(authStateProvider);
+      final user = authState.value;
+      if (user == null) return;
 
-          final existing = await (_db.select(_db.userMovieSettings)
-                ..where((t) => t.tmdbId.equals(key.tmdbId) & t.isTv.equals(key.isTv)))
-              .getSingleOrNull();
-          if (existing != null) {
-            await (_db.update(_db.userMovieSettings)
-                  ..where((t) => t.tmdbId.equals(key.tmdbId) & t.isTv.equals(key.isTv)))
-                .write(UserMovieSettingsCompanion(personalRanking: Value(rank)));
-          } else {
-            await _db.into(_db.userMovieSettings).insert(
-              UserMovieSettingsCompanion(tmdbId: Value(key.tmdbId), isTv: Value(key.isTv), personalRanking: Value(rank)),
-            );
-          }
-        }
-      });
+      for (final entry in rankings.entries) {
+        final key = entry.key;
+        final rank = entry.value;
+
+        final settingsRef = FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('movie_settings')
+            .doc('${key.tmdbId}_${key.isTv}');
+
+        await settingsRef.set({
+          'movieId': key.tmdbId,
+          'isTv': key.isTv,
+          'personalRanking': rank,
+          'updatedAt': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
+      }
     } catch (e, st) {
       debugPrint('updateWatchRecordRankings failed: $e\n$st');
       rethrow;
@@ -277,25 +281,31 @@ class WebMovieRepository implements MovieRepository {
 
   @override
   Future<void> updateWatchRecordRankings(Map<MovieKey, int?> rankings) async {
-    final map = _ref.read(webMovieSettingsProvider);
-    final newMap = Map<MovieKey, UserMovieSetting>.from(map);
-    for (final entry in rankings.entries) {
-      final key = entry.key;
-      final rank = entry.value;
-      final existing = newMap[key];
-      newMap[key] = UserMovieSetting(
-        tmdbId: key.tmdbId,
-        isTv: key.isTv,
-        isFavorite: existing?.isFavorite ?? false,
-        isReWatchList: existing?.isReWatchList ?? false,
-        personalNotes: existing?.personalNotes,
-        personalTags: existing?.personalTags,
-        personalRanking: rank,
-        updatedAt: DateTime.now(),
-        isActivelyWatching: existing?.isActivelyWatching ?? false,
-        lastWatchedEpisode: existing?.lastWatchedEpisode,
-      );
+    try {
+      final authState = _ref.read(authStateProvider);
+      final user = authState.value;
+      if (user == null) return;
+
+      for (final entry in rankings.entries) {
+        final key = entry.key;
+        final rank = entry.value;
+
+        final settingsRef = FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('movie_settings')
+            .doc('${key.tmdbId}_${key.isTv}');
+
+        await settingsRef.set({
+          'movieId': key.tmdbId,
+          'isTv': key.isTv,
+          'personalRanking': rank,
+          'updatedAt': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
+      }
+    } catch (e, st) {
+      debugPrint('updateWatchRecordRankings failed: $e\n$st');
+      rethrow;
     }
-    _ref.read(webMovieSettingsProvider.notifier).state = newMap;
   }
 }

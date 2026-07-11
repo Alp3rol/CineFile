@@ -1,6 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart'; // For kIsWeb
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../features/auth/controllers/auth_controller.dart';
+import '../../features/journal/models/diary_log_model.dart';
 import 'app_database.dart';
 import 'movie_repository.dart';
 
@@ -26,32 +29,56 @@ final webMoviesProvider = StateProvider<Map<MovieKey, Movie>>((ref) => {});
 
 // Stream provider to get watch records for a specific movie
 final watchRecordsForMovieProvider = StreamProvider.family<List<WatchRecord>, MovieKey>((ref, key) {
-  if (kIsWeb) {
-    final list = ref.watch(webWatchRecordsProvider);
-    final filtered = list.where((r) => r.movieId == key.tmdbId && r.isTv == key.isTv).toList();
-    // Sort descending by watchDate
-    filtered.sort((a, b) => b.watchDate.compareTo(a.watchDate));
-    return Stream.value(filtered);
+  final authState = ref.watch(authStateProvider);
+  final user = authState.value;
+  if (user == null) {
+    return Stream.value(<WatchRecord>[]);
   }
 
-  final db = ref.watch(databaseProvider);
-  return (db.select(db.watchRecords)
-        ..where((t) => t.movieId.equals(key.tmdbId) & t.isTv.equals(key.isTv))
-        ..orderBy([(t) => OrderingTerm.desc(t.watchDate)]))
-      .watch();
+  return FirebaseFirestore.instance
+      .collection('logs')
+      .where('userId', isEqualTo: user.uid)
+      .where('movieId', isEqualTo: key.tmdbId)
+      .where('isTv', isEqualTo: key.isTv)
+      .snapshots()
+      .map((snapshot) {
+        final logs = snapshot.docs.map((doc) => DiaryLogModel.fromMap(doc.data(), doc.id)).toList();
+        // Sort descending by watchDate
+        logs.sort((a, b) => b.watchDate.compareTo(a.watchDate));
+        return logs.map((log) => log.toWatchRecordWithMovie().record).toList();
+      });
 });
 
 // Stream provider to get settings for a specific movie
 final movieSettingsProvider = StreamProvider.family<UserMovieSetting?, MovieKey>((ref, key) {
-  if (kIsWeb) {
-    final map = ref.watch(webMovieSettingsProvider);
-    return Stream.value(map[key]);
+  final authState = ref.watch(authStateProvider);
+  final user = authState.value;
+  if (user == null) {
+    return Stream.value(null);
   }
 
-  final db = ref.watch(databaseProvider);
-  return (db.select(db.userMovieSettings)
-        ..where((t) => t.tmdbId.equals(key.tmdbId) & t.isTv.equals(key.isTv)))
-      .watchSingleOrNull();
+  return FirebaseFirestore.instance
+      .collection('users')
+      .doc(user.uid)
+      .collection('movie_settings')
+      .doc('${key.tmdbId}_${key.isTv}')
+      .snapshots()
+      .map((doc) {
+        if (!doc.exists) return null;
+        final data = doc.data()!;
+        return UserMovieSetting(
+          tmdbId: key.tmdbId,
+          isTv: key.isTv,
+          isFavorite: data['isFavorite'] ?? false,
+          isReWatchList: data['isReWatchList'] ?? false,
+          personalRanking: data['personalRanking'] as int?,
+          personalNotes: data['personalNotes'] as String?,
+          personalTags: data['personalTags'] as String?,
+          updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+          isActivelyWatching: data['isActivelyWatching'] ?? false,
+          lastWatchedEpisode: data['lastWatchedEpisode'] as int?,
+        );
+      });
 });
 
 // Model to represent a Watch Record joined with its Movie metadata and settings
@@ -64,110 +91,133 @@ class WatchRecordWithMovie {
 
 // Stream provider to get all watch records with movie details
 final allWatchRecordsProvider = StreamProvider<List<WatchRecordWithMovie>>((ref) {
-  if (kIsWeb) {
-    final records = ref.watch(webWatchRecordsProvider);
-    final movies = ref.watch(webMoviesProvider);
-    final settings = ref.watch(webMovieSettingsProvider);
-    
-    final list = records.map((r) {
-      final key = (tmdbId: r.movieId, isTv: r.isTv);
-      final movie = movies[key] ?? Movie(
-        tmdbId: r.movieId,
-        title: 'Bilinmeyen Film',
-        isTv: r.isTv,
-        createdAt: DateTime.now(),
-      );
-      final setting = settings[key];
-      return WatchRecordWithMovie(r, movie, setting: setting);
-    }).toList();
-
-    // Sort descending by watchDate
-    list.sort((a, b) => b.record.watchDate.compareTo(a.record.watchDate));
-    return Stream.value(list);
+  final authState = ref.watch(authStateProvider);
+  final user = authState.value;
+  if (user == null) {
+    return Stream.value(<WatchRecordWithMovie>[]);
   }
 
-  final db = ref.watch(databaseProvider);
-  final query = db.select(db.watchRecords).join([
-    leftOuterJoin(
-      db.movies,
-      db.movies.tmdbId.equalsExp(db.watchRecords.movieId) & db.movies.isTv.equalsExp(db.watchRecords.isTv),
-    ),
-    leftOuterJoin(
-      db.userMovieSettings,
-      db.userMovieSettings.tmdbId.equalsExp(db.watchRecords.movieId) &
-          db.userMovieSettings.isTv.equalsExp(db.watchRecords.isTv),
-    ),
-  ]);
-  
-  // Sort by watchDate descending
-  query.orderBy([OrderingTerm.desc(db.watchRecords.watchDate)]);
-
-  return query.watch().map((rows) {
-    return rows.map((row) {
-      return WatchRecordWithMovie(
-        row.readTable(db.watchRecords),
-        row.readTable(db.movies),
-        setting: row.readTableOrNull(db.userMovieSettings),
-      );
-    }).toList();
-  });
+  return FirebaseFirestore.instance
+      .collection('logs')
+      .where('userId', isEqualTo: user.uid)
+      .snapshots()
+      .asyncMap((snapshot) async {
+        final logs = snapshot.docs.map((doc) => DiaryLogModel.fromMap(doc.data(), doc.id)).toList();
+        // Sort descending by watchDate
+        logs.sort((a, b) => b.watchDate.compareTo(a.watchDate));
+        
+        final list = <WatchRecordWithMovie>[];
+        for (final log in logs) {
+          final key = (tmdbId: log.movieId, isTv: log.isTv);
+          
+          // Get settings from Firestore
+          final settingsDoc = await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .collection('movie_settings')
+              .doc('${key.tmdbId}_${key.isTv}')
+              .get();
+              
+          UserMovieSetting? setting;
+          if (settingsDoc.exists) {
+            final data = settingsDoc.data()!;
+            setting = UserMovieSetting(
+              tmdbId: key.tmdbId,
+              isTv: key.isTv,
+              isFavorite: data['isFavorite'] ?? false,
+              isReWatchList: data['isReWatchList'] ?? false,
+              personalRanking: data['personalRanking'] as int?,
+              personalNotes: data['personalNotes'] as String?,
+              personalTags: data['personalTags'] as String?,
+              updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+              isActivelyWatching: data['isActivelyWatching'] ?? false,
+              lastWatchedEpisode: data['lastWatchedEpisode'] as int?,
+            );
+          }
+          
+          final wRecord = log.toWatchRecordWithMovie();
+          list.add(WatchRecordWithMovie(wRecord.record, wRecord.movie, setting: setting));
+        }
+        return list;
+      });
 });
 
 // Stream provider to get a set of favorite movie IDs
 final favoriteMovieIdsProvider = StreamProvider<Set<MovieKey>>((ref) {
-  if (kIsWeb) {
-    final settings = ref.watch(webMovieSettingsProvider);
-    return Stream.value(settings.entries
-        .where((e) => e.value.isFavorite)
-        .map((e) => e.key)
-        .toSet());
+  final authState = ref.watch(authStateProvider);
+  final user = authState.value;
+  if (user == null) {
+    return Stream.value(<MovieKey>{});
   }
 
-  final db = ref.watch(databaseProvider);
-  return (db.select(db.userMovieSettings)..where((t) => t.isFavorite.equals(true)))
-      .watch()
-      .map((list) => list.map((e) => (tmdbId: e.tmdbId, isTv: e.isTv)).toSet());
+  return FirebaseFirestore.instance
+      .collection('users')
+      .doc(user.uid)
+      .collection('movie_settings')
+      .where('isFavorite', isEqualTo: true)
+      .snapshots()
+      .map((snapshot) {
+        return snapshot.docs.map((doc) {
+          final data = doc.data();
+          final movieId = data['movieId'] as int? ?? 0;
+          final isTv = data['isTv'] as bool? ?? false;
+          return (tmdbId: movieId, isTv: isTv);
+        }).toSet();
+      });
 });
 
 // Stream provider for the most recently added movies (by Movie.createdAt),
 // used by the Home screen's "Son Eklediklerim" section.
 final recentlyAddedMoviesProvider = StreamProvider<List<Movie>>((ref) {
-  if (kIsWeb) {
-    final map = ref.watch(webMoviesProvider);
-    final sorted = map.values.toList()..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    return Stream.value(sorted.take(10).toList());
-  }
-
-  final db = ref.watch(databaseProvider);
-  return (db.select(db.movies)
-        ..orderBy([(t) => OrderingTerm.desc(t.createdAt)])
-        ..limit(10))
-      .watch();
+  final watchRecordsAsync = ref.watch(allWatchRecordsProvider);
+  return watchRecordsAsync.when(
+    loading: () => Stream.value(<Movie>[]),
+    error: (err, stack) => Stream.value(<Movie>[]),
+    data: (records) {
+      final seenKeys = <MovieKey>{};
+      final movies = <Movie>[];
+      for (final r in records) {
+        final key = (tmdbId: r.movie.tmdbId, isTv: r.movie.isTv);
+        if (seenKeys.add(key)) {
+          movies.add(r.movie);
+        }
+      }
+      return Stream.value(movies.take(10).toList());
+    },
+  );
 });
 
 // Stream provider for movies that have been added to the library but have
 // no WatchRecords entry yet, used by the Home screen's "Bu Hafta Ne
-// İzlesem?" suggestion card. There is no dedicated "watchlist" flag in the
-// schema (UserMovieSettings.isReWatchList exists but is never toggled by
-// any UI), so "unwatched" is derived from the absence of a WatchRecords row.
+// İzlesem?" suggestion card.
 final unwatchedMoviesProvider = StreamProvider<List<Movie>>((ref) {
-  if (kIsWeb) {
-    final movies = ref.watch(webMoviesProvider);
-    final records = ref.watch(webWatchRecordsProvider);
-    final watchedKeys = records.map((r) => (tmdbId: r.movieId, isTv: r.isTv)).toSet();
-    return Stream.value(movies.values.where((m) => !watchedKeys.contains((tmdbId: m.tmdbId, isTv: m.isTv))).toList());
-  }
+  final watchRecordsAsync = ref.watch(allWatchRecordsProvider);
+  return watchRecordsAsync.when(
+    loading: () => Stream.value(<Movie>[]),
+    error: (err, stack) => Stream.value(<Movie>[]),
+    data: (records) {
+      final watchedKeys = records.map((r) => (tmdbId: r.movie.tmdbId, isTv: r.movie.isTv)).toSet();
 
-  final db = ref.watch(databaseProvider);
-  final query = db.select(db.movies).join([
-    leftOuterJoin(
-      db.watchRecords,
-      db.watchRecords.movieId.equalsExp(db.movies.tmdbId) & db.watchRecords.isTv.equalsExp(db.movies.isTv),
-    ),
-  ])
-    ..where(db.watchRecords.id.isNull());
+      if (kIsWeb) {
+        final movies = ref.watch(webMoviesProvider);
+        return Stream.value(movies.values.where((m) => !watchedKeys.contains((tmdbId: m.tmdbId, isTv: m.isTv))).toList());
+      }
 
-  return query.watch().map((rows) => rows.map((row) => row.readTable(db.movies)).toList());
+      final db = ref.watch(databaseProvider);
+      final query = db.select(db.movies).join([
+        leftOuterJoin(
+          db.watchRecords,
+          db.watchRecords.movieId.equalsExp(db.movies.tmdbId) & db.watchRecords.isTv.equalsExp(db.movies.isTv),
+        ),
+      ])
+        ..where(db.watchRecords.id.isNull());
+
+      return query.watch().map((rows) {
+        final list = rows.map((row) => row.readTable(db.movies)).toList();
+        return list.where((m) => !watchedKeys.contains((tmdbId: m.tmdbId, isTv: m.isTv))).toList();
+      });
+    },
+  );
 });
 
 // A TV show the user is currently tracking episode-by-episode (see
@@ -180,35 +230,55 @@ class ActivelyWatchingShow {
 }
 
 final activelyWatchingProvider = StreamProvider<List<ActivelyWatchingShow>>((ref) {
-  if (kIsWeb) {
-    final movies = ref.watch(webMoviesProvider);
-    final settings = ref.watch(webMovieSettingsProvider);
-    final list = settings.entries
-        .where((e) => e.value.isActivelyWatching)
-        .map((e) {
-          final movie = movies[e.key];
-          return movie == null ? null : ActivelyWatchingShow(movie, e.value);
-        })
-        .whereType<ActivelyWatchingShow>()
-        .toList();
-    return Stream.value(list);
+  final authState = ref.watch(authStateProvider);
+  final user = authState.value;
+  if (user == null) {
+    return Stream.value(<ActivelyWatchingShow>[]);
   }
 
-  final db = ref.watch(databaseProvider);
-  final query = db.select(db.userMovieSettings).join([
-    innerJoin(
-      db.movies,
-      db.movies.tmdbId.equalsExp(db.userMovieSettings.tmdbId) &
-          db.movies.isTv.equalsExp(db.userMovieSettings.isTv),
-    ),
-  ])
-    ..where(db.userMovieSettings.isActivelyWatching.equals(true));
-
-  return query.watch().map((rows) {
-    return rows
-        .map((row) => ActivelyWatchingShow(row.readTable(db.movies), row.readTable(db.userMovieSettings)))
-        .toList();
-  });
+  return FirebaseFirestore.instance
+      .collection('users')
+      .doc(user.uid)
+      .collection('movie_settings')
+      .where('isActivelyWatching', isEqualTo: true)
+      .snapshots()
+      .asyncMap((snapshot) async {
+        final list = <ActivelyWatchingShow>[];
+        for (final doc in snapshot.docs) {
+          final data = doc.data();
+          final movieId = data['movieId'] as int? ?? 0;
+          final isTv = data['isTv'] as bool? ?? false;
+          
+          final logSnapshot = await FirebaseFirestore.instance
+              .collection('logs')
+              .where('userId', isEqualTo: user.uid)
+              .where('movieId', isEqualTo: movieId)
+              .where('isTv', isEqualTo: isTv)
+              .limit(1)
+              .get();
+              
+          if (logSnapshot.docs.isNotEmpty) {
+            final log = DiaryLogModel.fromMap(logSnapshot.docs.first.data(), logSnapshot.docs.first.id);
+            final watchWithMovie = log.toWatchRecordWithMovie();
+            
+            final setting = UserMovieSetting(
+              tmdbId: movieId,
+              isTv: isTv,
+              isFavorite: data['isFavorite'] ?? false,
+              isReWatchList: data['isReWatchList'] ?? false,
+              personalRanking: data['personalRanking'] as int?,
+              personalNotes: data['personalNotes'] as String?,
+              personalTags: data['personalTags'] as String?,
+              updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+              isActivelyWatching: true,
+              lastWatchedEpisode: data['lastWatchedEpisode'] as int?,
+            );
+            
+            list.add(ActivelyWatchingShow(watchWithMovie.movie, setting));
+          }
+        }
+        return list;
+      });
 });
 
 // --- CUSTOM LISTS PROVIDERS AND ACTIONS ---
