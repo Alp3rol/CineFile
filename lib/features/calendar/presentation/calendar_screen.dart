@@ -6,7 +6,6 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/database/database_provider.dart';
-import '../../../../core/database/app_database.dart';
 import '../../movie_detail/presentation/movie_detail_screen.dart';
 
 class CalendarScreen extends ConsumerStatefulWidget {
@@ -205,7 +204,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         border: Border.all(
           color: isToday
               ? AppTheme.accentColor
-              : (hasRecords ? AppTheme.accentColor.withOpacity(0.3) : AppTheme.borderColor),
+              : (hasRecords ? AppTheme.accentColor.withValues(alpha: 0.3) : AppTheme.borderColor),
           width: isToday ? 1.5 : 1,
         ),
         padding: const EdgeInsets.all(4),

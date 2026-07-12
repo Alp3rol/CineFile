@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_theme.dart';
 import 'insights_provider.dart';
-import 'widgets/contribution_heatmap.dart';
 import 'widgets/insights_charts.dart';
 import 'widgets/insights_lists.dart';
 import 'widgets/insights_misc_cards.dart';
@@ -96,7 +95,7 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen>
             Icon(
               Icons.analytics_outlined,
               size: 72,
-              color: AppTheme.textSecondary.withOpacity(0.5),
+              color: AppTheme.textSecondary.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 20),
             Text(

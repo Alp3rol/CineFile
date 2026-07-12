@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/theme/app_theme.dart';
 import 'core/widgets/web_device_frame.dart';
-import 'features/main_shell.dart';
 import 'features/auth/presentation/auth_gate.dart';
 
 import 'package:firebase_core/firebase_core.dart';
@@ -12,14 +11,14 @@ import 'firebase_options.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
-    print('Initializing Firebase...');
+    debugPrint('Initializing Firebase...');
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    print('Firebase initialized successfully!');
+    debugPrint('Firebase initialized successfully!');
   } catch (e, stack) {
-    print('CRITICAL ERROR during Firebase init: $e');
-    print(stack);
+    debugPrint('CRITICAL ERROR during Firebase init: $e');
+    debugPrint(stack.toString());
   }
   
   runApp(

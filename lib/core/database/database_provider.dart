@@ -559,7 +559,7 @@ Future<void> deleteWatchRecord(WidgetRef ref, WatchRecord record) async {
       
       final currentEpisodeProgress = remainingLogs
           .where((log) => log.watchNumber == latestWatchNumber)
-          .fold<int>(0, (sum, log) => sum + log.episodeCount);
+          .fold<int>(0, (acc, log) => acc + log.episodeCount);
           
       final totalEpisodes = latestLog.totalEpisodes;
       final newIsActivelyWatching = totalEpisodes == null || currentEpisodeProgress < totalEpisodes;
@@ -606,7 +606,7 @@ Future<void> deleteWatchRecord(WidgetRef ref, WatchRecord record) async {
       
       final currentEpisodeProgress = remainingRecords
           .where((r) => r.watchNumber == latestWatchNumber)
-          .fold<int>(0, (sum, r) => sum + r.episodeCount);
+          .fold<int>(0, (acc, r) => acc + r.episodeCount);
 
       final movieQuery = db.select(db.movies)
         ..where((t) => t.tmdbId.equals(record.movieId) & t.isTv.equals(record.isTv));

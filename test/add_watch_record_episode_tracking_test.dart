@@ -184,7 +184,7 @@ void main() {
         home: Scaffold(
           body: JournalRecordsTable(
             items: [WatchRecordWithMovie(watchWithMovie.record, movie, setting: setting)],
-            onReorder: (items, oldIndex, newIndex) {},
+            onReorderItem: (items, oldIndex, newIndex) {},
             onUpdateRanking: (_) async {},
           ),
         ),

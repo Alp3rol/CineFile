@@ -10,7 +10,6 @@ import 'widgets/journal_filter_bar.dart';
 import 'widgets/journal_record_list.dart';
 import 'widgets/journal_table_list.dart';
 import '../../insights/presentation/insights_screen.dart';
-import '../../search/presentation/search_screen.dart';
 import '../../settings/presentation/settings_provider.dart';
 import '../../auth/presentation/widgets/user_profile_avatar_button.dart';
 import '../../../../core/widgets/scroll_to_top_button.dart';
@@ -26,7 +25,7 @@ class JournalScreen extends ConsumerStatefulWidget {
 class _JournalScreenState extends ConsumerState<JournalScreen>
     with SingleTickerProviderStateMixin {
   String _searchQuery = '';
-  String _activeFilter = 'all'; // all, favorites, cinema, notes
+  final String _activeFilter = 'all'; // all, favorites, cinema, notes
   String _sortColumn = 'personal_ranking'; // table view only
   bool _sortAscending = true;
   bool _showSearch = false; // search bar toggled by search icon
@@ -138,9 +137,6 @@ class _JournalScreenState extends ConsumerState<JournalScreen>
 
   // Handle Drag and Drop ranking changes (table view only)
   void _onReorder(List<WatchRecordWithMovie> list, int oldIndex, int newIndex) async {
-    if (newIndex > oldIndex) {
-      newIndex -= 1;
-    }
     if (oldIndex == newIndex) return;
 
     // Find the latest watch record ID for each unique movie (tmdbId, isTv) (based on watchDate)
@@ -225,7 +221,8 @@ class _JournalScreenState extends ConsumerState<JournalScreen>
     final isTableView = ref.watch(journalViewModeProvider);
 
     final favorites = favoriteIdsAsync.value ?? {};
-    // Register callback to sync scroll offset status after build (for view mode toggle)
+
+    // Register callback to sync scroll offset status after build (for view mode toggle)
     WidgetsBinding.instance.addPostFrameCallback((_) => _onTabOrScrollChange());
 
     return Scaffold(
@@ -262,7 +259,7 @@ class _JournalScreenState extends ConsumerState<JournalScreen>
                           width: 36,
                           height: 36,
                           decoration: BoxDecoration(
-                            color: _showSearch ? AppTheme.accentColor.withOpacity(0.2) : Colors.white10,
+                            color: _showSearch ? AppTheme.accentColor.withValues(alpha: 0.2) : Colors.white10,
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
@@ -293,7 +290,7 @@ class _JournalScreenState extends ConsumerState<JournalScreen>
                 indicatorSize: TabBarIndicatorSize.tab,
                 dividerColor: Colors.transparent,
                 splashBorderRadius: BorderRadius.circular(12),
-                overlayColor: WidgetStateProperty.all(Colors.white.withOpacity(0.05)),
+                overlayColor: WidgetStateProperty.all(Colors.white.withValues(alpha: 0.05)),
                 indicator: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
                   color: AppTheme.accentColor,
@@ -522,7 +519,7 @@ class _JournalScreenState extends ConsumerState<JournalScreen>
                                   Expanded(
                                     child: JournalRecordsTable(
                                       items: filtered,
-                                      onReorder: _onReorder,
+                                      onReorderItem: _onReorder,
                                       onUpdateRanking: _updateRankingsInDatabase,
                                       scrollController: _scrollController2,
                                     ),
@@ -631,7 +628,7 @@ class _JournalScreenState extends ConsumerState<JournalScreen>
           Icon(
             _activeFilter != 'all' ? Icons.search_off_rounded : Icons.menu_book_rounded,
             size: 56,
-            color: AppTheme.textSecondary.withOpacity(0.3),
+            color: AppTheme.textSecondary.withValues(alpha: 0.3),
           ),
           const SizedBox(height: 12),
           Text(

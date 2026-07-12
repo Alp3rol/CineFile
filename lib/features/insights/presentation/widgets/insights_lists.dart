@@ -43,7 +43,7 @@ class LeadersCard extends StatelessWidget {
               margin: const EdgeInsets.only(bottom: 8),
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.03),
+                color: Colors.white.withValues(alpha: 0.03),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
@@ -143,7 +143,7 @@ class BadgesSection extends StatelessWidget {
               borderRadius: 16,
               opacity: badge.isUnlocked ? 0.65 : 0.25,
               border: Border.all(
-                color: badge.isUnlocked ? AppTheme.accentColor.withOpacity(0.5) : Colors.white10,
+                color: badge.isUnlocked ? AppTheme.accentColor.withValues(alpha: 0.5) : Colors.white10,
                 width: badge.isUnlocked ? 1.5 : 0.5,
               ),
               padding: const EdgeInsets.all(12),
@@ -155,7 +155,7 @@ class BadgesSection extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: badge.isUnlocked ? AppTheme.accentColor.withOpacity(0.15) : Colors.white.withOpacity(0.04),
+                          color: badge.isUnlocked ? AppTheme.accentColor.withValues(alpha: 0.15) : Colors.white.withValues(alpha: 0.04),
                           shape: BoxShape.circle,
                         ),
                         child: Text(
@@ -198,7 +198,7 @@ class BadgesSection extends StatelessWidget {
                           borderRadius: BorderRadius.circular(2),
                           child: LinearProgressIndicator(
                             value: badge.progress,
-                            backgroundColor: Colors.white.withOpacity(0.04),
+                            backgroundColor: Colors.white.withValues(alpha: 0.04),
                             valueColor: AlwaysStoppedAnimation<Color>(
                               badge.isUnlocked ? AppTheme.accentColor : Colors.grey.shade700,
                             ),
@@ -264,7 +264,7 @@ class TagsSection extends StatelessWidget {
               return Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.04),
+                  color: Colors.white.withValues(alpha: 0.04),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(color: Colors.white10, width: 0.5),
                 ),

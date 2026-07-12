@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/widgets/app_network_image.dart';
-import 'package:intl/intl.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/database/database_provider.dart';
 import '../../../../core/database/app_database.dart';
@@ -100,7 +98,7 @@ class _CustomListsTabState extends ConsumerState<CustomListsTab>
 
     return moviesAsync.when(
       loading: () => const Card(color: Colors.black26),
-      error: (_, __) => const Card(color: Colors.black26),
+      error: (error, stackTrace) => const Card(color: Colors.black26),
       data: (movies) {
         final totalCount = movies.length;
         final watchedCount =
@@ -153,8 +151,8 @@ class _CustomListsTabState extends ConsumerState<CustomListsTab>
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
-                          Colors.black.withOpacity(0.1),
-                          Colors.black.withOpacity(0.85),
+                          Colors.black.withValues(alpha: 0.1),
+                          Colors.black.withValues(alpha: 0.85),
                         ],
                       ),
                     ),
@@ -255,7 +253,7 @@ class _CustomListsTabState extends ConsumerState<CustomListsTab>
             Icon(
               Icons.collections_bookmark_rounded,
               size: 64,
-              color: AppTheme.textSecondary.withOpacity(0.3),
+              color: AppTheme.textSecondary.withValues(alpha: 0.3),
             ),
             const SizedBox(height: 16),
             Text(

@@ -13,7 +13,7 @@ class AppTheme {
   static const Color textPrimary = Color(0xFFFFFFFF);
   static const Color textSecondary = Color(0xFF9BA3B4); // Blue Grey
   // Faint white hairline border (~6% opacity), baked into the constant so
-  // call sites use it directly instead of stacking another .withOpacity() on top.
+  // call sites use it directly instead of stacking another .withValues(alpha: ) on top.
   static const Color borderColor = Color(0x0FFFFFFF);
 
   static ThemeData get darkTheme {
@@ -30,11 +30,9 @@ class AppTheme {
         primary: accentColor,
         secondary: ratingColor,
         surface: surfaceColor,
-        background: backgroundColor,
         onPrimary: Colors.white,
         onSecondary: Colors.black,
         onSurface: textPrimary,
-        onBackground: textPrimary,
         outline: borderColor,
       ),
 
@@ -94,17 +92,17 @@ class AppTheme {
 
       // Navigation Bar Theme (Glassmorphism base)
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: backgroundColor.withOpacity(0.8),
-        indicatorColor: accentColor.withOpacity(0.2),
+        backgroundColor: backgroundColor.withValues(alpha: 0.8),
+        indicatorColor: accentColor.withValues(alpha: 0.2),
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-        labelTextStyle: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) {
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
             return GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: accentColor);
           }
           return GoogleFonts.inter(fontSize: 12, color: textSecondary);
         }),
-        iconTheme: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) {
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
             return const IconThemeData(color: accentColor, size: 26);
           }
           return const IconThemeData(color: textSecondary, size: 24);
@@ -148,16 +146,16 @@ class AppTheme {
         activeTrackColor: accentColor,
         inactiveTrackColor: borderColor,
         thumbColor: ratingColor,
-        overlayColor: ratingColor.withOpacity(0.2),
+        overlayColor: ratingColor.withValues(alpha: 0.2),
         valueIndicatorColor: surfaceColor,
         valueIndicatorTextStyle: GoogleFonts.outfit(color: textPrimary),
       ),
 
       // Scrollbar Theme (Thin and Premium)
       scrollbarTheme: ScrollbarThemeData(
-        thumbColor: MaterialStateProperty.all(Colors.white.withOpacity(0.12)),
-        trackColor: MaterialStateProperty.all(Colors.transparent),
-        thickness: MaterialStateProperty.all(4.0), // Thin scrollbar
+        thumbColor: WidgetStateProperty.all(Colors.white.withValues(alpha: 0.12)),
+        trackColor: WidgetStateProperty.all(Colors.transparent),
+        thickness: WidgetStateProperty.all(4.0), // Thin scrollbar
         radius: const Radius.circular(8),
         interactive: true,
       ),

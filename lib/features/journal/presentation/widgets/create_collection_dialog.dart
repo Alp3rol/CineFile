@@ -95,7 +95,7 @@ class _CreateCollectionDialogState extends ConsumerState<CreateCollectionDialog>
         borderRadius: 24,
         padding: const EdgeInsets.all(24),
         border: Border.all(
-          color: Colors.white.withOpacity(0.08),
+          color: Colors.white.withValues(alpha: 0.08),
           width: 1.5,
         ),
         child: Column(
@@ -110,21 +110,21 @@ class _CreateCollectionDialogState extends ConsumerState<CreateCollectionDialog>
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
                     colors: [
-                      AppTheme.accentColor.withOpacity(0.2),
-                      AppTheme.ratingColor.withOpacity(0.1),
+                      AppTheme.accentColor.withValues(alpha: 0.2),
+                      AppTheme.ratingColor.withValues(alpha: 0.1),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: AppTheme.accentColor.withOpacity(0.15),
+                      color: AppTheme.accentColor.withValues(alpha: 0.15),
                       blurRadius: 15,
                       spreadRadius: 2,
                     ),
                   ],
                   border: Border.all(
-                    color: AppTheme.accentColor.withOpacity(0.3),
+                    color: AppTheme.accentColor.withValues(alpha: 0.3),
                     width: 1.5,
                   ),
                 ),
@@ -213,12 +213,12 @@ class _CreateCollectionDialogState extends ConsumerState<CreateCollectionDialog>
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.15),
+                  color: Colors.black.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: _selectedTargetDate != null
-                        ? AppTheme.accentColor.withOpacity(0.3)
-                        : Colors.white.withOpacity(0.06),
+                        ? AppTheme.accentColor.withValues(alpha: 0.3)
+                        : Colors.white.withValues(alpha: 0.06),
                   ),
                 ),
                 child: Row(
@@ -268,7 +268,7 @@ class _CreateCollectionDialogState extends ConsumerState<CreateCollectionDialog>
                     onPressed: () => Navigator.pop(context),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.white70,
-                      side: BorderSide(color: Colors.white.withOpacity(0.12)),
+                      side: BorderSide(color: Colors.white.withValues(alpha: 0.12)),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
@@ -293,7 +293,7 @@ class _CreateCollectionDialogState extends ConsumerState<CreateCollectionDialog>
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: AppTheme.accentColor.withOpacity(0.3),
+                          color: AppTheme.accentColor.withValues(alpha: 0.3),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),

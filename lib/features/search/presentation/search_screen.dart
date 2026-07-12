@@ -130,7 +130,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   borderRadius: 12,
                   opacity: 0.8,
                   border: Border.all(
-                    color: Colors.amber.withOpacity(0.3),
+                    color: Colors.amber.withValues(alpha: 0.3),
                     width: 1,
                   ),
                   child: Row(
@@ -307,7 +307,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             Icon(
               Icons.explore_outlined,
               size: 64,
-              color: AppTheme.textSecondary.withOpacity(0.5),
+              color: AppTheme.textSecondary.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 12),
             Text(
@@ -369,7 +369,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             Icon(
               Icons.search_off_rounded,
               size: 64,
-              color: AppTheme.textSecondary.withOpacity(0.5),
+              color: AppTheme.textSecondary.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 12),
             Text(

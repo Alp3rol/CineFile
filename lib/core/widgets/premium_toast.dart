@@ -96,10 +96,10 @@ class _PremiumToastWidgetState extends State<_PremiumToastWidget> with SingleTic
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
-                    color: (widget.isError ? Colors.redAccent : AppTheme.accentColor).withOpacity(0.08),
+                    color: (widget.isError ? Colors.redAccent : AppTheme.accentColor).withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(
-                      color: (widget.isError ? Colors.redAccent : AppTheme.accentColor).withOpacity(0.24),
+                      color: (widget.isError ? Colors.redAccent : AppTheme.accentColor).withValues(alpha: 0.24),
                       width: 1.2,
                     ),
                   ),

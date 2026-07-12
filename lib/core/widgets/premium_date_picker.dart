@@ -24,7 +24,7 @@ class PremiumDatePicker extends StatefulWidget {
   }) {
     return showDialog<DateTime>(
       context: context,
-      barrierColor: Colors.black.withOpacity(0.6),
+      barrierColor: Colors.black.withValues(alpha: 0.6),
       builder: (context) => PremiumDatePicker(
         initialDate: initialDate,
         firstDate: firstDate,
@@ -106,7 +106,7 @@ class _PremiumDatePickerState extends State<PremiumDatePicker> {
         borderRadius: 24,
         padding: const EdgeInsets.all(20),
         border: Border.all(
-          color: Colors.white.withOpacity(0.08),
+          color: Colors.white.withValues(alpha: 0.08),
           width: 1.5,
         ),
         width: 320,
@@ -166,7 +166,7 @@ class _PremiumDatePickerState extends State<PremiumDatePicker> {
                     textAlign: TextAlign.center,
                     style: GoogleFonts.inter(
                       fontSize: 12,
-                      color: AppTheme.textSecondary.withOpacity(0.7),
+                      color: AppTheme.textSecondary.withValues(alpha: 0.7),
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -215,12 +215,12 @@ class _PremiumDatePickerState extends State<PremiumDatePicker> {
                       shape: BoxShape.circle,
                       color: isSelected ? AppTheme.accentColor : Colors.transparent,
                       border: isToday && !isSelected
-                          ? Border.all(color: AppTheme.ratingColor.withOpacity(0.6), width: 1.5)
+                          ? Border.all(color: AppTheme.ratingColor.withValues(alpha: 0.6), width: 1.5)
                           : null,
                       boxShadow: isSelected
                           ? [
                               BoxShadow(
-                                color: AppTheme.accentColor.withOpacity(0.3),
+                                color: AppTheme.accentColor.withValues(alpha: 0.3),
                                 blurRadius: 6,
                               )
                             ]
@@ -237,7 +237,7 @@ class _PremiumDatePickerState extends State<PremiumDatePicker> {
                                 ? Colors.white
                                 : isToday
                                     ? AppTheme.ratingColor
-                                    : Colors.white.withOpacity(0.9),
+                                    : Colors.white.withValues(alpha: 0.9),
                       ),
                     ),
                   ),
@@ -254,7 +254,7 @@ class _PremiumDatePickerState extends State<PremiumDatePicker> {
                     onPressed: () => Navigator.pop(context),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.white70,
-                      side: BorderSide(color: Colors.white.withOpacity(0.1)),
+                      side: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),

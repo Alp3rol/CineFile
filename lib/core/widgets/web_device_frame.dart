@@ -102,9 +102,9 @@ class _WebDeviceFrameState extends State<WebDeviceFrame> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.06),
+                            color: Colors.white.withValues(alpha: 0.06),
                             borderRadius: BorderRadius.circular(30),
-                            border: Border.all(color: Colors.white.withOpacity(0.1)),
+                            border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -146,9 +146,9 @@ class _WebDeviceFrameState extends State<WebDeviceFrame> {
                         decoration: BoxDecoration(
                           color: const Color(0xFF1C1C1E),
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.white.withOpacity(0.1)),
+                          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
                           boxShadow: [
-                            BoxShadow(color: Colors.black.withOpacity(0.6), blurRadius: 30, offset: const Offset(0, 15)),
+                            BoxShadow(color: Colors.black.withValues(alpha: 0.6), blurRadius: 30, offset: const Offset(0, 15)),
                           ],
                         ),
                         constraints: const BoxConstraints(maxHeight: 450),
@@ -162,7 +162,7 @@ class _WebDeviceFrameState extends State<WebDeviceFrame> {
                                 child: Container(
                                   width: double.infinity,
                                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                                  color: isSelected ? Colors.white.withOpacity(0.06) : Colors.transparent,
+                                  color: isSelected ? Colors.white.withValues(alpha: 0.06) : Colors.transparent,
                                   child: Row(
                                     children: [
                                       Icon(
@@ -241,9 +241,9 @@ class _PhoneFrame extends StatelessWidget {
               decoration: BoxDecoration(
                 color: const Color(0xFF1C1C1E),
                 borderRadius: BorderRadius.circular(cornerRadius),
-                border: Border.all(color: Colors.white.withOpacity(0.2), width: 1.5),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1.5),
                 boxShadow: [
-                  BoxShadow(color: Colors.black.withOpacity(0.5), blurRadius: 40, spreadRadius: 10),
+                  BoxShadow(color: Colors.black.withValues(alpha: 0.5), blurRadius: 40, spreadRadius: 10),
                 ],
               ),
             ),
@@ -290,7 +290,7 @@ class _GridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.white.withOpacity(0.025)
+      ..color = Colors.white.withValues(alpha: 0.025)
       ..strokeWidth = 1;
     const spacing = 40.0;
     for (double x = 0; x < size.width; x += spacing) {

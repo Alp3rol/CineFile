@@ -50,7 +50,7 @@ class DynamicBackgroundWrapper extends ConsumerWidget {
                 center: Alignment.topLeft,
                 radius: 1.3,
                 colors: [
-                  color1.withOpacity(0.20),
+                  color1.withValues(alpha: 0.20),
                   Colors.transparent,
                 ],
               ),
@@ -68,7 +68,7 @@ class DynamicBackgroundWrapper extends ConsumerWidget {
                 center: const Alignment(0.8, -0.3),
                 radius: 1.1,
                 colors: [
-                  color2.withOpacity(0.16),
+                  color2.withValues(alpha: 0.16),
                   Colors.transparent,
                 ],
               ),
@@ -86,7 +86,7 @@ class DynamicBackgroundWrapper extends ConsumerWidget {
                 center: const Alignment(-0.8, 0.3),
                 radius: 1.1,
                 colors: [
-                  color3.withOpacity(0.16),
+                  color3.withValues(alpha: 0.16),
                   Colors.transparent,
                 ],
               ),
@@ -104,7 +104,7 @@ class DynamicBackgroundWrapper extends ConsumerWidget {
                 center: Alignment.bottomRight,
                 radius: 1.3,
                 colors: [
-                  color4.withOpacity(0.20),
+                  color4.withValues(alpha: 0.20),
                   Colors.transparent,
                 ],
               ),
@@ -115,7 +115,7 @@ class DynamicBackgroundWrapper extends ConsumerWidget {
         // 3. Subdued Dimming Overlay to ensure text readability
         Positioned.fill(
           child: Container(
-            color: Colors.black.withOpacity(0.12),
+            color: Colors.black.withValues(alpha: 0.12),
           ),
         ),
 

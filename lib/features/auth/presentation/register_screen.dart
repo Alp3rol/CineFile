@@ -215,7 +215,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              disabledBackgroundColor: AppTheme.accentColor.withOpacity(0.5),
+                              disabledBackgroundColor: AppTheme.accentColor.withValues(alpha: 0.5),
                             ),
                             child: _isLoading
                                 ? const SizedBox(

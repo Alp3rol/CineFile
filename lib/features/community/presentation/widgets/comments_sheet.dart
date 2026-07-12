@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -88,11 +89,11 @@ class _CommentsSheetState extends ConsumerState<CommentsSheet> {
 
     // Scroll to bottom
     if (_scrollController.hasClients) {
-      _scrollController.animateTo(
+      unawaited(_scrollController.animateTo(
         _scrollController.position.maxScrollExtent + 80,
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeOut,
-      );
+      ));
     }
   }
 
@@ -307,7 +308,7 @@ class _CommentsSheetState extends ConsumerState<CommentsSheet> {
                   Expanded(
                     child: Container(
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.05),
+                        color: Colors.white.withValues(alpha: 0.05),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(color: Colors.white10),
                       ),

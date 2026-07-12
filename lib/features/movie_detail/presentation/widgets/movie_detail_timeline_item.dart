@@ -52,7 +52,7 @@ class MovieDetailTimelineItem extends StatelessWidget {
               Container(
                 width: 2,
                 height: 100, // Fixed height connecting timeline items
-                color: AppTheme.accentColor.withOpacity(0.5),
+                color: AppTheme.accentColor.withValues(alpha: 0.5),
               ),
           ],
         ),
@@ -138,7 +138,7 @@ class MovieDetailTimelineItem extends StatelessWidget {
                   // Notes (if any) & delete button
                   if (record.notes != null) ...[
                     const SizedBox(height: 8),
-                    Divider(color: Colors.white.withOpacity(0.1)),
+                    Divider(color: Colors.white.withValues(alpha: 0.1)),
                     const SizedBox(height: 4),
                     Text(
                       record.notes!,

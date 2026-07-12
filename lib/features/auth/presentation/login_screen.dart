@@ -169,7 +169,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              disabledBackgroundColor: AppTheme.accentColor.withOpacity(0.5),
+                              disabledBackgroundColor: AppTheme.accentColor.withValues(alpha: 0.5),
                             ),
                             child: _isLoading
                                 ? const SizedBox(

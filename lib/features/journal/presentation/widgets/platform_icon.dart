@@ -11,7 +11,7 @@ Widget buildPlatformIcon(String? place) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 0.5),
       decoration: BoxDecoration(
-        color: Colors.red.withOpacity(0.2),
+        color: Colors.red.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(2),
         border: Border.all(color: Colors.red, width: 0.5),
       ),
@@ -34,7 +34,7 @@ Widget buildPlatformIcon(String? place) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 0.5),
       decoration: BoxDecoration(
-        color: Colors.blue.withOpacity(0.2),
+        color: Colors.blue.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(2),
         border: Border.all(color: Colors.blue, width: 0.5),
       ),

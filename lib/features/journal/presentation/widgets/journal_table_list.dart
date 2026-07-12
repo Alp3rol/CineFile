@@ -79,14 +79,14 @@ class JournalHeaderCell extends StatelessWidget {
 // can switch between the two).
 class JournalRecordsTable extends ConsumerWidget {
   final List<WatchRecordWithMovie> items;
-  final void Function(List<WatchRecordWithMovie> items, int oldIndex, int newIndex) onReorder;
+  final void Function(List<WatchRecordWithMovie> items, int oldIndex, int newIndex) onReorderItem;
   final Future<void> Function(Map<MovieKey, int?> rankings) onUpdateRanking;
   final ScrollController? scrollController;
 
   const JournalRecordsTable({
     super.key,
     required this.items,
-    required this.onReorder,
+    required this.onReorderItem,
     required this.onUpdateRanking,
     this.scrollController,
   });
@@ -121,7 +121,7 @@ class JournalRecordsTable extends ConsumerWidget {
       padding: const EdgeInsets.only(left: 16, right: 16, top: 4, bottom: 20),
 
       itemCount: items.length,
-      onReorder: (oldIdx, newIdx) => onReorder(items, oldIdx, newIdx),
+      onReorderItem: (oldIdx, newIdx) => onReorderItem(items, oldIdx, newIdx),
       buildDefaultDragHandles: false, // Turn off default handles on the right to save space
       itemBuilder: (context, index) {
         final item = items[index];
@@ -232,7 +232,7 @@ class JournalRecordsTable extends ConsumerWidget {
                                   style: GoogleFonts.inter(
                                     fontSize: 10,
                                     fontWeight: FontWeight.w600,
-                                    color: AppTheme.accentColor.withOpacity(0.85),
+                                    color: AppTheme.accentColor.withValues(alpha: 0.85),
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -300,7 +300,7 @@ class JournalRecordsTable extends ConsumerWidget {
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.05),
+                            color: Colors.white.withValues(alpha: 0.05),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Row(

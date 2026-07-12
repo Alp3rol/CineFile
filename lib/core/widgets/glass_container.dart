@@ -37,7 +37,7 @@ class GlassContainer extends StatelessWidget {
       decoration: BoxDecoration(
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 40,
             offset: const Offset(0, 20),
           ),
@@ -50,7 +50,7 @@ class GlassContainer extends StatelessWidget {
           child: Container(
             padding: padding,
             decoration: BoxDecoration(
-              color: AppTheme.surfaceColor.withOpacity(opacity),
+              color: AppTheme.surfaceColor.withValues(alpha: opacity),
               borderRadius: BorderRadius.circular(borderRadius),
               border: border ?? Border.all(
                 color: AppTheme.borderColor,

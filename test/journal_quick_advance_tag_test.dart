@@ -80,7 +80,7 @@ void main() {
               final items = ref.watch(allWatchRecordsProvider).value ?? const [];
               return JournalRecordsTable(
                 items: items,
-                onReorder: (list, oldIndex, newIndex) {},
+                onReorderItem: (list, oldIndex, newIndex) {},
                 onUpdateRanking: (_) async {},
               );
             }),

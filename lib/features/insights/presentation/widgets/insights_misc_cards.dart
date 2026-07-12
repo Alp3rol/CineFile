@@ -120,7 +120,7 @@ class TimeOfDayCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
               value: total > 0 ? count / total : 0,
-              backgroundColor: Colors.white.withOpacity(0.05),
+              backgroundColor: Colors.white.withValues(alpha: 0.05),
               valueColor: AlwaysStoppedAnimation<Color>(color),
               minHeight: 6,
             ),
@@ -267,7 +267,7 @@ class _TimeVisualizerCardState extends State<TimeVisualizerCard> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.05),
+                  color: Colors.white.withValues(alpha: 0.05),
                   shape: BoxShape.circle,
                 ),
                 child: Text(
@@ -284,7 +284,7 @@ class _TimeVisualizerCardState extends State<TimeVisualizerCard> {
                       selected.text,
                       style: GoogleFonts.inter(
                         fontSize: 12,
-                        color: Colors.white.withOpacity(0.85),
+                        color: Colors.white.withValues(alpha: 0.85),
                         height: 1.4,
                       ),
                     ),
@@ -293,7 +293,7 @@ class _TimeVisualizerCardState extends State<TimeVisualizerCard> {
                       'Ama film/dizi izlemek de harika bir tercih! 🎬',
                       style: GoogleFonts.inter(
                         fontSize: 9,
-                        color: AppTheme.textSecondary.withOpacity(0.7),
+                        color: AppTheme.textSecondary.withValues(alpha: 0.7),
                         fontStyle: FontStyle.italic,
                       ),
                     ),
@@ -336,7 +336,7 @@ class SeasonalTrendsCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
               value: total > 0 ? count / total : 0,
-              backgroundColor: Colors.white.withOpacity(0.04),
+              backgroundColor: Colors.white.withValues(alpha: 0.04),
               valueColor: AlwaysStoppedAnimation<Color>(color),
               minHeight: 5,
             ),
@@ -371,7 +371,7 @@ class SeasonalTrendsCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppTheme.accentColor.withOpacity(0.15),
+                  color: AppTheme.accentColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -554,7 +554,7 @@ class WeeklyGoalCard extends ConsumerWidget {
                     height: 42,
                     child: CircularProgressIndicator(
                       value: progress,
-                      backgroundColor: Colors.white.withOpacity(0.04),
+                      backgroundColor: Colors.white.withValues(alpha: 0.04),
                       valueColor: AlwaysStoppedAnimation<Color>(
                         progress >= 1.0 ? Colors.greenAccent : AppTheme.accentColor,
                       ),

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -257,7 +258,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           Icon(
                             Icons.movie_filter_rounded,
                             size: 40,
-                            color: AppTheme.accentColor.withOpacity(0.5),
+                            color: AppTheme.accentColor.withValues(alpha: 0.5),
                           ),
                           const SizedBox(height: 6),
                           Text(
@@ -394,9 +395,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       // Copy to Clipboard
       await Clipboard.setData(ClipboardData(text: jsonString));
 
-      if (mounted) {
+      if (context.mounted) {
         // Show backup display modal
-        showDialog(
+        unawaited(showDialog(
           context: context,
           builder: (context) {
             return AlertDialog(
@@ -449,10 +450,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ],
             );
           },
-        );
+        ));
       }
     } catch (e) {
-      if (mounted) {
+      if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Yedekleme dosyası oluşturulurken hata: $e')),
         );

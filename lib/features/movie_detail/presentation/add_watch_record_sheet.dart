@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:drift/drift.dart' as drift;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
@@ -357,9 +356,9 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
               data: SliderTheme.of(context).copyWith(
                 trackHeight: 2.0, // Thinner track
                 activeTrackColor: AppTheme.accentColor,
-                inactiveTrackColor: Colors.white.withOpacity(0.08),
+                inactiveTrackColor: Colors.white.withValues(alpha: 0.08),
                 thumbColor: AppTheme.ratingColor,
-                overlayColor: AppTheme.ratingColor.withOpacity(0.12),
+                overlayColor: AppTheme.ratingColor.withValues(alpha: 0.12),
                 valueIndicatorColor: AppTheme.surfaceColor,
                 thumbShape: const RoundSliderThumbShape(
                   enabledThumbRadius: 6.0, // Smaller thumb
@@ -504,7 +503,7 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
                     duration: const Duration(milliseconds: 150),
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: isSelected ? AppTheme.accentColor.withOpacity(0.3) : Colors.transparent,
+                      color: isSelected ? AppTheme.accentColor.withValues(alpha: 0.3) : Colors.transparent,
                       shape: BoxShape.circle,
                       border: Border.all(
                         color: isSelected ? AppTheme.accentColor : Colors.grey.shade800,
@@ -666,7 +665,7 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
         width: 28,
         height: 28,
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.05),
+          color: Colors.white.withValues(alpha: 0.05),
           shape: BoxShape.circle,
           border: Border.all(color: isEnabled ? AppTheme.accentColor : Colors.grey.shade800, width: 1),
         ),

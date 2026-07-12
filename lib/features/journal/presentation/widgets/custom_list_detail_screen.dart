@@ -22,9 +22,6 @@ class CustomListDetailScreen extends ConsumerStatefulWidget {
 class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen> {
   // Handles reordering of list movies
   void _onReorder(List<CustomListMovieWithMovie> items, int oldIndex, int newIndex) async {
-    if (newIndex > oldIndex) {
-      newIndex -= 1;
-    }
     if (oldIndex == newIndex) return;
 
     final updated = List<CustomListMovieWithMovie>.from(items);
@@ -209,18 +206,18 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: AppTheme.accentColor.withOpacity(0.4), width: 1.5),
+                              border: Border.all(color: AppTheme.accentColor.withValues(alpha: 0.4), width: 1.5),
                               gradient: LinearGradient(
                                 colors: [
-                                  AppTheme.accentColor.withOpacity(0.08),
-                                  Colors.purple.withOpacity(0.04),
+                                  AppTheme.accentColor.withValues(alpha: 0.08),
+                                  Colors.purple.withValues(alpha: 0.04),
                                 ],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: AppTheme.accentColor.withOpacity(0.05),
+                                  color: AppTheme.accentColor.withValues(alpha: 0.05),
                                   blurRadius: 10,
                                   offset: const Offset(0, 4),
                                 ),
@@ -293,7 +290,7 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
                             : ReorderableListView.builder(
                                 padding: const EdgeInsets.only(left: 16, right: 16, bottom: 80),
                                 itemCount: movies.length,
-                                onReorder: (oldIdx, newIdx) => _onReorder(movies, oldIdx, newIdx),
+                                onReorderItem: (oldIdx, newIdx) => _onReorder(movies, oldIdx, newIdx),
                                 itemBuilder: (context, index) {
                                   final item = movies[index];
                                   final movie = item.movie;
@@ -459,7 +456,7 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.movie_filter_rounded, size: 56, color: AppTheme.textSecondary.withOpacity(0.3)),
+          Icon(Icons.movie_filter_rounded, size: 56, color: AppTheme.textSecondary.withValues(alpha: 0.3)),
           const SizedBox(height: 12),
           Text(
             'Bu Koleksiyon Boş',

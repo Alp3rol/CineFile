@@ -449,7 +449,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.02),
+        color: Colors.white.withValues(alpha: 0.02),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: Colors.white10, width: 0.5),
       ),
@@ -604,7 +604,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         opacity: 0.4,
         child: Row(
           children: [
-            Icon(Icons.movie_filter_outlined, color: AppTheme.textSecondary.withOpacity(0.6), size: 22),
+            Icon(Icons.movie_filter_outlined, color: AppTheme.textSecondary.withValues(alpha: 0.6), size: 22),
             const SizedBox(width: 12),
             Expanded(
               child: Text(

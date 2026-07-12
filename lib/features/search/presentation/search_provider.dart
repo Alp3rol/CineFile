@@ -1,9 +1,6 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/tmdb_service.dart';
-import '../../../core/database/database_provider.dart';
-import '../../../core/database/app_database.dart';
 
 const Object _sentinel = Object();
 
@@ -52,11 +49,10 @@ class SearchState {
 }
 
 class SearchNotifier extends StateNotifier<SearchState> {
-  final Ref _ref;
   final TmdbService _tmdbService;
   Timer? _debounceTimer;
 
-  SearchNotifier(this._ref, this._tmdbService) : super(SearchState.initial());
+  SearchNotifier(Ref ref, this._tmdbService) : super(SearchState.initial());
 
   Future<void> search(String query) async {
     _debounceTimer?.cancel();

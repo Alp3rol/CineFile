@@ -35,10 +35,10 @@ class QuickAdvanceTag extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         minimumSize: Size.zero,
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        backgroundColor: AppTheme.accentColor.withOpacity(0.12),
+        backgroundColor: AppTheme.accentColor.withValues(alpha: 0.12),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(6),
-          side: BorderSide(color: AppTheme.accentColor.withOpacity(0.4), width: 0.8),
+          side: BorderSide(color: AppTheme.accentColor.withValues(alpha: 0.4), width: 0.8),
         ),
       ),
       child: Row(

@@ -71,7 +71,7 @@ class MovieQuickActionButton extends StatelessWidget {
             width: 52,
             height: 52,
             decoration: BoxDecoration(
-              color: isPrimary ? AppTheme.accentColor : AppTheme.surfaceColor.withOpacity(0.6),
+              color: isPrimary ? AppTheme.accentColor : AppTheme.surfaceColor.withValues(alpha: 0.6),
               shape: BoxShape.circle,
               border: isPrimary ? null : Border.all(color: AppTheme.borderColor),
             ),

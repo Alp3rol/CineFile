@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:drift/drift.dart' show Value;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -260,8 +258,8 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
                             colors: [
-                              Colors.black.withOpacity(0.4),
-                              Colors.black.withOpacity(0.85),
+                              Colors.black.withValues(alpha: 0.4),
+                              Colors.black.withValues(alpha: 0.85),
                             ],
                             stops: const [0.0, 1.0],
                           ),
@@ -499,7 +497,7 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
                                 child: Center(
                                   child: Column(
                                     children: [
-                                      Icon(Icons.history_rounded, color: AppTheme.textSecondary.withOpacity(0.4), size: 40),
+                                      Icon(Icons.history_rounded, color: AppTheme.textSecondary.withValues(alpha: 0.4), size: 40),
                                       const SizedBox(height: 8),
                                       Text(
                                         'Bu filmi henüz izlemediniz.',

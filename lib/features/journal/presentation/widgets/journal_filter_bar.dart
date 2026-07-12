@@ -20,7 +20,7 @@ class JournalFiltersBar extends StatelessWidget {
           duration: const Duration(milliseconds: 180),
           padding: const EdgeInsets.symmetric(vertical: 7),
           decoration: BoxDecoration(
-            color: isActive ? AppTheme.accentColor : Colors.white.withOpacity(0.06),
+            color: isActive ? AppTheme.accentColor : Colors.white.withValues(alpha: 0.06),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: isActive ? AppTheme.accentColor : AppTheme.borderColor,
@@ -98,7 +98,7 @@ class JournalMiniInsightsBar extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.12),
+                color: color.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(icon, size: 16, color: color),

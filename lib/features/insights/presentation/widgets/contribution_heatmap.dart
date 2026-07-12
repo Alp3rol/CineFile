@@ -64,10 +64,10 @@ class _ContributionHeatmapState extends State<ContributionHeatmap> {
   }
 
   Color _getCellColor(int count) {
-    if (count == 0) return Colors.white.withOpacity(0.04);
-    if (count == 1) return AppTheme.accentColor.withOpacity(0.25);
-    if (count == 2) return AppTheme.accentColor.withOpacity(0.5);
-    if (count == 3) return AppTheme.accentColor.withOpacity(0.75);
+    if (count == 0) return Colors.white.withValues(alpha: 0.04);
+    if (count == 1) return AppTheme.accentColor.withValues(alpha: 0.25);
+    if (count == 2) return AppTheme.accentColor.withValues(alpha: 0.5);
+    if (count == 3) return AppTheme.accentColor.withValues(alpha: 0.75);
     return AppTheme.accentColor;
   }
 
@@ -132,7 +132,7 @@ class _ContributionHeatmapState extends State<ContributionHeatmap> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
-            color: isActive ? AppTheme.accentColor : Colors.white.withOpacity(0.04),
+            color: isActive ? AppTheme.accentColor : Colors.white.withValues(alpha: 0.04),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
               color: isActive ? Colors.transparent : Colors.white10,
@@ -156,7 +156,7 @@ class _ContributionHeatmapState extends State<ContributionHeatmap> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.02),
+            color: Colors.white.withValues(alpha: 0.02),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: Colors.white10, width: 0.5),
           ),
