@@ -2,56 +2,88 @@
 // views (replacing the earlier full-width "Aktif İzlediklerin" row per user
 // feedback): it only appears on an actively-watched show's latest record,
 // and tapping "+" logs the next episode immediately with no dialog/screen.
-import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
+//
+// Watch records now live in Firestore (see database_provider.dart) rather
+// than the local Drift DB, so this seeds a FakeFirebaseFirestore + a mocked
+// signed-in user instead of an in-memory Drift database.
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
+import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:filmdizi/core/database/app_database.dart';
-import 'package:filmdizi/core/database/database_provider.dart';
+import 'package:filmdizi/features/auth/controllers/auth_controller.dart';
 import 'package:filmdizi/features/journal/presentation/widgets/journal_table_list.dart';
+import 'package:filmdizi/core/database/database_provider.dart';
 
 void main() {
-  late AppDatabase db;
+  late FakeFirebaseFirestore firestore;
+  late MockFirebaseAuth mockAuth;
   late ProviderContainer container;
+  const uid = 'test-uid';
 
   setUp(() {
-    db = AppDatabase.forTesting(NativeDatabase.memory());
+    mockAuth = MockFirebaseAuth(signedIn: true, mockUser: MockUser(uid: uid, email: 'test@test.com'));
+    firestore = FakeFirebaseFirestore();
     container = ProviderContainer(overrides: [
-      databaseProvider.overrideWithValue(db),
+      firebaseAuthProvider.overrideWithValue(mockAuth),
+      firestoreProvider.overrideWithValue(firestore),
     ]);
   });
 
-  tearDown(() async {
+  tearDown(() {
     container.dispose();
-    await db.close();
   });
 
   testWidgets('quick-advance tag logs the next episode with a single tap, no dialog', (tester) async {
-    await db.into(db.movies).insert(
-          MoviesCompanion.insert(tmdbId: 700, title: 'Son Yaz', isTv: const Value(true), totalEpisodes: const Value(26)),
-        );
-    await db.into(db.watchRecords).insert(
-          WatchRecordsCompanion.insert(
-              movieId: 700, isTv: const Value(true), watchDate: DateTime(2026, 7, 9), rating: 7, watchNumber: 4, episodeCount: const Value(1)),
-        );
-    await db.into(db.userMovieSettings).insert(
-          UserMovieSettingsCompanion.insert(
-              tmdbId: 700, isTv: const Value(true), isActivelyWatching: const Value(true), lastWatchedEpisode: const Value(4)),
-        );
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
 
-    final items = await container.read(allWatchRecordsProvider.future);
+    await firestore.collection('logs').add({
+      'userId': uid,
+      'username': 'tester',
+      'userAvatarUrl': '',
+      'movieId': 700,
+      'isTv': true,
+      'movieTitle': 'Son Yaz',
+      'movieTotalEpisodes': 26,
+      'watchDate': Timestamp.fromDate(DateTime(2026, 7, 9)),
+      'rating': 7.0,
+      'mood': '🍿',
+      'watchNumber': 4,
+      'episodeCount': 1,
+      'createdAt': Timestamp.now(),
+      'starredBy': <String>[],
+      'commentCount': 0,
+    });
+    await firestore.collection('users').doc(uid).collection('movie_settings').doc('700_true').set({
+      'movieId': 700,
+      'isTv': true,
+      'isFavorite': false,
+      'isReWatchList': false,
+      'isActivelyWatching': true,
+      'lastWatchedEpisode': 4,
+      'updatedAt': Timestamp.now(),
+    });
 
+    // Reading `.future` directly (no widget subscribing to the provider)
+    // never drives the fake Firestore stream forward, so mount a Consumer
+    // that watches the provider and pumpAndSettle instead.
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
         child: MaterialApp(
           home: Scaffold(
-            body: JournalRecordsTable(
-              items: items,
-              onReorder: (list, oldIndex, newIndex) {},
-              onUpdateRanking: (_) async {},
-            ),
+            body: Consumer(builder: (context, ref, _) {
+              final items = ref.watch(allWatchRecordsProvider).value ?? const [];
+              return JournalRecordsTable(
+                items: items,
+                onReorder: (list, oldIndex, newIndex) {},
+                onUpdateRanking: (_) async {},
+              );
+            }),
           ),
         ),
       ),
@@ -70,12 +102,14 @@ void main() {
     expect(find.byType(AlertDialog), findsNothing);
     expect(find.byType(JournalRecordsTable), findsOneWidget);
 
-    final setting = await (db.select(db.userMovieSettings)..where((t) => t.tmdbId.equals(700))).getSingle();
-    expect(setting.lastWatchedEpisode, 5);
-    expect(setting.isActivelyWatching, isTrue);
+    final settingsDoc =
+        await firestore.collection('users').doc(uid).collection('movie_settings').doc('700_true').get();
+    expect(settingsDoc.data()!['lastWatchedEpisode'], 5);
+    expect(settingsDoc.data()!['isActivelyWatching'], isTrue);
 
-    final records = await db.select(db.watchRecords).get();
-    expect(records.length, 2);
-    expect(records.last.rating, 7); // carried forward from the previous record
+    final logsSnap = await firestore.collection('logs').where('userId', isEqualTo: uid).get();
+    expect(logsSnap.docs.length, 2);
+    final newLog = logsSnap.docs.firstWhere((d) => d.data()['episodeCount'] == 1 && d.data()['watchNumber'] != 4);
+    expect(newLog.data()['rating'], 7); // carried forward from the previous record
   });
 }

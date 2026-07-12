@@ -55,6 +55,8 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  fake_cloud_firestore: ^4.1.1
+  firebase_auth_mocks: ^0.15.2
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

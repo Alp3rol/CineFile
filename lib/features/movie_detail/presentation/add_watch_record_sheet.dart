@@ -79,12 +79,16 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
     _isActivelyWatching = existing?.isActivelyWatching ?? false;
     _lastWatchedEpisode = existing?.lastWatchedEpisode;
 
+    // Default to 1 episode per record regardless of active-tracking state —
+    // NOT the show's total episode count. Defaulting to "all episodes" here
+    // would apply to every single record added, so logging the same show 4
+    // separate times would each count as a full rewatch of the whole series
+    // (real bug: duration stats ballooned to 1000+ hours). The user can still
+    // raise it manually via the stepper for a genuine "watched it all" entry.
+    _episodeCount = 1;
     if (_isActivelyWatching) {
-      _episodeCount = 1;
       final next = (_lastWatchedEpisode ?? 0) + 1;
       _selectedEpisode = _totalEpisodes != null ? next.clamp(1, _totalEpisodes!) : next;
-    } else {
-      _episodeCount = _totalEpisodes ?? 1;
     }
   }
 
@@ -182,7 +186,7 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
 
     try {
       // 1. Calculate watch number (how many times they watched this movie)
-      final existingRecordsQuery = await FirebaseFirestore.instance
+      final existingRecordsQuery = await ref.read(firestoreProvider)
           .collection('logs')
           .where('userId', isEqualTo: user.uid)
           .where('movieId', isEqualTo: movieId)
@@ -191,7 +195,7 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
       final watchNumber = existingRecordsQuery.docs.length + 1;
 
       // 2. Generate a new log document
-      final logRef = FirebaseFirestore.instance.collection('logs').doc();
+      final logRef = ref.read(firestoreProvider).collection('logs').doc();
       final logData = {
         'id': logRef.id,
         'userId': user.uid,
@@ -227,7 +231,7 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
       await logRef.set(logData);
 
       // 3. Update movie settings for favorite/rewatch status
-      final settingsRef = FirebaseFirestore.instance
+      final settingsRef = ref.read(firestoreProvider)
           .collection('users')
           .doc(user.uid)
           .collection('movie_settings')
@@ -403,12 +407,10 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
                     onChanged: (value) {
                       setState(() {
                         _isActivelyWatching = value;
+                        _episodeCount = 1;
                         if (value) {
                           final next = (_lastWatchedEpisode ?? 0) + 1;
                           _selectedEpisode = _totalEpisodes != null ? next.clamp(1, _totalEpisodes!) : next;
-                          _episodeCount = 1;
-                        } else {
-                          _episodeCount = _totalEpisodes ?? 1;
                         }
                       });
                     },

@@ -146,7 +146,7 @@ class NativeMovieRepository implements MovieRepository {
         final key = entry.key;
         final rank = entry.value;
 
-        final settingsRef = FirebaseFirestore.instance
+        final settingsRef = _ref.read(firestoreProvider)
             .collection('users')
             .doc(user.uid)
             .collection('movie_settings')
@@ -292,7 +292,7 @@ class WebMovieRepository implements MovieRepository {
         final key = entry.key;
         final rank = entry.value;
 
-        final settingsRef = FirebaseFirestore.instance
+        final settingsRef = _ref.read(firestoreProvider)
             .collection('users')
             .doc(user.uid)
             .collection('movie_settings')

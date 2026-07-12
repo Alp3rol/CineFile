@@ -36,6 +36,10 @@ Widget _wrap({required List<WatchRecordWithMovie> watchRecords}) {
       watchRecordsForMovieProvider((tmdbId: 1, isTv: false))
           .overrideWith((ref) => Stream.value(watchRecords.map((w) => w.record).toList())),
       favoriteMovieIdsProvider.overrideWith((ref) => Stream.value(<MovieKey>{})),
+      // Reads from Firestore (via authStateProvider) in the real app —
+      // overridden directly so this render test doesn't need a Firebase
+      // test harness.
+      movieSettingsProvider((tmdbId: 1, isTv: false)).overrideWith((ref) => Stream.value(null)),
     ],
     child: const MaterialApp(home: MovieDetailScreen(tmdbId: 1)),
   );

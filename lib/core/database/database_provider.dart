@@ -35,7 +35,7 @@ final watchRecordsForMovieProvider = StreamProvider.family<List<WatchRecord>, Mo
     return Stream.value(<WatchRecord>[]);
   }
 
-  return FirebaseFirestore.instance
+  return ref.read(firestoreProvider)
       .collection('logs')
       .where('userId', isEqualTo: user.uid)
       .where('movieId', isEqualTo: key.tmdbId)
@@ -57,7 +57,7 @@ final movieSettingsProvider = StreamProvider.family<UserMovieSetting?, MovieKey>
     return Stream.value(null);
   }
 
-  return FirebaseFirestore.instance
+  return ref.read(firestoreProvider)
       .collection('users')
       .doc(user.uid)
       .collection('movie_settings')
@@ -91,7 +91,7 @@ class WatchRecordWithMovie {
 
 // Stream provider to get watch records for any user with movie details
 final watchRecordsForUserProvider = StreamProvider.family<List<WatchRecordWithMovie>, String>((ref, userId) {
-  return FirebaseFirestore.instance
+  return ref.read(firestoreProvider)
       .collection('logs')
       .where('userId', isEqualTo: userId)
       .snapshots()
@@ -105,7 +105,7 @@ final watchRecordsForUserProvider = StreamProvider.family<List<WatchRecordWithMo
           final key = (tmdbId: log.movieId, isTv: log.isTv);
           
           // Get settings from Firestore
-          final settingsDoc = await FirebaseFirestore.instance
+          final settingsDoc = await ref.read(firestoreProvider)
               .collection('users')
               .doc(userId)
               .collection('movie_settings')
@@ -144,7 +144,7 @@ final allWatchRecordsProvider = StreamProvider<List<WatchRecordWithMovie>>((ref)
     return Stream.value(<WatchRecordWithMovie>[]);
   }
 
-  return FirebaseFirestore.instance
+  return ref.read(firestoreProvider)
       .collection('logs')
       .where('userId', isEqualTo: user.uid)
       .snapshots()
@@ -158,7 +158,7 @@ final allWatchRecordsProvider = StreamProvider<List<WatchRecordWithMovie>>((ref)
           final key = (tmdbId: log.movieId, isTv: log.isTv);
           
           // Get settings from Firestore
-          final settingsDoc = await FirebaseFirestore.instance
+          final settingsDoc = await ref.read(firestoreProvider)
               .collection('users')
               .doc(user.uid)
               .collection('movie_settings')
@@ -197,7 +197,7 @@ final followedUserIdsProvider = StreamProvider<Set<String>>((ref) {
     return Stream.value(<String>{});
   }
 
-  return FirebaseFirestore.instance
+  return ref.read(firestoreProvider)
       .collection('follows')
       .where('followerId', isEqualTo: user.uid)
       .snapshots()
@@ -214,7 +214,7 @@ final isFollowingProvider = StreamProvider.family<bool, String>((ref, targetUser
     return Stream.value(false);
   }
 
-  return FirebaseFirestore.instance
+  return ref.read(firestoreProvider)
       .collection('follows')
       .doc('${user.uid}_$targetUserId')
       .snapshots()
@@ -229,7 +229,7 @@ final favoriteMovieIdsProvider = StreamProvider<Set<MovieKey>>((ref) {
     return Stream.value(<MovieKey>{});
   }
 
-  return FirebaseFirestore.instance
+  return ref.read(firestoreProvider)
       .collection('users')
       .doc(user.uid)
       .collection('movie_settings')
@@ -315,7 +315,7 @@ final activelyWatchingProvider = StreamProvider<List<ActivelyWatchingShow>>((ref
     return Stream.value(<ActivelyWatchingShow>[]);
   }
 
-  return FirebaseFirestore.instance
+  return ref.read(firestoreProvider)
       .collection('users')
       .doc(user.uid)
       .collection('movie_settings')
@@ -328,7 +328,7 @@ final activelyWatchingProvider = StreamProvider<List<ActivelyWatchingShow>>((ref
           final movieId = data['movieId'] as int? ?? 0;
           final isTv = data['isTv'] as bool? ?? false;
           
-          final logSnapshot = await FirebaseFirestore.instance
+          final logSnapshot = await ref.read(firestoreProvider)
               .collection('logs')
               .where('userId', isEqualTo: user.uid)
               .where('movieId', isEqualTo: movieId)
@@ -502,7 +502,7 @@ Future<void> deleteWatchRecord(WidgetRef ref, WatchRecord record) async {
   final user = authState.value;
 
   if (user != null) {
-    final query = await FirebaseFirestore.instance
+    final query = await ref.read(firestoreProvider)
         .collection('logs')
         .where('userId', isEqualTo: user.uid)
         .where('movieId', isEqualTo: record.movieId)
@@ -532,14 +532,14 @@ Future<void> deleteWatchRecord(WidgetRef ref, WatchRecord record) async {
     }
 
     // Recalculate movie settings progress for this user & movie/show in Firestore
-    final remainingQuery = await FirebaseFirestore.instance
+    final remainingQuery = await ref.read(firestoreProvider)
         .collection('logs')
         .where('userId', isEqualTo: user.uid)
         .where('movieId', isEqualTo: record.movieId)
         .where('isTv', isEqualTo: record.isTv)
         .get();
 
-    final settingsRef = FirebaseFirestore.instance
+    final settingsRef = ref.read(firestoreProvider)
         .collection('users')
         .doc(user.uid)
         .collection('movie_settings')
@@ -636,7 +636,7 @@ Future<void> updateWatchRecord(
   final user = authState.value;
 
   if (user != null) {
-    final query = await FirebaseFirestore.instance
+    final query = await ref.read(firestoreProvider)
         .collection('logs')
         .where('userId', isEqualTo: user.uid)
         .where('movieId', isEqualTo: record.movieId)

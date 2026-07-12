@@ -1,75 +1,125 @@
 // Verifies the "Aktif İzliyorum" quick-add flow: activelyWatchingProvider
-// surfaces shows with UserMovieSettings.isActivelyWatching, the
-// ActivelyWatchingRow renders them with a quick-add "+" button, and
-// confirming the quick episode dialog advances lastWatchedEpisode (and
-// removes the show from the active list once the last episode is reached).
-import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
+// surfaces shows with UserMovieSettings.isActivelyWatching (from Firestore),
+// the ActivelyWatchingRow renders them with a quick-add "+" button, and
+// tapping it logs the next episode immediately — no dialog, consistent with
+// the same no-dialog design used by the Journal table's quick-advance tag
+// (see journal_quick_advance_tag_test.dart) — advancing lastWatchedEpisode
+// and removing the show from the active list once the last episode is
+// reached.
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
+import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:filmdizi/core/database/app_database.dart';
 import 'package:filmdizi/core/database/database_provider.dart';
+import 'package:filmdizi/features/auth/controllers/auth_controller.dart';
 import 'package:filmdizi/core/widgets/actively_watching_row.dart';
 
 void main() {
-  late AppDatabase db;
+  late FakeFirebaseFirestore firestore;
+  late MockFirebaseAuth mockAuth;
   late ProviderContainer container;
+  const uid = 'test-uid';
 
   setUp(() {
-    db = AppDatabase.forTesting(NativeDatabase.memory());
+    mockAuth = MockFirebaseAuth(signedIn: true, mockUser: MockUser(uid: uid, email: 'test@test.com'));
+    firestore = FakeFirebaseFirestore();
     container = ProviderContainer(overrides: [
-      databaseProvider.overrideWithValue(db),
+      firebaseAuthProvider.overrideWithValue(mockAuth),
+      firestoreProvider.overrideWithValue(firestore),
     ]);
   });
 
-  tearDown(() async {
+  tearDown(() {
     container.dispose();
-    await db.close();
   });
 
   Future<void> seedActivelyWatchingShow({required int tmdbId, required int totalEpisodes, required int lastWatchedEpisode}) async {
-    await db.into(db.movies).insert(
-          MoviesCompanion.insert(
-            tmdbId: tmdbId,
-            title: 'Aktif Dizi',
-            isTv: const Value(true),
-            totalEpisodes: Value(totalEpisodes),
-          ),
-        );
-    await db.into(db.userMovieSettings).insert(
-          UserMovieSettingsCompanion.insert(
-            tmdbId: tmdbId,
-            isTv: const Value(true),
-            isActivelyWatching: const Value(true),
-            lastWatchedEpisode: Value(lastWatchedEpisode),
-          ),
-        );
+    // One existing log so activelyWatchingProvider (which joins movie_settings
+    // with the matching log) can resolve the show's title/poster/etc.
+    await firestore.collection('logs').add({
+      'userId': uid,
+      'username': 'tester',
+      'userAvatarUrl': '',
+      'movieId': tmdbId,
+      'isTv': true,
+      'movieTitle': 'Aktif Dizi',
+      'movieTotalEpisodes': totalEpisodes,
+      'watchDate': Timestamp.now(),
+      'rating': 7.0,
+      'mood': '🍿',
+      'watchNumber': 1,
+      'episodeCount': lastWatchedEpisode,
+      'createdAt': Timestamp.now(),
+      'starredBy': <String>[],
+      'commentCount': 0,
+    });
+    await firestore.collection('users').doc(uid).collection('movie_settings').doc('${tmdbId}_true').set({
+      'movieId': tmdbId,
+      'isTv': true,
+      'isFavorite': false,
+      'isReWatchList': false,
+      'isActivelyWatching': true,
+      'lastWatchedEpisode': lastWatchedEpisode,
+      'updatedAt': Timestamp.now(),
+    });
   }
 
-  test('activelyWatchingProvider only returns shows marked isActivelyWatching', () async {
+  testWidgets('activelyWatchingProvider only returns shows marked isActivelyWatching', (tester) async {
     await seedActivelyWatchingShow(tmdbId: 1, totalEpisodes: 10, lastWatchedEpisode: 3);
     // A finished show (isActivelyWatching false) must not show up.
-    await db.into(db.movies).insert(
-          MoviesCompanion.insert(tmdbId: 2, title: 'Bitmiş Dizi', isTv: const Value(true), totalEpisodes: const Value(5)),
-        );
-    await db.into(db.userMovieSettings).insert(
-          UserMovieSettingsCompanion.insert(
-              tmdbId: 2, isTv: const Value(true), isActivelyWatching: const Value(false), lastWatchedEpisode: const Value(5)),
-        );
+    await firestore.collection('logs').add({
+      'userId': uid,
+      'username': 'tester',
+      'userAvatarUrl': '',
+      'movieId': 2,
+      'isTv': true,
+      'movieTitle': 'Bitmiş Dizi',
+      'movieTotalEpisodes': 5,
+      'watchDate': Timestamp.now(),
+      'rating': 8.0,
+      'mood': '🍿',
+      'watchNumber': 1,
+      'episodeCount': 5,
+      'createdAt': Timestamp.now(),
+      'starredBy': <String>[],
+      'commentCount': 0,
+    });
+    await firestore.collection('users').doc(uid).collection('movie_settings').doc('2_true').set({
+      'movieId': 2,
+      'isTv': true,
+      'isFavorite': false,
+      'isReWatchList': false,
+      'isActivelyWatching': false,
+      'lastWatchedEpisode': 5,
+      'updatedAt': Timestamp.now(),
+    });
 
-    final list = await container.read(activelyWatchingProvider.future);
+    // Reading `.future` directly (no widget subscribing to the provider)
+    // never drives the fake Firestore stream forward, so mount a trivial
+    // Consumer and pumpAndSettle instead — same pattern the widget test below
+    // already relies on.
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          home: Consumer(builder: (context, ref, _) {
+            ref.watch(activelyWatchingProvider);
+            return const SizedBox();
+          }),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final list = container.read(activelyWatchingProvider).value!;
     expect(list.length, 1);
     expect(list.single.movie.tmdbId, 1);
     expect(list.single.setting.lastWatchedEpisode, 3);
   });
 
-  testWidgets('quick-add dialog logs the next episode and auto-completes on the last one', (tester) async {
-    tester.view.physicalSize = const Size(1080, 2400);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-
+  testWidgets('quick-add "+" logs the next episode immediately and auto-completes on the last one', (tester) async {
     // total=2, already at episode 1 — one quick-add should finish the show.
     await seedActivelyWatchingShow(tmdbId: 5, totalEpisodes: 2, lastWatchedEpisode: 1);
 
@@ -86,19 +136,15 @@ void main() {
     await tester.tap(find.byIcon(Icons.add_rounded));
     await tester.pumpAndSettle();
 
-    expect(find.text('Bölüm 2 / 2 izlendi olarak kaydedilecek.'), findsOneWidget);
+    final settingsDoc =
+        await firestore.collection('users').doc(uid).collection('movie_settings').doc('5_true').get();
+    expect(settingsDoc.data()!['lastWatchedEpisode'], 2);
+    expect(settingsDoc.data()!['isActivelyWatching'], isFalse);
 
-    await tester.tap(find.text('Bölümü Ekle'));
-    await tester.pumpAndSettle();
+    final logsSnap = await firestore.collection('logs').where('userId', isEqualTo: uid).where('movieId', isEqualTo: 5).get();
+    expect(logsSnap.docs.length, 2);
 
-    final setting = await (db.select(db.userMovieSettings)..where((t) => t.tmdbId.equals(5))).getSingle();
-    expect(setting.lastWatchedEpisode, 2);
-    expect(setting.isActivelyWatching, isFalse);
-
-    final records = await db.select(db.watchRecords).get();
-    expect(records.single.episodeCount, 1);
-
-    // The show is done, so the row (and dialog trigger) is gone now.
+    // The show is done, so the row (and quick-add button) is gone now.
     expect(find.text('Aktif Dizi'), findsNothing);
   });
 }

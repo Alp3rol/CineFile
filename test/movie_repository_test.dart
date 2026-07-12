@@ -1,12 +1,18 @@
 // Verifies the native repository extracted from database_provider.dart
 // during the kIsWeb -> repository-abstraction refactor still behaves
-// correctly against a real (in-memory) drift database.
+// correctly. Custom-list actions run against a real (in-memory) drift
+// database; updateWatchRecordRankings writes to Firestore (see
+// NativeMovieRepository.updateWatchRecordRankings) so that one test uses a
+// FakeFirebaseFirestore + mocked signed-in user instead.
 import 'package:drift/native.dart';
+import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
+import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:filmdizi/core/database/app_database.dart';
 import 'package:filmdizi/core/database/database_provider.dart';
 import 'package:filmdizi/core/database/movie_repository.dart';
+import 'package:filmdizi/features/auth/controllers/auth_controller.dart';
 import 'package:drift/drift.dart';
 
 void main() {
@@ -17,6 +23,7 @@ void main() {
     db = AppDatabase.forTesting(NativeDatabase.memory());
     container = ProviderContainer(overrides: [
       databaseProvider.overrideWithValue(db),
+      firebaseAuthProvider.overrideWithValue(MockFirebaseAuth(signedIn: false)),
     ]);
   });
 
@@ -59,14 +66,24 @@ void main() {
     expect(listsAfterDelete, isEmpty);
   });
 
-  test('updateWatchRecordRankings inserts a new setting row when none exists', () async {
-    final repo = container.read(movieRepositoryProvider);
-    await db.into(db.movies).insert(
-          MoviesCompanion.insert(tmdbId: 42, title: 'Test'),
-        );
+  test('updateWatchRecordRankings writes personalRanking to Firestore for the signed-in user', () async {
+    final firestore = FakeFirebaseFirestore();
+    final signedInContainer = ProviderContainer(overrides: [
+      databaseProvider.overrideWithValue(db),
+      firebaseAuthProvider.overrideWithValue(MockFirebaseAuth(signedIn: true, mockUser: MockUser(uid: 'test-uid'))),
+      firestoreProvider.overrideWithValue(firestore),
+    ]);
+    addTearDown(signedInContainer.dispose);
 
+    // Ensure the mocked authStateChanges() stream has actually emitted before
+    // the repository reads it synchronously — otherwise authStateProvider is
+    // still AsyncLoading (value == null) and the write becomes a no-op.
+    await signedInContainer.read(authStateProvider.future);
+
+    final repo = signedInContainer.read(movieRepositoryProvider);
     await repo.updateWatchRecordRankings({(tmdbId: 42, isTv: false): 3});
-    final setting = await (db.select(db.userMovieSettings)..where((t) => t.tmdbId.equals(42))).getSingle();
-    expect(setting.personalRanking, 3);
+
+    final doc = await firestore.collection('users').doc('test-uid').collection('movie_settings').doc('42_false').get();
+    expect(doc.data()!['personalRanking'], 3);
   });
 }

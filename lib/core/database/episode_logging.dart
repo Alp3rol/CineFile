@@ -36,7 +36,7 @@ Future<void> logNextEpisode({
     final avatarUrl = userModel?.avatarUrl ?? 'https://api.dicebear.com/7.x/bottts/png?seed=$username';
 
     // 1. Calculate watch number from existing Firestore logs
-    final existingRecordsQuery = await FirebaseFirestore.instance
+    final existingRecordsQuery = await ref.read(firestoreProvider)
         .collection('logs')
         .where('userId', isEqualTo: user.uid)
         .where('movieId', isEqualTo: movieId)
@@ -45,7 +45,7 @@ Future<void> logNextEpisode({
     final watchNumber = existingRecordsQuery.docs.length + 1;
 
     // 2. Create log document in Firestore
-    final logRef = FirebaseFirestore.instance.collection('logs').doc();
+    final logRef = ref.read(firestoreProvider).collection('logs').doc();
     final logData = {
       'id': logRef.id,
       'userId': user.uid,
@@ -80,7 +80,7 @@ Future<void> logNextEpisode({
     await logRef.set(logData);
 
     // 3. Update movie settings in Firestore
-    final settingsRef = FirebaseFirestore.instance
+    final settingsRef = ref.read(firestoreProvider)
         .collection('users')
         .doc(user.uid)
         .collection('movie_settings')

@@ -4,13 +4,22 @@
 // for a 26-episode show), active tracking suggests the next episode across
 // separate watch records, and reaching the last episode marks the show
 // completed (surfaced as a checkmark badge in the Journal list).
+//
+// Saving now writes to Firestore (not the local Drift DB) — see
+// AddWatchRecordSheet._saveRecord — so these tests run against
+// FakeFirebaseFirestore + a mocked signed-in FirebaseAuth user instead of an
+// in-memory Drift database.
 import 'dart:async';
-import 'package:drift/native.dart';
+import 'package:drift/drift.dart';
+import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
+import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:filmdizi/core/database/app_database.dart';
 import 'package:filmdizi/core/database/database_provider.dart';
+import 'package:filmdizi/features/auth/controllers/auth_controller.dart';
+import 'package:filmdizi/features/journal/models/diary_log_model.dart';
 import 'package:filmdizi/features/movie_detail/presentation/add_watch_record_sheet.dart';
 import 'package:filmdizi/features/journal/presentation/widgets/journal_table_list.dart';
 
@@ -47,19 +56,21 @@ Future<void> _openSheet(WidgetTester tester, GlobalKey<NavigatorState> navigator
 }
 
 void main() {
-  late AppDatabase db;
+  late FakeFirebaseFirestore firestore;
+  late MockFirebaseAuth mockAuth;
   late ProviderContainer container;
 
   setUp(() {
-    db = AppDatabase.forTesting(NativeDatabase.memory());
+    mockAuth = MockFirebaseAuth(signedIn: true, mockUser: MockUser(uid: 'test-uid', email: 'test@test.com'));
+    firestore = FakeFirebaseFirestore();
     container = ProviderContainer(overrides: [
-      databaseProvider.overrideWithValue(db),
+      firebaseAuthProvider.overrideWithValue(mockAuth),
+      firestoreProvider.overrideWithValue(firestore),
     ]);
   });
 
-  tearDown(() async {
+  tearDown(() {
     container.dispose();
-    await db.close();
   });
 
   testWidgets('manual episode-count stepper cannot exceed the total episode count', (tester) async {
@@ -106,13 +117,22 @@ void main() {
 
     await tester.tap(find.text('Kaydı Günlüğe Ekle'));
     await tester.pumpAndSettle();
+    // Flush the success-toast's auto-dismiss timer (Future.delayed) so it
+    // doesn't leak past this test — pumpAndSettle doesn't wait for timers
+    // that aren't tied to a scheduled frame.
+    await tester.pump(const Duration(seconds: 3));
 
-    var setting = await (db.select(db.userMovieSettings)..where((t) => t.tmdbId.equals(900))).getSingle();
-    expect(setting.lastWatchedEpisode, 1);
-    expect(setting.isActivelyWatching, isTrue);
+    Future<Map<String, dynamic>> settingsData() async {
+      final doc = await firestore.collection('users').doc('test-uid').collection('movie_settings').doc('900_true').get();
+      return doc.data()!;
+    }
 
-    var records = await db.select(db.watchRecords).get();
-    expect(records.single.episodeCount, 1);
+    var settings = await settingsData();
+    expect(settings['lastWatchedEpisode'], 1);
+    expect(settings['isActivelyWatching'], isTrue);
+
+    var logsSnap = await firestore.collection('logs').where('userId', isEqualTo: 'test-uid').get();
+    expect(logsSnap.docs.single.data()['episodeCount'], 1);
 
     // --- Record 2: a fresh sheet instance should suggest episode 2 ---
     await _openSheet(tester, navigatorKey);
@@ -120,10 +140,14 @@ void main() {
 
     await tester.tap(find.text('Kaydı Günlüğe Ekle'));
     await tester.pumpAndSettle();
+    // Flush the success-toast's auto-dismiss timer (Future.delayed) so it
+    // doesn't leak past this test — pumpAndSettle doesn't wait for timers
+    // that aren't tied to a scheduled frame.
+    await tester.pump(const Duration(seconds: 3));
 
-    setting = await (db.select(db.userMovieSettings)..where((t) => t.tmdbId.equals(900))).getSingle();
-    expect(setting.lastWatchedEpisode, 2);
-    expect(setting.isActivelyWatching, isTrue);
+    settings = await settingsData();
+    expect(settings['lastWatchedEpisode'], 2);
+    expect(settings['isActivelyWatching'], isTrue);
 
     // --- Record 3: reaching the last episode (3/3) auto-completes ---
     await _openSheet(tester, navigatorKey);
@@ -131,24 +155,35 @@ void main() {
 
     await tester.tap(find.text('Kaydı Günlüğe Ekle'));
     await tester.pumpAndSettle();
+    // Flush the success-toast's auto-dismiss timer (Future.delayed) so it
+    // doesn't leak past this test — pumpAndSettle doesn't wait for timers
+    // that aren't tied to a scheduled frame.
+    await tester.pump(const Duration(seconds: 3));
 
-    setting = await (db.select(db.userMovieSettings)..where((t) => t.tmdbId.equals(900))).getSingle();
-    expect(setting.lastWatchedEpisode, 3);
-    expect(setting.isActivelyWatching, isFalse); // auto-cleared: "Tamamlandı"
-
-    final movie = await (db.select(db.movies)..where((t) => t.tmdbId.equals(900))).getSingle();
-    expect(movie.totalEpisodes, 3);
+    settings = await settingsData();
+    expect(settings['lastWatchedEpisode'], 3);
+    expect(settings['isActivelyWatching'], isFalse); // auto-cleared: "Tamamlandı"
 
     // The Journal table view shows a completed checkmark for this record.
-    records = await db.select(db.watchRecords).get();
-    final withMovieAndSetting = [
-      WatchRecordWithMovie(records.first, movie, setting: setting),
-    ];
+    logsSnap = await firestore.collection('logs').where('userId', isEqualTo: 'test-uid').get();
+    final log = DiaryLogModel.fromMap(logsSnap.docs.first.data(), logsSnap.docs.first.id);
+    final watchWithMovie = log.toWatchRecordWithMovie();
+    final setting = UserMovieSetting(
+      tmdbId: 900,
+      isTv: true,
+      isFavorite: false,
+      isReWatchList: false,
+      updatedAt: DateTime.now(),
+      isActivelyWatching: false,
+      lastWatchedEpisode: 3,
+    );
+    final movie = watchWithMovie.movie.copyWith(totalEpisodes: const Value(3));
+
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: JournalRecordsTable(
-            items: withMovieAndSetting,
+            items: [WatchRecordWithMovie(watchWithMovie.record, movie, setting: setting)],
             onReorder: (items, oldIndex, newIndex) {},
             onUpdateRanking: (_) async {},
           ),

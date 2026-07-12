@@ -54,6 +54,10 @@ void main() {
           unwatchedMoviesProvider.overrideWith((ref) => Stream.value([unwatchedFavorite, unwatchedOther])),
           favoriteMovieIdsProvider
               .overrideWith((ref) => Stream.value({(tmdbId: unwatchedFavorite.tmdbId, isTv: unwatchedFavorite.isTv)})),
+          // Reads from Firestore (via authStateProvider/firebaseAuthProvider)
+          // in the real app — overridden directly so this render test doesn't
+          // need a Firebase test harness.
+          activelyWatchingProvider.overrideWith((ref) => Stream.value(const [])),
         ],
         child: const MaterialApp(home: HomeScreen()),
       ),
@@ -85,6 +89,7 @@ void main() {
           recentlyAddedMoviesProvider.overrideWith((ref) => Stream.value(const [])),
           unwatchedMoviesProvider.overrideWith((ref) => Stream.value(const [])),
           favoriteMovieIdsProvider.overrideWith((ref) => Stream.value(const <MovieKey>{})),
+          activelyWatchingProvider.overrideWith((ref) => Stream.value(const [])),
         ],
         child: const MaterialApp(home: HomeScreen()),
       ),
@@ -117,6 +122,7 @@ void main() {
           recentlyAddedMoviesProvider.overrideWith((ref) => Stream.value(const [])),
           unwatchedMoviesProvider.overrideWith((ref) => Stream.value(const [])),
           favoriteMovieIdsProvider.overrideWith((ref) => Stream.value(const <MovieKey>{})),
+          activelyWatchingProvider.overrideWith((ref) => Stream.value(const [])),
         ],
         child: const MaterialApp(home: HomeScreen()),
       ),

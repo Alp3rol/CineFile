@@ -73,17 +73,24 @@ class _JournalScreenState extends ConsumerState<JournalScreen>
 
   void _onTabOrScrollChange() {
     if (!mounted) return;
-    
+
     double offset = 0;
     final isTableView = ref.read(journalViewModeProvider);
+    ScrollController? active;
     if (_tabController.index == 0) {
-      offset = isTableView ? _scrollController2.offset : _scrollController1.offset;
+      active = isTableView ? _scrollController2 : _scrollController1;
     } else if (_tabController.index == 1) {
-      offset = _scrollController3.offset;
+      active = _scrollController3;
     } else if (_tabController.index == 2) {
-      offset = _scrollController4.offset;
+      active = _scrollController4;
     }
-    
+    // The active controller may not be attached to a scroll view yet — e.g.
+    // right after the first build's post-frame callback fires, or right
+    // after switching view mode/tab before the new list has laid out.
+    if (active != null && active.hasClients) {
+      offset = active.offset;
+    }
+
     final show = offset > 200;
     if (show != _showScrollToTop) {
       setState(() {
@@ -103,7 +110,8 @@ class _JournalScreenState extends ConsumerState<JournalScreen>
       activeController = _scrollController4;
     }
     
-    activeController?.animateTo(
+    if (activeController == null || !activeController.hasClients) return;
+    activeController.animateTo(
       0,
       duration: const Duration(milliseconds: 500),
       curve: Curves.easeInOut,
@@ -239,6 +247,32 @@ class _JournalScreenState extends ConsumerState<JournalScreen>
                   ),
                   Row(
                     children: [
+                      // Search toggle button
+                      GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _showSearch = !_showSearch;
+                            if (!_showSearch) {
+                              _searchController.clear();
+                              _searchQuery = '';
+                            }
+                          });
+                        },
+                        child: Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: _showSearch ? AppTheme.accentColor.withOpacity(0.2) : Colors.white10,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            _showSearch ? Icons.search_off_rounded : Icons.search_rounded,
+                            color: _showSearch ? AppTheme.accentColor : Colors.white70,
+                            size: 18,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
                       // Card/Table view toggle — moved here from filter row
                       _buildViewModeToggle(isTableView),
                       const SizedBox(width: 12),

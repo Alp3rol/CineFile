@@ -328,9 +328,10 @@ class JournalRecordsTable extends ConsumerWidget {
                       ),
                     ),
 
-                  // 5. Puanım Sütunu - fixed width
+                  // 5. Puanım Sütunu - fixed width (wide enough for the
+                  // 3-digit "X/YY" QuickAdvanceTag pill, e.g. "12/26")
                   SizedBox(
-                    width: isMobile ? 65 : 70,
+                    width: isMobile ? 78 : 84,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
