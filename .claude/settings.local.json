@@ -20,7 +20,9 @@
       "Bash(git push *)",
       "Bash(cmd /c yayınla.bat)",
       "Bash(git stash *)",
-      "Bash(git checkout *)"
+      "Bash(git checkout *)",
+      "Bash(FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch -f --msg-filter 'sed -e \"/Co-Authored-By/d\" -e \"/^$/N;/\\\\n$/D\"' c029912^..HEAD)",
+      "Bash(git commit *)"
     ]
   }
 }
