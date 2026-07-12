@@ -24,6 +24,7 @@ WatchRecordWithMovie _record(int id, Movie movie, DateTime watchDate) {
     watchNumber: 1,
     createdAt: DateTime.now(),
     episodeCount: 1,
+    isPublic: false,
   );
   return WatchRecordWithMovie(record, movie);
 }

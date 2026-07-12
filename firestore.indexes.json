@@ -1,0 +1,13 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "logs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "isPublic", "order": "ASCENDING" },
+        { "fieldPath": "watchDate", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

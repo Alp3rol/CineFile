@@ -47,7 +47,7 @@ class QuickAdvanceTag extends ConsumerWidget {
           Text(
             total != null ? '$next/$total' : '$next',
             style: GoogleFonts.outfit(
-              fontSize: 11,
+              fontSize: 12,
               fontWeight: FontWeight.bold,
               color: AppTheme.accentColor,
             ),
@@ -56,7 +56,7 @@ class QuickAdvanceTag extends ConsumerWidget {
           const Icon(
             Icons.add_circle_rounded,
             color: AppTheme.accentColor,
-            size: 14,
+            size: 16,
           ),
         ],
       ),

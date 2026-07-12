@@ -28,6 +28,7 @@ WatchRecordWithMovie _record(int id, {String watchPlace = 'Sinema', DateTime? wa
     watchNumber: 1,
     createdAt: DateTime.now(),
     episodeCount: 1,
+    isPublic: false,
   );
   return WatchRecordWithMovie(record, movie);
 }

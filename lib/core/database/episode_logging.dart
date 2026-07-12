@@ -76,6 +76,10 @@ Future<void> logNextEpisode({
       'movieTotalEpisodes': totalEpisodes,
       'starredBy': <String>[],
       'commentCount': 0,
+      // Automatic episode advancement never shows the user a form, so it
+      // always defaults to private; they can share it later from the
+      // journal entry itself.
+      'isPublic': false,
     };
     await logRef.set(logData);
 
@@ -120,6 +124,7 @@ Future<void> logNextEpisode({
       watchNumber: watchNumber,
       createdAt: now,
       episodeCount: 1,
+      isPublic: false,
     );
     ref.read(webWatchRecordsProvider.notifier).state = [...currentList, newRecord];
 

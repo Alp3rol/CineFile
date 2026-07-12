@@ -29,6 +29,7 @@ WatchRecord _watchRecord(int id, int movieId, DateTime watchDate, {double rating
     watchNumber: 1,
     createdAt: DateTime.now(),
     episodeCount: 1,
+    isPublic: false,
   );
 }
 

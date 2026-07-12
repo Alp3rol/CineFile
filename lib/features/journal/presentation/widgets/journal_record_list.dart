@@ -145,6 +145,7 @@ class _JournalRecordCard extends ConsumerWidget {
           onDelete: () => deleteWatchRecord(ref, record),
           onUpdateDate: (newDate) => updateWatchRecord(ref, record, watchDate: newDate),
           onUpdateEpisodes: (newCount) => updateWatchRecord(ref, record, episodeCount: newCount),
+          onUpdatePrivacy: (newValue) => updateWatchRecord(ref, record, isPublic: newValue),
         ),
         child: GlassContainer(
           borderRadius: 16,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -26,6 +27,7 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
   double _rating = 7.0;
   String _selectedMood = '🍿';
   int _episodeCount = 1;
+  bool _isPublic = false;
 
   // "Aktif İzliyorum" episode tracking (TV only). _totalEpisodes comes from
   // TMDb; _isActivelyWatching/_lastWatchedEpisode are seeded once from the
@@ -37,6 +39,13 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
   int _selectedEpisode = 1;
   bool _seededFromSettings = false;
 
+  // When "Aktif İzliyorum" is off, the default assumption is that the user
+  // finished the whole show (that's why they're logging it, not tracking
+  // progress). Only switched to false if they explicitly pick "Belirli
+  // sayıda bölüm" for a partial-watch entry.
+  bool _finishedWholeShow = true;
+
+  late final TextEditingController _episodeCountController = TextEditingController(text: '$_episodeCount');
   final TextEditingController _placeController = TextEditingController();
   final TextEditingController _companionController = TextEditingController();
   final TextEditingController _notesController = TextEditingController();
@@ -85,6 +94,7 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
     // (real bug: duration stats ballooned to 1000+ hours). The user can still
     // raise it manually via the stepper for a genuine "watched it all" entry.
     _episodeCount = 1;
+    _episodeCountController.text = '1';
     if (_isActivelyWatching) {
       final next = (_lastWatchedEpisode ?? 0) + 1;
       _selectedEpisode = _totalEpisodes != null ? next.clamp(1, _totalEpisodes!) : next;
@@ -93,6 +103,7 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
 
   @override
   void dispose() {
+    _episodeCountController.dispose();
     _placeController.dispose();
     _companionController.dispose();
     _notesController.dispose();
@@ -176,6 +187,11 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
         episodeCountForRecord = (selected - (_lastWatchedEpisode ?? 0)).clamp(1, selected);
         newLastWatchedEpisode = selected;
         newIsActivelyWatching = _totalEpisodes == null || selected < _totalEpisodes!;
+      } else if (_finishedWholeShow && _totalEpisodes != null) {
+        final selected = _totalEpisodes!;
+        episodeCountForRecord = (selected - (_lastWatchedEpisode ?? 0)).clamp(1, selected);
+        newLastWatchedEpisode = selected;
+        newIsActivelyWatching = false;
       } else {
         episodeCountForRecord = _totalEpisodes != null ? _episodeCount.clamp(1, _totalEpisodes!) : _episodeCount;
         newLastWatchedEpisode = episodeCountForRecord;
@@ -225,6 +241,7 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
         'movieTotalEpisodes': _totalEpisodes,
         'starredBy': <String>[],
         'commentCount': 0,
+        'isPublic': _isPublic,
       };
 
       await logRef.set(logData);
@@ -296,13 +313,28 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
             ),
             const SizedBox(height: 20),
 
-            Text(
-              'Günlüğe İzleme Kaydı Ekle',
-              style: GoogleFonts.outfit(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Günlüğe İzleme Kaydı Ekle',
+                  style: GoogleFonts.outfit(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                // Explicit close affordance — the sheet's content can grow
+                // tall enough (esp. with the TV episode-tracking section) to
+                // fill the whole screen, leaving no backdrop to tap and
+                // making drag-to-dismiss fight with the inner scroll view.
+                // Without this, there was no way to back out without saving.
+                IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.close_rounded, color: Colors.grey),
+                  visualDensity: VisualDensity.compact,
+                ),
+              ],
             ),
             const SizedBox(height: 18),
 
@@ -407,6 +439,8 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
                       setState(() {
                         _isActivelyWatching = value;
                         _episodeCount = 1;
+                        _episodeCountController.text = '1';
+                        _finishedWholeShow = true;
                         if (value) {
                           final next = (_lastWatchedEpisode ?? 0) + 1;
                           _selectedEpisode = _totalEpisodes != null ? next.clamp(1, _totalEpisodes!) : next;
@@ -449,39 +483,104 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
                     ),
                   ],
                 )
-              else
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Kaç bölüm izledin?',
-                      style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
-                    ),
-                    Row(
-                      children: [
-                        _buildStepperButton(
-                          icon: Icons.remove_rounded,
-                          onTap: _episodeCount > 1 ? () => setState(() => _episodeCount--) : null,
+              else ...[
+                // Whether TMDb gave us a total episode count decides if
+                // "finished the whole show" is even offerable — without a
+                // total there's nothing to mark "finished" against, so fall
+                // straight back to the manual episode-count stepper.
+                if (_totalEpisodes != null)
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildChoiceChip(
+                          label: 'Tüm sezonu bitirdim',
+                          selected: _finishedWholeShow,
+                          onTap: () => setState(() => _finishedWholeShow = true),
                         ),
-                        SizedBox(
-                          width: 36,
-                          child: Text(
-                            '$_episodeCount',
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _buildChoiceChip(
+                          label: 'Belirli sayıda bölüm',
+                          selected: !_finishedWholeShow,
+                          onTap: () => setState(() => _finishedWholeShow = false),
+                        ),
+                      ),
+                    ],
+                  ),
+                if (_totalEpisodes == null || !_finishedWholeShow) ...[
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Kaç bölüm izledin?',
+                        style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
+                      ),
+                      Row(
+                        children: [
+                          _buildStepperButton(
+                            icon: Icons.remove_rounded,
+                            onTap: _episodeCount > 1 ? () => _setEpisodeCount(_episodeCount - 1) : null,
                           ),
-                        ),
-                        _buildStepperButton(
-                          icon: Icons.add_rounded,
-                          onTap: _totalEpisodes == null || _episodeCount < _totalEpisodes!
-                              ? () => setState(() => _episodeCount++)
-                              : null,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                          SizedBox(
+                            width: 56,
+                            child: TextField(
+                              key: const Key('episodeCountField'),
+                              controller: _episodeCountController,
+                              textAlign: TextAlign.center,
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                              style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                              decoration: const InputDecoration(
+                                isDense: true,
+                                contentPadding: EdgeInsets.symmetric(vertical: 4),
+                              ),
+                              onChanged: (value) {
+                                final parsed = int.tryParse(value);
+                                if (parsed != null) _setEpisodeCount(parsed);
+                              },
+                            ),
+                          ),
+                          _buildStepperButton(
+                            icon: Icons.add_rounded,
+                            onTap: _totalEpisodes == null || _episodeCount < _totalEpisodes!
+                                ? () => _setEpisodeCount(_episodeCount + 1)
+                                : null,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ],
             ],
+
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Topluluğa Paylaş',
+                  style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
+                ),
+                Switch(
+                  value: _isPublic,
+                  activeThumbColor: AppTheme.accentColor,
+                  onChanged: (value) {
+                    setState(() {
+                      _isPublic = value;
+                    });
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Açarsan bu kayıt Topluluk akışında herkese görünür.',
+              style: GoogleFonts.inter(fontSize: 10, color: Colors.grey.shade500),
+            ),
+            const SizedBox(height: 16),
 
             // Mood Selector
             Text(
@@ -655,6 +754,45 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
       ),
     ),
   );
+  }
+
+  // Keeps _episodeCount and the text field's controller in sync whether the
+  // change came from the stepper buttons or the user typing a number
+  // directly — needed for shows with hundreds of episodes where tapping "+"
+  // one at a time isn't practical.
+  void _setEpisodeCount(int value) {
+    final clamped = _totalEpisodes != null ? value.clamp(1, _totalEpisodes!) : (value < 1 ? 1 : value);
+    setState(() => _episodeCount = clamped);
+    final text = '$clamped';
+    if (_episodeCountController.text != text) {
+      _episodeCountController.value = TextEditingValue(
+        text: text,
+        selection: TextSelection.collapsed(offset: text.length),
+      );
+    }
+  }
+
+  Widget _buildChoiceChip({required String label, required bool selected, required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+        decoration: BoxDecoration(
+          color: selected ? AppTheme.accentColor.withValues(alpha: 0.2) : Colors.white.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: selected ? AppTheme.accentColor : Colors.grey.shade800, width: 1),
+        ),
+        child: Text(
+          label,
+          textAlign: TextAlign.center,
+          style: GoogleFonts.inter(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: selected ? AppTheme.accentColor : Colors.grey.shade400,
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildStepperButton({required IconData icon, required VoidCallback? onTap}) {

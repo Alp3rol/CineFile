@@ -49,9 +49,11 @@ void showWatchRecordPreviewDialog(
   required Future<void> Function() onDelete,
   required Future<void> Function(DateTime newDate) onUpdateDate,
   required Future<void> Function(int newCount) onUpdateEpisodes,
+  required Future<void> Function(bool newValue) onUpdatePrivacy,
 }) {
   DateTime currentDate = record.watchDate;
   int currentEpisodeCount = record.episodeCount;
+  bool currentIsPublic = record.isPublic;
   final rankController = TextEditingController(text: setting?.personalRanking?.toString() ?? '');
 
   showDialog(
@@ -216,6 +218,39 @@ void showWatchRecordPreviewDialog(
                 const SizedBox(height: 10),
                 _buildPreviewDetailRow(Icons.people_outline_rounded, 'Eşlik Edenler', record.watchCompanion!),
               ],
+
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.public_rounded, color: AppTheme.accentColor, size: 14),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Topluluğa Paylaş',
+                        style: GoogleFonts.inter(fontSize: 11, color: AppTheme.textSecondary, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                  Switch(
+                    value: currentIsPublic,
+                    activeThumbColor: AppTheme.accentColor,
+                    onChanged: (value) async {
+                      try {
+                        await onUpdatePrivacy(value);
+                        setState(() {
+                          currentIsPublic = value;
+                        });
+                      } catch (e) {
+                        if (context.mounted) {
+                          showPremiumToast(context, 'Paylaşım durumu güncellenemedi: $e', isError: true);
+                        }
+                      }
+                    },
+                  ),
+                ],
+              ),
 
               // Edit Ranking Row
               const SizedBox(height: 10),

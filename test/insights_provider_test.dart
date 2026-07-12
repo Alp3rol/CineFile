@@ -36,6 +36,7 @@ WatchRecordWithMovie _record({
     tags: tags,
     createdAt: DateTime.now(),
     episodeCount: episodeCount,
+    isPublic: false,
   );
   return WatchRecordWithMovie(record, movie);
 }

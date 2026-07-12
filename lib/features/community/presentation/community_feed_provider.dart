@@ -5,6 +5,7 @@ import '../../journal/models/diary_log_model.dart';
 final communityFeedProvider = StreamProvider<List<DiaryLogModel>>((ref) {
   return FirebaseFirestore.instance
       .collection('logs')
+      .where('isPublic', isEqualTo: true)
       .orderBy('watchDate', descending: true)
       .snapshots()
       .map((snapshot) {

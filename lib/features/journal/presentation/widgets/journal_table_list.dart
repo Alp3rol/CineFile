@@ -155,6 +155,7 @@ class JournalRecordsTable extends ConsumerWidget {
               onDelete: () => deleteWatchRecord(ref, record),
               onUpdateDate: (newDate) => updateWatchRecord(ref, record, watchDate: newDate),
               onUpdateEpisodes: (newCount) => updateWatchRecord(ref, record, episodeCount: newCount),
+              onUpdatePrivacy: (newValue) => updateWatchRecord(ref, record, isPublic: newValue),
             ),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
@@ -331,20 +332,25 @@ class JournalRecordsTable extends ConsumerWidget {
                   // 5. Puanım Sütunu - fixed width (wide enough for the
                   // 3-digit "X/YY" QuickAdvanceTag pill, e.g. "12/26")
                   SizedBox(
-                    width: isMobile ? 78 : 84,
+                    width: isMobile ? 84 : 90,
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      // Right-aligned to sit flush against the row's edge —
+                      // left-aligned made the rating (and especially the
+                      // QuickAdvanceTag pill on its own line below) look
+                      // like a disconnected floating box in the middle of
+                      // the row instead of a coherent trailing action group.
+                      crossAxisAlignment: CrossAxisAlignment.end,
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.star_rounded, color: AppTheme.ratingColor, size: 13),
-                            const SizedBox(width: 2),
+                            const Icon(Icons.star_rounded, color: AppTheme.ratingColor, size: 15),
+                            const SizedBox(width: 3),
                             Text(
                               '${record.rating}',
                               style: GoogleFonts.outfit(
-                                fontSize: 12,
+                                fontSize: 13,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
                               ),
@@ -353,13 +359,13 @@ class JournalRecordsTable extends ConsumerWidget {
                               const SizedBox(width: 4),
                               Text(
                                 record.mood ?? '🍿',
-                                style: const TextStyle(fontSize: 14),
+                                style: const TextStyle(fontSize: 15),
                               ),
                             ],
                           ],
                         ),
                         if (isLatestWatch && item.setting?.isActivelyWatching == true) ...[
-                          const SizedBox(height: 3),
+                          const SizedBox(height: 4),
                           QuickAdvanceTag(item: item),
                         ],
                       ],

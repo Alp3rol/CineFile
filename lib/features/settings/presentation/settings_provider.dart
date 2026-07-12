@@ -216,6 +216,9 @@ class BackupService {
           createdAt: DateTime.parse(map['createdAt'] as String),
           // Absent in backups made before episode-count tracking existed.
           episodeCount: map['episodeCount'] as int? ?? 1,
+          // Absent in backups made before the community privacy toggle
+          // existed — treat as private, consistent with the opt-in default.
+          isPublic: map['isPublic'] as bool? ?? false,
         );
       }).toList();
       

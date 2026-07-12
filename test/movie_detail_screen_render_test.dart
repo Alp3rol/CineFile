@@ -72,6 +72,7 @@ void main() {
       watchNumber: 1,
       createdAt: DateTime.now(),
       episodeCount: 1,
+      isPublic: false,
     );
     await tester.pumpWidget(_wrap(watchRecords: [
       WatchRecordWithMovie(record, Movie(tmdbId: 1, title: 'Test Movie', isTv: false, createdAt: DateTime.now())),

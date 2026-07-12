@@ -351,6 +351,24 @@ graph TD
     *   **Scrollbar'ların Komple Kaldırılması**: Uygulama genelinde afişlerin üzerine binen veya çirkin görüntü oluşturan tüm kaydırma çubukları hem Flutter (`CineFileScrollBehavior`) hem de tarayıcı (Gölge DOM / Shadow DOM) seviyesinde tamamen görünmez kılındı.
     *   **Fareyle Kaydırma (Mouse Drag to Scroll) Desteği**: Masaüstü tarayıcılarda yatay listelerin dokunmatik ekranlardaki gibi fareyle sürüklenerek (mouse-drag) veya izleme paneliyle akıcı şekilde kaydırılabilmesi sağlandı.
 
+#### **✅ v1.3.3: Topluluk Akışına Gizlilik/Paylaşım Kontrolü**
+*   **Hedef**: v1.2.0'da kurulan Topluluk Akışı'nın, kullanıcı onayı olmadan HER izleme kaydını (özel notlar dahil) herkese açık göstermesini durdurmak; paylaşımı kullanıcının açıkça seçtiği (opt-in) bir davranışa çevirmek.
+*   **İşler**:
+    *   `WatchRecords` tablosuna (Drift, schema v9, veri kaybı olmayan migration) ve `DiaryLogModel`e (Firestore) `isPublic` alanı eklendi — varsayılan **gizli (false)**; `isPublic` alanı olmayan tüm eski kayıtlar da geriye dönük olarak gizli sayılıyor.
+    *   Kayıt ekleme formuna (`add_watch_record_sheet.dart`) ve günlük kaydı önizleme/düzenleme dialoguna (`watch_record_preview_dialog.dart`) "Topluluğa Paylaş" switch'i eklendi; otomatik bölüm loglaması (`episode_logging.dart`) her zaman gizli olarak kaydediyor.
+    *   `community_feed_provider.dart` sorgusu `isPublic == true` filtresiyle sınırlandırıldı (kullanıcının kendi profilindeki "Son İzlediklerim" bölümü hâlâ tüm kayıtlarını gösteriyor).
+    *   Projeye ilk kez `firestore.rules` ve `firestore.indexes.json` eklendi ve production'a deploy edildi — artık sunucu tarafında da gizli kayıtlar, başkasının profil/paylaşım bilgisi ve kimlik taklidiyle yazma engelleniyor (emulator'da 18 senaryoluk otomatik testle doğrulandı).
+
+#### **✅ v1.3.4: Dizi Günlük Kaydı, Tarih Seçici ve Günlük Tablosu Cilalaması**
+*   **Hedef**: Bir diziyi günlüğe eklerken "bitirdim mi yoksa hâlâ mı izliyorum" niyetini doğru varsayılanla yakalamak, eski bir tarihi seçerken ay ay geri gitme zorunluluğunu kaldırmak, kayıt formundan kaydetmeden çıkılamaması sorununu gidermek ve Günlük tablo görünümündeki hizalama/boyut sorunlarını düzeltmek.
+*   **İşler**:
+    *   **"Tüm Sezonu Bitirdim" Varsayılanı**: `add_watch_record_sheet.dart`'ta "Aktif İzliyorum" kapalıyken artık **"Tüm sezonu bitirdim"** (varsayılan seçili) ile **"Belirli sayıda bölüm"** arasında açık bir seçim var. Önceden varsayılan sessizce "1 bölüm izlendi" olarak kaydediyordu; artık varsayılan davranış diziyi doğrudan tamamlanmış (`lastWatchedEpisode = totalEpisodes`, `isActivelyWatching = false`) işaretliyor. Bu kayıt için sayılan bölüm sayısı, önceden loglanmış bölümler varsa sadece **kalanları** sayıyor (v0.9.6'daki "her ekleme tüm seriyi tekrar izlemiş gibi sayar" bug'ının tekrarlanmaması için delta hesaplaması korundu).
+    *   **Elle Bölüm Sayısı Girişi**: "Belirli sayıda bölüm" seçildiğinde artık stepper'ın yanında sayıyı doğrudan yazabilen bir metin kutusu var — 786 bölümlük bir diziyi "+" ile tek tek tıklamak yerine direkt yazılabiliyor; toplam bölüm sayısını aşan girişler otomatik sınıra çekiliyor.
+    *   **Kayıt Formunu Kapatma Butonu**: "Günlüğe İzleme Kaydı Ekle" sheet'inde daha önce açık bir kapatma (✕) butonu yoktu; içerik uzun olduğunda (özellikle dizi bölüm takibi açıkken) sheet tüm ekranı kaplayıp dışarı tıklanacak alan bırakmıyor, kaydetmeden çıkmayı imkânsız kılıyordu. Başlığa `Navigator.pop` çağıran bir ✕ butonu eklendi.
+    *   **Tarih Seçicide Yıl Atlama**: `PremiumDatePicker`'da eski bir yılı seçmek için ay okuyla tek tek geri gitmek gerekiyordu. Başlığa (`Ay Yıl`) dokununca açılan bir **yıl ızgarası** eklendi; seçili yıla otomatik kaydırılıyor, bir yıla dokununca takvim doğrudan o yıl/aya atlıyor.
+    *   **Günlük Tablosu Hizalama Düzeltmesi**: Tablo görünümünde "Puanım" sütunu sola hizalıydı; aktif izlenen bir dizinin son kaydında altına eklenen "Bölüm X/Y +" etiketiyle birlikte satırın ortasında ayrık/çakışan bir kutu gibi görünüyordu (kart görünümü zaten sağa hizalıydı, tutarsızlık vardı). Sütun sağa hizalandı, yıldız/puan/etiket ikonları büyütüldü.
+    *   Tüm değişiklikler için widget testleri eklendi (`add_watch_record_episode_tracking_test.dart`, yeni `premium_date_picker_test.dart`); `dart analyze lib` temiz, `flutter test` 24/24 geçiyor.
+
 ---
 
 ## 📈 Proje Durumu

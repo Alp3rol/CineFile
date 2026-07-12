@@ -56,5 +56,5 @@ Bu dosya, önceki bir kod denetiminde bulunan ve düzeltilen sorunların **tekra
 
 ## Yol haritası
 
-- `roadmap.md` dosyasında sürüm bazlı yol haritası var. v0.1'den v1.0.4'e kadar tüm kararlaştırılan aşamalar tamamlandı (✅) — `pubspec.yaml`'daki `version:` alanını da bu son roadmap sürümüyle senkron tut. Yapay zeka entegrasyonu ve bulut yedekleme özellikleri kullanıcı kararıyla devre dışı bırakılmış ve kapsamdan çıkarılmıştır. Uygulama şu an stabil ve yayına hazırdır.
+- `roadmap.md` dosyasında sürüm bazlı yol haritası var. v0.1'den v1.3.x'e kadar tüm kararlaştırılan aşamalar tamamlandı (✅) — `pubspec.yaml`'daki `version:` alanını da bu son roadmap sürümüyle senkron tut. Yapay zeka entegrasyonu kullanıcı kararıyla devre dışı bırakılmış ve kapsamdan çıkarılmıştır. **Not:** Bulut/topluluk özellikleri (aksine önceki bir notta yazılıydı) artık kapsam dışı DEĞİL — Firebase Auth + Firestore ile kullanıcı hesapları, Topluluk akışı, beğeni, yorum ve takip sistemi tamamen entegre edilmiş ve `main_shell.dart`'ta canlı bir sekme olarak duruyor (bkz. `lib/features/auth/`, `lib/features/community/`). Paylaşılan izleme kayıtları `isPublic` bayrağıyla opt-in'dir (varsayılan gizli); güvenlik `firestore.rules`'ta uygulanır — yeni bir Firestore koleksiyonu/alanı eklerken bu kuralları da güncellemeyi unutma.
 

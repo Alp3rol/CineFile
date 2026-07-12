@@ -1,0 +1,57 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Diary logs — the source of the Community feed. A log is world-readable
+    // only when its owner explicitly marked it isPublic == true; otherwise
+    // only the owner can read it. starredBy/commentCount are updated by
+    // *other* users (liking/commenting), so those two fields are allowed to
+    // change even when the request isn't from the owner — everything else
+    // stays owner-only.
+    match /logs/{logId} {
+      allow read: if resource.data.isPublic == true
+                   || (request.auth != null && request.auth.uid == resource.data.userId);
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+      allow update: if request.auth != null && (
+        request.auth.uid == resource.data.userId ||
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['starredBy', 'commentCount'])
+      );
+      allow delete: if request.auth != null && request.auth.uid == resource.data.userId;
+
+      match /comments/{commentId} {
+        allow read: if get(/databases/$(database)/documents/logs/$(logId)).data.isPublic == true ||
+                     (request.auth != null &&
+                      request.auth.uid == get(/databases/$(database)/documents/logs/$(logId)).data.userId);
+        allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+        allow delete: if request.auth != null && request.auth.uid == resource.data.userId;
+        allow update: if false;
+      }
+    }
+
+    // User profiles — public read (username/avatar/follower counts shown on
+    // any profile screen), but only the owner can write, except
+    // followerCount/followingCount which the follow/unfollow batch on
+    // *another* user's account also needs to touch.
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow update: if request.auth != null && (
+        request.auth.uid == userId ||
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['followerCount', 'followingCount'])
+      );
+      allow delete: if false;
+
+      match /movie_settings/{settingId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+
+    // Follow edges, doc id "${followerId}_${followingId}".
+    match /follows/{followId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.followerId;
+      allow delete: if request.auth != null && request.auth.uid == resource.data.followerId;
+      allow update: if false;
+    }
+  }
+}

@@ -630,6 +630,7 @@ Future<void> updateWatchRecord(
   WatchRecord record, {
   DateTime? watchDate,
   int? episodeCount,
+  bool? isPublic,
 }) async {
   final recordId = record.id;
   final authState = ref.read(authStateProvider);
@@ -661,6 +662,9 @@ Future<void> updateWatchRecord(
         if (episodeCount != null) {
           updates['episodeCount'] = episodeCount;
         }
+        if (isPublic != null) {
+          updates['isPublic'] = isPublic;
+        }
 
         if (updates.isNotEmpty) {
           await doc.reference.update(updates);
@@ -690,6 +694,7 @@ Future<void> updateWatchRecord(
           tags: r.tags,
           createdAt: r.createdAt,
           episodeCount: episodeCount ?? r.episodeCount,
+          isPublic: isPublic ?? r.isPublic,
         );
       }
       return r;
@@ -702,6 +707,7 @@ Future<void> updateWatchRecord(
     WatchRecordsCompanion(
       watchDate: watchDate != null ? Value(watchDate) : const Value.absent(),
       episodeCount: episodeCount != null ? Value(episodeCount) : const Value.absent(),
+      isPublic: isPublic != null ? Value(isPublic) : const Value.absent(),
     ),
   );
 }

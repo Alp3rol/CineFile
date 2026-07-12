@@ -13,7 +13,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration {
@@ -139,6 +139,14 @@ class AppDatabase extends _$AppDatabase {
 
           await customStatement('PRAGMA foreign_keys = ON');
           from = 8;
+        }
+        if (from < 9) {
+          // v9: Community feed privacy control. New column defaults to
+          // false, so every pre-existing watch record stays private until
+          // the user explicitly opts in via the record's own share toggle
+          // — no data is deleted or changed, only a visibility flag added.
+          await m.addColumn(watchRecords, watchRecords.isPublic);
+          from = 9;
         }
         if (from != to) {
           throw StateError(

@@ -22,12 +22,22 @@ import 'package:filmdizi/features/auth/controllers/auth_controller.dart';
 import 'package:filmdizi/features/journal/models/diary_log_model.dart';
 import 'package:filmdizi/features/movie_detail/presentation/add_watch_record_sheet.dart';
 import 'package:filmdizi/features/journal/presentation/widgets/journal_table_list.dart';
+import 'package:filmdizi/features/journal/presentation/widgets/journal_record_list.dart';
 
 const _tvMovieData = {
   'id': 900,
   'title': 'Test Dizi',
   'media_type': 'tv',
   'number_of_episodes': 3,
+};
+
+// A long-running show — typing the episode count directly must work here,
+// since tapping "+" 786 times isn't a reasonable way to log it.
+const _longRunningTvMovieData = {
+  'id': 901,
+  'title': 'Uzun Dizi',
+  'media_type': 'tv',
+  'number_of_episodes': 786,
 };
 
 // A base route + a real Navigator, so AddWatchRecordSheet's own
@@ -46,10 +56,14 @@ Widget _rootApp(GlobalKey<NavigatorState> navigatorKey) {
   );
 }
 
-Future<void> _openSheet(WidgetTester tester, GlobalKey<NavigatorState> navigatorKey) async {
+Future<void> _openSheet(
+  WidgetTester tester,
+  GlobalKey<NavigatorState> navigatorKey, {
+  Map<String, dynamic> movieData = _tvMovieData,
+}) async {
   unawaited(navigatorKey.currentState!.push(
     MaterialPageRoute(
-      builder: (context) => const Scaffold(body: AddWatchRecordSheet(movieData: _tvMovieData)),
+      builder: (context) => Scaffold(body: AddWatchRecordSheet(movieData: movieData)),
     ),
   ));
   await tester.pumpAndSettle();
@@ -73,6 +87,91 @@ void main() {
     container.dispose();
   });
 
+  testWidgets('default (not actively watching) marks the whole show as finished', (tester) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final navigatorKey = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(UncontrolledProviderScope(container: container, child: _rootApp(navigatorKey)));
+    await tester.pumpAndSettle();
+    await _openSheet(tester, navigatorKey);
+
+    // "Aktif İzliyorum" is off by default, and so is "Belirli sayıda bölüm" —
+    // the default assumption is that the user finished the whole show (why
+    // else would they be logging it without tracking progress). The manual
+    // stepper should be hidden in this state.
+    expect(find.text('Tüm sezonu bitirdim'), findsOneWidget);
+    expect(find.text('Kaç bölüm izledin?'), findsNothing);
+
+    await tester.tap(find.text('Kaydı Günlüğe Ekle'));
+    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 3));
+
+    final settingsDoc = await firestore.collection('users').doc('test-uid').collection('movie_settings').doc('900_true').get();
+    final settings = settingsDoc.data()!;
+    expect(settings['lastWatchedEpisode'], 3);
+    expect(settings['isActivelyWatching'], isFalse);
+
+    final logsSnap = await firestore.collection('logs').where('userId', isEqualTo: 'test-uid').get();
+    expect(logsSnap.docs.single.data()['episodeCount'], 3);
+
+    // The Journal list (both the card list and the table view) marks a show
+    // "Tamamlandı" purely from UserMovieSettings.lastWatchedEpisode reaching
+    // totalEpisodes — so "Tüm sezonu bitirdim" surfaces the same green
+    // checkmark as finishing a show one episode at a time via "Aktif
+    // İzliyorum", with no extra wiring needed.
+    final log = DiaryLogModel.fromMap(logsSnap.docs.first.data(), logsSnap.docs.first.id);
+    final watchWithMovie = log.toWatchRecordWithMovie();
+    final setting = UserMovieSetting(
+      tmdbId: 900,
+      isTv: true,
+      isFavorite: false,
+      isReWatchList: false,
+      updatedAt: DateTime.now(),
+      isActivelyWatching: false,
+      lastWatchedEpisode: 3,
+    );
+    final movie = watchWithMovie.movie.copyWith(totalEpisodes: const Value(3));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: JournalRecordsList(
+            items: [WatchRecordWithMovie(watchWithMovie.record, movie, setting: setting)],
+            onUpdateRanking: (_) async {},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.check_circle_rounded), findsOneWidget);
+  });
+
+  testWidgets('close button dismisses the sheet without saving a record', (tester) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final navigatorKey = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(UncontrolledProviderScope(container: container, child: _rootApp(navigatorKey)));
+    await tester.pumpAndSettle();
+    await _openSheet(tester, navigatorKey);
+
+    expect(find.byType(AddWatchRecordSheet), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.close_rounded));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AddWatchRecordSheet), findsNothing);
+
+    final logsSnap = await firestore.collection('logs').where('userId', isEqualTo: 'test-uid').get();
+    expect(logsSnap.docs, isEmpty);
+  });
+
   testWidgets('manual episode-count stepper cannot exceed the total episode count', (tester) async {
     tester.view.physicalSize = const Size(1080, 2400);
     tester.view.devicePixelRatio = 1.0;
@@ -84,7 +183,11 @@ void main() {
     await tester.pumpAndSettle();
     await _openSheet(tester, navigatorKey);
 
-    // Default (not actively watching) is 1 episode — NOT the show's total
+    // Switch to the manual partial-watch mode to reveal the stepper.
+    await tester.tap(find.text('Belirli sayıda bölüm'));
+    await tester.pumpAndSettle();
+
+    // Default in manual mode is 1 episode — NOT the show's total
     // (defaulting to "all episodes" caused a real bug: logging the same
     // show multiple times each counted as a full rewatch of the series).
     expect(find.text('1'), findsOneWidget);
@@ -96,6 +199,38 @@ void main() {
     }
     expect(find.text('3'), findsOneWidget);
     expect(find.text('4'), findsNothing);
+  });
+
+  testWidgets('manual episode count can be typed directly for long-running shows', (tester) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final navigatorKey = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(UncontrolledProviderScope(container: container, child: _rootApp(navigatorKey)));
+    await tester.pumpAndSettle();
+    await _openSheet(tester, navigatorKey, movieData: _longRunningTvMovieData);
+
+    await tester.tap(find.text('Belirli sayıda bölüm'));
+    await tester.pumpAndSettle();
+
+    final field = find.byKey(const Key('episodeCountField'));
+    await tester.enterText(field, '700');
+    await tester.pump();
+    expect(find.text('700'), findsOneWidget);
+
+    // Typing past the show's total (786) clamps back down to it.
+    await tester.enterText(field, '9999');
+    await tester.pump();
+    expect(find.text('786'), findsOneWidget);
+
+    await tester.tap(find.text('Kaydı Günlüğe Ekle'));
+    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 3));
+
+    final settingsDoc = await firestore.collection('users').doc('test-uid').collection('movie_settings').doc('901_true').get();
+    expect(settingsDoc.data()!['lastWatchedEpisode'], 786);
   });
 
   testWidgets('active tracking suggests the next episode across separate records, then completes', (tester) async {
@@ -111,7 +246,9 @@ void main() {
     // --- Record 1: turn on active tracking, keep suggested episode 1 ---
     await _openSheet(tester, navigatorKey);
 
-    await tester.tap(find.byType(Switch));
+    // "Aktif İzliyorum" is the first Switch on the sheet (the "Topluluğa
+    // Paylaş" privacy toggle renders after it).
+    await tester.tap(find.byType(Switch).first);
     await tester.pumpAndSettle();
     expect(find.text('Bölüm 1 / 3'), findsOneWidget);
 

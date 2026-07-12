@@ -157,15 +157,16 @@ final insightsProvider = Provider<InsightsData?>((ref) {
   for (final r in list) {
     final date = r.record.watchDate;
     final dateKey = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-    
-    // Tümü
-    dailyWatchCounts[dateKey] = (dailyWatchCounts[dateKey] ?? 0) + 1;
-    
-    // Film vs Dizi
+
+    // Film vs Dizi (dizi için bölüm sayısı, film için her zaman 1 kayıt) —
+    // dailyWatchCounts ('Tümü') bu ikisinin toplamıyla tutarlı kalır.
+    final increment = r.movie.isTv ? r.record.episodeCount : 1;
+    dailyWatchCounts[dateKey] = (dailyWatchCounts[dateKey] ?? 0) + increment;
+
     if (r.movie.isTv) {
-      dailyTvWatchCounts[dateKey] = (dailyTvWatchCounts[dateKey] ?? 0) + 1;
+      dailyTvWatchCounts[dateKey] = (dailyTvWatchCounts[dateKey] ?? 0) + increment;
     } else {
-      dailyMovieWatchCounts[dateKey] = (dailyMovieWatchCounts[dateKey] ?? 0) + 1;
+      dailyMovieWatchCounts[dateKey] = (dailyMovieWatchCounts[dateKey] ?? 0) + increment;
     }
   }
 

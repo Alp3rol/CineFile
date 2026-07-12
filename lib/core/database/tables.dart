@@ -55,6 +55,10 @@ class WatchRecords extends Table {
   // applying that single estimate uniformly to every logged watch.
   IntColumn get episodeCount => integer().withDefault(const Constant(1))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  // Whether the user chose to share this record on the Community feed.
+  // Defaults to false (opt-in) so nothing is ever exposed without an
+  // explicit choice.
+  BoolColumn get isPublic => boolean().withDefault(const Constant(false))();
 }
 
 @DataClassName('UserMovieSetting')

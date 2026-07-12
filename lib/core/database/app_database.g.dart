@@ -1077,6 +1077,21 @@ class $WatchRecordsTable extends WatchRecords
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
   );
+  static const VerificationMeta _isPublicMeta = const VerificationMeta(
+    'isPublic',
+  );
+  @override
+  late final GeneratedColumn<bool> isPublic = GeneratedColumn<bool>(
+    'is_public',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_public" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1092,6 +1107,7 @@ class $WatchRecordsTable extends WatchRecords
     tags,
     episodeCount,
     createdAt,
+    isPublic,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1197,6 +1213,12 @@ class $WatchRecordsTable extends WatchRecords
         createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
       );
     }
+    if (data.containsKey('is_public')) {
+      context.handle(
+        _isPublicMeta,
+        isPublic.isAcceptableOrUnknown(data['is_public']!, _isPublicMeta),
+      );
+    }
     return context;
   }
 
@@ -1258,6 +1280,10 @@ class $WatchRecordsTable extends WatchRecords
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
       )!,
+      isPublic: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_public'],
+      )!,
     );
   }
 
@@ -1281,6 +1307,7 @@ class WatchRecord extends DataClass implements Insertable<WatchRecord> {
   final String? tags;
   final int episodeCount;
   final DateTime createdAt;
+  final bool isPublic;
   const WatchRecord({
     required this.id,
     required this.movieId,
@@ -1295,6 +1322,7 @@ class WatchRecord extends DataClass implements Insertable<WatchRecord> {
     this.tags,
     required this.episodeCount,
     required this.createdAt,
+    required this.isPublic,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1322,6 +1350,7 @@ class WatchRecord extends DataClass implements Insertable<WatchRecord> {
     }
     map['episode_count'] = Variable<int>(episodeCount);
     map['created_at'] = Variable<DateTime>(createdAt);
+    map['is_public'] = Variable<bool>(isPublic);
     return map;
   }
 
@@ -1346,6 +1375,7 @@ class WatchRecord extends DataClass implements Insertable<WatchRecord> {
       tags: tags == null && nullToAbsent ? const Value.absent() : Value(tags),
       episodeCount: Value(episodeCount),
       createdAt: Value(createdAt),
+      isPublic: Value(isPublic),
     );
   }
 
@@ -1368,6 +1398,7 @@ class WatchRecord extends DataClass implements Insertable<WatchRecord> {
       tags: serializer.fromJson<String?>(json['tags']),
       episodeCount: serializer.fromJson<int>(json['episodeCount']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      isPublic: serializer.fromJson<bool>(json['isPublic']),
     );
   }
   @override
@@ -1387,6 +1418,7 @@ class WatchRecord extends DataClass implements Insertable<WatchRecord> {
       'tags': serializer.toJson<String?>(tags),
       'episodeCount': serializer.toJson<int>(episodeCount),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'isPublic': serializer.toJson<bool>(isPublic),
     };
   }
 
@@ -1404,6 +1436,7 @@ class WatchRecord extends DataClass implements Insertable<WatchRecord> {
     Value<String?> tags = const Value.absent(),
     int? episodeCount,
     DateTime? createdAt,
+    bool? isPublic,
   }) => WatchRecord(
     id: id ?? this.id,
     movieId: movieId ?? this.movieId,
@@ -1420,6 +1453,7 @@ class WatchRecord extends DataClass implements Insertable<WatchRecord> {
     tags: tags.present ? tags.value : this.tags,
     episodeCount: episodeCount ?? this.episodeCount,
     createdAt: createdAt ?? this.createdAt,
+    isPublic: isPublic ?? this.isPublic,
   );
   WatchRecord copyWithCompanion(WatchRecordsCompanion data) {
     return WatchRecord(
@@ -1444,6 +1478,7 @@ class WatchRecord extends DataClass implements Insertable<WatchRecord> {
           ? data.episodeCount.value
           : this.episodeCount,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      isPublic: data.isPublic.present ? data.isPublic.value : this.isPublic,
     );
   }
 
@@ -1462,7 +1497,8 @@ class WatchRecord extends DataClass implements Insertable<WatchRecord> {
           ..write('watchNumber: $watchNumber, ')
           ..write('tags: $tags, ')
           ..write('episodeCount: $episodeCount, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('isPublic: $isPublic')
           ..write(')'))
         .toString();
   }
@@ -1482,6 +1518,7 @@ class WatchRecord extends DataClass implements Insertable<WatchRecord> {
     tags,
     episodeCount,
     createdAt,
+    isPublic,
   );
   @override
   bool operator ==(Object other) =>
@@ -1499,7 +1536,8 @@ class WatchRecord extends DataClass implements Insertable<WatchRecord> {
           other.watchNumber == this.watchNumber &&
           other.tags == this.tags &&
           other.episodeCount == this.episodeCount &&
-          other.createdAt == this.createdAt);
+          other.createdAt == this.createdAt &&
+          other.isPublic == this.isPublic);
 }
 
 class WatchRecordsCompanion extends UpdateCompanion<WatchRecord> {
@@ -1516,6 +1554,7 @@ class WatchRecordsCompanion extends UpdateCompanion<WatchRecord> {
   final Value<String?> tags;
   final Value<int> episodeCount;
   final Value<DateTime> createdAt;
+  final Value<bool> isPublic;
   const WatchRecordsCompanion({
     this.id = const Value.absent(),
     this.movieId = const Value.absent(),
@@ -1530,6 +1569,7 @@ class WatchRecordsCompanion extends UpdateCompanion<WatchRecord> {
     this.tags = const Value.absent(),
     this.episodeCount = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.isPublic = const Value.absent(),
   });
   WatchRecordsCompanion.insert({
     this.id = const Value.absent(),
@@ -1545,6 +1585,7 @@ class WatchRecordsCompanion extends UpdateCompanion<WatchRecord> {
     this.tags = const Value.absent(),
     this.episodeCount = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.isPublic = const Value.absent(),
   }) : movieId = Value(movieId),
        watchDate = Value(watchDate),
        rating = Value(rating),
@@ -1563,6 +1604,7 @@ class WatchRecordsCompanion extends UpdateCompanion<WatchRecord> {
     Expression<String>? tags,
     Expression<int>? episodeCount,
     Expression<DateTime>? createdAt,
+    Expression<bool>? isPublic,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1578,6 +1620,7 @@ class WatchRecordsCompanion extends UpdateCompanion<WatchRecord> {
       if (tags != null) 'tags': tags,
       if (episodeCount != null) 'episode_count': episodeCount,
       if (createdAt != null) 'created_at': createdAt,
+      if (isPublic != null) 'is_public': isPublic,
     });
   }
 
@@ -1595,6 +1638,7 @@ class WatchRecordsCompanion extends UpdateCompanion<WatchRecord> {
     Value<String?>? tags,
     Value<int>? episodeCount,
     Value<DateTime>? createdAt,
+    Value<bool>? isPublic,
   }) {
     return WatchRecordsCompanion(
       id: id ?? this.id,
@@ -1610,6 +1654,7 @@ class WatchRecordsCompanion extends UpdateCompanion<WatchRecord> {
       tags: tags ?? this.tags,
       episodeCount: episodeCount ?? this.episodeCount,
       createdAt: createdAt ?? this.createdAt,
+      isPublic: isPublic ?? this.isPublic,
     );
   }
 
@@ -1655,6 +1700,9 @@ class WatchRecordsCompanion extends UpdateCompanion<WatchRecord> {
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
+    if (isPublic.present) {
+      map['is_public'] = Variable<bool>(isPublic.value);
+    }
     return map;
   }
 
@@ -1673,7 +1721,8 @@ class WatchRecordsCompanion extends UpdateCompanion<WatchRecord> {
           ..write('watchNumber: $watchNumber, ')
           ..write('tags: $tags, ')
           ..write('episodeCount: $episodeCount, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('isPublic: $isPublic')
           ..write(')'))
         .toString();
   }
@@ -3523,6 +3572,7 @@ typedef $$WatchRecordsTableCreateCompanionBuilder =
       Value<String?> tags,
       Value<int> episodeCount,
       Value<DateTime> createdAt,
+      Value<bool> isPublic,
     });
 typedef $$WatchRecordsTableUpdateCompanionBuilder =
     WatchRecordsCompanion Function({
@@ -3539,6 +3589,7 @@ typedef $$WatchRecordsTableUpdateCompanionBuilder =
       Value<String?> tags,
       Value<int> episodeCount,
       Value<DateTime> createdAt,
+      Value<bool> isPublic,
     });
 
 class $$WatchRecordsTableFilterComposer
@@ -3612,6 +3663,11 @@ class $$WatchRecordsTableFilterComposer
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isPublic => $composableBuilder(
+    column: $table.isPublic,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -3689,6 +3745,11 @@ class $$WatchRecordsTableOrderingComposer
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get isPublic => $composableBuilder(
+    column: $table.isPublic,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$WatchRecordsTableAnnotationComposer
@@ -3746,6 +3807,9 @@ class $$WatchRecordsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get isPublic =>
+      $composableBuilder(column: $table.isPublic, builder: (column) => column);
 }
 
 class $$WatchRecordsTableTableManager
@@ -3792,6 +3856,7 @@ class $$WatchRecordsTableTableManager
                 Value<String?> tags = const Value.absent(),
                 Value<int> episodeCount = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<bool> isPublic = const Value.absent(),
               }) => WatchRecordsCompanion(
                 id: id,
                 movieId: movieId,
@@ -3806,6 +3871,7 @@ class $$WatchRecordsTableTableManager
                 tags: tags,
                 episodeCount: episodeCount,
                 createdAt: createdAt,
+                isPublic: isPublic,
               ),
           createCompanionCallback:
               ({
@@ -3822,6 +3888,7 @@ class $$WatchRecordsTableTableManager
                 Value<String?> tags = const Value.absent(),
                 Value<int> episodeCount = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<bool> isPublic = const Value.absent(),
               }) => WatchRecordsCompanion.insert(
                 id: id,
                 movieId: movieId,
@@ -3836,6 +3903,7 @@ class $$WatchRecordsTableTableManager
                 tags: tags,
                 episodeCount: episodeCount,
                 createdAt: createdAt,
+                isPublic: isPublic,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

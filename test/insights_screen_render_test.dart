@@ -30,6 +30,7 @@ WatchRecordWithMovie _record(int id, {String? director, String? genres}) {
     tags: 'gece',
     createdAt: DateTime.now(),
     episodeCount: 1,
+    isPublic: false,
   );
   return WatchRecordWithMovie(record, movie);
 }

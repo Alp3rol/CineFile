@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_theme.dart';
 import 'insights_provider.dart';
+import 'widgets/contribution_heatmap.dart';
 import 'widgets/insights_charts.dart';
 import 'widgets/insights_lists.dart';
 import 'widgets/insights_misc_cards.dart';
@@ -43,6 +44,10 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen>
 
           // 1b. Haftalık İzleme Hedefi (v0.9.0)
           WeeklyGoalCard(data: insights),
+          const SizedBox(height: 12),
+
+          // 1c. Yıllık İzleme Isı Haritası (Neon Contribution Heatmap)
+          ContributionHeatmap(insights: insights),
           const SizedBox(height: 12),
 
           // 2. Monthly Trend Chart Card

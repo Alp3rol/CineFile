@@ -37,6 +37,7 @@ class DiaryLogModel {
   // Social
   final List<String> starredBy;
   final int commentCount;
+  final bool isPublic;
 
   DiaryLogModel({
     required this.id,
@@ -67,6 +68,7 @@ class DiaryLogModel {
     required this.createdAt,
     required this.starredBy,
     required this.commentCount,
+    required this.isPublic,
   });
 
   Map<String, dynamic> toMap() {
@@ -99,6 +101,7 @@ class DiaryLogModel {
       'createdAt': Timestamp.fromDate(createdAt),
       'starredBy': starredBy,
       'commentCount': commentCount,
+      'isPublic': isPublic,
     };
   }
 
@@ -132,6 +135,7 @@ class DiaryLogModel {
       createdAt: (map['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       starredBy: List<String>.from(map['starredBy'] ?? []),
       commentCount: map['commentCount'] as int? ?? 0,
+      isPublic: map['isPublic'] as bool? ?? false,
     );
   }
 
@@ -150,6 +154,7 @@ class DiaryLogModel {
       tags: tags,
       createdAt: createdAt,
       episodeCount: episodeCount,
+      isPublic: isPublic,
     );
 
     final movie = Movie(
