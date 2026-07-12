@@ -11,6 +11,10 @@ import '../../../../core/database/app_database.dart';
 import '../../../../core/widgets/premium_date_picker.dart';
 import '../../../../core/widgets/premium_toast.dart';
 import '../../auth/controllers/auth_controller.dart';
+import 'widgets/episode_tracking_section.dart';
+import 'widgets/mood_selector.dart';
+import 'widgets/watch_context_fields.dart';
+import 'widgets/watch_rating_slider.dart';
 
 class AddWatchRecordSheet extends ConsumerStatefulWidget {
   final Map<String, dynamic> movieData;
@@ -335,297 +339,87 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
             const SizedBox(height: 16),
 
             // Rating Selector (Slider)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Senin Puanın:',
-                  style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
-                ),
-                Text(
-                  '$_rating / 10',
-                  style: GoogleFonts.outfit(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.ratingColor,
-                  ),
-                ),
-              ],
-            ),
-            SliderTheme(
-              data: SliderTheme.of(context).copyWith(
-                trackHeight: 2.0, // Thinner track
-                activeTrackColor: AppTheme.accentColor,
-                inactiveTrackColor: Colors.white.withValues(alpha: 0.08),
-                thumbColor: AppTheme.ratingColor,
-                overlayColor: AppTheme.ratingColor.withValues(alpha: 0.12),
-                valueIndicatorColor: AppTheme.surfaceColor,
-                thumbShape: const RoundSliderThumbShape(
-                  enabledThumbRadius: 6.0, // Smaller thumb
-                ),
-                overlayShape: const RoundSliderOverlayShape(
-                  overlayRadius: 16.0,
-                ),
-                tickMarkShape: SliderTickMarkShape.noTickMark, // Hide tick marks for a cleaner look
-                valueIndicatorTextStyle: GoogleFonts.outfit(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                ),
-              ),
-              child: Slider(
-                value: _rating,
-                min: 1.0,
-                max: 10.0,
-                divisions: 18, // 0.5 steps
-                label: _rating.toString(),
-                onChanged: (val) {
-                  setState(() {
-                    _rating = val;
-                  });
-                },
-              ),
+            WatchRatingSlider(
+              rating: _rating,
+              onChanged: (val) {
+                setState(() {
+                  _rating = val;
+                });
+              },
             ),
 
             // Episode Tracking (TV shows only) — TMDb only exposes a single
             // flat episode runtime, so this lets duration stats scale with
             // how many episodes are actually covered instead of applying
             // that one estimate uniformly to every logged watch.
-            if (widget.movieData['media_type'] == 'tv') ...[
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Aktif İzliyorum',
-                    style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
-                  ),
-                  Switch(
-                    value: _isActivelyWatching,
-                    activeThumbColor: AppTheme.accentColor,
-                    onChanged: (value) {
-                      setState(() {
-                        _isActivelyWatching = value;
-                        _episodeCount = 1;
-                        if (value) {
-                          final next = (_lastWatchedEpisode ?? 0) + 1;
-                          _selectedEpisode = _totalEpisodes != null ? next.clamp(1, _totalEpisodes!) : next;
-                        }
-                      });
-                    },
-                  ),
-                ],
+            if (widget.movieData['media_type'] == 'tv')
+              EpisodeTrackingSection(
+                isActivelyWatching: _isActivelyWatching,
+                selectedEpisode: _selectedEpisode,
+                totalEpisodes: _totalEpisodes,
+                episodeCount: _episodeCount,
+                onActiveChanged: (value) {
+                  setState(() {
+                    _isActivelyWatching = value;
+                    _episodeCount = 1;
+                    if (value) {
+                      final next = (_lastWatchedEpisode ?? 0) + 1;
+                      _selectedEpisode = _totalEpisodes != null ? next.clamp(1, _totalEpisodes!) : next;
+                    }
+                  });
+                },
+                onEpisodeCountDecrement: _episodeCount > 1 ? () => setState(() => _episodeCount--) : null,
+                onEpisodeCountIncrement: _totalEpisodes == null || _episodeCount < _totalEpisodes!
+                    ? () => setState(() => _episodeCount++)
+                    : null,
+                onSelectedEpisodeDecrement: _selectedEpisode > 1 ? () => setState(() => _selectedEpisode--) : null,
+                onSelectedEpisodeIncrement: _totalEpisodes == null || _selectedEpisode < _totalEpisodes!
+                    ? () => setState(() => _selectedEpisode++)
+                    : null,
               ),
-              const SizedBox(height: 8),
-              if (_isActivelyWatching)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Bölüm $_selectedEpisode${_totalEpisodes != null ? ' / $_totalEpisodes' : ''}',
-                      style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
-                    ),
-                    Row(
-                      children: [
-                        _buildStepperButton(
-                          icon: Icons.remove_rounded,
-                          onTap: _selectedEpisode > 1 ? () => setState(() => _selectedEpisode--) : null,
-                        ),
-                        SizedBox(
-                          width: 36,
-                          child: Text(
-                            '$_selectedEpisode',
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-                          ),
-                        ),
-                        _buildStepperButton(
-                          icon: Icons.add_rounded,
-                          onTap: _totalEpisodes == null || _selectedEpisode < _totalEpisodes!
-                              ? () => setState(() => _selectedEpisode++)
-                              : null,
-                        ),
-                      ],
-                    ),
-                  ],
-                )
-              else
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Kaç bölüm izledin?',
-                      style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
-                    ),
-                    Row(
-                      children: [
-                        _buildStepperButton(
-                          icon: Icons.remove_rounded,
-                          onTap: _episodeCount > 1 ? () => setState(() => _episodeCount--) : null,
-                        ),
-                        SizedBox(
-                          width: 36,
-                          child: Text(
-                            '$_episodeCount',
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-                          ),
-                        ),
-                        _buildStepperButton(
-                          icon: Icons.add_rounded,
-                          onTap: _totalEpisodes == null || _episodeCount < _totalEpisodes!
-                              ? () => setState(() => _episodeCount++)
-                              : null,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-            ],
 
             // Mood Selector
-            Text(
-              'İzleme Modu / Ruh Hali:',
-              style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: _moods.map((mood) {
-                final isSelected = _selectedMood == mood;
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _selectedMood = mood;
-                    });
-                  },
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 150),
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: isSelected ? AppTheme.accentColor.withValues(alpha: 0.3) : Colors.transparent,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: isSelected ? AppTheme.accentColor : Colors.grey.shade800,
-                        width: 1.5,
-                      ),
-                    ),
-                    child: Text(
-                      mood,
-                      style: const TextStyle(fontSize: 20),
-                    ),
-                  ),
-                );
-              }).toList(),
+            MoodSelector(
+              moods: _moods,
+              selectedMood: _selectedMood,
+              onMoodSelected: (mood) {
+                setState(() {
+                  _selectedMood = mood;
+                });
+              },
             ),
             const SizedBox(height: 18),
 
             // Watch Place Input & Chips
-            Text(
-              'Nerede İzledin?',
-              style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
-            ),
-            const SizedBox(height: 6),
-            TextField(
+            WatchPlaceField(
               controller: _placeController,
-              decoration: const InputDecoration(
-                hintText: 'Örn: Kadıköy Sineması, Ev...',
-              ),
-            ),
-            const SizedBox(height: 6),
-            Wrap(
-              spacing: 6,
-              children: _placeSuggestions.map((place) {
-                return ActionChip(
-                  label: Text(place, style: GoogleFonts.inter(fontSize: 11)),
-                  backgroundColor: AppTheme.surfaceColor,
-                  onPressed: () {
-                    setState(() {
-                      _placeController.text = place;
-                    });
-                  },
-                );
-              }).toList(),
+              suggestions: _placeSuggestions,
+              onSuggestionTap: (place) {
+                setState(() {
+                  _placeController.text = place;
+                });
+              },
             ),
             const SizedBox(height: 14),
 
             // Companions Input & Chips
-            Text(
-              'Kiminle İzledin?',
-              style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
-            ),
-            const SizedBox(height: 6),
-            TextField(
+            WatchCompanionField(
               controller: _companionController,
-              decoration: const InputDecoration(
-                hintText: 'Örn: Tek başıma, Ahmet, Ailem...',
-              ),
-            ),
-            const SizedBox(height: 6),
-            Wrap(
-              spacing: 6,
-              children: _companionSuggestions.map((companion) {
-                return ActionChip(
-                  label: Text(companion, style: GoogleFonts.inter(fontSize: 11)),
-                  backgroundColor: AppTheme.surfaceColor,
-                  onPressed: () {
-                    setState(() {
-                      _companionController.text = companion;
-                    });
-                  },
-                );
-              }).toList(),
+              suggestions: _companionSuggestions,
+              onSuggestionTap: (companion) {
+                setState(() {
+                  _companionController.text = companion;
+                });
+              },
             ),
             const SizedBox(height: 14),
 
             // Personal Notes
-            Text(
-              'Kişisel Notların:',
-              style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
-            ),
-            const SizedBox(height: 6),
-            TextField(
-              controller: _notesController,
-              maxLines: 3,
-              decoration: const InputDecoration(
-                hintText: 'Film hakkında ne düşünüyorsun? Akılda kalıcı sahneler...',
-              ),
-            ),
+            WatchNotesField(controller: _notesController),
             const SizedBox(height: 14),
 
             // Özel Etiketler (Tags)
-            Text(
-              'Özel Etiketler (#tag):',
-              style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
-            ),
-            const SizedBox(height: 6),
-            TextField(
-              controller: _tagsController,
-              decoration: const InputDecoration(
-                hintText: 'Örn: #nostalji, #sinemada, #yalnız (Virgülle ayırın)...',
-              ),
-            ),
-            const SizedBox(height: 6),
-            Wrap(
-              spacing: 6,
-              children: _tagSuggestions.map((tag) {
-                return ActionChip(
-                  label: Text(tag, style: GoogleFonts.inter(fontSize: 11)),
-                  backgroundColor: AppTheme.surfaceColor,
-                  onPressed: () {
-                    final currentText = _tagsController.text.trim();
-                    if (currentText.isEmpty) {
-                      _tagsController.text = tag;
-                    } else {
-                      final tagsList = currentText.split(',').map((t) => t.trim()).toList();
-                      if (!tagsList.contains(tag)) {
-                        _tagsController.text = '$currentText, $tag';
-                      }
-                    }
-                  },
-                );
-              }).toList(),
-            ),
+            WatchTagsField(controller: _tagsController, suggestions: _tagSuggestions),
             const SizedBox(height: 24),
 
             // Submit Button
@@ -655,22 +449,5 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
       ),
     ),
   );
-  }
-
-  Widget _buildStepperButton({required IconData icon, required VoidCallback? onTap}) {
-    final isEnabled = onTap != null;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 28,
-        height: 28,
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.05),
-          shape: BoxShape.circle,
-          border: Border.all(color: isEnabled ? AppTheme.accentColor : Colors.grey.shade800, width: 1),
-        ),
-        child: Icon(icon, size: 16, color: isEnabled ? AppTheme.accentColor : Colors.grey.shade700),
-      ),
-    );
   }
 }
