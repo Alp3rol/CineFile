@@ -20,6 +20,24 @@ class CustomListDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen> {
+  // Mirrors widget.list.isPublic locally so the badge/button update
+  // immediately after _stopSharing — widget.list is a snapshot passed in
+  // by the caller, not a reactively-watched provider value.
+  late bool _isPublic = widget.list.isPublic;
+
+  Future<void> _stopSharing() async {
+    try {
+      await setCollectionVisibility(ref, widget.list.id, false);
+      if (mounted) setState(() => _isPublic = false);
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Paylaşım durdurulamadı, tekrar deneyin.')),
+        );
+      }
+    }
+  }
+
   // Handles reordering of list movies
   void _onReorder(List<CustomListMovieWithMovie> items, int oldIndex, int newIndex) async {
     if (oldIndex == newIndex) return;
@@ -194,7 +212,36 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
                           ),
                         ),
                       ),
-                      
+
+                      // Community share status — starting a share only
+                      // happens via the compose bar's "Koleksiyon Paylaş"
+                      // flow (share_compose_sheet.dart); this is stop-only,
+                      // so there's no "isPublic" ambiguity about who
+                      // initiates the first Firestore write.
+                      if (_isPublic)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                          child: Row(
+                            children: [
+                              Icon(Icons.public_rounded, color: AppTheme.accentColor, size: 14),
+                              const SizedBox(width: 6),
+                              Text(
+                                'Toplulukla paylaşılıyor',
+                                style: GoogleFonts.inter(fontSize: 11, color: AppTheme.accentColor, fontWeight: FontWeight.bold),
+                              ),
+                              const Spacer(),
+                              TextButton(
+                                onPressed: _stopSharing,
+                                style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero),
+                                child: Text(
+                                  'Paylaşımı Durdur',
+                                  style: GoogleFonts.inter(fontSize: 11, color: AppTheme.textSecondary, decoration: TextDecoration.underline),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
                       const SizedBox(height: 8),
 
                       // Marathon challenge banner (v0.9.0)

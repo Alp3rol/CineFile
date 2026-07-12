@@ -28,6 +28,40 @@ service cloud.firestore {
       }
     }
 
+    // Community posts — every doc here was explicitly published via the
+    // compose flow (share_compose_sheet.dart), so unlike `logs` there is no
+    // isPublic branch: existence itself means "world-readable". starredBy/
+    // commentCount are updated by *other* users the same way logs' are.
+    match /posts/{postId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+      allow update: if request.auth != null && (
+        request.auth.uid == resource.data.userId ||
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['starredBy', 'commentCount'])
+      );
+      allow delete: if request.auth != null && request.auth.uid == resource.data.userId;
+
+      match /comments/{commentId} {
+        allow read: if request.auth != null;
+        allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+        allow delete: if request.auth != null && request.auth.uid == resource.data.userId;
+        allow update: if false;
+      }
+    }
+
+    // Shared collections — the live-synced mirror behind 'collection'-type
+    // community posts (see movie_repository.dart's setCollectionVisibility/
+    // _mirrorSharedCollection). Doc id is "${ownerId}_${listId}". Unlike
+    // `logs`/`posts`, existence of a doc here always means "currently
+    // shared" — the owner deletes it outright to stop sharing, so there's
+    // no isPublic branch to check.
+    match /shared_collections/{collectionId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.ownerId;
+      allow update: if request.auth != null && request.auth.uid == resource.data.ownerId;
+      allow delete: if request.auth != null && request.auth.uid == resource.data.ownerId;
+    }
+
     // User profiles — public read (username/avatar/follower counts shown on
     // any profile screen), but only the owner can write, except
     // followerCount/followingCount which the follow/unfollow batch on

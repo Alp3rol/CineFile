@@ -89,11 +89,24 @@ class WatchRecordWithMovie {
   WatchRecordWithMovie(this.record, this.movie, {this.setting});
 }
 
-// Stream provider to get watch records for any user with movie details
+// Stream provider to get watch records for any user with movie details.
+// The owner sees all of their own logs (public + private) — that satisfies
+// firestore.rules' `auth.uid == resource.data.userId` clause. Viewing
+// someone else's profile must filter to isPublic == true client-side too:
+// Firestore denies a whole collection query if it could return documents
+// the rules would reject, and the read rule's `isPublic == true` branch is
+// the only one a non-owner can satisfy, so the query itself must include
+// that filter for a stranger's profile.
 final watchRecordsForUserProvider = StreamProvider.family<List<WatchRecordWithMovie>, String>((ref, userId) {
-  return ref.read(firestoreProvider)
-      .collection('logs')
-      .where('userId', isEqualTo: userId)
+  final currentUserId = ref.watch(authStateProvider).value?.uid;
+  final isOwnProfile = currentUserId == userId;
+
+  var query = ref.read(firestoreProvider).collection('logs').where('userId', isEqualTo: userId);
+  if (!isOwnProfile) {
+    query = query.where('isPublic', isEqualTo: true);
+  }
+
+  return query
       .snapshots()
       .asyncMap((snapshot) async {
         final logs = snapshot.docs.map((doc) => DiaryLogModel.fromMap(doc.data(), doc.id)).toList();
@@ -220,6 +233,40 @@ final isFollowingProvider = StreamProvider.family<bool, String>((ref, targetUser
       .snapshots()
       .map((doc) => doc.exists);
 });
+
+// Toggles a follow relationship: creates/deletes the follows/{followerId}_{targetId}
+// doc and bumps both users' followerCount/followingCount atomically. Lives here
+// (next to the follow-related providers above) rather than in auth_controller.dart
+// since it's the shared write counterpart to followedUserIdsProvider/isFollowingProvider.
+Future<void> toggleFollow(
+  WidgetRef ref, {
+  required String currentUserId,
+  required String targetUserId,
+  required bool currentlyFollowing,
+}) async {
+  final firestore = ref.read(firestoreProvider);
+  final followDocRef = firestore.collection('follows').doc('${currentUserId}_$targetUserId');
+  final currentUserRef = firestore.collection('users').doc(currentUserId);
+  final targetUserRef = firestore.collection('users').doc(targetUserId);
+
+  final batch = firestore.batch();
+
+  if (currentlyFollowing) {
+    batch.delete(followDocRef);
+    batch.update(currentUserRef, {'followingCount': FieldValue.increment(-1)});
+    batch.update(targetUserRef, {'followerCount': FieldValue.increment(-1)});
+  } else {
+    batch.set(followDocRef, {
+      'followerId': currentUserId,
+      'followingId': targetUserId,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+    batch.update(currentUserRef, {'followingCount': FieldValue.increment(1)});
+    batch.update(targetUserRef, {'followerCount': FieldValue.increment(1)});
+  }
+
+  await batch.commit();
+}
 
 // Stream provider to get a set of favorite movie IDs
 final favoriteMovieIdsProvider = StreamProvider<Set<MovieKey>>((ref) {
@@ -493,6 +540,23 @@ Future<void> removeMovieFromCustomList(WidgetRef ref, int listId, int tmdbId, bo
 
 Future<void> reorderCustomListMovies(WidgetRef ref, int listId, Map<MovieKey, int> rankings) =>
     ref.read(movieRepositoryProvider).reorderCustomListMovies(listId, rankings);
+
+Future<void> setCollectionVisibility(WidgetRef ref, int listId, bool isPublic) =>
+    ref.read(movieRepositoryProvider).setCollectionVisibility(listId, isPublic);
+
+// Live view of a shared collection's current contents — used by the
+// Community feed's 'collection' post cards and shared_collection_detail_
+// screen.dart. Returns null once the doc doesn't exist (owner turned
+// sharing off, or it was never shared), which callers render as a graceful
+// "no longer shared" state rather than an error.
+final sharedCollectionProvider = StreamProvider.family<Map<String, dynamic>?, String>((ref, collectionRefId) {
+  return ref
+      .watch(firestoreProvider)
+      .collection('shared_collections')
+      .doc(collectionRefId)
+      .snapshots()
+      .map((doc) => doc.data());
+});
 
 // --- WATCH RECORD ACTIONS ---
 

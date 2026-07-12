@@ -90,6 +90,11 @@ class CustomLists extends Table {
   TextColumn get description => text().nullable()();
   DateTimeColumn get targetDate => dateTime().nullable()(); // Target end date for a watch marathon/challenge
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  // Whether this collection is live-mirrored to Firestore's
+  // shared_collections/{ownerId_listId} for the Community feed's "Koleksiyon
+  // Paylaş" post type. Defaults to false (opt-in), same as
+  // WatchRecords.isPublic — nothing is exposed without an explicit choice.
+  BoolColumn get isPublic => boolean().withDefault(const Constant(false))();
 }
 
 @DataClassName('CustomListMovie')

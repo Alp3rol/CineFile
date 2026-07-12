@@ -219,6 +219,10 @@ void showWatchRecordPreviewDialog(
                 _buildPreviewDetailRow(Icons.people_outline_rounded, 'Eşlik Edenler', record.watchCompanion!),
               ],
 
+              // Controls ONLY the "Son İzlediklerim" section on the user's
+              // own profile — unrelated to the Community feed, which is
+              // populated by explicit posts (see share_compose_sheet.dart),
+              // not by this flag.
               const SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -228,7 +232,7 @@ void showWatchRecordPreviewDialog(
                       const Icon(Icons.public_rounded, color: AppTheme.accentColor, size: 14),
                       const SizedBox(width: 8),
                       Text(
-                        'Topluluğa Paylaş',
+                        'Profilimde Göster',
                         style: GoogleFonts.inter(fontSize: 11, color: AppTheme.textSecondary, fontWeight: FontWeight.bold),
                       ),
                     ],

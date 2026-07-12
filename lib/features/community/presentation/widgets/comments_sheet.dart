@@ -11,10 +11,10 @@ import '../../../auth/presentation/user_profile_screen.dart';
 import '../comments_provider.dart';
 
 class CommentsSheet extends ConsumerStatefulWidget {
-  final String logId;
-  const CommentsSheet({super.key, required this.logId});
+  final String postId;
+  const CommentsSheet({super.key, required this.postId});
 
-  static void show(BuildContext context, String logId) {
+  static void show(BuildContext context, String postId) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -22,7 +22,7 @@ class CommentsSheet extends ConsumerStatefulWidget {
       builder: (context) {
         return Padding(
           padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-          child: CommentsSheet(logId: logId),
+          child: CommentsSheet(postId: postId),
         );
       },
     );
@@ -65,12 +65,12 @@ class _CommentsSheetState extends ConsumerState<CommentsSheet> {
     _commentController.clear();
 
     final commentRef = FirebaseFirestore.instance
-        .collection('logs')
-        .doc(widget.logId)
+        .collection('posts')
+        .doc(widget.postId)
         .collection('comments')
         .doc();
 
-    final logRef = FirebaseFirestore.instance.collection('logs').doc(widget.logId);
+    final postRef = FirebaseFirestore.instance.collection('posts').doc(widget.postId);
 
     final comment = CommentModel(
       id: commentRef.id,
@@ -84,7 +84,7 @@ class _CommentsSheetState extends ConsumerState<CommentsSheet> {
     // Run as batch to ensure atomicity
     final batch = FirebaseFirestore.instance.batch();
     batch.set(commentRef, comment.toMap());
-    batch.update(logRef, {'commentCount': FieldValue.increment(1)});
+    batch.update(postRef, {'commentCount': FieldValue.increment(1)});
     await batch.commit();
 
     // Scroll to bottom
@@ -99,22 +99,22 @@ class _CommentsSheetState extends ConsumerState<CommentsSheet> {
 
   Future<void> _deleteComment(String commentId) async {
     final commentRef = FirebaseFirestore.instance
-        .collection('logs')
-        .doc(widget.logId)
+        .collection('posts')
+        .doc(widget.postId)
         .collection('comments')
         .doc(commentId);
 
-    final logRef = FirebaseFirestore.instance.collection('logs').doc(widget.logId);
+    final postRef = FirebaseFirestore.instance.collection('posts').doc(widget.postId);
 
     final batch = FirebaseFirestore.instance.batch();
     batch.delete(commentRef);
-    batch.update(logRef, {'commentCount': FieldValue.increment(-1)});
+    batch.update(postRef, {'commentCount': FieldValue.increment(-1)});
     await batch.commit();
   }
 
   @override
   Widget build(BuildContext context) {
-    final commentsAsync = ref.watch(commentsProvider(widget.logId));
+    final commentsAsync = ref.watch(commentsProvider(widget.postId));
     final authState = ref.watch(authStateProvider);
     final currentUser = authState.value;
 

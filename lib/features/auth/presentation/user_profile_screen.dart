@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/glass_container.dart';
 import '../../../core/database/database_provider.dart';
 import '../../movie_detail/presentation/movie_detail_screen.dart';
+import '../../community/presentation/widgets/follow_button.dart';
 import '../controllers/auth_controller.dart';
 
 class UserProfileScreen extends ConsumerWidget {
@@ -123,64 +123,7 @@ class UserProfileScreen extends ConsumerWidget {
                   // Follow / Unfollow Button
                   if (!isMe && currentUser != null) ...[
                     const SizedBox(height: 24),
-                    ref.watch(isFollowingProvider(effectiveUserId)).when(
-                      loading: () => const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(color: AppTheme.accentColor, strokeWidth: 2),
-                      ),
-                      error: (err, stack) => const SizedBox(),
-                      data: (isFollowing) => GestureDetector(
-                        onTap: () async {
-                          final followDocRef = FirebaseFirestore.instance
-                              .collection('follows')
-                              .doc('${currentUser.uid}_$effectiveUserId');
-
-                          final currentUserRef = FirebaseFirestore.instance.collection('users').doc(currentUser.uid);
-                          final targetUserRef = FirebaseFirestore.instance.collection('users').doc(effectiveUserId);
-
-                          final batch = FirebaseFirestore.instance.batch();
-
-                          if (isFollowing) {
-                            batch.delete(followDocRef);
-                            batch.update(currentUserRef, {'followingCount': FieldValue.increment(-1)});
-                            batch.update(targetUserRef, {'followerCount': FieldValue.increment(-1)});
-                          } else {
-                            batch.set(followDocRef, {
-                              'followerId': currentUser.uid,
-                              'followingId': effectiveUserId,
-                              'createdAt': FieldValue.serverTimestamp(),
-                            });
-                            batch.update(currentUserRef, {'followingCount': FieldValue.increment(1)});
-                            batch.update(targetUserRef, {'followerCount': FieldValue.increment(1)});
-                          }
-
-                          await batch.commit();
-                        },
-                        child: Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          decoration: BoxDecoration(
-                            color: isFollowing ? Colors.transparent : AppTheme.accentColor,
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(
-                              color: isFollowing ? Colors.white24 : AppTheme.accentColor,
-                              width: 1,
-                            ),
-                          ),
-                          child: Center(
-                            child: Text(
-                              isFollowing ? 'Takibi Bırak' : 'Takip Et',
-                              style: GoogleFonts.outfit(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
+                    FollowButton(targetUserId: effectiveUserId),
                   ],
                   
                   const SizedBox(height: 32),

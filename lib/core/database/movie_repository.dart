@@ -23,6 +23,12 @@ abstract class MovieRepository {
   Future<void> removeMovieFromCustomList(int listId, int tmdbId, bool isTv);
   Future<void> reorderCustomListMovies(int listId, Map<MovieKey, int> rankings);
   Future<void> updateWatchRecordRankings(Map<MovieKey, int?> rankings);
+  // Turns a collection's "Koleksiyon Paylaş" live sync on/off. When turned
+  // on, mirrors the collection's current contents to Firestore's
+  // shared_collections/{ownerId_listId} immediately; when turned off,
+  // deletes that mirror doc (the local collection itself is untouched
+  // either way — this only controls the Community feed's visibility).
+  Future<void> setCollectionVisibility(int listId, bool isPublic);
 }
 
 final movieRepositoryProvider = Provider<MovieRepository>((ref) {
@@ -61,6 +67,7 @@ class NativeMovieRepository implements MovieRepository {
             targetDate: Value(clearTargetDate ? null : targetDate),
           ),
         );
+    await _mirrorSharedCollectionIfPublic(id);
   }
 
   @override
@@ -105,6 +112,7 @@ class NativeMovieRepository implements MovieRepository {
               addedAt: DateTime.now(),
             ),
           );
+      await _mirrorSharedCollectionIfPublic(listId);
     } catch (e, st) {
       debugPrint('addMovieToCustomList failed: $e\n$st');
       rethrow;
@@ -116,6 +124,7 @@ class NativeMovieRepository implements MovieRepository {
     await (_db.delete(_db.customListMovies)
           ..where((t) => t.listId.equals(listId) & t.movieId.equals(tmdbId) & t.isTv.equals(isTv)))
         .go();
+    await _mirrorSharedCollectionIfPublic(listId);
   }
 
   @override
@@ -129,9 +138,75 @@ class NativeMovieRepository implements MovieRepository {
               .write(CustomListMoviesCompanion(rankingOrder: Value(entry.value)));
         }
       });
+      await _mirrorSharedCollectionIfPublic(listId);
     } catch (e, st) {
       debugPrint('reorderCustomListMovies failed: $e\n$st');
       rethrow;
+    }
+  }
+
+  // Re-mirrors `listId`'s current contents to Firestore ONLY if that
+  // collection is currently shared — a no-op for the (default, common)
+  // case of a private collection, so ordinary local edits stay cheap.
+  Future<void> _mirrorSharedCollectionIfPublic(int listId) async {
+    final list = await (_db.select(_db.customLists)..where((t) => t.id.equals(listId))).getSingleOrNull();
+    if (list != null && list.isPublic) {
+      await _mirrorSharedCollection(listId);
+    }
+  }
+
+  Future<void> _mirrorSharedCollection(int listId) async {
+    final user = _ref.read(authStateProvider).value;
+    if (user == null) return;
+
+    final list = await (_db.select(_db.customLists)..where((t) => t.id.equals(listId))).getSingleOrNull();
+    if (list == null) return;
+
+    final movieRows = await (_db.select(_db.customListMovies)..where((t) => t.listId.equals(listId))).get();
+    final movies = <Map<String, dynamic>>[];
+    for (final row in movieRows) {
+      final movie = await (_db.select(_db.movies)
+            ..where((t) => t.tmdbId.equals(row.movieId) & t.isTv.equals(row.isTv)))
+          .getSingleOrNull();
+      if (movie == null) continue;
+      movies.add({
+        'tmdbId': movie.tmdbId,
+        'isTv': movie.isTv,
+        'title': movie.title,
+        'posterPath': movie.posterPath,
+        'rankingOrder': row.rankingOrder ?? 0,
+      });
+    }
+    movies.sort((a, b) => (a['rankingOrder'] as int).compareTo(b['rankingOrder'] as int));
+
+    final userModel = _ref.read(userModelProvider);
+    final username = userModel?.username ?? user.email!.split('@')[0];
+    final avatarUrl = userModel?.avatarUrl ?? 'https://api.dicebear.com/7.x/bottts/png?seed=$username';
+
+    await _ref.read(firestoreProvider).collection('shared_collections').doc('${user.uid}_$listId').set({
+      'ownerId': user.uid,
+      'ownerUsername': username,
+      'ownerAvatarUrl': avatarUrl,
+      'name': list.name,
+      'description': list.description,
+      'movies': movies,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  @override
+  Future<void> setCollectionVisibility(int listId, bool isPublic) async {
+    if (isPublic) {
+      await _mirrorSharedCollection(listId);
+      await (_db.update(_db.customLists)..where((t) => t.id.equals(listId)))
+          .write(const CustomListsCompanion(isPublic: Value(true)));
+    } else {
+      await (_db.update(_db.customLists)..where((t) => t.id.equals(listId)))
+          .write(const CustomListsCompanion(isPublic: Value(false)));
+      final user = _ref.read(authStateProvider).value;
+      if (user != null) {
+        await _ref.read(firestoreProvider).collection('shared_collections').doc('${user.uid}_$listId').delete();
+      }
     }
   }
 
@@ -182,6 +257,7 @@ class WebMovieRepository implements MovieRepository {
       description: description,
       targetDate: targetDate,
       createdAt: DateTime.now(),
+      isPublic: false,
     );
     notifier.state = newMap;
   }
@@ -205,6 +281,7 @@ class WebMovieRepository implements MovieRepository {
         description: description,
         targetDate: clearTargetDate ? null : (targetDate ?? existing.targetDate),
         createdAt: existing.createdAt,
+        isPublic: existing.isPublic,
       );
       notifier.state = newMap;
     }
@@ -310,4 +387,11 @@ class WebMovieRepository implements MovieRepository {
       rethrow;
     }
   }
+
+  // Web collections stay in-memory only (see webCustomListsProvider) —
+  // there's no local persistence to mirror from, and the "Koleksiyon
+  // Paylaş" entry point is disabled on web builds, so this is never
+  // expected to be called. A no-op rather than a crash if it ever is.
+  @override
+  Future<void> setCollectionVisibility(int listId, bool isPublic) async {}
 }

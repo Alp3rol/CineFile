@@ -246,9 +246,9 @@ void main() {
     // --- Record 1: turn on active tracking, keep suggested episode 1 ---
     await _openSheet(tester, navigatorKey);
 
-    // "Aktif İzliyorum" is the first Switch on the sheet (the "Topluluğa
-    // Paylaş" privacy toggle renders after it).
-    await tester.tap(find.byType(Switch).first);
+    // "Topluluğa Paylaş" now renders first (moved above episode tracking so
+    // it's harder to miss), so "Aktif İzliyorum" is the second Switch.
+    await tester.tap(find.byType(Switch).at(1));
     await tester.pumpAndSettle();
     expect(find.text('Bölüm 1 / 3'), findsOneWidget);
 

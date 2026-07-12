@@ -395,11 +395,64 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
               },
             ),
 
+            const SizedBox(height: 16),
+
+            // Profile Visibility Toggle — controls ONLY the "Son
+            // İzlediklerim" section on the user's own profile screen. This
+            // is deliberately unrelated to the Community feed: feed posts
+            // are created explicitly via the compose bar's "Film
+            // Paylaş"/"Günlüğünü Paylaş" flows (see
+            // share_compose_sheet.dart), which snapshot their own data and
+            // never read this flag.
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.03),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppTheme.borderColor),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.public_rounded, color: AppTheme.accentColor, size: 20),
+                          const SizedBox(width: 10),
+                          Text(
+                            'Profilimde Göster',
+                            style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
+                          ),
+                        ],
+                      ),
+                      Switch(
+                        value: _isPublic,
+                        activeThumbColor: AppTheme.accentColor,
+                        onChanged: (value) {
+                          setState(() {
+                            _isPublic = value;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Açarsan bu kayıt profilindeki "Son İzlediklerim" bölümünde herkese görünür.',
+                    style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary),
+                  ),
+                ],
+              ),
+            ),
+
             // Episode Tracking (TV shows only) — TMDb only exposes a single
             // flat episode runtime, so this lets duration stats scale with
             // how many episodes are actually covered instead of applying
             // that one estimate uniformly to every logged watch.
-            if (widget.movieData['media_type'] == 'tv')
+            if (widget.movieData['media_type'] == 'tv') ...[
+              const SizedBox(height: 16),
               EpisodeTrackingSection(
                 isActivelyWatching: _isActivelyWatching,
                 selectedEpisode: _selectedEpisode,
@@ -432,31 +485,8 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
                     ? () => setState(() => _selectedEpisode++)
                     : null,
               ),
+            ],
 
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Topluluğa Paylaş',
-                  style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
-                ),
-                Switch(
-                  value: _isPublic,
-                  activeThumbColor: AppTheme.accentColor,
-                  onChanged: (value) {
-                    setState(() {
-                      _isPublic = value;
-                    });
-                  },
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Açarsan bu kayıt Topluluk akışında herkese görünür.',
-              style: GoogleFonts.inter(fontSize: 10, color: Colors.grey.shade500),
-            ),
             const SizedBox(height: 16),
 
             // Mood Selector

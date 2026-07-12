@@ -83,7 +83,12 @@ class AuthController {
           avatarUrl: 'https://api.dicebear.com/7.x/bottts/png?seed=${username.trim()}',
         );
 
-        await _firestore.collection('users').doc(credential.user!.uid).set(newUser.toMap());
+        // usernameLower isn't part of UserModel (nothing in the app reads it
+        // back) — it exists purely so user_search_provider.dart can do a
+        // case-insensitive prefix query, since Firestore range queries are
+        // otherwise case-sensitive.
+        final userDoc = newUser.toMap()..['usernameLower'] = username.trim().toLowerCase();
+        await _firestore.collection('users').doc(credential.user!.uid).set(userDoc);
         _ref.read(userModelProvider.notifier).state = newUser;
       }
       return null;

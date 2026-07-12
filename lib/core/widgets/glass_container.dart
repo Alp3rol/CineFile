@@ -57,7 +57,15 @@ class GlassContainer extends StatelessWidget {
                 width: 1,
               ),
             ),
-            child: child,
+            // Widgets that paint on "the nearest Material ancestor" (ListTile,
+            // InkWell ripples, etc.) would otherwise paint underneath this
+            // Container's own background color and become invisible — wrap
+            // the content in its own transparent Material so those effects
+            // render on top of it instead.
+            child: Material(
+              type: MaterialType.transparency,
+              child: child,
+            ),
           ),
         ),
       ),

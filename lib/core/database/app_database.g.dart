@@ -2444,6 +2444,21 @@ class $CustomListsTable extends CustomLists
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
   );
+  static const VerificationMeta _isPublicMeta = const VerificationMeta(
+    'isPublic',
+  );
+  @override
+  late final GeneratedColumn<bool> isPublic = GeneratedColumn<bool>(
+    'is_public',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_public" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -2451,6 +2466,7 @@ class $CustomListsTable extends CustomLists
     description,
     targetDate,
     createdAt,
+    isPublic,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2496,6 +2512,12 @@ class $CustomListsTable extends CustomLists
         createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
       );
     }
+    if (data.containsKey('is_public')) {
+      context.handle(
+        _isPublicMeta,
+        isPublic.isAcceptableOrUnknown(data['is_public']!, _isPublicMeta),
+      );
+    }
     return context;
   }
 
@@ -2525,6 +2547,10 @@ class $CustomListsTable extends CustomLists
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
       )!,
+      isPublic: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_public'],
+      )!,
     );
   }
 
@@ -2540,12 +2566,14 @@ class CustomList extends DataClass implements Insertable<CustomList> {
   final String? description;
   final DateTime? targetDate;
   final DateTime createdAt;
+  final bool isPublic;
   const CustomList({
     required this.id,
     required this.name,
     this.description,
     this.targetDate,
     required this.createdAt,
+    required this.isPublic,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2559,6 +2587,7 @@ class CustomList extends DataClass implements Insertable<CustomList> {
       map['target_date'] = Variable<DateTime>(targetDate);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
+    map['is_public'] = Variable<bool>(isPublic);
     return map;
   }
 
@@ -2573,6 +2602,7 @@ class CustomList extends DataClass implements Insertable<CustomList> {
           ? const Value.absent()
           : Value(targetDate),
       createdAt: Value(createdAt),
+      isPublic: Value(isPublic),
     );
   }
 
@@ -2587,6 +2617,7 @@ class CustomList extends DataClass implements Insertable<CustomList> {
       description: serializer.fromJson<String?>(json['description']),
       targetDate: serializer.fromJson<DateTime?>(json['targetDate']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      isPublic: serializer.fromJson<bool>(json['isPublic']),
     );
   }
   @override
@@ -2598,6 +2629,7 @@ class CustomList extends DataClass implements Insertable<CustomList> {
       'description': serializer.toJson<String?>(description),
       'targetDate': serializer.toJson<DateTime?>(targetDate),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'isPublic': serializer.toJson<bool>(isPublic),
     };
   }
 
@@ -2607,12 +2639,14 @@ class CustomList extends DataClass implements Insertable<CustomList> {
     Value<String?> description = const Value.absent(),
     Value<DateTime?> targetDate = const Value.absent(),
     DateTime? createdAt,
+    bool? isPublic,
   }) => CustomList(
     id: id ?? this.id,
     name: name ?? this.name,
     description: description.present ? description.value : this.description,
     targetDate: targetDate.present ? targetDate.value : this.targetDate,
     createdAt: createdAt ?? this.createdAt,
+    isPublic: isPublic ?? this.isPublic,
   );
   CustomList copyWithCompanion(CustomListsCompanion data) {
     return CustomList(
@@ -2625,6 +2659,7 @@ class CustomList extends DataClass implements Insertable<CustomList> {
           ? data.targetDate.value
           : this.targetDate,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      isPublic: data.isPublic.present ? data.isPublic.value : this.isPublic,
     );
   }
 
@@ -2635,13 +2670,15 @@ class CustomList extends DataClass implements Insertable<CustomList> {
           ..write('name: $name, ')
           ..write('description: $description, ')
           ..write('targetDate: $targetDate, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('isPublic: $isPublic')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, description, targetDate, createdAt);
+  int get hashCode =>
+      Object.hash(id, name, description, targetDate, createdAt, isPublic);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2650,7 +2687,8 @@ class CustomList extends DataClass implements Insertable<CustomList> {
           other.name == this.name &&
           other.description == this.description &&
           other.targetDate == this.targetDate &&
-          other.createdAt == this.createdAt);
+          other.createdAt == this.createdAt &&
+          other.isPublic == this.isPublic);
 }
 
 class CustomListsCompanion extends UpdateCompanion<CustomList> {
@@ -2659,12 +2697,14 @@ class CustomListsCompanion extends UpdateCompanion<CustomList> {
   final Value<String?> description;
   final Value<DateTime?> targetDate;
   final Value<DateTime> createdAt;
+  final Value<bool> isPublic;
   const CustomListsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.description = const Value.absent(),
     this.targetDate = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.isPublic = const Value.absent(),
   });
   CustomListsCompanion.insert({
     this.id = const Value.absent(),
@@ -2672,6 +2712,7 @@ class CustomListsCompanion extends UpdateCompanion<CustomList> {
     this.description = const Value.absent(),
     this.targetDate = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.isPublic = const Value.absent(),
   }) : name = Value(name);
   static Insertable<CustomList> custom({
     Expression<int>? id,
@@ -2679,6 +2720,7 @@ class CustomListsCompanion extends UpdateCompanion<CustomList> {
     Expression<String>? description,
     Expression<DateTime>? targetDate,
     Expression<DateTime>? createdAt,
+    Expression<bool>? isPublic,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -2686,6 +2728,7 @@ class CustomListsCompanion extends UpdateCompanion<CustomList> {
       if (description != null) 'description': description,
       if (targetDate != null) 'target_date': targetDate,
       if (createdAt != null) 'created_at': createdAt,
+      if (isPublic != null) 'is_public': isPublic,
     });
   }
 
@@ -2695,6 +2738,7 @@ class CustomListsCompanion extends UpdateCompanion<CustomList> {
     Value<String?>? description,
     Value<DateTime?>? targetDate,
     Value<DateTime>? createdAt,
+    Value<bool>? isPublic,
   }) {
     return CustomListsCompanion(
       id: id ?? this.id,
@@ -2702,6 +2746,7 @@ class CustomListsCompanion extends UpdateCompanion<CustomList> {
       description: description ?? this.description,
       targetDate: targetDate ?? this.targetDate,
       createdAt: createdAt ?? this.createdAt,
+      isPublic: isPublic ?? this.isPublic,
     );
   }
 
@@ -2723,6 +2768,9 @@ class CustomListsCompanion extends UpdateCompanion<CustomList> {
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
+    if (isPublic.present) {
+      map['is_public'] = Variable<bool>(isPublic.value);
+    }
     return map;
   }
 
@@ -2733,7 +2781,8 @@ class CustomListsCompanion extends UpdateCompanion<CustomList> {
           ..write('name: $name, ')
           ..write('description: $description, ')
           ..write('targetDate: $targetDate, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('isPublic: $isPublic')
           ..write(')'))
         .toString();
   }
@@ -4259,6 +4308,7 @@ typedef $$CustomListsTableCreateCompanionBuilder =
       Value<String?> description,
       Value<DateTime?> targetDate,
       Value<DateTime> createdAt,
+      Value<bool> isPublic,
     });
 typedef $$CustomListsTableUpdateCompanionBuilder =
     CustomListsCompanion Function({
@@ -4267,6 +4317,7 @@ typedef $$CustomListsTableUpdateCompanionBuilder =
       Value<String?> description,
       Value<DateTime?> targetDate,
       Value<DateTime> createdAt,
+      Value<bool> isPublic,
     });
 
 final class $$CustomListsTableReferences
@@ -4325,6 +4376,11 @@ class $$CustomListsTableFilterComposer
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isPublic => $composableBuilder(
+    column: $table.isPublic,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4387,6 +4443,11 @@ class $$CustomListsTableOrderingComposer
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get isPublic => $composableBuilder(
+    column: $table.isPublic,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$CustomListsTableAnnotationComposer
@@ -4416,6 +4477,9 @@ class $$CustomListsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get isPublic =>
+      $composableBuilder(column: $table.isPublic, builder: (column) => column);
 
   Expression<T> customListMoviesRefs<T extends Object>(
     Expression<T> Function($$CustomListMoviesTableAnnotationComposer a) f,
@@ -4476,12 +4540,14 @@ class $$CustomListsTableTableManager
                 Value<String?> description = const Value.absent(),
                 Value<DateTime?> targetDate = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<bool> isPublic = const Value.absent(),
               }) => CustomListsCompanion(
                 id: id,
                 name: name,
                 description: description,
                 targetDate: targetDate,
                 createdAt: createdAt,
+                isPublic: isPublic,
               ),
           createCompanionCallback:
               ({
@@ -4490,12 +4556,14 @@ class $$CustomListsTableTableManager
                 Value<String?> description = const Value.absent(),
                 Value<DateTime?> targetDate = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<bool> isPublic = const Value.absent(),
               }) => CustomListsCompanion.insert(
                 id: id,
                 name: name,
                 description: description,
                 targetDate: targetDate,
                 createdAt: createdAt,
+                isPublic: isPublic,
               ),
           withReferenceMapper: (p0) => p0
               .map(

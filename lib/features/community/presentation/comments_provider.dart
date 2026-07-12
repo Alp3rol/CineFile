@@ -41,10 +41,10 @@ class CommentModel {
   }
 }
 
-final commentsProvider = StreamProvider.family<List<CommentModel>, String>((ref, logId) {
+final commentsProvider = StreamProvider.family<List<CommentModel>, String>((ref, postId) {
   return FirebaseFirestore.instance
-      .collection('logs')
-      .doc(logId)
+      .collection('posts')
+      .doc(postId)
       .collection('comments')
       .orderBy('createdAt', descending: false)
       .snapshots()

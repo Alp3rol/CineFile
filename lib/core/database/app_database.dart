@@ -13,7 +13,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration {
@@ -147,6 +147,14 @@ class AppDatabase extends _$AppDatabase {
           // — no data is deleted or changed, only a visibility flag added.
           await m.addColumn(watchRecords, watchRecords.isPublic);
           from = 9;
+        }
+        if (from < 10) {
+          // v10: live-synced "Koleksiyon Paylaş" community posts. New
+          // column defaults to false, so every pre-existing collection
+          // stays local-only until the user explicitly shares it — no data
+          // is deleted or changed, only a visibility flag added.
+          await m.addColumn(customLists, customLists.isPublic);
+          from = 10;
         }
         if (from != to) {
           throw StateError(
