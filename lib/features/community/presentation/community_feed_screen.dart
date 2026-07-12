@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -8,6 +9,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/glass_container.dart';
 import '../../../core/widgets/dynamic_background_wrapper.dart';
 import '../../auth/controllers/auth_controller.dart';
+import '../../auth/presentation/widgets/user_profile_avatar_button.dart';
 import '../../movie_detail/presentation/movie_detail_screen.dart';
 import '../../auth/presentation/user_profile_screen.dart';
 import 'community_feed_provider.dart';
@@ -15,6 +17,8 @@ import '../models/community_post_model.dart';
 import '../../../core/database/database_provider.dart';
 import 'widgets/comments_sheet.dart';
 import 'widgets/share_options_sheet.dart';
+import 'widgets/user_search_result_tile.dart';
+import 'user_search_provider.dart';
 import 'user_search_screen.dart';
 import 'user_public_diary_screen.dart';
 import 'shared_collection_detail_screen.dart';
@@ -35,6 +39,14 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
   final ScrollController _scrollController = ScrollController();
   bool _showScrollToTop = false;
 
+  // Inline user search — mirrors journal_screen.dart's _showSearch pattern:
+  // the search icon toggles a search field open in place, never navigating
+  // away from the Community feed itself (tapping a result still does, that
+  // is a real navigation to a profile, not the search UI).
+  bool _showSearch = false;
+  final TextEditingController _searchController = TextEditingController();
+  Timer? _searchDebounce;
+
   @override
   void initState() {
     super.initState();
@@ -45,7 +57,17 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
+    _searchDebounce?.cancel();
+    _searchController.dispose();
     super.dispose();
+  }
+
+  void _onSearchChanged(String value) {
+    setState(() {}); // updates the clear-button visibility
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 350), () {
+      ref.read(userSearchQueryProvider.notifier).state = value;
+    });
   }
 
   void _onScroll() {
@@ -112,6 +134,49 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  // Renders the same three states as UserSearchScreen (empty query / no
+  // results / results), but in place of the feed content instead of a
+  // pushed route — see _showSearch.
+  Widget _buildInlineSearchResults() {
+    final resultsAsync = ref.watch(userSearchResultsProvider);
+    final query = ref.watch(userSearchQueryProvider);
+
+    return resultsAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.accentColor)),
+      error: (err, stack) => Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: Text(
+            'Hata oluştu: $err',
+            style: GoogleFonts.inter(color: Colors.redAccent),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ),
+      data: (results) {
+        if (query.trim().isEmpty) {
+          return _buildEmptyState(
+            icon: Icons.person_search_rounded,
+            title: 'Kullanıcı Ara',
+            subtitle: 'Kullanıcı adına göre arama yapın.',
+          );
+        }
+        if (results.isEmpty) {
+          return _buildEmptyState(
+            icon: Icons.search_off_rounded,
+            title: 'Kullanıcı Bulunamadı',
+            subtitle: '"$query" ile eşleşen bir kullanıcı yok.',
+          );
+        }
+        return ListView.builder(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          itemCount: results.length,
+          itemBuilder: (context, index) => UserSearchResultTile(user: results[index]),
+        );
+      },
     );
   }
 
@@ -421,49 +486,21 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
                   builder: (_) => UserPublicDiaryScreen(username: post.username, entries: post.entries),
                 ),
               ),
-              child: Row(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          post.caption,
-                          style: GoogleFonts.inter(fontSize: 13, color: Colors.white70, height: 1.4),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          '${post.entries.length} film/dizi · Günlüğü gör',
-                          style: GoogleFonts.inter(fontSize: 11, color: AppTheme.accentColor, fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
+                  Text(
+                    post.caption,
+                    style: GoogleFonts.inter(fontSize: 13, color: Colors.white70, height: 1.4),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    '${post.entries.length} film/dizi · Günlüğü gör',
+                    style: GoogleFonts.inter(fontSize: 11, color: AppTheme.accentColor, fontWeight: FontWeight.bold),
                   ),
                   if (previewPosters.isNotEmpty) ...[
-                    const SizedBox(width: 12),
-                    SizedBox(
-                      width: 46 + (previewPosters.length - 1) * 16,
-                      height: 60,
-                      child: Stack(
-                        children: [
-                          for (var i = 0; i < previewPosters.length; i++)
-                            Positioned(
-                              left: i * 16,
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: Image.network(
-                                  'https://image.tmdb.org/t/p/w185${previewPosters[i]}',
-                                  width: 40,
-                                  height: 60,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) => Container(width: 40, height: 60, color: AppTheme.surfaceColor),
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
+                    const SizedBox(height: 12),
+                    _PosterFilmstrip(posterPaths: previewPosters, remainingCount: post.entries.length - previewPosters.length),
                   ],
                 ],
               ),
@@ -536,49 +573,21 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
                       builder: (_) => SharedCollectionDetailScreen(collectionRefId: post.collectionRefId!),
                     ),
                   ),
-                  child: Row(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              post.caption,
-                              style: GoogleFonts.inter(fontSize: 13, color: Colors.white70, height: 1.4),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              '$name · ${movies.length} film/dizi',
-                              style: GoogleFonts.inter(fontSize: 11, color: AppTheme.accentColor, fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        ),
+                      Text(
+                        post.caption,
+                        style: GoogleFonts.inter(fontSize: 13, color: Colors.white70, height: 1.4),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        '$name · ${movies.length} film/dizi',
+                        style: GoogleFonts.inter(fontSize: 11, color: AppTheme.accentColor, fontWeight: FontWeight.bold),
                       ),
                       if (previewPosters.isNotEmpty) ...[
-                        const SizedBox(width: 12),
-                        SizedBox(
-                          width: 46 + (previewPosters.length - 1) * 16,
-                          height: 60,
-                          child: Stack(
-                            children: [
-                              for (var i = 0; i < previewPosters.length; i++)
-                                Positioned(
-                                  left: i * 16,
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: Image.network(
-                                      'https://image.tmdb.org/t/p/w185${previewPosters[i]}',
-                                      width: 40,
-                                      height: 60,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (context, error, stackTrace) => Container(width: 40, height: 60, color: AppTheme.surfaceColor),
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
+                        const SizedBox(height: 12),
+                        _PosterFilmstrip(posterPaths: previewPosters, remainingCount: movies.length - previewPosters.length),
                       ],
                     ],
                   ),
@@ -627,20 +636,78 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
                         color: Colors.white,
                       ),
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.person_search_rounded, color: Colors.white),
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const UserSearchScreen()),
-                        );
-                      },
+                    Row(
+                      children: [
+                        // Search toggle button — mirrors journal_screen.dart's
+                        // inline search toggle (no separate route).
+                        GestureDetector(
+                          key: const Key('communitySearchToggle'),
+                          onTap: () {
+                            setState(() {
+                              _showSearch = !_showSearch;
+                              if (!_showSearch) {
+                                _searchController.clear();
+                                _searchDebounce?.cancel();
+                                ref.read(userSearchQueryProvider.notifier).state = '';
+                              }
+                            });
+                          },
+                          child: Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: _showSearch ? AppTheme.accentColor.withValues(alpha: 0.2) : Colors.white10,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              _showSearch ? Icons.search_off_rounded : Icons.search_rounded,
+                              color: _showSearch ? AppTheme.accentColor : Colors.white70,
+                              size: 18,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        const UserProfileAvatarButton(),
+                      ],
                     ),
                   ],
                 ),
               ),
 
+              // Inline search field — shown in place of the tabs/feed below,
+              // never pushes a new route (see UserSearchScreen for the
+              // full-page variant, still used by the "Kullanıcı Ara" CTA).
+              AnimatedCrossFade(
+                firstChild: const SizedBox(width: double.infinity, height: 0),
+                secondChild: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+                  child: TextField(
+                    controller: _searchController,
+                    autofocus: true,
+                    style: GoogleFonts.inter(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: 'Kullanıcı adına göre ara...',
+                      hintStyle: GoogleFonts.inter(color: AppTheme.textSecondary),
+                      prefixIcon: const Icon(Icons.search_rounded, color: AppTheme.textSecondary),
+                      suffixIcon: _searchController.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear_rounded, color: AppTheme.textSecondary),
+                              onPressed: () {
+                                _searchController.clear();
+                                _onSearchChanged('');
+                              },
+                            )
+                          : null,
+                    ),
+                    onChanged: _onSearchChanged,
+                  ),
+                ),
+                crossFadeState: _showSearch ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+                duration: const Duration(milliseconds: 200),
+              ),
+
               // Filter Toggle Tabs
-              if (currentUser != null)
+              if (currentUser != null && !_showSearch)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                   child: Row(
@@ -655,7 +722,7 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
               // Compose Bar — deliberately not an editable text field (see
               // ShareOptionsSheet doc comment: no freeform empty posts).
               // Tapping anywhere opens the structured share picker.
-              if (currentUser != null)
+              if (currentUser != null && !_showSearch)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
                   child: InkWell(
@@ -691,8 +758,11 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
                   ),
                 ),
 
-              Expanded(
-                child: feedAsync.when(
+              if (_showSearch)
+                Expanded(child: _buildInlineSearchResults())
+              else
+                Expanded(
+                  child: feedAsync.when(
                   loading: () => const Center(
                     child: CircularProgressIndicator(color: AppTheme.accentColor),
                   ),
@@ -766,6 +836,119 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
             );
           },
           show: _showScrollToTop,
+        ),
+      ),
+    );
+  }
+}
+
+// The premium film-strip preview shown on both "diary_snapshot" and
+// "collection" post cards (was duplicated identically in both — now
+// shared). Larger, non-overlapping posters in a horizontally scrollable
+// row, with a "+N" tile at the end when there are more entries than fit.
+// Each poster still grows/lifts/gains a shadow on hover (desktop/web
+// mouse) or press (touch — there's no touch equivalent of hover, so this
+// is the substitute). The press feedback uses Listener (raw pointer
+// events), not a GestureDetector: Listener doesn't enter the gesture
+// arena, so it can't intercept the tap that the existing GestureDetector
+// each card wraps this in relies on to navigate.
+class _PosterFilmstrip extends StatefulWidget {
+  final List<String> posterPaths;
+  final int remainingCount;
+  const _PosterFilmstrip({required this.posterPaths, this.remainingCount = 0});
+
+  @override
+  State<_PosterFilmstrip> createState() => _PosterFilmstripState();
+}
+
+class _PosterFilmstripState extends State<_PosterFilmstrip> {
+  int? _hoveredIndex;
+
+  static const _posterWidth = 64.0;
+  static const _posterHeight = 96.0;
+  static const _gap = 8.0;
+  static const _hoverLift = 6.0;
+  static const _hoverScale = 1.08;
+  static const _animationDuration = Duration(milliseconds: 180);
+
+  @override
+  Widget build(BuildContext context) {
+    final posters = widget.posterPaths;
+
+    return SizedBox(
+      height: _posterHeight + _hoverLift,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        clipBehavior: Clip.none, // lets a hovered/pressed poster lift above the row
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            for (var i = 0; i < posters.length; i++) ...[
+              if (i > 0) const SizedBox(width: _gap),
+              Padding(
+                padding: EdgeInsets.only(top: _hoveredIndex == i ? 0 : _hoverLift),
+                child: Listener(
+                  onPointerDown: (_) => setState(() => _hoveredIndex = i),
+                  onPointerUp: (_) => setState(() => _hoveredIndex = null),
+                  onPointerCancel: (_) => setState(() => _hoveredIndex = null),
+                  child: MouseRegion(
+                    onEnter: (_) => setState(() => _hoveredIndex = i),
+                    onExit: (_) => setState(() => _hoveredIndex = null),
+                    child: AnimatedScale(
+                      duration: _animationDuration,
+                      curve: Curves.easeOut,
+                      scale: _hoveredIndex == i ? _hoverScale : 1.0,
+                      child: AnimatedContainer(
+                        duration: _animationDuration,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: _hoveredIndex == i
+                              ? [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.45),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ]
+                              : const [],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.network(
+                            'https://image.tmdb.org/t/p/w185${posters[i]}',
+                            width: _posterWidth,
+                            height: _posterHeight,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) =>
+                                Container(width: _posterWidth, height: _posterHeight, color: AppTheme.surfaceColor),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+            if (widget.remainingCount > 0) ...[
+              const SizedBox(width: _gap),
+              Padding(
+                padding: const EdgeInsets.only(top: _hoverLift),
+                child: Container(
+                  width: _posterWidth,
+                  height: _posterHeight,
+                  decoration: BoxDecoration(
+                    color: AppTheme.surfaceColor,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    '+${widget.remainingCount}',
+                    style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white70),
+                  ),
+                ),
+              ),
+            ],
+          ],
         ),
       ),
     );

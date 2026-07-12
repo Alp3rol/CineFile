@@ -3,10 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../auth/models/user_model.dart';
-import '../../auth/presentation/user_profile_screen.dart';
 import 'user_search_provider.dart';
-import 'widgets/follow_button.dart';
+import 'widgets/user_search_result_tile.dart';
 
 class UserSearchScreen extends ConsumerStatefulWidget {
   const UserSearchScreen({super.key});
@@ -110,7 +108,7 @@ class _UserSearchScreenState extends ConsumerState<UserSearchScreen> {
                   return ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     itemCount: results.length,
-                    itemBuilder: (context, index) => _UserResultTile(user: results[index]),
+                    itemBuilder: (context, index) => UserSearchResultTile(user: results[index]),
                   );
                 },
               ),
@@ -139,56 +137,6 @@ class _UserSearchScreenState extends ConsumerState<UserSearchScreen> {
             textAlign: TextAlign.center,
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _UserResultTile extends StatelessWidget {
-  final UserModel user;
-  const _UserResultTile({required this.user});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: GestureDetector(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => UserProfileScreen(userId: user.id)),
-          );
-        },
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 24,
-              backgroundColor: AppTheme.borderColor,
-              backgroundImage: NetworkImage(
-                user.avatarUrl ?? 'https://api.dicebear.com/7.x/bottts/png?seed=${user.username}',
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '@${user.username}',
-                    style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '${user.followerCount} takipçi',
-                    style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 12),
-            SizedBox(width: 110, child: FollowButton(targetUserId: user.id)),
-          ],
-        ),
       ),
     );
   }

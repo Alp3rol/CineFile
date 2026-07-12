@@ -66,8 +66,9 @@ service cloud.firestore {
     // any profile screen), but only the owner can write, except
     // followerCount/followingCount which the follow/unfollow batch on
     // *another* user's account also needs to touch.
+    // Unauthenticated users can read to check username availability during signup.
     match /users/{userId} {
-      allow read: if request.auth != null;
+      allow read: if true;
       allow create: if request.auth != null && request.auth.uid == userId;
       allow update: if request.auth != null && (
         request.auth.uid == userId ||

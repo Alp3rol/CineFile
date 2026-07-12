@@ -64,7 +64,10 @@ void showRankDialog(
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              controller.dispose();
+              Navigator.pop(context);
+            },
             child: const Text('İptal', style: TextStyle(color: Colors.white70)),
           ),
           ElevatedButton(
@@ -75,7 +78,10 @@ void showRankDialog(
 
               try {
                 await _updateRank(ref, tmdbId: tmdbId, isTv: isTv, movieData: movieData, settings: settings, rank: newRank);
-                if (context.mounted) Navigator.pop(context);
+                if (context.mounted) {
+                  controller.dispose();
+                  Navigator.pop(context);
+                }
               } catch (e) {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -89,7 +95,7 @@ void showRankDialog(
         ],
       );
     },
-  );
+  ).then((_) => controller.dispose());
 }
 
 Future<void> _updateRank(

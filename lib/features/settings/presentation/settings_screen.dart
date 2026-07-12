@@ -409,7 +409,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   const SizedBox(width: 8),
                   Text(
                     'Yedek Panoya Kopyalandı!',
-                    style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                    style: GoogleFonts.outfit(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                 ],
               ),
@@ -464,7 +468,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   // Import Dialog
   void _showImportDialog(BuildContext context) {
     final controller = TextEditingController();
-    
+
     showDialog(
       context: context,
       builder: (context) {
@@ -503,7 +507,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () {
+                controller.dispose();
+                Navigator.pop(context);
+              },
               child: Text(
                 'İptal',
                 style: GoogleFonts.outfit(color: Colors.grey),
