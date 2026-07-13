@@ -6,7 +6,6 @@ import '../../../core/widgets/glass_container.dart';
 import '../../../core/database/database_provider.dart';
 import '../../movie_detail/presentation/movie_detail_screen.dart';
 import '../../community/presentation/widgets/follow_button.dart';
-import 'package:image_picker/image_picker.dart';
 import '../controllers/auth_controller.dart';
 import '../models/user_model.dart';
 
@@ -99,15 +98,6 @@ class UserProfileScreen extends ConsumerWidget {
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  // Email
-                  Text(
-                    userModel.email,
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      color: AppTheme.textSecondary,
                     ),
                   ),
                   if (userModel.bio != null && userModel.bio!.isNotEmpty) ...[
@@ -358,7 +348,6 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
   late TextEditingController _bioController;
   late String _selectedAvatarUrl;
   bool _isLoading = false;
-  bool _isUploadingImage = false;
   String? _errorMessage;
 
   final List<String> _presetAvatars = const [
@@ -385,50 +374,6 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
     _usernameController.dispose();
     _bioController.dispose();
     super.dispose();
-  }
-
-  Future<void> _pickAndUploadImage() async {
-    setState(() {
-      _isUploadingImage = true;
-      _errorMessage = null;
-    });
-
-    try {
-      final picker = ImagePicker();
-      final pickedFile = await picker.pickImage(
-        source: ImageSource.gallery,
-        imageQuality: 70,
-        maxWidth: 400,
-        maxHeight: 400,
-      );
-
-      if (pickedFile == null) {
-        setState(() => _isUploadingImage = false);
-        return;
-      }
-
-      final bytes = await pickedFile.readAsBytes();
-      final fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
-      
-      final downloadUrl = await ref.read(authControllerProvider).uploadAvatarImage(bytes, fileName);
-      
-      if (downloadUrl != null) {
-        setState(() {
-          _selectedAvatarUrl = downloadUrl;
-          _isUploadingImage = false;
-        });
-      } else {
-        setState(() {
-          _isUploadingImage = false;
-          _errorMessage = 'Görsel yüklenemedi. Firebase Storage yapılandırmanızı kontrol edin.';
-        });
-      }
-    } catch (e) {
-      setState(() {
-        _isUploadingImage = false;
-        _errorMessage = 'Resim yükleme hatası: $e';
-      });
-    }
   }
 
   @override
@@ -472,54 +417,20 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
             
             // Avatar Preview
             Center(
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  Container(
-                    width: 90,
-                    height: 90,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: AppTheme.accentColor, width: 2),
-                      image: DecorationImage(
-                        image: NetworkImage(_selectedAvatarUrl),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                  if (_isUploadingImage)
-                    Container(
-                      width: 90,
-                      height: 90,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.black.withOpacity(0.5),
-                      ),
-                      child: const Center(
-                        child: CircularProgressIndicator(color: AppTheme.accentColor),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-            
-            // Image Upload and Reset buttons
-            Center(
-              child: ElevatedButton.icon(
-                onPressed: _isUploadingImage ? null : _pickAndUploadImage,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white.withOpacity(0.08),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+              child: Container(
+                width: 90,
+                height: 90,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppTheme.accentColor, width: 2),
+                  image: DecorationImage(
+                    image: NetworkImage(_selectedAvatarUrl),
+                    fit: BoxFit.cover,
                   ),
                 ),
-                icon: const Icon(Icons.upload_file_rounded, size: 18),
-                label: const Text('Kendi Görselini Yükle'),
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
 
             // Predefined Avatars section
             Text(
@@ -633,7 +544,7 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
             
             // Save Button
             ElevatedButton(
-              onPressed: (_isLoading || _isUploadingImage) ? null : _saveProfile,
+              onPressed: _isLoading ? null : _saveProfile,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.accentColor,
                 foregroundColor: Colors.black,
