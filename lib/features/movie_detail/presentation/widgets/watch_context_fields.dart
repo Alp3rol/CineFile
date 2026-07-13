@@ -2,6 +2,55 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
 
+// Shared pill-shaped suggestion chip for the fields below, laid out in a
+// single horizontally scrollable row (never wraps to a second line) so a
+// long suggestion list stays compact instead of pushing the rest of the
+// sheet down.
+class _SuggestionChipRow extends StatelessWidget {
+  final List<String> suggestions;
+  final ValueChanged<String> onTap;
+
+  const _SuggestionChipRow({required this.suggestions, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 34,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        // Default (hardEdge) clip — keeps the chip row confined to the
+        // sheet's horizontal padding instead of bleeding out to the
+        // screen/device edge.
+        itemCount: suggestions.length,
+        separatorBuilder: (context, index) => const SizedBox(width: 8),
+        itemBuilder: (context, index) {
+          final label = suggestions[index];
+          return Material(
+            color: Colors.white.withValues(alpha: 0.04),
+            borderRadius: BorderRadius.circular(100),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(100),
+              onTap: () => onTap(label),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(100),
+                  border: Border.all(color: AppTheme.borderColor),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  label,
+                  style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white70),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
 // "Nerede İzledin?" text field + suggestion chips used in the
 // add-watch-record sheet. onSuggestionTap is expected to setState-wrap the
 // controller assignment, matching the sheet's original inline behavior.
@@ -33,17 +82,8 @@ class WatchPlaceField extends StatelessWidget {
             hintText: 'Örn: Kadıköy Sineması, Ev...',
           ),
         ),
-        const SizedBox(height: 6),
-        Wrap(
-          spacing: 6,
-          children: suggestions.map((place) {
-            return ActionChip(
-              label: Text(place, style: GoogleFonts.inter(fontSize: 11)),
-              backgroundColor: AppTheme.surfaceColor,
-              onPressed: () => onSuggestionTap(place),
-            );
-          }).toList(),
-        ),
+        const SizedBox(height: 8),
+        _SuggestionChipRow(suggestions: suggestions, onTap: onSuggestionTap),
       ],
     );
   }
@@ -78,17 +118,8 @@ class WatchCompanionField extends StatelessWidget {
             hintText: 'Örn: Tek başıma, Ahmet, Ailem...',
           ),
         ),
-        const SizedBox(height: 6),
-        Wrap(
-          spacing: 6,
-          children: suggestions.map((companion) {
-            return ActionChip(
-              label: Text(companion, style: GoogleFonts.inter(fontSize: 11)),
-              backgroundColor: AppTheme.surfaceColor,
-              onPressed: () => onSuggestionTap(companion),
-            );
-          }).toList(),
-        ),
+        const SizedBox(height: 8),
+        _SuggestionChipRow(suggestions: suggestions, onTap: onSuggestionTap),
       ],
     );
   }
@@ -165,17 +196,8 @@ class WatchTagsField extends StatelessWidget {
             hintText: 'Örn: #nostalji, #sinemada, #yalnız (Virgülle ayırın)...',
           ),
         ),
-        const SizedBox(height: 6),
-        Wrap(
-          spacing: 6,
-          children: suggestions.map((tag) {
-            return ActionChip(
-              label: Text(tag, style: GoogleFonts.inter(fontSize: 11)),
-              backgroundColor: AppTheme.surfaceColor,
-              onPressed: () => _onSuggestionTap(tag),
-            );
-          }).toList(),
-        ),
+        const SizedBox(height: 8),
+        _SuggestionChipRow(suggestions: suggestions, onTap: _onSuggestionTap),
       ],
     );
   }

@@ -25,30 +25,51 @@ class MoodSelector extends StatelessWidget {
           style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
         ),
         const SizedBox(height: 8),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: moods.map((mood) {
-            final isSelected = selectedMood == mood;
-            return GestureDetector(
-              onTap: () => onMoodSelected(mood),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 150),
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: isSelected ? AppTheme.accentColor.withValues(alpha: 0.3) : Colors.transparent,
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: isSelected ? AppTheme.accentColor : Colors.grey.shade800,
-                    width: 1.5,
+        SizedBox(
+          height: 52,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            // Default (hardEdge) clip — keeps the row confined to the
+            // sheet's horizontal padding instead of the selected glow
+            // shadow bleeding out to the screen/device edge.
+            itemCount: moods.length,
+            separatorBuilder: (context, index) => const SizedBox(width: 10),
+            itemBuilder: (context, index) {
+              final mood = moods[index];
+              final isSelected = selectedMood == mood;
+              return GestureDetector(
+                onTap: () => onMoodSelected(mood),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  curve: Curves.easeOut,
+                  width: 48,
+                  height: 48,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: isSelected ? AppTheme.accentColor.withValues(alpha: 0.22) : Colors.white.withValues(alpha: 0.04),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: isSelected ? AppTheme.accentColor : AppTheme.borderColor,
+                      width: 1.5,
+                    ),
+                    boxShadow: isSelected
+                        ? [
+                            BoxShadow(
+                              color: AppTheme.accentColor.withValues(alpha: 0.35),
+                              blurRadius: 12,
+                              spreadRadius: 1,
+                            ),
+                          ]
+                        : null,
+                  ),
+                  child: Text(
+                    mood,
+                    style: const TextStyle(fontSize: 22),
                   ),
                 ),
-                child: Text(
-                  mood,
-                  style: const TextStyle(fontSize: 20),
-                ),
-              ),
-            );
-          }).toList(),
+              );
+            },
+          ),
         ),
       ],
     );

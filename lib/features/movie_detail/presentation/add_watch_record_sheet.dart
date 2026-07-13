@@ -54,11 +54,23 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
   final TextEditingController _notesController = TextEditingController();
   final TextEditingController _tagsController = TextEditingController();
 
-  final List<String> _moods = ['🍿', '😊', '😢', '😱', '😴', '🔥', '❤️'];
+  final List<String> _moods = [
+    '🍿', '😊', '😢', '😱', '😴', '🔥', '❤️',
+    '😂', '🤯', '😭', '🥹', '🤔', '😍', '🥱', '😤', '🤩',
+  ];
 
-  final List<String> _placeSuggestions = ['Ev', 'Sinema', 'Arkadaşın Evi', 'Yolculukta'];
-  final List<String> _companionSuggestions = ['Tek Başına', 'Arkadaşlarla', 'Ailemle', 'Sevgilimle'];
-  final List<String> _tagSuggestions = ['#nostalji', '#sinemada', '#yalnız', '#aksiyon', '#romantizm'];
+  final List<String> _placeSuggestions = [
+    'Ev', 'Sinema', 'Arkadaşın Evi', 'Yolculukta',
+    'Otelde', 'Uçakta', 'Bahçede', 'Kampta', 'İş Yerinde',
+  ];
+  final List<String> _companionSuggestions = [
+    'Tek Başına', 'Arkadaşlarla', 'Ailemle', 'Sevgilimle',
+    'Eşimle', 'Kardeşimle', 'Çocuklarla', 'İş Arkadaşlarımla',
+  ];
+  final List<String> _tagSuggestions = [
+    '#nostalji', '#sinemada', '#yalnız', '#aksiyon', '#romantizm',
+    '#gerilim', '#komedi', '#drama', '#bilimkurgu', '#korku', '#klasik', '#yenikesif',
+  ];
 
   @override
   void initState() {
@@ -305,57 +317,80 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
 
     // Avoid sheet hitting bottom bar / keyboard
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    // Cap the sheet's height so it never eats the whole screen — the fields
+    // above (esp. the TV episode-tracking section) scroll inside that cap,
+    // while the submit button below stays outside the scroll view and is
+    // therefore always visible, never requiring a scroll to reach it.
+    final maxSheetHeight = MediaQuery.of(context).size.height * 0.92;
 
     return Container(
+      constraints: BoxConstraints(maxHeight: maxSheetHeight),
       decoration: const BoxDecoration(
         color: AppTheme.backgroundColor,
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       padding: EdgeInsets.only(bottom: bottomInset),
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-            // Sheet Handle bar
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade700,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Header (handle bar + title + close button) — deliberately
+          // outside the scroll view below so it stays visible while
+          // scrolling through the form, AND so a downward drag starting on
+          // it isn't captured by the inner SingleChildScrollView, letting
+          // the sheet's default drag-to-dismiss gesture work from here.
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  'Günlüğe İzleme Kaydı Ekle',
-                  style: GoogleFonts.outfit(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                // Sheet Handle bar
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade700,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
-                // Explicit close affordance — the sheet's content can grow
-                // tall enough (esp. with the TV episode-tracking section) to
-                // fill the whole screen, leaving no backdrop to tap and
-                // making drag-to-dismiss fight with the inner scroll view.
-                // Without this, there was no way to back out without saving.
-                IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.close_rounded, color: Colors.grey),
-                  visualDensity: VisualDensity.compact,
+                const SizedBox(height: 20),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Günlüğe İzleme Kaydı Ekle',
+                      style: GoogleFonts.outfit(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    // Explicit close affordance — the sheet's content can grow
+                    // tall enough (esp. with the TV episode-tracking section) to
+                    // fill the whole screen, leaving no backdrop to tap and
+                    // making drag-to-dismiss fight with the inner scroll view.
+                    // Without this, there was no way to back out without saving.
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close_rounded, color: Colors.grey),
+                      visualDensity: VisualDensity.compact,
+                    ),
+                  ],
                 ),
               ],
             ),
-            const SizedBox(height: 18),
+          ),
+          Flexible(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
 
             // Date Picker Row
             Row(
@@ -531,10 +566,18 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
 
             // Özel Etiketler (Tags)
             WatchTagsField(controller: _tagsController, suggestions: _tagSuggestions),
-            const SizedBox(height: 24),
+                  ],
+                ),
+              ),
+            ),
+          ),
 
-            // Submit Button
-            SizedBox(
+          // Submit Button — deliberately outside the Flexible/scroll area
+          // above so it's always visible without scrolling, regardless of
+          // how tall the form above gets (see maxSheetHeight comment).
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+            child: SizedBox(
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
@@ -555,10 +598,9 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-    ),
-  );
+    );
   }
 }

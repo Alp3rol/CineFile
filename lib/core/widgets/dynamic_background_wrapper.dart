@@ -17,20 +17,21 @@ class DynamicBackgroundWrapper extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final bgState = ref.watch(dynamicBackgroundProvider);
     final activeColors = bgState.uniqueColors;
+    final hasColors = bgState.isEnabled && activeColors.isNotEmpty;
 
-    if (!bgState.isEnabled || activeColors.isEmpty) {
-      // Fallback: Default Premium Dark Background
-      return Container(
-        color: AppTheme.backgroundColor,
-        child: child,
-      );
-    }
-
-    // Distribute active colors deterministically to 4 corners/sides
-    final color1 = _getBlobColor(0, activeColors);
-    final color2 = _getBlobColor(1, activeColors);
-    final color3 = _getBlobColor(2, activeColors);
-    final color4 = _getBlobColor(3, activeColors);
+    // Always render the same Stack shape (with `child` at the same position)
+    // regardless of whether colors are active. Poster color extraction is
+    // async, so this state flips mid-scroll on screens like movie detail —
+    // switching between a Container and a Stack here would change the
+    // widget type at this tree position, which makes Flutter destroy and
+    // recreate everything below (including the page's ScrollController),
+    // snapping the scroll position back to the top. Fading the gradient
+    // layers to transparent keeps the child's Element — and its scroll
+    // state — alive instead.
+    final color1 = hasColors ? _getBlobColor(0, activeColors) : Colors.transparent;
+    final color2 = hasColors ? _getBlobColor(1, activeColors) : Colors.transparent;
+    final color3 = hasColors ? _getBlobColor(2, activeColors) : Colors.transparent;
+    final color4 = hasColors ? _getBlobColor(3, activeColors) : Colors.transparent;
 
     return Stack(
       children: [

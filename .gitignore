@@ -46,3 +46,7 @@ app.*.map.json
 
 # Private TMDb API Key configuration
 lib/core/constants/api_key.dart
+
+# Raw app-icon/splash design source dump (see assets/icon/ for the
+# actually-used, already-cropped derived assets committed to the repo).
+/CineFileLOGO/

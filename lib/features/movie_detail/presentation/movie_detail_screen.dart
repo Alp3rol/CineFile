@@ -216,7 +216,17 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
           return Stack(
             children: [
               // 1. Blurred Backdrop Image
-              if (backdropOpacity > 0 && backdropPath != null)
+              // NOTE: gated only on backdropPath (stable per movie), NOT on
+              // backdropOpacity. backdropOpacity flips to 0 exactly at
+              // scrollOffset >= 200 — if that also removed this Positioned
+              // from the Stack's children list, the list length would
+              // change mid-scroll, and Flutter's unkeyed list
+              // reconciliation would reassign this Element's identity to
+              // a different subtree (the scroll content below), destroying
+              // and recreating it — resetting the ScrollController's
+              // position and snapping the page back to the top. Opacity
+              // alone (below) already makes this invisible at 0.
+              if (backdropPath != null)
                 Positioned(
                   top: backdropTop,
                   left: 0,
@@ -247,44 +257,44 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
                   ),
                 ),
               
-              // 2. Black Fading Mask
-              if (backdropOpacity > 0)
-                Positioned(
-                  top: backdropTop,
-                  left: 0,
-                  right: 0,
-                  height: 480,
-                  child: Opacity(
-                    opacity: backdropOpacity,
-                    child: ShaderMask(
-                      shaderCallback: (rect) {
-                        return const LinearGradient(
+              // 2. Black Fading Mask — always present for the same reason
+              // as the backdrop image above; opacity alone drives visibility.
+              Positioned(
+                top: backdropTop,
+                left: 0,
+                right: 0,
+                height: 480,
+                child: Opacity(
+                  opacity: backdropOpacity,
+                  child: ShaderMask(
+                    shaderCallback: (rect) {
+                      return const LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.black,
+                          Colors.transparent,
+                        ],
+                        stops: [0.65, 1.0],
+                      ).createShader(Rect.fromLTRB(0, 0, rect.width, rect.height));
+                    },
+                    blendMode: BlendMode.dstIn,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: [
-                            Colors.black,
-                            Colors.transparent,
+                            Colors.black.withValues(alpha: 0.4),
+                            Colors.black.withValues(alpha: 0.85),
                           ],
-                          stops: [0.65, 1.0],
-                        ).createShader(Rect.fromLTRB(0, 0, rect.width, rect.height));
-                      },
-                      blendMode: BlendMode.dstIn,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Colors.black.withValues(alpha: 0.4),
-                              Colors.black.withValues(alpha: 0.85),
-                            ],
-                            stops: const [0.0, 1.0],
-                          ),
+                          stops: const [0.0, 1.0],
                         ),
                       ),
                     ),
                   ),
                 ),
+              ),
 
 
               // 3. Main Scrollable Content
