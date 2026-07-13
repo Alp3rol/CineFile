@@ -206,16 +206,16 @@ class UserProfileScreen extends ConsumerWidget {
                           .where((r) => userModel.featuredMovieIds.contains('${r.movie.tmdbId}'))
                           .toList();
 
-                      if (featuredRecords.isEmpty) return const SizedBox.shrink();
+                      // If it's not my profile and there are no featured movies, hide it completely.
+                      // If it's my profile, we show the box with an empty state and edit button so the owner can set it up!
+                      if (featuredRecords.isEmpty && !isMe) return const SizedBox.shrink();
 
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildSectionHeader('Favori Vitrinim'),
-                          const SizedBox(height: 16),
                           Container(
                             width: double.infinity,
-                            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+                            padding: const EdgeInsets.all(20),
                             decoration: BoxDecoration(
                               color: Colors.white.withValues(alpha: 0.015),
                               borderRadius: BorderRadius.circular(24),
@@ -224,8 +224,39 @@ class UserProfileScreen extends ConsumerWidget {
                                 width: 1,
                               ),
                             ),
-                            child: Center(
-                              child: _FeaturedMoviesStack(featuredRecords: featuredRecords),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    _buildSectionHeader('Favori Vitrinim'),
+                                    if (isMe)
+                                      IconButton(
+                                        padding: EdgeInsets.zero,
+                                        constraints: const BoxConstraints(),
+                                        icon: const Icon(Icons.edit_rounded, color: AppTheme.accentColor, size: 20),
+                                        onPressed: () => _showFeaturedMoviesSelector(context, ref, userModel),
+                                        tooltip: 'Vitrini Düzenle',
+                                      ),
+                                  ],
+                                ),
+                                const SizedBox(height: 20),
+                                if (featuredRecords.isEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 20),
+                                    child: Center(
+                                      child: Text(
+                                        'Henüz öne çıkarılan film seçilmedi.',
+                                        style: GoogleFonts.inter(color: AppTheme.textSecondary, fontSize: 13),
+                                      ),
+                                    ),
+                                  )
+                                else
+                                  Center(
+                                    child: _FeaturedMoviesStack(featuredRecords: featuredRecords),
+                                  ),
+                              ],
                             ),
                           ),
                           const SizedBox(height: 32),
@@ -396,6 +427,110 @@ class UserProfileScreen extends ConsumerWidget {
       backgroundColor: Colors.transparent,
       builder: (context) {
         return _EditProfileSheet(user: user);
+      },
+    );
+  }
+
+  void _showFeaturedMoviesSelector(BuildContext context, WidgetRef ref, UserModel userModel) {
+    final tempFeaturedMovieIds = List<String>.from(userModel.featuredMovieIds);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Consumer(
+          builder: (context, ref, _) {
+            final recordsAsync = ref.watch(watchRecordsForUserProvider(userModel.id));
+            return recordsAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.accentColor)),
+              error: (err, stack) => AlertDialog(
+                backgroundColor: AppTheme.surfaceColor,
+                content: Text('Hata: $err', style: const TextStyle(color: Colors.redAccent)),
+              ),
+              data: (records) {
+                return StatefulBuilder(
+                  builder: (context, setDialogState) {
+                    return AlertDialog(
+                      backgroundColor: AppTheme.surfaceColor,
+                      title: Text(
+                        'Vitrini Düzenle',
+                        style: GoogleFonts.outfit(color: Colors.white, fontSize: 18),
+                      ),
+                      content: SizedBox(
+                        width: double.maxFinite,
+                        height: 300,
+                        child: records.isEmpty
+                            ? const Center(
+                                child: Text(
+                                  'Henüz hiç izleme kaydınız yok.',
+                                  style: TextStyle(color: Colors.white38),
+                                ),
+                              )
+                            : ListView.builder(
+                                itemCount: records.length,
+                                itemBuilder: (context, index) {
+                                  final item = records[index];
+                                  final tmdbIdStr = '${item.movie.tmdbId}';
+                                  final isSelected = tempFeaturedMovieIds.contains(tmdbIdStr);
+                                  return CheckboxListTile(
+                                    title: Text(
+                                      item.movie.title,
+                                      style: const TextStyle(color: Colors.white),
+                                    ),
+                                    subtitle: Text(
+                                      item.movie.isTv ? 'Dizi' : 'Film',
+                                      style: const TextStyle(color: Colors.white60),
+                                    ),
+                                    activeColor: AppTheme.accentColor,
+                                    checkColor: Colors.black,
+                                    value: isSelected,
+                                    onChanged: (bool? checked) {
+                                      if (checked == true) {
+                                        if (tempFeaturedMovieIds.length >= 5) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(
+                                              content: Text('En fazla 5 film seçebilirsiniz.'),
+                                            ),
+                                          );
+                                          return;
+                                        }
+                                        setDialogState(() {
+                                          tempFeaturedMovieIds.add(tmdbIdStr);
+                                        });
+                                      } else {
+                                        setDialogState(() {
+                                          tempFeaturedMovieIds.remove(tmdbIdStr);
+                                        });
+                                      }
+                                    },
+                                  );
+                                },
+                              ),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('İptal', style: TextStyle(color: Colors.white70)),
+                        ),
+                        TextButton(
+                          onPressed: () async {
+                            Navigator.pop(context);
+                            await ref.read(authControllerProvider).updateProfile(
+                              username: userModel.username,
+                              avatarUrl: userModel.avatarUrl,
+                              bio: userModel.bio,
+                              featuredMovieIds: tempFeaturedMovieIds,
+                            );
+                          },
+                          child: const Text('Kaydet', style: TextStyle(color: AppTheme.accentColor, fontWeight: FontWeight.bold)),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+            );
+          },
+        );
       },
     );
   }
