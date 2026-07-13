@@ -294,4 +294,129 @@ class TmdbService {
       throw Exception('TMDb Popüler Filmler Hatası: ${e.message}');
     }
   }
+
+  /// Get popular TV shows
+  Future<List<Map<String, dynamic>>> getPopularTvShows({int page = 1, String language = 'tr-TR'}) async {
+    if (_apiKey.isEmpty) {
+      return [];
+    }
+
+    try {
+      final response = await _dio.get(
+        '/tv/popular',
+        queryParameters: {
+          'api_key': _apiKey,
+          'page': page,
+          'language': language,
+        },
+      );
+
+      final results = response.data['results'] as List<dynamic>;
+      return results.map((item) {
+        final data = item as Map<String, dynamic>;
+        return {
+          ...data,
+          'title': data['name'] ?? data['original_name'] ?? 'Bilinmeyen Dizi',
+          'release_date': data['first_air_date'] ?? '',
+          'media_type': 'tv',
+        };
+      }).toList();
+    } on DioException catch (e) {
+      throw Exception('TMDb Popüler Dizi Hatası: ${e.message}');
+    }
+  }
+
+  /// Search for a person to get their TMDb ID
+  Future<int?> searchPersonId(String name) async {
+    if (_apiKey.isEmpty) {
+      return null;
+    }
+    try {
+      final response = await _dio.get(
+        '/search/person',
+        queryParameters: {
+          'api_key': _apiKey,
+          'query': name,
+          'page': 1,
+        },
+      );
+      final results = response.data['results'] as List<dynamic>;
+      if (results.isNotEmpty) {
+        return results.first['id'] as int?;
+      }
+      return null;
+    } on DioException catch (e) {
+      throw Exception('TMDb Person Search Hatası: ${e.message}');
+    }
+  }
+
+  /// Discover movies by genres, crew, or cast
+  Future<List<Map<String, dynamic>>> discoverMovies({
+    String? withGenres,
+    String? withCrew,
+    String? withCast,
+    String language = 'tr-TR',
+  }) async {
+    if (_apiKey.isEmpty) {
+      return [];
+    }
+    try {
+      final response = await _dio.get(
+        '/discover/movie',
+        queryParameters: {
+          'api_key': _apiKey,
+          'language': language,
+          'sort_by': 'popularity.desc',
+          'with_genres': ?withGenres,
+          'with_crew': ?withCrew,
+          'with_cast': ?withCast,
+        },
+      );
+      final results = response.data['results'] as List<dynamic>;
+      return results.map((item) {
+        final data = item as Map<String, dynamic>;
+        return {
+          ...data,
+          'media_type': 'movie',
+        };
+      }).toList();
+    } on DioException catch (e) {
+      throw Exception('TMDb Discover Movie Hatası: ${e.message}');
+    }
+  }
+
+  /// Discover TV shows by genres or people
+  Future<List<Map<String, dynamic>>> discoverTvShows({
+    String? withGenres,
+    String? withPeople,
+    String language = 'tr-TR',
+  }) async {
+    if (_apiKey.isEmpty) {
+      return [];
+    }
+    try {
+      final response = await _dio.get(
+        '/discover/tv',
+        queryParameters: {
+          'api_key': _apiKey,
+          'language': language,
+          'sort_by': 'popularity.desc',
+          'with_genres': ?withGenres,
+          'with_people': ?withPeople,
+        },
+      );
+      final results = response.data['results'] as List<dynamic>;
+      return results.map((item) {
+        final data = item as Map<String, dynamic>;
+        return {
+          ...data,
+          'title': data['name'] ?? data['original_name'] ?? 'Bilinmeyen Dizi',
+          'release_date': data['first_air_date'] ?? '',
+          'media_type': 'tv',
+        };
+      }).toList();
+    } on DioException catch (e) {
+      throw Exception('TMDb Discover TV Hatası: ${e.message}');
+    }
+  }
 }

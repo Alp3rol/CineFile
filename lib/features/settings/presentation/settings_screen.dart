@@ -10,6 +10,7 @@ import 'settings_provider.dart';
 import '../../auth/presentation/widgets/user_profile_avatar_button.dart';
 import '../../../../core/widgets/scroll_to_top_button.dart';
 import 'widgets/duplicate_cleanup_screen.dart';
+import '../../../../core/services/notification_service.dart';
 
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -100,11 +101,34 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             onChanged: (v) => setState(() => _darkModeEnabled = v),
                           ),
                           _buildDivider(),
-                          _buildToggleRow(
+                           _buildToggleRow(
                             icon: Icons.play_circle_outline_rounded,
                             label: 'Otomatik Fragman Oynat',
                             value: _autoPlayTrailer,
                             onChanged: (v) => setState(() => _autoPlayTrailer = v),
+                          ),
+                          _buildDivider(),
+                          _buildToggleRow(
+                            icon: Icons.notifications_active_outlined,
+                            label: 'Çıkış Hatırlatıcıları',
+                            value: ref.watch(releaseRemindersEnabledProvider),
+                            onChanged: (v) async {
+                              if (v) {
+                                final messenger = ScaffoldMessenger.of(context);
+                                final granted = await ref.read(notificationServiceProvider).requestPermissions();
+                                if (granted) {
+                                  await ref.read(releaseRemindersEnabledProvider.notifier).savePreference(true);
+                                  await ref.read(notificationServiceProvider).syncNotifications();
+                                } else {
+                                  messenger.showSnackBar(
+                                    const SnackBar(content: Text('Bildirim izni reddedildi. Sistem ayarlarından açabilirsiniz.')),
+                                  );
+                                }
+                              } else {
+                                await ref.read(releaseRemindersEnabledProvider.notifier).savePreference(false);
+                                await ref.read(notificationServiceProvider).syncNotifications();
+                              }
+                            },
                           ),
                           _buildDivider(),
                           _buildToggleRow(

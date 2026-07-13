@@ -125,6 +125,58 @@ class SettingsBaseUrlNotifier extends StateNotifier<String> {
   }
 }
 
+final releaseRemindersEnabledProvider = StateNotifierProvider<ReleaseRemindersNotifier, bool>((ref) {
+  return ReleaseRemindersNotifier();
+});
+
+class ReleaseRemindersNotifier extends StateNotifier<bool> {
+  ReleaseRemindersNotifier() : super(false) {
+    loadPreference();
+  }
+
+  Future<File?> get _settingsFile async {
+    if (kIsWeb) return null;
+    final dir = await getApplicationDocumentsDirectory();
+    return File(p.join(dir.path, 'app_settings.json'));
+  }
+
+  Future<void> loadPreference() async {
+    if (kIsWeb) return;
+    try {
+      final file = await _settingsFile;
+      if (file != null && await file.exists()) {
+        final content = await file.readAsString();
+        final json = jsonDecode(content) as Map<String, dynamic>;
+        final enabled = json['release_reminders_enabled'] as bool?;
+        if (enabled != null) {
+          state = enabled;
+        }
+      }
+    } catch (e) {
+      debugPrint('loadPreference failed: $e');
+    }
+  }
+
+  Future<void> savePreference(bool enabled) async {
+    state = enabled;
+    if (kIsWeb) return;
+    try {
+      final file = await _settingsFile;
+      if (file != null) {
+        Map<String, dynamic> json = {};
+        if (await file.exists()) {
+          final content = await file.readAsString();
+          json = jsonDecode(content) as Map<String, dynamic>;
+        }
+        json['release_reminders_enabled'] = enabled;
+        await file.writeAsString(jsonEncode(json));
+      }
+    } catch (e) {
+      debugPrint('savePreference failed: $e');
+    }
+  }
+}
+
 // Backup & Restore Services
 class BackupService {
   static Future<Map<String, dynamic>> exportData(dynamic ref) async {

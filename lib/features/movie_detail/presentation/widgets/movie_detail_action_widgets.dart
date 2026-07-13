@@ -23,7 +23,12 @@ class MovieInfoCard extends StatelessWidget {
     return GlassContainer(
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
       borderRadius: 14,
-      opacity: 0.5,
+      opacity: 0.7,
+      color: const Color(0xFF0d253f),
+      border: Border.all(
+        color: const Color(0xFF90cea1).withValues(alpha: 0.5),
+        width: 1,
+      ),
       child: Column(
         children: [
           Icon(icon, color: iconColor, size: 18),

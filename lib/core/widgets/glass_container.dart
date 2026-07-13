@@ -11,6 +11,7 @@ class GlassContainer extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
   final EdgeInsetsGeometry? margin;
   final Border? border;
+  final Color? color;
   final double? width;
   final double? height;
   // When false, skips the BackdropFilter blur pass and just paints a flat
@@ -33,6 +34,7 @@ class GlassContainer extends StatelessWidget {
     this.padding,
     this.margin,
     this.border,
+    this.color,
     this.width,
     this.height,
     this.useBlur = true,
@@ -43,7 +45,7 @@ class GlassContainer extends StatelessWidget {
     final content = Container(
       padding: padding,
       decoration: BoxDecoration(
-        color: AppTheme.surfaceColor.withValues(alpha: opacity),
+        color: (color ?? AppTheme.surfaceColor).withValues(alpha: opacity),
         borderRadius: BorderRadius.circular(borderRadius),
         border: border ?? Border.all(
           color: AppTheme.borderColor,
