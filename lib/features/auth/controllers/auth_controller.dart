@@ -1,10 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/user_model.dart';
 
 final firebaseAuthProvider = Provider<FirebaseAuth>((ref) => FirebaseAuth.instance);
 final firestoreProvider = Provider<FirebaseFirestore>((ref) => FirebaseFirestore.instance);
+final firebaseStorageProvider = Provider<FirebaseStorage>((ref) => FirebaseStorage.instance);
 
 final authStateProvider = StreamProvider<User?>((ref) {
   return ref.watch(firebaseAuthProvider).authStateChanges();
@@ -31,6 +34,7 @@ class AuthController {
 
   FirebaseAuth get _auth => _ref.read(firebaseAuthProvider);
   FirebaseFirestore get _firestore => _ref.read(firestoreProvider);
+  FirebaseStorage get _storage => _ref.read(firebaseStorageProvider);
 
   Future<void> initUser(User user) async {
     try {
@@ -177,6 +181,31 @@ class AuthController {
       return null;
     } catch (e) {
       return e.toString();
+    }
+  }
+
+  Future<String?> uploadAvatarImage(Uint8List imageBytes, String fileName) async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) return null;
+
+      final storageRef = _storage
+          .ref()
+          .child('avatars')
+          .child(user.uid)
+          .child(fileName);
+
+      final uploadTask = storageRef.putData(
+        imageBytes,
+        SettableMetadata(contentType: 'image/jpeg'),
+      );
+
+      final snapshot = await uploadTask;
+      final downloadUrl = await snapshot.ref.getDownloadURL();
+      return downloadUrl;
+    } catch (e) {
+      debugPrint('uploadAvatarImage failed: $e');
+      return null;
     }
   }
 }

@@ -6,6 +6,7 @@ import '../../../core/widgets/glass_container.dart';
 import '../../../core/database/database_provider.dart';
 import '../../movie_detail/presentation/movie_detail_screen.dart';
 import '../../community/presentation/widgets/follow_button.dart';
+import 'package:image_picker/image_picker.dart';
 import '../controllers/auth_controller.dart';
 import '../models/user_model.dart';
 
@@ -355,29 +356,79 @@ class _EditProfileSheet extends ConsumerStatefulWidget {
 class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
   late TextEditingController _usernameController;
   late TextEditingController _bioController;
-  late TextEditingController _avatarSeedController;
+  late String _selectedAvatarUrl;
   bool _isLoading = false;
+  bool _isUploadingImage = false;
   String? _errorMessage;
+
+  final List<String> _presetAvatars = const [
+    'https://api.dicebear.com/7.x/bottts/png?seed=cine1',
+    'https://api.dicebear.com/7.x/bottts/png?seed=cine2',
+    'https://api.dicebear.com/7.x/bottts/png?seed=cine3',
+    'https://api.dicebear.com/7.x/bottts/png?seed=cine4',
+    'https://api.dicebear.com/7.x/bottts/png?seed=cine5',
+    'https://api.dicebear.com/7.x/bottts/png?seed=cine6',
+    'https://api.dicebear.com/7.x/bottts/png?seed=cine7',
+    'https://api.dicebear.com/7.x/bottts/png?seed=cine8',
+  ];
 
   @override
   void initState() {
     super.initState();
     _usernameController = TextEditingController(text: widget.user.username);
     _bioController = TextEditingController(text: widget.user.bio ?? '');
-    
-    // Extract seed from DiceBear URL if it exists, otherwise use username
-    final avatarUrl = widget.user.avatarUrl ?? '';
-    final uri = Uri.tryParse(avatarUrl);
-    final seed = uri?.queryParameters['seed'] ?? widget.user.username;
-    _avatarSeedController = TextEditingController(text: seed);
+    _selectedAvatarUrl = widget.user.avatarUrl ?? _presetAvatars.first;
   }
 
   @override
   void dispose() {
     _usernameController.dispose();
     _bioController.dispose();
-    _avatarSeedController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickAndUploadImage() async {
+    setState(() {
+      _isUploadingImage = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 70,
+        maxWidth: 400,
+        maxHeight: 400,
+      );
+
+      if (pickedFile == null) {
+        setState(() => _isUploadingImage = false);
+        return;
+      }
+
+      final bytes = await pickedFile.readAsBytes();
+      final fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
+      
+      final downloadUrl = await ref.read(authControllerProvider).uploadAvatarImage(bytes, fileName);
+      
+      if (downloadUrl != null) {
+        setState(() {
+          _selectedAvatarUrl = downloadUrl;
+          _isUploadingImage = false;
+        });
+      } else {
+        setState(() {
+          _isUploadingImage = false;
+          _errorMessage = 'Görsel yüklenemedi. Firebase Storage yapılandırmanızı kontrol edin.';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _isUploadingImage = false;
+        _errorMessage = 'Resim yükleme hatası: $e';
+      });
+    }
   }
 
   @override
@@ -421,20 +472,95 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
             
             // Avatar Preview
             Center(
-              child: ValueListenableBuilder<TextEditingValue>(
-                valueListenable: _avatarSeedController,
-                builder: (context, value, _) {
-                  final seed = value.text.trim();
-                  final previewUrl = 'https://api.dicebear.com/7.x/bottts/png?seed=${seed.isEmpty ? 'default' : seed}';
-                  return Container(
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
                     width: 90,
                     height: 90,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(color: AppTheme.accentColor, width: 2),
                       image: DecorationImage(
-                        image: NetworkImage(previewUrl),
+                        image: NetworkImage(_selectedAvatarUrl),
                         fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                  if (_isUploadingImage)
+                    Container(
+                      width: 90,
+                      height: 90,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.black.withOpacity(0.5),
+                      ),
+                      child: const Center(
+                        child: CircularProgressIndicator(color: AppTheme.accentColor),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            
+            // Image Upload and Reset buttons
+            Center(
+              child: ElevatedButton.icon(
+                onPressed: _isUploadingImage ? null : _pickAndUploadImage,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white.withOpacity(0.08),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                icon: const Icon(Icons.upload_file_rounded, size: 18),
+                label: const Text('Kendi Görselini Yükle'),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Predefined Avatars section
+            Text(
+              'Hazır Avatarlar',
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.white70,
+              ),
+            ),
+            const SizedBox(height: 10),
+            SizedBox(
+              height: 60,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: _presetAvatars.length,
+                itemBuilder: (context, index) {
+                  final presetUrl = _presetAvatars[index];
+                  final isSelected = _selectedAvatarUrl == presetUrl;
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedAvatarUrl = presetUrl;
+                      });
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 12.0),
+                      child: Container(
+                        width: 56,
+                        height: 56,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: isSelected ? AppTheme.accentColor : Colors.transparent,
+                            width: 2.5,
+                          ),
+                          image: DecorationImage(
+                            image: NetworkImage(presetUrl),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
                       ),
                     ),
                   );
@@ -458,32 +584,6 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 hintText: 'Kullanıcı adı girin',
-                hintStyle: const TextStyle(color: Colors.white38),
-                filled: true,
-                fillColor: Colors.white.withOpacity(0.05),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            
-            // Avatar Seed field
-            Text(
-              'Avatar Görsel Tohumu (Seed)',
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: Colors.white70,
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _avatarSeedController,
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                hintText: 'Avatar görselini değiştirmek için tohum yazın',
                 hintStyle: const TextStyle(color: Colors.white38),
                 filled: true,
                 fillColor: Colors.white.withOpacity(0.05),
@@ -533,7 +633,7 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
             
             // Save Button
             ElevatedButton(
-              onPressed: _isLoading ? null : _saveProfile,
+              onPressed: (_isLoading || _isUploadingImage) ? null : _saveProfile,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.accentColor,
                 foregroundColor: Colors.black,
@@ -559,7 +659,6 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
   Future<void> _saveProfile() async {
     final username = _usernameController.text.trim();
     final bio = _bioController.text.trim();
-    final seed = _avatarSeedController.text.trim();
 
     if (username.isEmpty) {
       setState(() => _errorMessage = 'Kullanıcı adı boş olamaz.');
@@ -571,10 +670,9 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
       _errorMessage = null;
     });
 
-    final avatarUrl = 'https://api.dicebear.com/7.x/bottts/png?seed=${seed.isEmpty ? username : seed}';
     final error = await ref.read(authControllerProvider).updateProfile(
       username: username,
-      avatarUrl: avatarUrl,
+      avatarUrl: _selectedAvatarUrl,
       bio: bio,
     );
 
