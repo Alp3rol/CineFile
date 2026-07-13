@@ -98,83 +98,97 @@ class UserProfileScreen extends ConsumerWidget {
                       GlassContainer(
                         borderRadius: 24,
                         padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 16.0),
-                        child: Column(
+                        child: Stack(
                           children: [
-                            // Glowing border around Avatar
-                            Container(
-                              padding: const EdgeInsets.all(3.5),
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                gradient: LinearGradient(
-                                  colors: [
-                                    AppTheme.accentColor,
-                                    Colors.purpleAccent,
-                                    Colors.blueAccent,
-                                  ],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
+                            if (isMe)
+                              Positioned(
+                                top: 0,
+                                right: 0,
+                                child: IconButton(
+                                  icon: const Icon(Icons.edit_rounded, color: Colors.white70),
+                                  onPressed: () => _showEditProfileSheet(context, ref, userModel),
+                                  tooltip: 'Profili Düzenle',
                                 ),
                               ),
-                              child: Container(
-                                width: 92,
-                                height: 92,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(color: AppTheme.surfaceColor, width: 2.5),
-                                  image: DecorationImage(
-                                    image: NetworkImage(
-                                      userModel.avatarUrl ?? 'https://api.dicebear.com/7.x/bottts/png?seed=${userModel.username}',
-                                    ),
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            // Username with modern Outfit styling
-                            Text(
-                              '@${userModel.username}',
-                              style: GoogleFonts.outfit(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                            if (userModel.bio != null && userModel.bio!.isNotEmpty) ...[
-                              const SizedBox(height: 10),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                                child: Text(
-                                  userModel.bio!,
-                                  textAlign: TextAlign.center,
-                                  style: GoogleFonts.inter(
-                                    fontSize: 13.5,
-                                    color: Colors.white70,
-                                    fontStyle: FontStyle.italic,
-                                    height: 1.4,
-                                  ),
-                                ),
-                              ),
-                            ],
-                            const SizedBox(height: 24),
-                            // Stats inside capsule row
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                            Column(
                               children: [
-                                _buildPremiumStatCapsule('Takipçi', '${userModel.followerCount}'),
-                                const SizedBox(width: 16),
-                                _buildPremiumStatCapsule('Takip', '${userModel.followingCount}'),
+                                // Glowing border around Avatar
+                                Container(
+                                  padding: const EdgeInsets.all(3.5),
+                                  decoration: const BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        AppTheme.accentColor,
+                                        Colors.purpleAccent,
+                                        Colors.blueAccent,
+                                      ],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                  ),
+                                  child: Container(
+                                    width: 92,
+                                    height: 92,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(color: AppTheme.surfaceColor, width: 2.5),
+                                      image: DecorationImage(
+                                        image: NetworkImage(
+                                          userModel.avatarUrl ?? 'https://api.dicebear.com/7.x/bottts/png?seed=${userModel.username}',
+                                        ),
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                // Username with modern Outfit styling
+                                Text(
+                                  '@${userModel.username}',
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                                if (userModel.bio != null && userModel.bio!.isNotEmpty) ...[
+                                  const SizedBox(height: 10),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                                    child: Text(
+                                      userModel.bio!,
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.inter(
+                                        fontSize: 13.5,
+                                        color: Colors.white70,
+                                        fontStyle: FontStyle.italic,
+                                        height: 1.4,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                                const SizedBox(height: 24),
+                                // Stats inside capsule row
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    _buildPremiumStatCapsule('Takipçi', '${userModel.followerCount}'),
+                                    const SizedBox(width: 16),
+                                    _buildPremiumStatCapsule('Takip', '${userModel.followingCount}'),
+                                  ],
+                                ),
+                                // Follow / Unfollow Button within the header card
+                                if (!isMe && currentUser != null) ...[
+                                  const SizedBox(height: 20),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: FollowButton(targetUserId: effectiveUserId),
+                                  ),
+                                ],
                               ],
                             ),
-                            // Follow / Unfollow Button within the header card
-                            if (!isMe && currentUser != null) ...[
-                              const SizedBox(height: 20),
-                              SizedBox(
-                                width: double.infinity,
-                                child: FollowButton(targetUserId: effectiveUserId),
-                              ),
-                            ],
                           ],
                         ),
                       ),
