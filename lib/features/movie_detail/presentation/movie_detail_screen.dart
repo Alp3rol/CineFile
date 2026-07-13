@@ -20,6 +20,9 @@ import 'widgets/movie_watch_status_badge.dart';
 import 'widgets/rank_dialog.dart';
 import '../../journal/presentation/widgets/add_to_list_sheet.dart';
 import '../../auth/controllers/auth_controller.dart';
+import '../../../../core/services/notification_service.dart';
+import 'package:drift/drift.dart' show Value;
+import '../../settings/presentation/settings_provider.dart';
 
 class MovieDetailScreen extends ConsumerStatefulWidget {
   final int tmdbId;
@@ -91,6 +94,84 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
     } catch (_) {}
   }
 
+  Future<void> _toggleWatchlist(WidgetRef ref, Map<String, dynamic> movieData) async {
+    final authState = ref.read(authStateProvider);
+    final user = authState.value;
+    if (user == null) return;
+
+    final settings = ref.read(movieSettingsProvider((tmdbId: tmdbId, isTv: isTv))).value;
+    final isReWatchList = settings?.isReWatchList ?? false;
+
+    final releaseDateStr = (isTv
+        ? movieData['first_air_date']
+        : movieData['release_date']) as String? ?? '';
+
+    try {
+      final settingsRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('movie_settings')
+          .doc('${tmdbId}_$isTv');
+
+      await settingsRef.set({
+        'movieId': tmdbId,
+        'isTv': isTv,
+        'isReWatchList': !isReWatchList,
+        'releaseDate': releaseDateStr,
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+
+      // Ensure local movies table entry exists
+      final db = ref.read(databaseProvider);
+      final releaseYear = int.tryParse(releaseDateStr.split('-').first) ?? 0;
+      final genres = movieData['genres'] as List<dynamic>?;
+      final genresString = genres?.map((e) => e['name']).join(', ') ?? '';
+
+      final crew = movieData['credits']?['crew'] as List<dynamic>?;
+      final directorName = crew?.where((e) => e['job'] == 'Director').firstOrNull?['name'] as String? ?? 'Bilinmiyor';
+
+      final cast = movieData['credits']?['cast'] as List<dynamic>?;
+      final actorsString = cast?.take(5).map((e) => e['name']).join(', ') ?? '';
+
+      await db.into(db.movies).insertOnConflictUpdate(
+        MoviesCompanion.insert(
+          tmdbId: tmdbId,
+          title: (isTv ? (movieData['name'] ?? movieData['original_name']) : (movieData['title'] ?? movieData['original_title'])) as String? ?? 'Bilinmeyen Yapım',
+          originalTitle: Value(movieData['original_title'] as String? ?? movieData['original_name'] as String?),
+          posterPath: Value(movieData['poster_path'] as String?),
+          backdropPath: Value(movieData['backdrop_path'] as String?),
+          releaseYear: Value(releaseYear),
+          runtime: Value(movieData['runtime'] as int? ?? 0),
+          genres: Value(genresString),
+          director: Value(directorName),
+          actors: Value(actorsString),
+          overview: Value(movieData['overview'] as String?),
+          isTv: Value(isTv),
+        ),
+      );
+
+      // Trigger local notifications schedule/cancel
+      final remindersEnabled = ref.read(releaseRemindersEnabledProvider);
+      if (remindersEnabled && releaseDateStr.isNotEmpty) {
+        final parsedDate = DateTime.tryParse(releaseDateStr);
+        if (parsedDate != null) {
+          if (!isReWatchList) {
+            if (parsedDate.isAfter(DateTime.now())) {
+              await ref.read(notificationServiceProvider).scheduleReleaseReminder(
+                id: tmdbId,
+                title: (isTv ? (movieData['name'] ?? movieData['original_name']) : (movieData['title'] ?? movieData['original_title'])) as String? ?? 'Bilinmeyen Yapım',
+                releaseDate: parsedDate,
+                isTv: isTv,
+              );
+            }
+          } else {
+            await ref.read(notificationServiceProvider).cancelReleaseReminder(tmdbId, isTv);
+          }
+        }
+      }
+    } catch (_) {}
+  }
+
   // Delete Watch Record
   Future<void> _deleteRecord(BuildContext context, WidgetRef ref, int recordId) async {
     final authState = ref.read(authStateProvider);
@@ -157,6 +238,13 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
     super.dispose();
   }
 
+  String _formatVoteCount(int count) {
+    if (count >= 1000) {
+      return '${(count / 1000).toStringAsFixed(1)}k';
+    }
+    return count.toString();
+  }
+
   @override
   Widget build(BuildContext context) {
     final detailAsync = ref.watch(movieDetailProvider((tmdbId: tmdbId, isTv: isTv)));
@@ -205,8 +293,12 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
           final director = crew?.where((e) => e['job'] == 'Director').firstOrNull?['name'] as String? ?? 'Bilinmiyor';
 
           final cast = movieData['credits']?['cast'] as List<dynamic>?;
+          
+          final voteAverage = movieData['vote_average'] as num?;
+          final voteCount = movieData['vote_count'] as int?;
 
           final isFavorite = settingsAsync.value?.isFavorite ?? false;
+          final isReWatchList = settingsAsync.value?.isReWatchList ?? false;
           // watchRecordsForMovieProvider already orders by watchDate desc.
           final latestRecord = watchRecordsAsync.value?.firstOrNull;
 
@@ -363,6 +455,53 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
                                     ].join(' • '),
                                     style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary),
                                   ),
+                                  if (voteAverage != null && voteAverage > 0) ...[
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFF0d253f).withValues(alpha: 0.7), // TMDb dark blue
+                                            borderRadius: BorderRadius.circular(8),
+                                            border: Border.all(
+                                              color: const Color(0xFF90cea1).withValues(alpha: 0.5), // TMDb light green
+                                              width: 1,
+                                            ),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              const Icon(
+                                                Icons.star_rounded,
+                                                color: Color(0xFF90cea1),
+                                                size: 14,
+                                              ),
+                                              const SizedBox(width: 4),
+                                              Text(
+                                                voteAverage.toStringAsFixed(1),
+                                                style: GoogleFonts.outfit(
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                              if (voteCount != null && voteCount > 0) ...[
+                                                const SizedBox(width: 4),
+                                                Text(
+                                                  '(${_formatVoteCount(voteCount)})',
+                                                  style: GoogleFonts.inter(
+                                                    fontSize: 10,
+                                                    color: Colors.white70,
+                                                  ),
+                                                ),
+                                              ],
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                   if (isTv) MovieWatchStatusBadge(setting: settingsAsync.value, totalEpisodes: movieData['number_of_episodes'] as int?),
                                 ],
                               ),
@@ -610,6 +749,22 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
                         Row(
                           children: [
                             // Favorite toggle button
+                            // Watchlist toggle button
+                            GestureDetector(
+                              onTap: () => _toggleWatchlist(ref, movieData),
+                              child: GlassContainer(
+                                padding: const EdgeInsets.all(8),
+                                borderRadius: 12,
+                                opacity: 0.7,
+                                child: Icon(
+                                  isReWatchList ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
+                                  color: isReWatchList ? AppTheme.accentColor : Colors.white,
+                                  size: 20,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+
                             GestureDetector(
                               onTap: () => _toggleFavorite(ref, movieData),
                               child: GlassContainer(

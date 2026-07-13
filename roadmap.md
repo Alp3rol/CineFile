@@ -444,21 +444,22 @@ graph TD
 #### **🔜 v1.5.1: Kişisel Film/Dizi Önerisi Motoru**
 *   **Hedef**: v0.9.3'teki "Bu Hafta Ne İzlesem?" kartından farklı olarak — o sadece kütüphanede zaten var olup izlenmemiş yapımları öneriyor — kullanıcının izleme geçmişinden çıkarılan bir zevk profiliyle, kütüphanede hiç olmayan **yeni** film/dizi keşifleri sunmak.
 *   **İşler**:
+    *   **✅ TMDb Puan Rozeti & Özet Kartları**: Detay sayfasına TMDb `vote_average` ve `vote_count` bilgileriyle şık bir rozet (badge) yerleştirildi. Bu premium tasarım dili (lacivert arka plan ve açık yeşil sınır çizgisi), sayfadaki diğer 3 özet kartına ("Puanım", "Yönetmen", "Ortam") da yansıtılarak görsel bütünlük sağlandı.
     *   Kullanıcının en çok izlediği/en yüksek puan verdiği tür, yönetmen ve oyunculardan (`allWatchRecordsProvider` + `Movies` verisi üzerinden, zaten İçgörüler'de hesaplanan istatistiklerin yeniden kullanılması) basit bir ağırlıklı "zevk profili" çıkarılması.
     *   TMDb `/discover/movie` ve `/discover/tv` uç noktalarının bu profildeki tür/oyuncu/yönetmen ID'leriyle sorgulanması; sonuçların kullanıcının kütüphanesinde (herhangi bir `WatchRecords` veya `UserMovieSettings` kaydı) zaten bulunanlar elenerek filtrelenmesi.
     *   Keşfet sekmesine veya Ana Sayfa'ya (hero banner altına) yatay kaydırılabilir "Sana Özel" öneri şeridi eklenmesi; her karta dokununca doğrudan Film Detay sayfasına gidilmesi (mevcut `AppNetworkImage`/poster kart bileşenlerinin yeniden kullanılması).
     *   Öneri kalitesinin TMDb'nin kaba tür/anahtar-kelime eşleştirmesine bağlı olduğu göz önünde bulundurularak, kullanıcıya "Neden önerildi?" (ör. "Christopher Nolan filmlerini sevdiğin için") kısa bir açıklama etiketi gösterilmesi — beklenti yönetimi için.
     *   Kütüphanesi boş/çok küçük (ör. <5 kayıt) kullanıcılar için öneri şeridinin gizlenmesi veya jenerik popüler içerikle (TMDb `/trending`) doldurulması.
 
-#### **🔜 v1.5.1a: Yaklaşan Çıkışlar İçin Yerel Bildirim**
+#### **✅ v1.5.1a: Yaklaşan Çıkışlar İçin Yerel Bildirim**
 *   **Hedef**: "İzleyeceklerim" listesine eklenen ama henüz vizyona/yayına girmemiş bir film/dizinin çıkış tarihini kullanıcının elle takip etmesini gerektirmeden, çıkış günü geldiğinde otomatik hatırlatmak — mevcut Takvim sekmesiyle ve v0.9.5'te zaten doğrulanan `release_date` verisiyle doğal olarak örtüşen bir özellik.
 *   **İşler**:
-    *   Yeni bağımlılık: `flutter_local_notifications` (dev bağımlılıklara `EOL`/discontinued kontrolü yapılarak eklenir, CLAUDE.md'deki paket kuralına uyulur).
-    *   `UserMovieSettings`te "İzleyeceklerim" (watchlist) olarak işaretli ve `release_date`'i gelecekte olan yapımlar taranarak, çıkış günü için yerel bildirim zamanlanması — TMDb verisi değişebileceğinden (tarih ötelenmesi) periyodik bir yeniden senkron (uygulama açılışında arka planda `release_date` kontrolü).
-    *   Android 13+ için çalışma zamanı bildirim izni akışı; izin reddedilirse özelliğin sessizce devre dışı kalması (Ayarlar'dan sonradan açılabilir bir anahtar).
-    *   Bildirime dokununca doğrudan ilgili Film Detay sayfasına yönlendirme (mevcut deep-link/navigasyon deseninin genişletilmesi).
-    *   Ayarlar'a "Çıkış Hatırlatıcıları" açma/kapama anahtarı; varsayılan **açık** değil, kullanıcı ilk bildirim izni istendiğinde açıkça onaylıyor (iOS/Android bildirim izni zaten opt-in olduğu için doğal bir eşleşme).
-    *   Zaten vizyonda olan (`release_date` geçmişte) yapımlar için bildirim zamanlanmaz — sadece gelecekteki çıkışlar kapsanır, bu da işi v0.9.5'teki tarih doğrulama mantığıyla tutarlı kılar.
+    *   **✅ Yeni bağımlılık**: `flutter_local_notifications` ve `timezone` paketleri projeye entegre edildi.
+    *   **✅ İzleme Listesi Butonu**: Film Detay sayfasına favori butonunun yanına bookmark simgeli İzleme Listesi ("İzleyeceklerim") butonu eklendi; veritabanı senkronu kuruldu.
+    *   **✅ Bildirim Zamanlama Servisi (`NotificationService`)**: Çıkış gününde saat sabah 10:00'a `zonedSchedule` üzerinden bildirim zamanlayan, iptal eden ve periyodik senkronize eden altyapı oluşturuldu.
+    *   **✅ Bildirime Dokununca Yönlendirme**: Bildirimlere tıklandığında uygulamanın açılıp doğrudan ilgili yapımın detay sayfasına yönlendirilmesi (deep-linking) sağlandı.
+    *   **✅ Ayarlar ve İzin Yönetimi**: Ayarlar sayfasına "Çıkış Hatırlatıcıları" açma/kapama anahtarı eklendi, opt-in olarak izin isteme süreçleri ve otomatik senkronizasyon entegre edildi.
+    *   **✅ Çıkış Tarihi Doğrulaması**: Sadece gelecekteki çıkışlar için bildirim planlanır, geçmiştekiler elenir. Uçuş sırasındaki değişiklikler uygulama açılışında otomatik güncellenir.
 
 #### **🔜 v1.5.2: Kod Kalitesi ve Dosya Bölme Cilası**
 *   **Hedef**: CLAUDE.md'deki 300-400 satır kuralını aşan ekranları `widgets/` alt klasörlerine bölmek ve test kapsamını genişletmek.

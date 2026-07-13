@@ -15,6 +15,7 @@ import 'widgets/home_hero_banner.dart';
 import 'widgets/home_hero_carousel.dart';
 import 'widgets/home_stats_dashboard.dart';
 import 'widgets/home_content_lists.dart';
+import '../../recommendations/presentation/widgets/home_recommendations_list.dart';
 
 // Lets the user tap "Başka Öner" on the suggestion card to cycle to a
 // different unwatched title without waiting for the next calendar day.
@@ -183,9 +184,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       onSeeAll: () => ref.read(mainShellTabIndexProvider.notifier).state = 2,
                     ),
                     const SizedBox(height: 12),
-                    recentlyAdded.isEmpty
+                     recentlyAdded.isEmpty
                         ? const HomeEmptySection(message: 'Henüz kütüphanene film eklemedin.')
                         : HomeRecentlyAddedList(items: recentlyAdded, onOpenDetail: _openDetail),
+
+                    const SizedBox(height: 28),
+                    HomeRecommendationsList(onOpenDetail: _openDetail),
 
                     // Genre Distribution (reuses the existing Insights chart card)
                     if (insights != null && insights.topGenres.isNotEmpty) ...[

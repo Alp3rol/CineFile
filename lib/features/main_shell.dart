@@ -9,6 +9,9 @@ import 'search/presentation/search_screen.dart';
 import 'journal/presentation/journal_screen.dart';
 import 'community/presentation/community_feed_screen.dart';
 import 'settings/presentation/settings_screen.dart';
+import '../core/services/notification_service.dart';
+import '../core/database/database_provider.dart';
+import 'settings/presentation/settings_provider.dart';
 
 // Lets other screens (e.g. Home's "Tümünü Gör" buttons) switch the active
 // bottom-nav tab without needing a BuildContext-based navigation route.
@@ -31,6 +34,16 @@ class _MainShellState extends ConsumerState<MainShell> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    Future.microtask(() async {
+      final notifications = ref.read(notificationServiceProvider);
+      await notifications.initialize();
+      await notifications.syncNotifications();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final selectedIndex = ref.watch(mainShellTabIndexProvider);
 
@@ -38,6 +51,19 @@ class _MainShellState extends ConsumerState<MainShell> {
     ref.listen<int>(mainShellTabIndexProvider, (previous, next) {
       if (next == 2 || next == 3 || next == 4) {
         ref.read(dynamicBackgroundProvider.notifier).clearColors();
+      }
+    });
+
+    // Re-sync notifications automatically when settings or preferences change
+    ref.listen(allMovieSettingsProvider, (prev, next) {
+      if (next.hasValue) {
+        ref.read(notificationServiceProvider).syncNotifications();
+      }
+    });
+
+    ref.listen(releaseRemindersEnabledProvider, (prev, next) {
+      if (next != prev) {
+        ref.read(notificationServiceProvider).syncNotifications();
       }
     });
 
