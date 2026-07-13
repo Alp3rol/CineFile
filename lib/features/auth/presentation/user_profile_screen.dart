@@ -777,10 +777,10 @@ class _FeaturedMoviesStackState extends State<_FeaturedMoviesStack> {
       renderIndices.add(_hoveredIndex!);
     }
 
-    final stackWidth = 100.0 + (totalCount - 1) * 45.0 + 30.0;
+    final stackWidth = 125.0 + (totalCount - 1) * 60.0 + 30.0;
 
     return SizedBox(
-      height: 180,
+      height: 230,
       width: stackWidth,
       child: Stack(
         clipBehavior: Clip.none,
@@ -792,7 +792,7 @@ class _FeaturedMoviesStackState extends State<_FeaturedMoviesStack> {
           return AnimatedPositioned(
             duration: const Duration(milliseconds: 200),
             curve: Curves.easeOutCubic,
-            left: i * 45.0 + (isHovered ? 5.0 : 0.0),
+            left: i * 60.0 + (isHovered ? 5.0 : 0.0),
             top: isHovered ? 10.0 : 25.0,
             child: MouseRegion(
               onEnter: (_) => setState(() => _hoveredIndex = i),
@@ -810,11 +810,11 @@ class _FeaturedMoviesStackState extends State<_FeaturedMoviesStack> {
                 },
                 child: AnimatedScale(
                   duration: const Duration(milliseconds: 200),
-                  scale: isHovered ? 1.18 : 1.0,
+                  scale: isHovered ? 1.15 : 1.0,
                   curve: Curves.easeOutCubic,
                   child: Container(
-                    width: 90,
-                    height: 135,
+                    width: 125,
+                    height: 187.5,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
@@ -835,8 +835,8 @@ class _FeaturedMoviesStackState extends State<_FeaturedMoviesStack> {
                       borderRadius: BorderRadius.circular(10),
                       child: Image.network(
                         posterPath != null && posterPath.isNotEmpty
-                            ? 'https://image.tmdb.org/t/p/w185$posterPath'
-                            : 'https://images.unsplash.com/photo-1594909122845-11baa439b7bf?q=80&w=185',
+                            ? 'https://image.tmdb.org/t/p/w342$posterPath'
+                            : 'https://images.unsplash.com/photo-1594909122845-11baa439b7bf?q=80&w=342',
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) => Container(
                           color: AppTheme.surfaceColor,
