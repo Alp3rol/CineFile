@@ -6,6 +6,7 @@ class UserModel {
   final String? bio;
   final int followerCount;
   final int followingCount;
+  final List<String> featuredMovieIds;
 
   UserModel({
     required this.id,
@@ -15,6 +16,7 @@ class UserModel {
     this.bio,
     this.followerCount = 0,
     this.followingCount = 0,
+    this.featuredMovieIds = const [],
   });
 
   factory UserModel.fromMap(Map<String, dynamic> map, String id) {
@@ -26,6 +28,7 @@ class UserModel {
       bio: map['bio'],
       followerCount: map['followerCount'] ?? 0,
       followingCount: map['followingCount'] ?? 0,
+      featuredMovieIds: List<String>.from(map['featuredMovieIds'] ?? []),
     );
   }
 
@@ -37,6 +40,7 @@ class UserModel {
       'bio': bio,
       'followerCount': followerCount,
       'followingCount': followingCount,
+      'featuredMovieIds': featuredMovieIds,
     };
   }
 
@@ -48,6 +52,7 @@ class UserModel {
     String? bio,
     int? followerCount,
     int? followingCount,
+    List<String>? featuredMovieIds,
   }) {
     return UserModel(
       id: id ?? this.id,
@@ -57,6 +62,7 @@ class UserModel {
       bio: bio ?? this.bio,
       followerCount: followerCount ?? this.followerCount,
       followingCount: followingCount ?? this.followingCount,
+      featuredMovieIds: featuredMovieIds ?? this.featuredMovieIds,
     );
   }
 }

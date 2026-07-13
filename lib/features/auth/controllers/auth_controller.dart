@@ -139,6 +139,7 @@ class AuthController {
     required String username,
     required String? avatarUrl,
     required String? bio,
+    List<String>? featuredMovieIds,
   }) async {
     try {
       final user = _auth.currentUser;
@@ -166,6 +167,7 @@ class AuthController {
         username: newUsername,
         avatarUrl: avatarUrl?.trim(),
         bio: bio?.trim(),
+        featuredMovieIds: featuredMovieIds,
       );
 
       final userDoc = updatedModel.toMap()..['usernameLower'] = newUsername.toLowerCase();

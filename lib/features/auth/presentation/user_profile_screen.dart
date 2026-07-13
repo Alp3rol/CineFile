@@ -135,6 +135,38 @@ class UserProfileScreen extends ConsumerWidget {
                   
                   const SizedBox(height: 32),
 
+                  // Favori Vitrinim Section
+                  ref.watch(watchRecordsForUserProvider(effectiveUserId)).when(
+                    loading: () => const SizedBox.shrink(),
+                    error: (err, stack) => const SizedBox.shrink(),
+                    data: (records) {
+                      final featuredRecords = records
+                          .where((r) => userModel.featuredMovieIds.contains('${r.movie.tmdbId}'))
+                          .toList();
+
+                      if (featuredRecords.isEmpty) return const SizedBox.shrink();
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Favori Vitrinim',
+                            style: GoogleFonts.outfit(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Center(
+                            child: _FeaturedMoviesStack(featuredRecords: featuredRecords),
+                          ),
+                          const SizedBox(height: 32),
+                        ],
+                      );
+                    },
+                  ),
+
                   // Son İzlediklerim Section
                   Align(
                     alignment: Alignment.centerLeft,
@@ -347,6 +379,7 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
   late TextEditingController _usernameController;
   late TextEditingController _bioController;
   late String _selectedAvatarUrl;
+  late List<String> _tempFeaturedMovieIds;
   bool _isLoading = false;
   String? _errorMessage;
 
@@ -367,6 +400,7 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
     _usernameController = TextEditingController(text: widget.user.username);
     _bioController = TextEditingController(text: widget.user.bio ?? '');
     _selectedAvatarUrl = widget.user.avatarUrl ?? _presetAvatars.first;
+    _tempFeaturedMovieIds = List<String>.from(widget.user.featuredMovieIds);
   }
 
   @override
@@ -497,7 +531,7 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                 hintText: 'Kullanıcı adı girin',
                 hintStyle: const TextStyle(color: Colors.white38),
                 filled: true,
-                fillColor: Colors.white.withOpacity(0.05),
+                fillColor: Colors.white.withValues(alpha: 0.05),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
@@ -524,12 +558,37 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
                 hintText: 'Kendinden bahset...',
                 hintStyle: const TextStyle(color: Colors.white38),
                 filled: true,
-                fillColor: Colors.white.withOpacity(0.05),
+                fillColor: Colors.white.withValues(alpha: 0.05),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
                 ),
               ),
+            ),
+            const SizedBox(height: 16),
+
+            // Featured Movies section
+            Text(
+              'Profil Vitrini (En Fazla 5 Öne Çıkan Film)',
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.white70,
+              ),
+            ),
+            const SizedBox(height: 8),
+            ElevatedButton.icon(
+              onPressed: _showFeaturedMoviesSelector,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white.withValues(alpha: 0.05),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: const BorderSide(color: AppTheme.borderColor),
+                ),
+              ),
+              icon: const Icon(Icons.star_rounded, color: AppTheme.accentColor),
+              label: Text('Öne Çıkarılan Filmleri Seç (${_tempFeaturedMovieIds.length}/5)'),
             ),
             
             if (_errorMessage != null) ...[
@@ -567,6 +626,97 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
     );
   }
 
+  void _showFeaturedMoviesSelector() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Consumer(
+          builder: (context, ref, _) {
+            final recordsAsync = ref.watch(watchRecordsForUserProvider(widget.user.id));
+            return recordsAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.accentColor)),
+              error: (err, stack) => AlertDialog(
+                backgroundColor: AppTheme.surfaceColor,
+                content: Text('Hata: $err', style: const TextStyle(color: Colors.redAccent)),
+              ),
+              data: (records) {
+                return StatefulBuilder(
+                  builder: (context, setDialogState) {
+                    return AlertDialog(
+                      backgroundColor: AppTheme.surfaceColor,
+                      title: Text(
+                        'Öne Çıkarılacak Filmleri Seç',
+                        style: GoogleFonts.outfit(color: Colors.white, fontSize: 18),
+                      ),
+                      content: SizedBox(
+                        width: double.maxFinite,
+                        height: 300,
+                        child: records.isEmpty
+                            ? const Center(
+                                child: Text(
+                                  'Henüz hiç izleme kaydınız yok.',
+                                  style: TextStyle(color: Colors.white38),
+                                ),
+                              )
+                            : ListView.builder(
+                                itemCount: records.length,
+                                itemBuilder: (context, index) {
+                                  final item = records[index];
+                                  final tmdbIdStr = '${item.movie.tmdbId}';
+                                  final isSelected = _tempFeaturedMovieIds.contains(tmdbIdStr);
+                                  return CheckboxListTile(
+                                    title: Text(
+                                      item.movie.title,
+                                      style: const TextStyle(color: Colors.white),
+                                    ),
+                                    subtitle: Text(
+                                      item.movie.isTv ? 'Dizi' : 'Film',
+                                      style: const TextStyle(color: Colors.white60),
+                                    ),
+                                    activeColor: AppTheme.accentColor,
+                                    checkColor: Colors.black,
+                                    value: isSelected,
+                                    onChanged: (bool? checked) {
+                                      if (checked == true) {
+                                        if (_tempFeaturedMovieIds.length >= 5) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(
+                                              content: Text('En fazla 5 film seçebilirsiniz.'),
+                                            ),
+                                          );
+                                          return;
+                                        }
+                                        setDialogState(() {
+                                          _tempFeaturedMovieIds.add(tmdbIdStr);
+                                        });
+                                      } else {
+                                        setDialogState(() {
+                                          _tempFeaturedMovieIds.remove(tmdbIdStr);
+                                        });
+                                      }
+                                      setState(() {});
+                                    },
+                                  );
+                                },
+                              ),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('Tamam', style: TextStyle(color: AppTheme.accentColor)),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+
   Future<void> _saveProfile() async {
     final username = _usernameController.text.trim();
     final bio = _bioController.text.trim();
@@ -585,6 +735,7 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
       username: username,
       avatarUrl: _selectedAvatarUrl,
       bio: bio,
+      featuredMovieIds: _tempFeaturedMovieIds,
     );
 
     if (mounted) {
@@ -598,5 +749,108 @@ class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
         );
       }
     }
+  }
+}
+
+class _FeaturedMoviesStack extends StatefulWidget {
+  final List<dynamic> featuredRecords;
+  const _FeaturedMoviesStack({required this.featuredRecords});
+
+  @override
+  State<_FeaturedMoviesStack> createState() => _FeaturedMoviesStackState();
+}
+
+class _FeaturedMoviesStackState extends State<_FeaturedMoviesStack> {
+  int? _hoveredIndex;
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.featuredRecords.isEmpty) return const SizedBox.shrink();
+
+    final records = widget.featuredRecords;
+    final totalCount = records.length;
+
+    final renderIndices = List<int>.generate(totalCount, (index) => index);
+    
+    if (_hoveredIndex != null && _hoveredIndex! < totalCount) {
+      renderIndices.remove(_hoveredIndex);
+      renderIndices.add(_hoveredIndex!);
+    }
+
+    final stackWidth = 100.0 + (totalCount - 1) * 45.0 + 30.0;
+
+    return SizedBox(
+      height: 180,
+      width: stackWidth,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: renderIndices.map((i) {
+          final item = records[i];
+          final posterPath = item.movie.posterPath;
+          final isHovered = _hoveredIndex == i;
+
+          return AnimatedPositioned(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOutCubic,
+            left: i * 45.0 + (isHovered ? 5.0 : 0.0),
+            top: isHovered ? 10.0 : 25.0,
+            child: MouseRegion(
+              onEnter: (_) => setState(() => _hoveredIndex = i),
+              onExit: (_) => setState(() => _hoveredIndex = null),
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => MovieDetailScreen(
+                        tmdbId: item.movie.tmdbId,
+                        isTv: item.movie.isTv,
+                      ),
+                    ),
+                  );
+                },
+                child: AnimatedScale(
+                  duration: const Duration(milliseconds: 200),
+                  scale: isHovered ? 1.18 : 1.0,
+                  curve: Curves.easeOutCubic,
+                  child: Container(
+                    width: 90,
+                    height: 135,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: isHovered 
+                              ? AppTheme.accentColor.withValues(alpha: 0.3) 
+                              : Colors.black.withValues(alpha: 0.4),
+                          blurRadius: isHovered ? 16 : 8,
+                          offset: Offset(0, isHovered ? 8 : 4),
+                        ),
+                      ],
+                      border: Border.all(
+                        color: isHovered ? AppTheme.accentColor : Colors.transparent,
+                        width: 1.5,
+                      ),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Image.network(
+                        posterPath != null && posterPath.isNotEmpty
+                            ? 'https://image.tmdb.org/t/p/w185$posterPath'
+                            : 'https://images.unsplash.com/photo-1594909122845-11baa439b7bf?q=80&w=185',
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          color: AppTheme.surfaceColor,
+                          child: const Icon(Icons.movie_rounded, color: Colors.white24),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
   }
 }
