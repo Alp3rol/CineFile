@@ -428,12 +428,18 @@ graph TD
 
 ### **Aşama 6: Veri Bütünlüğü, Sosyal Olgunlaşma ve Kod Kalitesi (v1.5.0 - v1.6.0) — Planlanan**
 
-#### **✅ v1.5.0: Yedekleme Bütünlüğü ve Profil Düzenleme**
-*   **Hedef**: v0.9.9'da bilinçli olarak kapsam dışı bırakılan ve o zamandan beri açık kalan iki gerçek eksiği kapatmak: veri kaybı riski taşıyan eksik yedekleme ve işlevsiz profil düzenleme butonu.
+#### **✅ v1.5.0: Yedekleme Bütünlüğü, Gizlilik ve Premium Profil Tasarımı**
+*   **Hedef**: v0.9.9'da bilinçli olarak kapsam dışı bırakılan eksik yedekleme ve işlevsiz profil düzenlemeyi çözmek; gizlilik açıklarını kapatmak ve profil arayüzünü ultra-premium görsel standartlara taşımak.
 *   **İşler**:
-    *   **✅ Tam Yedekleme**: Ayarlar → Veri Yönetimi export/import akışına `CustomLists` ve `CustomListMovies` tablolarının dahil edilmesi (tamamlandı; hem Web hem de Native için yedekleme ve geriye dönük uyumlu geri yükleme entegre edildi).
-    *   **✅ Profil Düzenleme**: `user_profile_screen.dart`'taki boş `// TODO: Implement profile edit` callback'inin gerçek bir düzenleme akışıyla doldurulması (kullanıcı adı değiştirme + `usernameLower` senkronu, avatar/bio alanı entegre edildi, biyografi profilde gösterildi).
-    *   İçe aktarma (import) validasyonuna, bozuk/eksik alanlı bir yedek dosyası yüklendiğinde kullanıcıyı bilgilendiren daha net hata mesajları eklenmesi.
+    *   **✅ Tam Yedekleme (Backup & Restore)**: Ayarlar → Veri Yönetimi export/import akışına `CustomLists` ve `CustomListMovies` tablolarının dahil edilmesi (tamamlandı; hem Web hem de Native için yedekleme ve geriye dönük uyumlu geri yükleme entegre edildi).
+    *   **✅ Gizlilik Güncellemesi (Email Privacy)**: Kullanıcıların birbirlerinin e-posta adreslerini görememesi için profil ekranlarındaki e-posta (Gmail) gösterim alanı tamamen kaldırıldı.
+    *   **✅ Profil Düzenleme & Hazır Avatarlar**: Kullanıcı adı ve biyografi düzenleme desteği Firestore ile entegre edildi. Firebase Storage ücretli plan gereksinimlerini aşmak için 8 adet sinema temalı hazır DiceBear avatar seçici entegre edildi. Profil cam kartının sağ üst köşesine hızlı düzenleme kalem ikonu yerleştirildi.
+    *   **✅ Görsel Revizyon & Cam Kartlar (Glassmorphism)**: Profil bilgileri degradeli buzlu cam kart (`GlassContainer`) içine yerleştirildi, avatarın arkasına sinematik mor/altın radyal ışık huzmeleri ve degrade halka çerçeve yerleştirildi. İstatistikler yarı saydam hap kapsüllerine dönüştürüldü. Bölüm başlıklarının soluna neon dikey çizgiler yerleştirildi.
+    *   **✅ Favori Vitrinim (Showcase Shelf)**: Kullanıcının 5 adede kadar en sevdiği yapımı sergileyebileceği, posterleri üst üste binen yatay raf paneli tasarlandı.
+        *   Kartlar arası mesafenin dar ekranlarda taşmasını önlemek amacıyla `LayoutBuilder` ile dinamik yelpaze genişliği (`spacing`) hesaplaması eklendi.
+        *   Kart geçişlerindeki takılma/glitch hatalarını önlemek için `ValueKey` entegrasyonu yapıldı; animasyon eğrisi fiziksel yaylanma hissi sunan `Curves.easeOutBack` olarak güncellendi.
+        *   Vitrin başlığı ve doğrudan vitrini düzenlemeyi sağlayan özel kalem ikonu raf kutusunun içine konumlandırıldı.
+    *   **✅ Premium Seçim Paneli (`_PremiumFeaturedSelectorDialog`)**: Vitrini düzenle butonu için klasik gri Material diyalog kutusu tamamen kaldırılarak, **film afiş önizlemeli (40x60px), tür çipli (Film/Dizi) ve parlayan dairesel onay halkalı özel bir buzlu cam dialog kutusu** kodlandı. Degrade "Kaydet" ve minimalist "İptal" butonları eklendi.
 
 #### **🔜 v1.5.1: Bildirimler, İçerik Yönetimi ve Admin Moderasyonu**
 *   **Hedef**: Topluluk özelliklerini (v1.2-v1.4) "yayınla ve unut" aşamasından çıkarıp, kullanıcıların etkileşimden haberdar olduğu, kendi içeriğini yönetebildiği **ve** uygunsuz içeriğin sahipsiz kalmadığı olgun bir sosyal deneyime taşımak.
