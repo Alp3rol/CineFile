@@ -134,4 +134,49 @@ class AuthController {
     await _auth.signOut();
     _ref.read(userModelProvider.notifier).state = null;
   }
+
+  Future<String?> updateProfile({
+    required String username,
+    required String? avatarUrl,
+    required String? bio,
+  }) async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) return 'Kullanıcı oturumu bulunamadı.';
+
+      final currentModel = _ref.read(userModelProvider);
+      if (currentModel == null) return 'Kullanıcı verisi bulunamadı.';
+
+      final newUsername = username.trim();
+      if (newUsername.isEmpty) return 'Kullanıcı adı boş olamaz.';
+
+      // Check if username is already taken by another user
+      if (currentModel.username.toLowerCase() != newUsername.toLowerCase()) {
+        final query = await _firestore
+            .collection('users')
+            .where('usernameLower', isEqualTo: newUsername.toLowerCase())
+            .get();
+
+        if (query.docs.isNotEmpty) {
+          return 'Bu kullanıcı adı zaten alınmış.';
+        }
+      }
+
+      final updatedModel = currentModel.copyWith(
+        username: newUsername,
+        avatarUrl: avatarUrl?.trim(),
+        bio: bio?.trim(),
+      );
+
+      final userDoc = updatedModel.toMap()..['usernameLower'] = newUsername.toLowerCase();
+      await _firestore.collection('users').doc(user.uid).update(userDoc);
+      
+      // Update local state
+      _ref.read(userModelProvider.notifier).state = updatedModel;
+      
+      return null;
+    } catch (e) {
+      return e.toString();
+    }
+  }
 }

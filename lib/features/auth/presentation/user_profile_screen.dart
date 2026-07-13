@@ -7,6 +7,7 @@ import '../../../core/database/database_provider.dart';
 import '../../movie_detail/presentation/movie_detail_screen.dart';
 import '../../community/presentation/widgets/follow_button.dart';
 import '../controllers/auth_controller.dart';
+import '../models/user_model.dart';
 
 class UserProfileScreen extends ConsumerWidget {
   final String? userId;
@@ -108,6 +109,21 @@ class UserProfileScreen extends ConsumerWidget {
                       color: AppTheme.textSecondary,
                     ),
                   ),
+                  if (userModel.bio != null && userModel.bio!.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                      child: Text(
+                        userModel.bio!,
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          color: Colors.white70,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 32),
 
                   // Stats Row (Followers / Following)
@@ -243,11 +259,9 @@ class UserProfileScreen extends ConsumerWidget {
                         children: [
                           ListTile(
                             leading: const Icon(Icons.person_outline_rounded, color: Colors.white70),
-                            title: const Text('Profili Düzenle (Yakında)'),
+                            title: const Text('Profili Düzenle'),
                             trailing: const Icon(Icons.chevron_right_rounded, color: AppTheme.textSecondary),
-                            onTap: () {
-                              // TODO: Implement profile edit
-                            },
+                            onTap: () => _showEditProfileSheet(context, ref, userModel),
                           ),
                           const Divider(color: AppTheme.borderColor),
                           ListTile(
@@ -295,6 +309,17 @@ class UserProfileScreen extends ConsumerWidget {
     );
   }
 
+  void _showEditProfileSheet(BuildContext context, WidgetRef ref, UserModel user) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return _EditProfileSheet(user: user);
+      },
+    );
+  }
+
   Widget _buildStatColumn(String label, String count) {
     return Column(
       children: [
@@ -316,5 +341,253 @@ class UserProfileScreen extends ConsumerWidget {
         ),
       ],
     );
+  }
+}
+
+class _EditProfileSheet extends ConsumerStatefulWidget {
+  final UserModel user;
+  const _EditProfileSheet({required this.user});
+
+  @override
+  ConsumerState<_EditProfileSheet> createState() => _EditProfileSheetState();
+}
+
+class _EditProfileSheetState extends ConsumerState<_EditProfileSheet> {
+  late TextEditingController _usernameController;
+  late TextEditingController _bioController;
+  late TextEditingController _avatarSeedController;
+  bool _isLoading = false;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _usernameController = TextEditingController(text: widget.user.username);
+    _bioController = TextEditingController(text: widget.user.bio ?? '');
+    
+    // Extract seed from DiceBear URL if it exists, otherwise use username
+    final avatarUrl = widget.user.avatarUrl ?? '';
+    final uri = Uri.tryParse(avatarUrl);
+    final seed = uri?.queryParameters['seed'] ?? widget.user.username;
+    _avatarSeedController = TextEditingController(text: seed);
+  }
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _bioController.dispose();
+    _avatarSeedController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    
+    return Container(
+      padding: EdgeInsets.only(
+        left: 24,
+        right: 24,
+        top: 24,
+        bottom: 24 + bottomInset,
+      ),
+      decoration: const BoxDecoration(
+        color: AppTheme.surfaceColor,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Profili Düzenle',
+                  style: GoogleFonts.outfit(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close_rounded, color: Colors.white70),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            
+            // Avatar Preview
+            Center(
+              child: ValueListenableBuilder<TextEditingValue>(
+                valueListenable: _avatarSeedController,
+                builder: (context, value, _) {
+                  final seed = value.text.trim();
+                  final previewUrl = 'https://api.dicebear.com/7.x/bottts/png?seed=${seed.isEmpty ? 'default' : seed}';
+                  return Container(
+                    width: 90,
+                    height: 90,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: AppTheme.accentColor, width: 2),
+                      image: DecorationImage(
+                        image: NetworkImage(previewUrl),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 24),
+            
+            // Username field
+            Text(
+              'Kullanıcı Adı',
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.white70,
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _usernameController,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                hintText: 'Kullanıcı adı girin',
+                hintStyle: const TextStyle(color: Colors.white38),
+                filled: true,
+                fillColor: Colors.white.withOpacity(0.05),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            
+            // Avatar Seed field
+            Text(
+              'Avatar Görsel Tohumu (Seed)',
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.white70,
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _avatarSeedController,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                hintText: 'Avatar görselini değiştirmek için tohum yazın',
+                hintStyle: const TextStyle(color: Colors.white38),
+                filled: true,
+                fillColor: Colors.white.withOpacity(0.05),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            
+            // Bio field
+            Text(
+              'Biyografi',
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.white70,
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _bioController,
+              style: const TextStyle(color: Colors.white),
+              maxLines: 3,
+              decoration: InputDecoration(
+                hintText: 'Kendinden bahset...',
+                hintStyle: const TextStyle(color: Colors.white38),
+                filled: true,
+                fillColor: Colors.white.withOpacity(0.05),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+            
+            if (_errorMessage != null) ...[
+              const SizedBox(height: 16),
+              Text(
+                _errorMessage!,
+                style: const TextStyle(color: Colors.redAccent, fontSize: 13),
+              ),
+            ],
+            
+            const SizedBox(height: 24),
+            
+            // Save Button
+            ElevatedButton(
+              onPressed: _isLoading ? null : _saveProfile,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.accentColor,
+                foregroundColor: Colors.black,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              child: _isLoading
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(color: Colors.black, strokeWidth: 2),
+                    )
+                  : const Text('Kaydet', style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _saveProfile() async {
+    final username = _usernameController.text.trim();
+    final bio = _bioController.text.trim();
+    final seed = _avatarSeedController.text.trim();
+
+    if (username.isEmpty) {
+      setState(() => _errorMessage = 'Kullanıcı adı boş olamaz.');
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    final avatarUrl = 'https://api.dicebear.com/7.x/bottts/png?seed=${seed.isEmpty ? username : seed}';
+    final error = await ref.read(authControllerProvider).updateProfile(
+      username: username,
+      avatarUrl: avatarUrl,
+      bio: bio,
+    );
+
+    if (mounted) {
+      setState(() => _isLoading = false);
+      if (error != null) {
+        setState(() => _errorMessage = error);
+      } else {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Profil başarıyla güncellendi.')),
+        );
+      }
+    }
   }
 }

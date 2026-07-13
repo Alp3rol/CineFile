@@ -428,11 +428,11 @@ graph TD
 
 ### **Aşama 6: Veri Bütünlüğü, Sosyal Olgunlaşma ve Kod Kalitesi (v1.5.0 - v1.6.0) — Planlanan**
 
-#### **🔜 v1.5.0: Yedekleme Bütünlüğü ve Profil Düzenleme**
+#### **✅ v1.5.0: Yedekleme Bütünlüğü ve Profil Düzenleme**
 *   **Hedef**: v0.9.9'da bilinçli olarak kapsam dışı bırakılan ve o zamandan beri açık kalan iki gerçek eksiği kapatmak: veri kaybı riski taşıyan eksik yedekleme ve işlevsiz profil düzenleme butonu.
 *   **İşler**:
     *   **✅ Tam Yedekleme**: Ayarlar → Veri Yönetimi export/import akışına `CustomLists` ve `CustomListMovies` tablolarının dahil edilmesi (tamamlandı; hem Web hem de Native için yedekleme ve geriye dönük uyumlu geri yükleme entegre edildi).
-    *   **Profil Düzenleme**: [user_profile_screen.dart:249](lib/features/auth/presentation/user_profile_screen.dart:249)'daki boş `// TODO: Implement profile edit` callback'inin gerçek bir düzenleme akışıyla doldurulması (kullanıcı adı değiştirme + `usernameLower` senkronu, avatar/bio alanı) — Firestore `users` belgesi ve `firestore.rules` güncellenmesi.
+    *   **✅ Profil Düzenleme**: `user_profile_screen.dart`'taki boş `// TODO: Implement profile edit` callback'inin gerçek bir düzenleme akışıyla doldurulması (kullanıcı adı değiştirme + `usernameLower` senkronu, avatar/bio alanı entegre edildi, biyografi profilde gösterildi).
     *   İçe aktarma (import) validasyonuna, bozuk/eksik alanlı bir yedek dosyası yüklendiğinde kullanıcıyı bilgilendiren daha net hata mesajları eklenmesi.
 
 #### **🔜 v1.5.1: Bildirimler, İçerik Yönetimi ve Admin Moderasyonu**

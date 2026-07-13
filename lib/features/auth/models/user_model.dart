@@ -3,6 +3,7 @@ class UserModel {
   final String email;
   final String username;
   final String? avatarUrl;
+  final String? bio;
   final int followerCount;
   final int followingCount;
 
@@ -11,6 +12,7 @@ class UserModel {
     required this.email,
     required this.username,
     this.avatarUrl,
+    this.bio,
     this.followerCount = 0,
     this.followingCount = 0,
   });
@@ -21,6 +23,7 @@ class UserModel {
       email: map['email'] ?? '',
       username: map['username'] ?? '',
       avatarUrl: map['avatarUrl'],
+      bio: map['bio'],
       followerCount: map['followerCount'] ?? 0,
       followingCount: map['followingCount'] ?? 0,
     );
@@ -31,6 +34,7 @@ class UserModel {
       'email': email,
       'username': username,
       'avatarUrl': avatarUrl,
+      'bio': bio,
       'followerCount': followerCount,
       'followingCount': followingCount,
     };
@@ -41,6 +45,7 @@ class UserModel {
     String? email,
     String? username,
     String? avatarUrl,
+    String? bio,
     int? followerCount,
     int? followingCount,
   }) {
@@ -49,6 +54,7 @@ class UserModel {
       email: email ?? this.email,
       username: username ?? this.username,
       avatarUrl: avatarUrl ?? this.avatarUrl,
+      bio: bio ?? this.bio,
       followerCount: followerCount ?? this.followerCount,
       followingCount: followingCount ?? this.followingCount,
     );
