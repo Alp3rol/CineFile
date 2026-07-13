@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/icon/splash_logo.png" alt="CineFile" width="750"/>
+<img src="assets/icon/splash_logo.png" alt="CineFile" width="500"/>
 
 # 🎬 CineFile
 
