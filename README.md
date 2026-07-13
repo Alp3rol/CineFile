@@ -1,44 +1,84 @@
+<div align="center">
+
+<img src="assets/icon/app_icon.png" alt="CineFile" width="120"/>
+
 # 🎬 CineFile
 
-<p align="center">
-  <img src="assets/images/tmdb_logo.png" alt="TMDB Logo" width="120"/>
-</p>
+**Film & Dizi İzleme Günlüğü**
 
-**CineFile: Film & Dizi Listem**, sinema ve dizi tutkunları için özel olarak tasarlanmış, koyu tema odaklı ve cam efekti (glassmorphism) detaylarına sahip **premium bir kişisel izleme günlüğü ve analiz uygulamasıdır.** 
+Sinema ve dizi tutkunları için tasarlanmış, koyu tema ve cam efekti (glassmorphism) detaylarına sahip **premium bir kişisel izleme günlüğü, analiz ve topluluk uygulaması.**
 
-Tamamen yerel veritabanında çalışarak verilerinizin gizliliğini korur ve zengin veri görselleştirmeleri ile izleme alışkanlıklarınızı analiz eder.
+[![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
+[![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS%20%7C%20Web%20%7C%20Windows-lightgrey)](#-teknolojik-altyapı)
+[![Firebase](https://img.shields.io/badge/Backend-Firebase-FFCA28?logo=firebase&logoColor=white)](https://firebase.google.com)
+[![TMDb](https://img.shields.io/badge/Data-TMDb-01B4E4?logo=themoviedatabase&logoColor=white)](https://www.themoviedb.org)
 
-👉 **[Canlı Web Demosu (Mobil Görünüm)](https://Alp3rol.github.io/CineFile/)**
+### 👉 [Canlı Web Demosunu Dene](https://Alp3rol.github.io/CineFile/)
+
+</div>
 
 ---
+
+## 📖 Nedir?
+
+CineFile, izlediğiniz her film ve diziyi — hatta aynı yapımı birden fazla izleyişinizi bile — tarih, mekan, ruh hali, puan ve kişisel notlarla kayıt altına almanızı sağlayan bir günlük uygulamasıdır. İzleme verileriniz üzerinden zengin istatistikler çıkarır, dizilerinizi bölüm bölüm takip eder ve isterseniz izleme günlüğünüzü bir topluluk akışında arkadaşlarınızla paylaşmanıza olanak tanır.
 
 ## ✨ Özellikler
 
-*   **🔍 Keşfet ve Engelsiz Arama:** Türkiye'deki internet engellerini (TMDb engelleri) DNS-over-HTTPS (DoH) katmanıyla otomatik aşarak film ve dizileri bulur, detaylarını ve fragmanlarını getirir.
-*   **📖 Detaylı İzleme Günlüğü:** Bir yapımı kaç kez, ne zaman, nerede (Sinema, Ev vb.) ve kiminle izlediğinizi kaydedin. Puanlama (1-10), ruh hali emojileri ve kişisel notlar/etiketler ekleyin.
-*   **🔄 Dizi Bölüm Takip Sistemi (Aktif İzliyorum):** Dizileri bölüm bölüm kolayca takip edin. Sistem nerede kaldığınızı hatırlar, sıradaki bölümü otomatik önerir ve tamamlandığında durumu günceller.
-*   **➕ Hızlı Ekleme:** Ana Sayfa ve Günlük listesindeki hızlı ekleme butonlarıyla, detay sayfasına girmeden tek dokunuşla sıradaki bölümü loglayın.
-*   **📺 Otomatik Platform Simgeleri:** Girdiğiniz mekandan (ör. Netflix, Prime Video, Sinema) izleme platformunu otomatik tanır ve satırlara şık simgeler yerleştirir.
-*   **📁 Özel Koleksiyonlar ve Maratonlar:** Kendi listelerinizi oluşturun, sürükle-bırak ile sıralayın ve neon ilerleme çubuklarıyla tamamlanma oranlarını takip edin.
-*   **📊 Zengin Analizler & İstatistikler (İçgörüler):**
-    *   **İzleme Yoğunluğu Haritası:** Yıllık izleme sıklığınızı gün gün gösteren GitHub tarzı bir takvim ısı haritası.
-    *   **Puan Dağılım Grafiği:** Verdiğiniz puanların dağılımı ve buna göre esprili bir *Eleştirmen Profili* yorumu.
-    *   **İzleme Serileri (Streak):** Üst üste film izlenen gün serileriniz (Mevcut ve en uzun seri).
-    *   **İzleyici Alışkanlıkları:** En çok izlenen yönetmenler, oyuncular, türler, mevsimsel eğilimler ve gün içi aktif saatler.
-*   **🔒 Yerel Öncelikli Gizlilik:** Tüm verileriniz tamamen cihazınızda (SQLite/Drift) saklanır. İstediğiniz zaman verilerinizi JSON formatında dışa aktarabilir veya yedekten geri yükleyebilirsiniz.
+### 📖 İzleme Günlüğü & Takip
+- **Çoklu İzleme Kaydı:** Bir yapımı kaç kez, ne zaman, nerede (Sinema, Ev, Yolculukta...) ve kiminle izlediğinizi ayrı ayrı kaydedin. 1-10 puan, ruh hali emojisi, kişisel not ve özel etiketler (#tag) ekleyin.
+- **Dizi Bölüm Takibi ("Aktif İzliyorum"):** Dizileri bölüm bölüm takip edin — sistem nerede kaldığınızı hatırlar, sıradaki bölümü otomatik önerir, seri bitince durumu otomatik günceller.
+- **Hızlı Ekleme:** Ana Sayfa ve Günlük'teki tek dokunuşluk "+" rozetiyle, detay sayfasına hiç girmeden sıradaki bölümü ilerletin.
+- **Akıllı Tarih Seçici & Platform Simgeleri:** Bir yapımı vizyon tarihinden önce "izledim" diyemezsiniz; girdiğiniz mekandan (Netflix, Prime, Sinema...) platform otomatik tanınıp ikonlanır.
 
----
+### 📊 Analizler & İçgörüler
+- **İzleme Yoğunluğu Haritası:** Yıllık izleme sıklığını gün gün gösteren GitHub tarzı, yıl gezinmeli bir ısı haritası.
+- **Puan Dağılımı & Eleştirmen Profili:** Verdiğiniz puanların dağılım grafiği ve ortalamanıza göre esprili bir yorum.
+- **İzleme Serileri (Streak):** Güncel ve en uzun izleme serileriniz, haftalık hedef ilerlemesi.
+- **Alışkanlık Analizi:** En çok izlenen yönetmenler/oyuncular/türler, mevsimsel dağılım, en aktif gün ve saatler, eğlenceli zaman kıyaslamaları.
+
+### 👥 Topluluk & Sosyal
+- **Topluluk Akışı:** İzleme kayıtlarınızı, günlüğünüzün bir kesitini veya paylaşıma açtığınız bir koleksiyonu yapılandırılmış gönderiler olarak paylaşın.
+- **Takip Sistemi & Kullanıcı Arama:** Diğer kullanıcıları kullanıcı adına göre bulun, takip edin; akışı "Tümü" / "Takip Ettiklerim" olarak filtreleyin.
+- **Beğeni & Yorum:** Gönderilere yıldızla beğeni bırakın, gerçek zamanlı yorum yapın.
+- **Opt-in Gizlilik:** Paylaşım tamamen isteğe bağlıdır — her kayıt varsayılan olarak **gizlidir**, yalnızca açıkça paylaştığınız içerik herkese görünür (bkz. [Gizlilik](#-gizlilik--veri) bölümü).
+
+### 📁 Koleksiyonlar & Keşif
+- **Özel Listeler & Maratonlar:** Kendi koleksiyonlarınızı oluşturun, sürükle-bırak ile sıralayın, neon ilerleme çubuklarıyla tamamlanma oranını takip edin; isterseniz canlı senkronize şekilde toplulukla paylaşın.
+- **Engelsiz Arama ve Keşif:** Türkiye'deki TMDb erişim engellerini DNS-over-HTTPS (DoH) ve resmi domain fallback katmanıyla otomatik aşarak film/dizi arar, tür filtreleriyle keşif sunar.
+
+## 🔒 Gizlilik & Veri
+
+CineFile **yerel öncelikli** bir mimariyle çalışır: tüm izleme kayıtlarınız, notlarınız ve ayarlarınız varsayılan olarak **gizlidir** ve yalnızca siz görürsünüz. Topluluk özellikleri tamamen **opt-in**'dir — bir kaydı ya da koleksiyonu açıkça paylaşmadığınız sürece kimse göremez; sunucu tarafında da bu kurallar [`firestore.rules`](firestore.rules) ile zorunlu kılınır. Verilerinizi istediğiniz zaman JSON formatında dışa aktarabilir veya bir yedekten geri yükleyebilirsiniz.
 
 ## 🛠️ Teknolojik Altyapı
 
-*   **Arayüz & Framework:** Flutter (Mobil, Web, Windows uyumluluğu)
-*   **Durum Yönetimi (State Management):** Riverpod
-*   **Veritabanı:** Drift (SQLite) — *Web platformu için bellek içi (in-memory) veri simülasyonu.*
-*   **Ağ İstemcisi:** Dio (Özel proxy yönlendiricileri ve DoH entegrasyonu ile).
-*   **Grafikler:** `fl_chart`
+| Katman | Teknoloji |
+|---|---|
+| Arayüz & Framework | Flutter (Android, iOS, Web, Windows) |
+| Durum Yönetimi | Riverpod |
+| Yerel Veritabanı | Drift (SQLite) — Web'de bellek içi (in-memory) simülasyon |
+| Bulut & Kimlik Doğrulama | Firebase Auth + Cloud Firestore |
+| Ağ İstemcisi | Dio — özel proxy yönlendirme ve DoH entegrasyonu ile |
+| Grafikler | `fl_chart` |
+| Veri Kaynağı | [The Movie Database (TMDb)](https://www.themoviedb.org) API |
+
+## 🚀 Yerelde Çalıştırma
+
+```bash
+git clone https://github.com/Alp3rol/CineFile.git
+cd CineFile
+flutter pub get
+flutter run
+```
+
+> Uygulamayı çalıştırmak için `lib/core/constants/api_key.dart` içinde bir TMDb API anahtarı ve Firebase projeniz için oluşturulmuş `lib/firebase_options.dart` dosyası gerekir (ikisi de gizlilik nedeniyle `.gitignore`'dadır).
+
+## 🗺️ Yol Haritası
+
+Sürüm bazlı geliştirme geçmişi ve gelecek planları için [`roadmap.md`](roadmap.md) dosyasına bakabilirsiniz.
 
 ---
-
 
 ## 📝 TMDb Atfı
 
