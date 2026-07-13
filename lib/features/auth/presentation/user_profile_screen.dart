@@ -68,70 +68,118 @@ class UserProfileScreen extends ConsumerWidget {
             final isMe = currentUser != null && currentUser.uid == effectiveUserId;
 
             return SingleChildScrollView(
-              padding: const EdgeInsets.all(24.0),
+              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const SizedBox(height: 20),
-                  // User Avatar
-                  Center(
-                    child: Container(
-                      width: 100,
-                      height: 100,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: AppTheme.accentColor, width: 2),
-                        image: DecorationImage(
-                          image: NetworkImage(
-                            userModel.avatarUrl ?? 'https://api.dicebear.com/7.x/bottts/png?seed=${userModel.username}',
-                          ),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  // Username
-                  Text(
-                    '@${userModel.username}',
-                    style: GoogleFonts.outfit(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  if (userModel.bio != null && userModel.bio!.isNotEmpty) ...[
-                    const SizedBox(height: 12),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                      child: Text(
-                        userModel.bio!,
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          color: Colors.white70,
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: 32),
-
-                  // Stats Row (Followers / Following)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  // Glassmorphic Profile Card with Gradient Backdrop Glow
+                  Stack(
+                    alignment: Alignment.center,
                     children: [
-                      _buildStatColumn('Takipçi', '${userModel.followerCount}'),
-                      Container(height: 30, width: 1, color: AppTheme.borderColor),
-                      _buildStatColumn('Takip', '${userModel.followingCount}'),
+                      // Radial background glow for avatar depth
+                      Positioned(
+                        top: 20,
+                        child: Container(
+                          width: 140,
+                          height: 140,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: RadialGradient(
+                              colors: [
+                                AppTheme.accentColor.withValues(alpha: 0.25),
+                                Colors.purple.withValues(alpha: 0.15),
+                                Colors.transparent,
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      // The main card
+                      GlassContainer(
+                        borderRadius: 24,
+                        padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 16.0),
+                        child: Column(
+                          children: [
+                            // Glowing border around Avatar
+                            Container(
+                              padding: const EdgeInsets.all(3.5),
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: LinearGradient(
+                                  colors: [
+                                    AppTheme.accentColor,
+                                    Colors.purpleAccent,
+                                    Colors.blueAccent,
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                              ),
+                              child: Container(
+                                width: 92,
+                                height: 92,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: AppTheme.surfaceColor, width: 2.5),
+                                  image: DecorationImage(
+                                    image: NetworkImage(
+                                      userModel.avatarUrl ?? 'https://api.dicebear.com/7.x/bottts/png?seed=${userModel.username}',
+                                    ),
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            // Username with modern Outfit styling
+                            Text(
+                              '@${userModel.username}',
+                              style: GoogleFonts.outfit(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                            if (userModel.bio != null && userModel.bio!.isNotEmpty) ...[
+                              const SizedBox(height: 10),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                                child: Text(
+                                  userModel.bio!,
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.inter(
+                                    fontSize: 13.5,
+                                    color: Colors.white70,
+                                    fontStyle: FontStyle.italic,
+                                    height: 1.4,
+                                  ),
+                                ),
+                              ),
+                            ],
+                            const SizedBox(height: 24),
+                            // Stats inside capsule row
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                _buildPremiumStatCapsule('Takipçi', '${userModel.followerCount}'),
+                                const SizedBox(width: 16),
+                                _buildPremiumStatCapsule('Takip', '${userModel.followingCount}'),
+                              ],
+                            ),
+                            // Follow / Unfollow Button within the header card
+                            if (!isMe && currentUser != null) ...[
+                              const SizedBox(height: 20),
+                              SizedBox(
+                                width: double.infinity,
+                                child: FollowButton(targetUserId: effectiveUserId),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
                     ],
                   ),
-                  
-                  // Follow / Unfollow Button
-                  if (!isMe && currentUser != null) ...[
-                    const SizedBox(height: 24),
-                    FollowButton(targetUserId: effectiveUserId),
-                  ],
                   
                   const SizedBox(height: 32),
 
@@ -149,17 +197,22 @@ class UserProfileScreen extends ConsumerWidget {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Favori Vitrinim',
-                            style: GoogleFonts.outfit(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                          _buildSectionHeader('Favori Vitrinim'),
+                          const SizedBox(height: 16),
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.015),
+                              borderRadius: BorderRadius.circular(24),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.03),
+                                width: 1,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 12),
-                          Center(
-                            child: _FeaturedMoviesStack(featuredRecords: featuredRecords),
+                            child: Center(
+                              child: _FeaturedMoviesStack(featuredRecords: featuredRecords),
+                            ),
                           ),
                           const SizedBox(height: 32),
                         ],
@@ -168,18 +221,8 @@ class UserProfileScreen extends ConsumerWidget {
                   ),
 
                   // Son İzlediklerim Section
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Son İzlediklerim',
-                      style: GoogleFonts.outfit(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
+                  _buildSectionHeader('Son İzlediklerim'),
+                  const SizedBox(height: 16),
 
                   ref.watch(watchRecordsForUserProvider(effectiveUserId)).when(
                     loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.accentColor)),
@@ -343,23 +386,69 @@ class UserProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildStatColumn(String label, String count) {
-    return Column(
+
+  Widget _buildPremiumStatCapsule(String label, String value) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.03),
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.05),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            value,
+            style: GoogleFonts.outfit(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.accentColor,
+            ),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: Colors.white60,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title) {
+    return Row(
       children: [
-        Text(
-          count,
-          style: GoogleFonts.outfit(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+        Container(
+          width: 4,
+          height: 18,
+          decoration: BoxDecoration(
+            color: AppTheme.accentColor,
+            borderRadius: BorderRadius.circular(2),
+            boxShadow: [
+              BoxShadow(
+                color: AppTheme.accentColor.withValues(alpha: 0.4),
+                blurRadius: 6,
+                offset: const Offset(0, 0),
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(width: 10),
         Text(
-          label,
-          style: GoogleFonts.inter(
-            fontSize: 12,
-            color: AppTheme.textSecondary,
+          title,
+          style: GoogleFonts.outfit(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            letterSpacing: 0.5,
           ),
         ),
       ],
