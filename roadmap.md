@@ -426,7 +426,67 @@ graph TD
 
 ---
 
+### **Aşama 6: Veri Bütünlüğü, Sosyal Olgunlaşma ve Kod Kalitesi (v1.5.0 - v1.6.0) — Planlanan**
+
+#### **🔜 v1.5.0: Yedekleme Bütünlüğü ve Profil Düzenleme**
+*   **Hedef**: v0.9.9'da bilinçli olarak kapsam dışı bırakılan ve o zamandan beri açık kalan iki gerçek eksiği kapatmak: veri kaybı riski taşıyan eksik yedekleme ve işlevsiz profil düzenleme butonu.
+*   **İşler**:
+    *   **✅ Tam Yedekleme**: Ayarlar → Veri Yönetimi export/import akışına `CustomLists` ve `CustomListMovies` tablolarının dahil edilmesi (tamamlandı; hem Web hem de Native için yedekleme ve geriye dönük uyumlu geri yükleme entegre edildi).
+    *   **Profil Düzenleme**: [user_profile_screen.dart:249](lib/features/auth/presentation/user_profile_screen.dart:249)'daki boş `// TODO: Implement profile edit` callback'inin gerçek bir düzenleme akışıyla doldurulması (kullanıcı adı değiştirme + `usernameLower` senkronu, avatar/bio alanı) — Firestore `users` belgesi ve `firestore.rules` güncellenmesi.
+    *   İçe aktarma (import) validasyonuna, bozuk/eksik alanlı bir yedek dosyası yüklendiğinde kullanıcıyı bilgilendiren daha net hata mesajları eklenmesi.
+
+#### **🔜 v1.5.1: Bildirimler, İçerik Yönetimi ve Admin Moderasyonu**
+*   **Hedef**: Topluluk özelliklerini (v1.2-v1.4) "yayınla ve unut" aşamasından çıkarıp, kullanıcıların etkileşimden haberdar olduğu, kendi içeriğini yönetebildiği **ve** uygunsuz içeriğin sahipsiz kalmadığı olgun bir sosyal deneyime taşımak.
+*   **İşler**:
+    *   Firestore `notifications` koleksiyonu: bir gönderi beğenildiğinde/yorumlandığında veya yeni bir takipçi kazanıldığında bildirim üretimi; Topluluk Akışı başlığına okunmamış sayacı olan bir zil ikonu.
+    *   Kullanıcının kendi gönderisini/yorumunu silebilmesi (şu an sadece oluşturma var, silme yok).
+    *   Web build'de devre dışı bırakılan "Koleksiyon Paylaş" (canlı senkron) özelliğinin web/Drift-web tarafına da taşınması.
+    *   Temel kullanıcı engelleme (`blocked_users` alt koleksiyonu) — engellenen kullanıcının gönderileri akıştan ve profil aramasından filtrelenir.
+    *   **Admin Hesabı ve Moderasyon Paneli**: Cloud Functions/Custom Claims gerektirmeyen, mevcut client-only Flutter+Firestore mimarisine uygun hafif bir model — yeni bir Firestore `admins` koleksiyonu (`{uid}` belgesi varlığı = admin), `firestore.rules`'a `isAdmin()` yardımcı fonksiyonu (`exists(/databases/$(db)/documents/admins/$(request.auth.uid))`) eklenerek adminlerin **herhangi bir** `posts`/`comments`/`logs` belgesini (sahibi olmasa da) silebilmesi ve bir kullanıcıyı `users/{uid}.suspended = true` ile askıya alabilmesi.
+        *   Admin ekleme/çıkarma **elle** Firebase Console'dan yapılır (ilk sürümde uygulama içi "admin ata" arayüzü **yok** — bu, bir admin'in başka bir admin oluşturup yetkiyi client tarafından kontrolsüz genişletmesini engelleyen bilinçli bir kısıt).
+        *   Uygulama içinde yeni bir gizli `admin_panel_screen.dart` — sadece `isAdmin` (kullanıcının `admins` koleksiyonundaki varlığı `AuthController` açılışında bir kerelik kontrol edilip cache'lenir) true dönen kullanıcılara Ayarlar altında görünen bir giriş noktası. Bekleyen "şikayet edildi" gönderi/yorum kuyruğu, tek dokunuşla silme, kullanıcı askıya alma/kaldırma.
+        *   Gönderi/yorum için basit bir kullanıcı **şikayet (report)** aksiyonu (`reports` koleksiyonu: `targetId`, `targetType`, `reporterId`, `reason`, `createdAt`) — admin panelindeki kuyruğun veri kaynağı.
+        *   `suspended = true` olan kullanıcılar `firestore.rules` seviyesinde yeni post/yorum/beğeni oluşturamaz; giriş yaptıklarında uygulama içi bir bilgilendirme ekranı gösterilir (hesap engellenmemiş, sadece topluluk yazma yetkisi kısıtlanmış — kendi günlüğüne native tarafta kayıt tutmaya devam edebilir).
+        *   Not: Bu, ölçeklenebilir/kurumsal bir yetkilendirme sistemi değil, tek geliştiricili küçük ölçekli bir topluluk için "yeterince güvenli" bir çözüm — kullanıcı sayısı büyürse Custom Claims + Cloud Functions'a geçiş ayrı bir görev olarak değerlendirilmeli.
+
+#### **🔜 v1.5.2: Kod Kalitesi ve Dosya Bölme Cilası**
+*   **Hedef**: CLAUDE.md'deki 300-400 satır kuralını aşan ekranları `widgets/` alt klasörlerine bölmek ve test kapsamını genişletmek.
+*   **İşler**:
+    *   Bölünecek öncelikli dosyalar (satır sayısına göre): `community_feed_screen.dart` (956), `database_provider.dart` (836 — sadece kIsWeb `StreamProvider`ları hariç, bkz. CLAUDE.md istisnası), `contribution_heatmap.dart` (734), `movie_detail_screen.dart` (684), `journal_screen.dart` (661), `add_watch_record_sheet.dart` (606), `settings_screen.dart` (590).
+    *   State'i olan metodlar ayrılırken CLAUDE.md kuralına uyulması: state callback/parametre (`ValueChanged<T>` vb.) olarak geçilecek, State sınıfının private alanlarına doğrudan erişilmeyecek.
+    *   Yeni bölünen widget'lar için render testleri (mevcut `*_render_test.dart` desenine uygun).
+    *   `dart analyze lib` ve `flutter test` her adımdan sonra çalıştırılıp temiz/yeşil tutulacak.
+
+#### **🔜 v1.6.0: "CineFile Wrapped" — Paylaşılabilir Yıllık Özet**
+*   **Hedef**: Mevcut İçgörüler verisini (yönetmen/tür/puan dağılımı, streak, toplam süre — zaten v0.8.x'te hesaplanıyor) yıl sonunda tek, görsel olarak zengin ve dışa aktarılabilir bir "özet kart" haline getirerek hem kullanıcıya değer katmak hem de organik paylaşım/keşif kanalı açmak.
+*   **İşler**:
+    *   Mevcut `insightsProvider` çıktısından türeyen, belirli bir takvim yılına odaklı yeni bir `yearInReviewProvider`.
+    *   Dikey, story/poster formatında bir özet ekranı (en çok izlenen film/dizi, toplam süre, en aktif ay, puan ortalaması, streak rekoru) — zaten var olan `GenreChartCard`, zaman kıyaslama kartı gibi bileşenlerin yeniden kullanılması (kod tekrarı yok).
+    *   `share_plus` (zaten bağımlılıklarda mevcut) ile ekran görüntüsünü PNG olarak dışa aktarıp paylaşma.
+    *   İsteğe bağlı: Topluluk Akışı'na bu özeti `post` tipi olarak (v1.4.0'daki `movie`/`diary_snapshot`/`collection` post modeline dördüncü bir `year_review` tipi eklenerek) paylaşabilme.
+
+#### **🔜 v1.6.0a: Kişisel Film/Dizi Önerisi Motoru**
+*   **Hedef**: v0.9.3'teki "Bu Hafta Ne İzlesem?" kartından farklı olarak — o sadece kütüphanede zaten var olup izlenmemiş yapımları öneriyor — kullanıcının izleme geçmişinden çıkarılan bir zevk profiliyle, kütüphanede hiç olmayan **yeni** film/dizi keşifleri sunmak.
+*   **İşler**:
+    *   Kullanıcının en çok izlediği/en yüksek puan verdiği tür, yönetmen ve oyunculardan (`allWatchRecordsProvider` + `Movies` verisi üzerinden, zaten İçgörüler'de hesaplanan istatistiklerin yeniden kullanılması) basit bir ağırlıklı "zevk profili" çıkarılması.
+    *   TMDb `/discover/movie` ve `/discover/tv` uç noktalarının bu profildeki tür/oyuncu/yönetmen ID'leriyle sorgulanması; sonuçların kullanıcının kütüphanesinde (herhangi bir `WatchRecords` veya `UserMovieSettings` kaydı) zaten bulunanlar elenerek filtrelenmesi.
+    *   Keşfet sekmesine veya Ana Sayfa'ya (hero banner altına) yatay kaydırılabilir "Sana Özel" öneri şeridi eklenmesi; her karta dokununca doğrudan Film Detay sayfasına gidilmesi (mevcut `AppNetworkImage`/poster kart bileşenlerinin yeniden kullanılması).
+    *   Öneri kalitesinin TMDb'nin kaba tür/anahtar-kelime eşleştirmesine bağlı olduğu göz önünde bulundurularak, kullanıcıya "Neden önerildi?" (ör. "Christopher Nolan filmlerini sevdiğin için") kısa bir açıklama etiketi gösterilmesi — beklenti yönetimi için.
+    *   Kütüphanesi boş/çok küçük (ör. <5 kayıt) kullanıcılar için öneri şeridinin gizlenmesi veya jenerik popüler içerikle (TMDb `/trending`) doldurulması.
+
+#### **🔜 v1.6.0b: Yaklaşan Çıkışlar İçin Yerel Bildirim**
+*   **Hedef**: "İzleyeceklerim" listesine eklenen ama henüz vizyona/yayına girmemiş bir film/dizinin çıkış tarihini kullanıcının elle takip etmesini gerektirmeden, çıkış günü geldiğinde otomatik hatırlatmak — mevcut Takvim sekmesiyle ve v0.9.5'te zaten doğrulanan `release_date` verisiyle doğal olarak örtüşen bir özellik.
+*   **İşler**:
+    *   Yeni bağımlılık: `flutter_local_notifications` (dev bağımlılıklara `EOL`/discontinued kontrolü yapılarak eklenir, CLAUDE.md'deki paket kuralına uyulur).
+    *   `UserMovieSettings`te "İzleyeceklerim" (watchlist) olarak işaretli ve `release_date`'i gelecekte olan yapımlar taranarak, çıkış günü için yerel bildirim zamanlanması — TMDb verisi değişebileceğinden (tarih ötelenmesi) periyodik bir yeniden senkron (uygulama açılışında arka planda `release_date` kontrolü).
+    *   Android 13+ için çalışma zamanı bildirim izni akışı; izin reddedilirse özelliğin sessizce devre dışı kalması (Ayarlar'dan sonradan açılabilir bir anahtar).
+    *   Bildirime dokununca doğrudan ilgili Film Detay sayfasına yönlendirme (mevcut deep-link/navigasyon deseninin genişletilmesi).
+    *   Ayarlar'a "Çıkış Hatırlatıcıları" açma/kapama anahtarı; varsayılan **açık** değil, kullanıcı ilk bildirim izni istendiğinde açıkça onaylıyor (iOS/Android bildirim izni zaten opt-in olduğu için doğal bir eşleşme).
+    *   Zaten vizyonda olan (`release_date` geçmişte) yapımlar için bildirim zamanlanmaz — sadece gelecekteki çıkışlar kapsanır, bu da işi v0.9.5'teki tarih doğrulama mantığıyla tutarlı kılar.
+
+---
+
 ## 📈 Proje Durumu
 
-Uygulama planlanan tüm MVP aşamalarını ve büyük sosyal özellikleri (Faz 3, 4, 5) başarıyla tamamlamıştır. Arayüz geliştirmeleri ve kullanıcı deneyimi optimizasyonları aktif olarak devam etmektedir.
+Uygulama planlanan tüm MVP aşamalarını ve büyük sosyal özellikleri (Faz 3, 4, 5) başarıyla tamamlamıştır. v1.4.x serisi arayüz/marka cilası ile kapandı. Sıradaki odak (v1.5.0-v1.6.0): açık kalan veri güvenliği eksiklerini kapatmak, sosyal özellikleri bildirim/yönetim katmanıyla olgunlaştırmak, büyüyen dosyaları CLAUDE.md kurallarına göre bölmek ve yıl sonu özet özelliğiyle yeni bir kullanıcı değeri eklemek.
 
