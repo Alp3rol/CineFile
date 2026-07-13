@@ -13,6 +13,15 @@ class GlassContainer extends StatelessWidget {
   final Border? border;
   final double? width;
   final double? height;
+  // When false, skips the BackdropFilter blur pass and just paints a flat
+  // semi-transparent fill instead. Real backdrop blur is expensive per
+  // instance (its own compositing layer + re-sampling every frame it's on
+  // screen); for small elements that repeat per list item (poster rating
+  // badges, per-row cards) that cost multiplies across every visible item
+  // with no perceptible visual gain, so those call sites should pass false.
+  // Large, few-per-screen panels (hero banners, stat cards, the bottom nav)
+  // should keep the default blur.
+  final bool useBlur;
 
   const GlassContainer({
     super.key,
@@ -26,10 +35,32 @@ class GlassContainer extends StatelessWidget {
     this.border,
     this.width,
     this.height,
+    this.useBlur = true,
   });
 
   @override
   Widget build(BuildContext context) {
+    final content = Container(
+      padding: padding,
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceColor.withValues(alpha: opacity),
+        borderRadius: BorderRadius.circular(borderRadius),
+        border: border ?? Border.all(
+          color: AppTheme.borderColor,
+          width: 1,
+        ),
+      ),
+      // Widgets that paint on "the nearest Material ancestor" (ListTile,
+      // InkWell ripples, etc.) would otherwise paint underneath this
+      // Container's own background color and become invisible — wrap
+      // the content in its own transparent Material so those effects
+      // render on top of it instead.
+      child: Material(
+        type: MaterialType.transparency,
+        child: child,
+      ),
+    );
+
     return Container(
       width: width,
       height: height,
@@ -45,29 +76,12 @@ class GlassContainer extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(borderRadius),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: blurX, sigmaY: blurY),
-          child: Container(
-            padding: padding,
-            decoration: BoxDecoration(
-              color: AppTheme.surfaceColor.withValues(alpha: opacity),
-              borderRadius: BorderRadius.circular(borderRadius),
-              border: border ?? Border.all(
-                color: AppTheme.borderColor,
-                width: 1,
-              ),
-            ),
-            // Widgets that paint on "the nearest Material ancestor" (ListTile,
-            // InkWell ripples, etc.) would otherwise paint underneath this
-            // Container's own background color and become invisible — wrap
-            // the content in its own transparent Material so those effects
-            // render on top of it instead.
-            child: Material(
-              type: MaterialType.transparency,
-              child: child,
-            ),
-          ),
-        ),
+        child: useBlur
+            ? BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: blurX, sigmaY: blurY),
+                child: content,
+              )
+            : content,
       ),
     );
   }

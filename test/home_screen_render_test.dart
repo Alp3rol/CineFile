@@ -70,9 +70,9 @@ void main() {
     expect(find.text('Interstellar'), findsNothing);
     expect(find.text('Dune: Part Two'), findsNothing);
 
-    // Real data shows up.
-    expect(find.text('Real Watched Movie'), findsOneWidget);
-    expect(find.text('9.0'), findsOneWidget); // latest watch's rating, not the older 7
+    // Real data shows up. "Son İzlediklerim" was removed (redundant with
+    // "Son Eklediklerim" for this app's usage pattern), so watched-only
+    // movies like "Real Watched Movie" no longer render anywhere on Home.
     expect(find.text('Real Added Movie'), findsOneWidget);
     expect(find.text('2020 • Dir B'), findsOneWidget);
 
@@ -98,7 +98,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);
-    expect(find.textContaining('Henüz izleme kaydın yok'), findsOneWidget);
     expect(find.textContaining('Henüz kütüphanene film eklemedin'), findsOneWidget);
 
     // Nothing to suggest and no watch history means these sections are hidden.

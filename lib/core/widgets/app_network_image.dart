@@ -71,11 +71,17 @@ class _AppNetworkImageState extends ConsumerState<AppNetworkImage> {
         child: widget.errorWidget ?? _gradientPlaceholder(),
       );
     } else if (kIsWeb) {
+      // Image.network has no memory-cache-size knob on web, but cacheWidth/
+      // cacheHeight still tell the decoder to downsample instead of
+      // decoding at the source image's full resolution.
+      final dpr = MediaQuery.of(context).devicePixelRatio;
       childWidget = Image.network(
         finalUrl,
         width: widget.width,
         height: widget.height,
         fit: widget.fit,
+        cacheWidth: widget.width != null ? (widget.width! * dpr).round() : null,
+        cacheHeight: widget.height != null ? (widget.height! * dpr).round() : null,
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null) return child;
           return SizedBox(
@@ -93,11 +99,18 @@ class _AppNetworkImageState extends ConsumerState<AppNetworkImage> {
         },
       );
     } else {
+      // Decoding a poster/backdrop at its full TMDb resolution (e.g. w500
+      // or "original") when it's displayed at a fraction of that size wastes
+      // memory and CPU on every scroll/rebuild. memCacheWidth/Height tell
+      // the decoder to downsample to roughly the on-screen size instead.
+      final dpr = MediaQuery.of(context).devicePixelRatio;
       childWidget = CachedNetworkImage(
         imageUrl: widget.imageUrl,
         width: widget.width,
         height: widget.height,
         fit: widget.fit,
+        memCacheWidth: widget.width != null ? (widget.width! * dpr).round() : null,
+        memCacheHeight: widget.height != null ? (widget.height! * dpr).round() : null,
         placeholder: (context, url) => SizedBox(
           width: widget.width,
           height: widget.height,

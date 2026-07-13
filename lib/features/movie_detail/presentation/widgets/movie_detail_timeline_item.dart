@@ -66,6 +66,7 @@ class MovieDetailTimelineItem extends StatelessWidget {
               padding: const EdgeInsets.all(14),
               borderRadius: 16,
               opacity: 0.6,
+              useBlur: false, // per-entry card inside the rewatch-history list
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

@@ -5,13 +5,13 @@ import '../theme/app_theme.dart';
 import '../database/database_provider.dart';
 import '../database/episode_logging.dart';
 
-import '../widgets/premium_toast.dart';
-
 // Compact "Bölüm X/Y +" pill for the latest watch record of an
 // actively-watched show (see UserMovieSettings.isActivelyWatching). Tapping
-// "+" logs the next episode immediately — no dialog, no screen — reusing
-// the last given rating for that show as the new record's rating. Shared by
-// the Journal table and card list views so the two can't drift out of sync.
+// "+" bumps the episode progress counter immediately — no dialog, no screen,
+// and (like the Home quick-add "+") no new diary log entry either, so
+// catching up on several episodes from the Journal doesn't clutter the diary
+// with a card per tap. Shared by the Journal table and card list views so
+// the two can't drift out of sync.
 class QuickAdvanceTag extends ConsumerWidget {
   final WatchRecordWithMovie item;
   const QuickAdvanceTag({super.key, required this.item});
@@ -22,15 +22,7 @@ class QuickAdvanceTag extends ConsumerWidget {
     final next = (item.setting!.lastWatchedEpisode ?? 0) + 1;
 
     return TextButton(
-      onPressed: () async {
-        try {
-          await logNextEpisode(ref: ref, movie: item.movie, setting: item.setting!, rating: item.record.rating);
-        } catch (e) {
-          if (context.mounted) {
-            showPremiumToast(context, 'Bölüm kaydedilemedi: $e', isError: true);
-          }
-        }
-      },
+      onPressed: () => advanceEpisodeWithToast(context, ref, ActivelyWatchingShow(item.movie, item.setting!)),
       style: TextButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         minimumSize: Size.zero,

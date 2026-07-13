@@ -87,53 +87,49 @@ class JournalMiniInsightsBar extends StatelessWidget {
     required this.totalMinutes,
   });
 
-  Widget _buildInsightCard(String title, String value, IconData icon, Color color) {
+  // Matches HomeStatsDashboard's mini-stat treatment (icon + label/value
+  // column, alternating accentColor/ratingColor, shared textTheme) so the
+  // Journal's top panel reads as the same design system as Home instead of
+  // four disconnected floating cards with ad-hoc colors/font sizes.
+  Widget _buildStat(BuildContext context, String label, String value, IconData icon, Color color) {
+    final textTheme = Theme.of(context).textTheme;
     return Expanded(
-      child: GlassContainer(
-        borderRadius: 16,
-        opacity: 0.65,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(icon, size: 16, color: color),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: color, size: 20),
+          const SizedBox(width: 10),
+          Flexible(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  label,
+                  style: textTheme.labelLarge,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  value,
+                  style: textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold, color: Colors.white),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    title,
-                    style: GoogleFonts.inter(fontSize: 9, color: AppTheme.textSecondary, fontWeight: FontWeight.w500),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    value,
-                    style: GoogleFonts.outfit(
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
+
+  Widget _divider() => Container(
+        height: 30,
+        width: 1,
+        color: AppTheme.borderColor,
+        margin: const EdgeInsets.symmetric(horizontal: 10),
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -147,24 +143,30 @@ class JournalMiniInsightsBar extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              _buildInsightCard('Bu Ay', '$thisMonthCount Film', Icons.calendar_month_rounded, Colors.orangeAccent),
-              const SizedBox(width: 8),
-              _buildInsightCard('Ort. Puan', '${avgRating.toStringAsFixed(1)} ★', Icons.star_rounded, AppTheme.ratingColor),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              _buildInsightCard('Favori Tür', favoriteGenre, Icons.movie_filter_rounded, AppTheme.accentColor),
-              const SizedBox(width: 8),
-              _buildInsightCard('Toplam Süre', durationStr, Icons.hourglass_bottom_rounded, Colors.tealAccent),
-            ],
-          ),
-        ],
+      child: GlassContainer(
+        borderRadius: 20,
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                _buildStat(context, 'Bu Ay', '$thisMonthCount Film', Icons.calendar_month_rounded, AppTheme.accentColor),
+                _divider(),
+                _buildStat(context, 'Ort. Puan', '${avgRating.toStringAsFixed(1)} ★', Icons.star_rounded, AppTheme.ratingColor),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Divider(color: AppTheme.borderColor, height: 1),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                _buildStat(context, 'Favori Tür', favoriteGenre, Icons.movie_filter_rounded, AppTheme.accentColor),
+                _divider(),
+                _buildStat(context, 'Toplam Süre', durationStr, Icons.hourglass_bottom_rounded, AppTheme.ratingColor),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

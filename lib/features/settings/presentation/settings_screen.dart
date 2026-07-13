@@ -9,6 +9,7 @@ import '../../../../core/widgets/glass_container.dart';
 import 'settings_provider.dart';
 import '../../auth/presentation/widgets/user_profile_avatar_button.dart';
 import '../../../../core/widgets/scroll_to_top_button.dart';
+import 'widgets/duplicate_cleanup_screen.dart';
 
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -205,6 +206,32 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                 ),
                               ),
                             ],
+                          ),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton.icon(
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: Colors.white70,
+                                side: const BorderSide(color: AppTheme.borderColor),
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                              icon: const Icon(Icons.cleaning_services_outlined, size: 18),
+                              label: Text(
+                                'Mükerrer Kayıtları Temizle',
+                                style: GoogleFonts.outfit(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              onPressed: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => const DuplicateCleanupScreen()),
+                              ),
+                            ),
                           ),
                         ],
                       ),

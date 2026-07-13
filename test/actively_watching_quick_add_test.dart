@@ -1,11 +1,12 @@
 // Verifies the "Aktif İzliyorum" quick-add flow: activelyWatchingProvider
 // surfaces shows with UserMovieSettings.isActivelyWatching (from Firestore),
 // the ActivelyWatchingRow renders them with a quick-add "+" button, and
-// tapping it logs the next episode immediately — no dialog, consistent with
-// the same no-dialog design used by the Journal table's quick-advance tag
-// (see journal_quick_advance_tag_test.dart) — advancing lastWatchedEpisode
-// and removing the show from the active list once the last episode is
-// reached.
+// tapping it advances lastWatchedEpisode immediately — no dialog, and
+// (unlike the Journal table's quick-advance tag, see
+// journal_quick_advance_tag_test.dart) without creating a new diary log
+// entry, since this is meant as a lightweight "mark next episode watched"
+// shortcut, not a diary action. Also removes the show from the active list
+// once the last episode is reached.
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
@@ -119,7 +120,8 @@ void main() {
     expect(list.single.setting.lastWatchedEpisode, 3);
   });
 
-  testWidgets('quick-add "+" logs the next episode immediately and auto-completes on the last one', (tester) async {
+  testWidgets('quick-add "+" advances episode progress without a new diary entry, and auto-completes on the last one',
+      (tester) async {
     // total=2, already at episode 1 — one quick-add should finish the show.
     await seedActivelyWatchingShow(tmdbId: 5, totalEpisodes: 2, lastWatchedEpisode: 1);
 
@@ -141,8 +143,10 @@ void main() {
     expect(settingsDoc.data()!['lastWatchedEpisode'], 2);
     expect(settingsDoc.data()!['isActivelyWatching'], isFalse);
 
+    // No new diary entry should be created by the quick-add "+" — only the
+    // one log seeded to make the show resolvable in the first place.
     final logsSnap = await firestore.collection('logs').where('userId', isEqualTo: uid).where('movieId', isEqualTo: 5).get();
-    expect(logsSnap.docs.length, 2);
+    expect(logsSnap.docs.length, 1);
 
     // The show is done, so the row (and quick-add button) is gone now.
     expect(find.text('Aktif Dizi'), findsNothing);

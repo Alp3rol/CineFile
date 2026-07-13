@@ -1,7 +1,11 @@
 // Verifies the compact "Bölüm X/Y +" tag added to the Journal table/card
 // views (replacing the earlier full-width "Aktif İzlediklerin" row per user
 // feedback): it only appears on an actively-watched show's latest record,
-// and tapping "+" logs the next episode immediately with no dialog/screen.
+// and tapping "+" advances the episode progress counter immediately with no
+// dialog/screen — and, like Home's quick-add "+", without creating a new
+// diary log entry (an earlier version created one per tap, which made the
+// diary look like a new show was added every time someone caught up on a
+// few episodes from Journal).
 //
 // Watch records now live in Firestore (see database_provider.dart) rather
 // than the local Drift DB, so this seeds a FakeFirebaseFirestore + a mocked
@@ -35,7 +39,7 @@ void main() {
     container.dispose();
   });
 
-  testWidgets('quick-advance tag logs the next episode with a single tap, no dialog', (tester) async {
+  testWidgets('quick-advance tag advances episode progress without a new diary entry, no dialog', (tester) async {
     tester.view.physicalSize = const Size(1080, 2400);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
@@ -107,9 +111,9 @@ void main() {
     expect(settingsDoc.data()!['lastWatchedEpisode'], 5);
     expect(settingsDoc.data()!['isActivelyWatching'], isTrue);
 
+    // No new diary entry should be created by the quick-advance tag — only
+    // the one log seeded to make the record resolvable in the first place.
     final logsSnap = await firestore.collection('logs').where('userId', isEqualTo: uid).get();
-    expect(logsSnap.docs.length, 2);
-    final newLog = logsSnap.docs.firstWhere((d) => d.data()['episodeCount'] == 1 && d.data()['watchNumber'] != 4);
-    expect(newLog.data()['rating'], 7); // carried forward from the previous record
+    expect(logsSnap.docs.length, 1);
   });
 }

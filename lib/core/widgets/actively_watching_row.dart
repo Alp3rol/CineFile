@@ -6,7 +6,6 @@ import '../constants/api_constants.dart';
 import '../database/database_provider.dart';
 import 'app_network_image.dart';
 import 'glass_container.dart';
-import 'premium_toast.dart';
 import '../database/episode_logging.dart';
 
 // Horizontal "Aktif İzlediklerin" strip — shared by Home and Journal so a
@@ -70,24 +69,12 @@ class ActivelyWatchingRow extends ConsumerWidget {
                             right: 6,
                             bottom: 6,
                             child: GestureDetector(
-                              onTap: () async {
-                                try {
-                                  await logNextEpisode(
-                                    ref: ref,
-                                    movie: show.movie,
-                                    setting: show.setting,
-                                    rating: show.setting.personalRanking?.toDouble() ?? 7.0,
-                                  );
-                                } catch (e) {
-                                  if (context.mounted) {
-                                    showPremiumToast(context, 'Bölüm kaydedilemedi: $e', isError: true);
-                                  }
-                                }
-                              },
+                              onTap: () => advanceEpisodeWithToast(context, ref, show),
                               child: GlassContainer(
                                 padding: const EdgeInsets.all(6),
                                 borderRadius: 100,
                                 opacity: 0.85,
+                                useBlur: false, // per-item badge inside a scrolling list
                                 child: const Icon(Icons.add_rounded, color: AppTheme.accentColor, size: 18),
                               ),
                             ),

@@ -46,8 +46,23 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
 
   void _onScroll() {
     if (!mounted) return;
+    final offset = _scrollController.offset;
+    // backdropOpacity/backdropTop (derived from _scrollOffset below) are
+    // saturated outside the [0, 200] range — opacity is already 0 past 200px
+    // and already 1 at/below 0px, so once both the old and new offset land
+    // in the same saturated zone, nothing visible actually changes. Skipping
+    // the rebuild there avoids re-laying-out the backdrop stack on every
+    // scroll pixel once the user has scrolled past the hero.
+    final wasSaturatedLow = _scrollOffset <= 0;
+    final wasSaturatedHigh = _scrollOffset >= 200;
+    final isSaturatedLow = offset <= 0;
+    final isSaturatedHigh = offset >= 200;
+    if ((wasSaturatedLow && isSaturatedLow) || (wasSaturatedHigh && isSaturatedHigh)) {
+      _scrollOffset = offset;
+      return;
+    }
     setState(() {
-      _scrollOffset = _scrollController.offset;
+      _scrollOffset = offset;
     });
   }
 
@@ -223,7 +238,9 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
                       },
                       blendMode: BlendMode.dstIn,
                       child: AppNetworkImage(
-                        imageUrl: '${ApiConstants.imagePathOriginal}$backdropPath',
+                        imageUrl: '${ApiConstants.imagePathW780}$backdropPath',
+                        width: MediaQuery.of(context).size.width,
+                        height: 480,
                         fit: BoxFit.cover,
                       ),
                     ),

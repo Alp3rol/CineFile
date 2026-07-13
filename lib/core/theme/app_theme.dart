@@ -75,6 +75,14 @@ class AppTheme {
           fontWeight: FontWeight.w300,
           color: textSecondary,
         ),
+        // Smallest step in the scale — recurring "tertiary caption under a
+        // poster" use case (watch info, director/year) that labelLarge (12)
+        // reads slightly too large for.
+        labelSmall: GoogleFonts.inter(
+          fontSize: 10,
+          fontWeight: FontWeight.w400,
+          color: textSecondary,
+        ),
       ),
 
       // AppBar Theme

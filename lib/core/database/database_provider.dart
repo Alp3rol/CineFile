@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart'; // For kIsWeb
@@ -149,7 +150,58 @@ final watchRecordsForUserProvider = StreamProvider.family<List<WatchRecordWithMo
       });
 });
 
-// Stream provider to get all watch records with movie details (current logged in user)
+Map<MovieKey, UserMovieSetting> _movieSettingsMapFromSnapshot(QuerySnapshot<Map<String, dynamic>> snapshot) {
+  final map = <MovieKey, UserMovieSetting>{};
+  for (final doc in snapshot.docs) {
+    final data = doc.data();
+    final movieId = data['movieId'] as int?;
+    final isTv = data['isTv'] as bool?;
+    if (movieId == null || isTv == null) continue;
+    map[(tmdbId: movieId, isTv: isTv)] = UserMovieSetting(
+      tmdbId: movieId,
+      isTv: isTv,
+      isFavorite: data['isFavorite'] ?? false,
+      isReWatchList: data['isReWatchList'] ?? false,
+      personalRanking: data['personalRanking'] as int?,
+      personalNotes: data['personalNotes'] as String?,
+      personalTags: data['personalTags'] as String?,
+      updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      isActivelyWatching: data['isActivelyWatching'] ?? false,
+      lastWatchedEpisode: data['lastWatchedEpisode'] as int?,
+    );
+  }
+  return map;
+}
+
+// Reactive map of the current user's per-movie settings, keyed by
+// (tmdbId, isTv). Standalone convenience provider for anything that only
+// needs settings, not logs — allWatchRecordsProvider (below) does NOT
+// depend on this via ref.watch, since that would tear down and recreate its
+// logs subscription (and briefly flash to a loading state) on every
+// settings change; it merges both Firestore streams manually instead.
+final allMovieSettingsProvider = StreamProvider<Map<MovieKey, UserMovieSetting>>((ref) {
+  final authState = ref.watch(authStateProvider);
+  final user = authState.value;
+  if (user == null) {
+    return Stream.value(<MovieKey, UserMovieSetting>{});
+  }
+
+  return ref.read(firestoreProvider)
+      .collection('users')
+      .doc(user.uid)
+      .collection('movie_settings')
+      .snapshots()
+      .map(_movieSettingsMapFromSnapshot);
+});
+
+// Stream provider to get all watch records with movie details (current
+// logged in user). Manually merges two independent Firestore listeners
+// (logs + movie_settings) into one output stream that re-emits whenever
+// EITHER source updates, without ever tearing down/recreating either
+// subscription — combining them via ref.watch(allMovieSettingsProvider)
+// instead would rebuild this whole provider (and its logs subscription) on
+// every settings change, which briefly resets consumers to a loading state
+// and shows up as a visible flicker/jump in the Journal list.
 final allWatchRecordsProvider = StreamProvider<List<WatchRecordWithMovie>>((ref) {
   final authState = ref.watch(authStateProvider);
   final user = authState.value;
@@ -157,49 +209,56 @@ final allWatchRecordsProvider = StreamProvider<List<WatchRecordWithMovie>>((ref)
     return Stream.value(<WatchRecordWithMovie>[]);
   }
 
-  return ref.read(firestoreProvider)
+  final controller = StreamController<List<WatchRecordWithMovie>>();
+  var latestLogs = <DiaryLogModel>[];
+  var latestSettings = const <MovieKey, UserMovieSetting>{};
+  var hasLogs = false;
+
+  void emit() {
+    // Settings may not have loaded yet on the very first tick — that's fine,
+    // records just render with a null setting briefly. Logs are the primary
+    // data source, so wait for at least one logs snapshot before emitting.
+    if (!hasLogs) return;
+    final sorted = [...latestLogs]..sort((a, b) => b.watchDate.compareTo(a.watchDate));
+    final list = sorted.map((log) {
+      final key = (tmdbId: log.movieId, isTv: log.isTv);
+      final wRecord = log.toWatchRecordWithMovie();
+      return WatchRecordWithMovie(wRecord.record, wRecord.movie, setting: latestSettings[key]);
+    }).toList();
+    if (!controller.isClosed) controller.add(list);
+  }
+
+  final logsSub = ref.read(firestoreProvider)
       .collection('logs')
       .where('userId', isEqualTo: user.uid)
       .snapshots()
-      .asyncMap((snapshot) async {
-        final logs = snapshot.docs.map((doc) => DiaryLogModel.fromMap(doc.data(), doc.id)).toList();
-        // Sort descending by watchDate
-        logs.sort((a, b) => b.watchDate.compareTo(a.watchDate));
-        
-        final list = <WatchRecordWithMovie>[];
-        for (final log in logs) {
-          final key = (tmdbId: log.movieId, isTv: log.isTv);
-          
-          // Get settings from Firestore
-          final settingsDoc = await ref.read(firestoreProvider)
-              .collection('users')
-              .doc(user.uid)
-              .collection('movie_settings')
-              .doc('${key.tmdbId}_${key.isTv}')
-              .get();
-              
-          UserMovieSetting? setting;
-          if (settingsDoc.exists) {
-            final data = settingsDoc.data()!;
-            setting = UserMovieSetting(
-              tmdbId: key.tmdbId,
-              isTv: key.isTv,
-              isFavorite: data['isFavorite'] ?? false,
-              isReWatchList: data['isReWatchList'] ?? false,
-              personalRanking: data['personalRanking'] as int?,
-              personalNotes: data['personalNotes'] as String?,
-              personalTags: data['personalTags'] as String?,
-              updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-              isActivelyWatching: data['isActivelyWatching'] ?? false,
-              lastWatchedEpisode: data['lastWatchedEpisode'] as int?,
-            );
-          }
-          
-          final wRecord = log.toWatchRecordWithMovie();
-          list.add(WatchRecordWithMovie(wRecord.record, wRecord.movie, setting: setting));
-        }
-        return list;
+      .listen((snapshot) {
+        latestLogs = snapshot.docs.map((doc) => DiaryLogModel.fromMap(doc.data(), doc.id)).toList();
+        hasLogs = true;
+        emit();
+      }, onError: (Object e, StackTrace st) {
+        if (!controller.isClosed) controller.addError(e, st);
       });
+
+  final settingsSub = ref.read(firestoreProvider)
+      .collection('users')
+      .doc(user.uid)
+      .collection('movie_settings')
+      .snapshots()
+      .listen((snapshot) {
+        latestSettings = _movieSettingsMapFromSnapshot(snapshot);
+        emit();
+      }, onError: (Object e, StackTrace st) {
+        if (!controller.isClosed) controller.addError(e, st);
+      });
+
+  ref.onDispose(() {
+    logsSub.cancel();
+    settingsSub.cancel();
+    controller.close();
+  });
+
+  return controller.stream;
 });
 
 // Stream provider to get all followed user IDs for the current user

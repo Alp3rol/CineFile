@@ -181,7 +181,22 @@ class DynamicBackgroundNotifier extends StateNotifier<DynamicBackgroundState> {
       }
     }
 
+    // home_screen.dart (and similar callers) invoke this on every build via
+    // addPostFrameCallback with no dedupe of their own — skip the state
+    // assignment when the resulting colors are identical to avoid
+    // retriggering DynamicBackgroundWrapper's AnimatedContainer transitions
+    // (and the rebuilds that come with them) when nothing actually changed.
+    if (_colorMapEquals(activeColors, state.activePosterColors)) return;
+
     state = state.copyWith(activePosterColors: activeColors);
+  }
+
+  bool _colorMapEquals(Map<String, Color> a, Map<String, Color> b) {
+    if (a.length != b.length) return false;
+    for (final entry in a.entries) {
+      if (b[entry.key] != entry.value) return false;
+    }
+    return true;
   }
 
   /// Directly updates the active colors based on a list of TMDb Map objects.

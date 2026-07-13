@@ -150,6 +150,7 @@ class _JournalRecordCard extends ConsumerWidget {
         child: GlassContainer(
           borderRadius: 16,
           opacity: 0.5,
+          useBlur: false, // per-row card inside a scrolling list — see GlassContainer's useBlur doc
           padding: const EdgeInsets.all(10),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
