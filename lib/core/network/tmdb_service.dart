@@ -634,4 +634,24 @@ class TmdbService {
       throw Exception('TMDb Person Details Hatası: ${e.message}');
     }
   }
+
+  /// Get person combined credits (TMDb /person/$personId/combined_credits)
+  Future<List<Map<String, dynamic>>> getPersonCombinedCredits(int personId, {String language = 'tr-TR'}) async {
+    if (_apiKey.isEmpty) {
+      return [];
+    }
+    try {
+      final response = await _dio.get(
+        '/person/$personId/combined_credits',
+        queryParameters: {
+          'api_key': _apiKey,
+          'language': language,
+        },
+      );
+      final cast = response.data['cast'] as List<dynamic>? ?? [];
+      return cast.map((e) => e as Map<String, dynamic>).toList();
+    } on DioException catch (e) {
+      throw Exception('TMDb Combined Credits Hatası: ${e.message}');
+    }
+  }
 }

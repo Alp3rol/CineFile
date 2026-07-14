@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
@@ -39,7 +40,11 @@ class DohResolver {
           queryParameters: {'name': hostname, 'type': 'A'},
           options: Options(headers: {'Accept': 'application/dns-json'}),
         );
-        final answers = response.data['Answer'] as List<dynamic>?;
+        var data = response.data;
+        if (data is String) {
+          data = jsonDecode(data);
+        }
+        final answers = data['Answer'] as List<dynamic>?;
         if (answers == null) continue;
 
         final aRecord = answers.cast<Map<String, dynamic>?>().firstWhere(
