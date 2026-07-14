@@ -444,7 +444,7 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
                         ),
                         const SizedBox(height: 28),
 
-                        MovieDetailCastList(cast: cast),
+                        MovieDetailCastList(cast: cast, movieData: movieData),
 
                         MovieDetailTimelineSection(
                           watchRecordsAsync: watchRecordsAsync,

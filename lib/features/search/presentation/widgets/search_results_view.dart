@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/widgets/app_network_image.dart';
-import '../../../../core/constants/api_constants.dart';
-import '../../../movie_detail/presentation/movie_detail_screen.dart';
+import '../../../../core/widgets/poster_grid.dart';
 import '../search_provider.dart';
 import '../trending_provider.dart';
 
@@ -84,7 +82,10 @@ class SearchResultsView extends ConsumerWidget {
               Expanded(
                 child: filtered.isEmpty
                     ? _buildFilteredEmptyState(mediaFilter)
-                    : _buildGrid(context, filtered, scrollController),
+                    : PosterGrid(
+                        items: filtered,
+                        scrollController: scrollController,
+                      ),
               ),
             ],
           );
@@ -129,7 +130,10 @@ class SearchResultsView extends ConsumerWidget {
     }
 
     // Grid presentation (Letterboxd stili 3'lü poster grid)
-    return _buildGrid(context, results, scrollController);
+    return PosterGrid(
+      items: results,
+      scrollController: scrollController,
+    );
   }
 
   String _headingFor(DiscoverCategory category, DiscoverTimeWindow timeWindow) {
@@ -344,84 +348,4 @@ class SearchResultsView extends ConsumerWidget {
     );
   }
 
-  Widget _buildGrid(
-    BuildContext context,
-    List<Map<String, dynamic>> items,
-    ScrollController? controller,
-  ) {
-    return GridView.builder(
-      controller: controller,
-      padding: const EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 120),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 16,
-        childAspectRatio: 0.65, // Ratio for standard movie posters
-      ),
-      itemCount: items.length,
-      itemBuilder: (context, index) {
-        final movie = items[index];
-        final posterPath = movie['poster_path'] as String?;
-        final title = movie['title'] as String;
-        final releaseDate = movie['release_date'] as String? ?? '';
-        final year = releaseDate.split('-').first;
-
-        final movieId = movie['id'] as int;
-        final isTv = movie['media_type'] == 'tv';
-
-        return GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => MovieDetailScreen(tmdbId: movieId, isTv: isTv),
-              ),
-            );
-          },
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Poster Frame
-              Expanded(
-                child: Hero(
-                  tag: 'poster_${movieId}_$isTv',
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: AppNetworkImage(
-                      imageUrl: posterPath != null ? '${ApiConstants.imagePathW500}$posterPath' : '',
-                      seed: title,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 6),
-
-              // Film Title (Grid subtitle)
-              Text(
-                title,
-                style: GoogleFonts.inter(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-
-              // Year and Rating Info
-              Text(
-                year.isNotEmpty ? year : 'Bilinmeyen Yıl',
-                style: GoogleFonts.inter(
-                  fontSize: 9,
-                  color: AppTheme.textSecondary,
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
 }

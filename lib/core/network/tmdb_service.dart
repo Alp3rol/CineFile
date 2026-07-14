@@ -593,4 +593,45 @@ class TmdbService {
       throw Exception('TMDb Discover TV Hatası: ${e.message}');
     }
   }
+
+  /// Get person details (TMDb /person/{id})
+  Future<Map<String, dynamic>?> getPersonDetails(int personId, {String language = 'tr-TR'}) async {
+    if (_apiKey.isEmpty) {
+      return null;
+    }
+    try {
+      final response = await _dio.get(
+        '/person/$personId',
+        queryParameters: {
+          'api_key': _apiKey,
+          'language': language,
+        },
+      );
+      final data = response.data as Map<String, dynamic>;
+
+      // Fallback to English if Turkish biography is empty or null
+      final biography = data['biography'] as String?;
+      if (language == 'tr-TR' && (biography == null || biography.trim().isEmpty)) {
+        try {
+          final enResponse = await _dio.get(
+            '/person/$personId',
+            queryParameters: {
+              'api_key': _apiKey,
+              'language': 'en-US',
+            },
+          );
+          final enData = enResponse.data as Map<String, dynamic>;
+          final enBio = enData['biography'] as String?;
+          if (enBio != null && enBio.trim().isNotEmpty) {
+            data['biography'] = enBio;
+          }
+        } catch (e) {
+          debugPrint('English biography fallback error: $e');
+        }
+      }
+      return data;
+    } on DioException catch (e) {
+      throw Exception('TMDb Person Details Hatası: ${e.message}');
+    }
+  }
 }
