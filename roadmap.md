@@ -426,7 +426,7 @@ graph TD
 
 ---
 
-### **Aşama 6: Veri Bütünlüğü, Sosyal Olgunlaşma ve Kod Kalitesi (v1.5.0 - v1.6.0) — Planlanan**
+### **Aşama 6: Veri Bütünlüğü, Sosyal Olgunlaşma ve Kod Kalitesi (v1.5.0 - v1.7.0) — Planlanan**
 
 #### **✅ v1.5.0: Yedekleme Bütünlüğü, Gizlilik ve Premium Profil Tasarımı**
 *   **Hedef**: v0.9.9'da bilinçli olarak kapsam dışı bırakılan eksik yedekleme ve işlevsiz profil düzenlemeyi çözmek; gizlilik açıklarını kapatmak ve profil arayüzünü ultra-premium görsel standartlara taşımak.
@@ -479,7 +479,7 @@ graph TD
     *   **✅ Test güvenilirliği**: `widget_test.dart`'ın gerçek bir TMDb ağ isteği tetikleyip (Ana Sayfa'nın öneri şeridi üzerinden) test teardown'ında "Timer is still pending" ile başarısız olması kök nedenine inilerek düzeltildi (`recommendationsProvider` test override'ı). `NotificationService`, `flutter_local_notifications`'ın test ortamında platform kanalı olmadığı için attığı (ve zaten yakalanıp loglanan, ama gürültülü) `LateInitializationError`'ları artık test ortamını tespit edip atlıyor.
     *   `dart analyze lib` ve `flutter test` (59/59) her adımdan sonra çalıştırılıp temiz/yeşil tutuldu.
 
-#### **🔜 v1.6.0: Keşfet'te "Haftanın Popüler Film/Dizileri"**
+#### **✅ v1.6.0: Keşfet'te "Haftanın Popüler Film/Dizileri"**
 *   **Hedef**: Keşfet ekranındaki arama kutusu boşken gösterilen statik "Keşfetmeye Başlayın" yer tutucusunu, TMDb'nin `/trending/*/week` uçlarından beslenen, mevcut 3'lü poster grid'i yeniden kullanan gerçek bir "Haftanın Popüler Film/Dizileri" listesiyle değiştirerek Keşfet'i arama yapılmadan önce de keşfedilebilir hale getirmek.
 *   **İşler**:
     *   `tmdb_service.dart`'a `getPopularMovies`/`getPopularTvShows` ile aynı örüntüde iki yeni metod: `getTrendingMoviesThisWeek()` (`/trending/movie/week`) ve `getTrendingTvShowsThisWeek()` (`/trending/tv/week`).
@@ -490,7 +490,15 @@ graph TD
     *   Keşfet'in boş-sorgu görünümüne iki filtre satırı eklendi: Kategori+Zaman (Trend seçiliyken "Bu Hafta"/"Bugün" alt-çipleri beliriyor) ve Tür (Hepsi/Film/Dizi, yeni `discoverMediaFilterProvider` ile tamamen istemci taraflı, ağ isteği tetiklemiyor).
     *   `SearchGenreChips`, sorgu boşken artık gizleniyor (Keşfet'in yeni filtre satırlarıyla üst üste binmesin diye).
 
-#### **🔜 v1.6.1: Bildirimler, İçerik Yönetimi ve Admin Moderasyonu**
+#### **🔜 v1.7.0: Oyuncu Profili**
+*   **Hedef**: Film/dizi detay sayfasındaki oyuncu kadrosunu statik bir liste olmaktan çıkarıp, bir oyuncuya dokunulduğunda TMDb'nin `/person/{id}` uç noktasından beslenen fotoğraf/biyografi bilgileriyle ve discover uç noktalarından türetilen filmografiyle premium bir profil sayfası açan, tıklanabilir bir keşif zinciri haline getirmek.
+*   **İşler**:
+    *   `tmdb_service.dart`'a `getPersonDetails(int personId)` — mevcut metodlarla aynı örüntüde (`/person/{id}`, hata yönetimi/log stili birebir aynı).
+    *   Yeni `lib/features/actor_profile/` özellik klasörü: `actor_profile_provider.dart` (`personDetailsProvider`/`actorFilmographyProvider`, ikisi de `.family<..., int>`, filmografi `discoverMovies(withCast:)` + `discoverTvShows(withPeople:)` birleşimini popülerliğe göre sıralar — `recommendations_provider.dart`'ta zaten kurulu aktör-bazlı öneri örüntüsünün yeniden kullanılması), `actor_profile_screen.dart`, `widgets/actor_profile_header.dart` (glassmorphism degrade-halka avatar, `profile_header_card.dart` ile görsel tutarlı), `widgets/actor_filmography_grid.dart` (Hepsi/Film/Dizi istemci taraflı filtreli poster grid).
+    *   `lib/core/widgets/poster_grid.dart`: `search_results_view.dart`'taki tekrar eden 3'lü poster grid mantığı paylaşılan bir `PosterGrid` widget'ına çıkarıldı (hem Keşfet hem de yeni oyuncu filmografisi tarafından kullanılıyor; ayrıca `search_results_view.dart`'ı CLAUDE.md'nin dosya boyutu eşiğinin altına indirdi).
+    *   `movie_detail_cast_list.dart`, `ConsumerWidget`'a çevrilerek her oyuncu kartı tıklanabilir hale getirildi; çevrimiçi veride mevcut TMDb id doğrudan kullanılıyor, nadir görülen çevrimdışı önbellek kaydında (id alanı olmayan) `searchPersonId` ile ada göre çözümleme deneniyor (bulunamazsa sessizce no-op + log).
+
+#### **🔜 vx.x.x: Bildirimler, İçerik Yönetimi ve Admin Moderasyonu**
 *   **Hedef**: Topluluk özelliklerini (v1.2-v1.4) "yayınla ve unut" aşamasından çıkarıp, kullanıcıların etkileşimden haberdar olduğu, kendi içeriğini yönetebildiği **ve** uygunsuz içeriğin sahipsiz kalmadığı olgun bir sosyal deneyime taşımak.
 *   **İşler**:
     *   Firestore `notifications` koleksiyonu: bir gönderi beğenildiğinde/yorumlandığında veya yeni bir takipçi kazanıldığında bildirim üretimi; Topluluk Akışı başlığına okunmamış sayacı olan bir zil ikonu.
@@ -504,7 +512,7 @@ graph TD
         *   `suspended = true` olan kullanıcılar `firestore.rules` seviyesinde yeni post/yorum/beğeni oluşturamaz; giriş yaptıklarında uygulama içi bir bilgilendirme ekranı gösterilir (hesap engellenmemiş, sadece topluluk yazma yetkisi kısıtlanmış — kendi günlüğüne native tarafta kayıt tutmaya devam edebilir).
         *   Not: Bu, ölçeklenebilir/kurumsal bir yetkilendirme sistemi değil, tek geliştiricili küçük ölçekli bir topluluk için "yeterince güvenli" bir çözüm — kullanıcı sayısı büyürse Custom Claims + Cloud Functions'a geçiş ayrı bir görev olarak değerlendirilmeli.
 
-#### **🔜 v1.6.2: "CineFile Wrapped" — Paylaşılabilir Yıllık Özet**
+#### **🔜 vx.x.x: "CineFile Wrapped" — Paylaşılabilir Yıllık Özet**
 *   **Hedef**: Mevcut İçgörüler verisini (yönetmen/tür/puan dağılımı, streak, toplam süre — zaten v0.8.x'te hesaplanıyor) yıl sonunda tek, görsel olarak zengin ve dışa aktarılabilir bir "özet kart" haline getirerek hem kullanıcıya değer katmak hem de organik paylaşım/keşif kanalı açmak.
 *   **İşler**:
     *   Mevcut `insightsProvider` çıktısından türeyen, belirli bir takvim yılına odaklı yeni bir `yearInReviewProvider`.
@@ -516,5 +524,5 @@ graph TD
 
 ## 📈 Proje Durumu
 
-Uygulama planlanan tüm MVP aşamalarını ve büyük sosyal özellikleri (Faz 3, 4, 5) başarıyla tamamlamıştır. v1.4.x serisi arayüz/marka cilası ile kapandı. Sıradaki odak (v1.5.0-v1.6.2): açık kalan veri güvenliği eksiklerini kapatmak, Keşfet ekranına haftanın popüler film/dizilerini eklemek, sosyal özellikleri bildirim/yönetim katmanıyla olgunlaştırmak, büyüyen dosyaları CLAUDE.md kurallarına göre bölmek ve yıl sonu özet özelliğiyle yeni bir kullanıcı değeri eklemek.
+Uygulama planlanan tüm MVP aşamalarını ve büyük sosyal özellikleri (Faz 3, 4, 5) başarıyla tamamlamıştır. v1.4.x serisi arayüz/marka cilası ile kapandı. v1.6.0 (Keşfet'te Trend/Popüler/En Çok Oy Alan filtreleri) tamamlandı. Sıradaki odak v1.7.0: oyuncu kadrosunu tıklanabilir kılan Oyuncu Profili özelliği. Bildirim/moderasyon katmanı ve "CineFile Wrapped" yıl sonu özeti (eski v1.6.1/v1.6.2) tarih belirtilmeden `vx.x.x` olarak zamanlanmamış/backlog kalemleri haline getirildi.
 
