@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -7,14 +6,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/database/database_provider.dart';
-import '../../../../core/database/app_database.dart';
 import '../../../../core/widgets/premium_date_picker.dart';
 import '../../../../core/widgets/premium_toast.dart';
 import '../../auth/controllers/auth_controller.dart';
+import 'widgets/add_watch_record_header.dart';
 import 'widgets/episode_tracking_section.dart';
 import 'widgets/mood_selector.dart';
 import 'widgets/watch_context_fields.dart';
 import 'widgets/watch_rating_slider.dart';
+import 'widgets/watch_record_episode_math.dart';
+import 'widgets/watch_record_visibility_toggle.dart';
 
 class AddWatchRecordSheet extends ConsumerStatefulWidget {
   final Map<String, dynamic> movieData;
@@ -89,14 +90,9 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
     if (_seededFromSettings || widget.movieData['media_type'] != 'tv') return;
 
     final tmdbId = widget.movieData['id'] as int;
-    UserMovieSetting? existing;
-    if (kIsWeb) {
-      existing = ref.watch(webMovieSettingsProvider)[(tmdbId: tmdbId, isTv: true)];
-    } else {
-      final asyncSettings = ref.watch(movieSettingsProvider((tmdbId: tmdbId, isTv: true)));
-      if (!asyncSettings.hasValue) return; // still loading — try again next build
-      existing = asyncSettings.value;
-    }
+    final asyncSettings = ref.watch(movieSettingsSnapshotProvider((tmdbId: tmdbId, isTv: true)));
+    if (!asyncSettings.hasValue) return; // still loading — try again next build
+    final existing = asyncSettings.value;
 
     _seededFromSettings = true;
     _isActivelyWatching = existing?.isActivelyWatching ?? false;
@@ -209,26 +205,18 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
     final isTv = widget.movieData['media_type'] == 'tv';
 
     // Episode count
-    var episodeCountForRecord = _episodeCount;
-    var newIsActivelyWatching = false;
-    var newLastWatchedEpisode = _lastWatchedEpisode;
-    if (isTv) {
-      if (_isActivelyWatching) {
-        final selected = _totalEpisodes != null ? _selectedEpisode.clamp(1, _totalEpisodes!) : _selectedEpisode;
-        episodeCountForRecord = (selected - (_lastWatchedEpisode ?? 0)).clamp(1, selected);
-        newLastWatchedEpisode = selected;
-        newIsActivelyWatching = _totalEpisodes == null || selected < _totalEpisodes!;
-      } else if (_finishedWholeShow && _totalEpisodes != null) {
-        final selected = _totalEpisodes!;
-        episodeCountForRecord = (selected - (_lastWatchedEpisode ?? 0)).clamp(1, selected);
-        newLastWatchedEpisode = selected;
-        newIsActivelyWatching = false;
-      } else {
-        episodeCountForRecord = _totalEpisodes != null ? _episodeCount.clamp(1, _totalEpisodes!) : _episodeCount;
-        newLastWatchedEpisode = episodeCountForRecord;
-        newIsActivelyWatching = false;
-      }
-    }
+    final episodeFields = computeWatchRecordEpisodeFields(
+      isTv: isTv,
+      isActivelyWatching: _isActivelyWatching,
+      finishedWholeShow: _finishedWholeShow,
+      episodeCount: _episodeCount,
+      selectedEpisode: _selectedEpisode,
+      totalEpisodes: _totalEpisodes,
+      lastWatchedEpisode: _lastWatchedEpisode,
+    );
+    final episodeCountForRecord = episodeFields.episodeCount;
+    final newIsActivelyWatching = episodeFields.isActivelyWatching;
+    final newLastWatchedEpisode = episodeFields.lastWatchedEpisode;
 
     try {
       // 1. Calculate watch number (how many times they watched this movie)
@@ -333,56 +321,7 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Header (handle bar + title + close button) — deliberately
-          // outside the scroll view below so it stays visible while
-          // scrolling through the form, AND so a downward drag starting on
-          // it isn't captured by the inner SingleChildScrollView, letting
-          // the sheet's default drag-to-dismiss gesture work from here.
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Sheet Handle bar
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade700,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Günlüğe İzleme Kaydı Ekle',
-                      style: GoogleFonts.outfit(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    // Explicit close affordance — the sheet's content can grow
-                    // tall enough (esp. with the TV episode-tracking section) to
-                    // fill the whole screen, leaving no backdrop to tap and
-                    // making drag-to-dismiss fight with the inner scroll view.
-                    // Without this, there was no way to back out without saving.
-                    IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.close_rounded, color: Colors.grey),
-                      visualDensity: VisualDensity.compact,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
+          AddWatchRecordHeader(onClose: () => Navigator.pop(context)),
           Flexible(
             child: SingleChildScrollView(
               child: Padding(
@@ -432,54 +371,9 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
 
             const SizedBox(height: 16),
 
-            // Profile Visibility Toggle — controls ONLY the "Son
-            // İzlediklerim" section on the user's own profile screen. This
-            // is deliberately unrelated to the Community feed: feed posts
-            // are created explicitly via the compose bar's "Film
-            // Paylaş"/"Günlüğünü Paylaş" flows (see
-            // share_compose_sheet.dart), which snapshot their own data and
-            // never read this flag.
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.03),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppTheme.borderColor),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.public_rounded, color: AppTheme.accentColor, size: 20),
-                          const SizedBox(width: 10),
-                          Text(
-                            'Profilimde Göster',
-                            style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
-                          ),
-                        ],
-                      ),
-                      Switch(
-                        value: _isPublic,
-                        activeThumbColor: AppTheme.accentColor,
-                        onChanged: (value) {
-                          setState(() {
-                            _isPublic = value;
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Açarsan bu kayıt profilindeki "Son İzlediklerim" bölümünde herkese görünür.',
-                    style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary),
-                  ),
-                ],
-              ),
+            WatchRecordVisibilityToggle(
+              isPublic: _isPublic,
+              onChanged: (value) => setState(() => _isPublic = value),
             ),
 
             // Episode Tracking (TV shows only) — TMDb only exposes a single

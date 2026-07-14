@@ -6,7 +6,11 @@ import 'insights_provider.dart';
 import 'widgets/contribution_heatmap.dart';
 import 'widgets/insights_charts.dart';
 import 'widgets/insights_lists.dart';
-import 'widgets/insights_misc_cards.dart';
+import 'widgets/seasonal_trends_card.dart';
+import 'widgets/summary_cards_grid.dart';
+import 'widgets/time_of_day_card.dart';
+import 'widgets/time_visualizer_card.dart';
+import 'widgets/weekly_goal_card.dart';
 
 class InsightsScreen extends ConsumerStatefulWidget {
   final ScrollController? scrollController;

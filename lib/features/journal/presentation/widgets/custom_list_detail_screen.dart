@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/widgets/app_network_image.dart';
-import 'package:intl/intl.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
-import '../../../../core/constants/api_constants.dart';
 import '../../../../core/database/database_provider.dart';
 import '../../../../core/database/app_database.dart';
-import '../../../movie_detail/presentation/movie_detail_screen.dart';
 import 'create_collection_dialog.dart';
+import 'custom_list_empty_state.dart';
+import 'custom_list_marathon_banner.dart';
+import 'custom_list_movie_tile.dart';
+import 'custom_list_summary_header.dart';
 
 class CustomListDetailScreen extends ConsumerStatefulWidget {
   final CustomList list;
@@ -123,314 +123,48 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // List Summary Header (Collage Cover + Progress bar)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        child: GlassContainer(
-                          borderRadius: 16,
-                          opacity: 0.5,
-                          padding: const EdgeInsets.all(16),
-                          child: Row(
-                            children: [
-                              // Mini Cover Thumbnail
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: coverPath != null
-                                    ? AppNetworkImage(
-                                        imageUrl: '${ApiConstants.imagePathW185}$coverPath',
-                                        width: 50,
-                                        height: 75,
-                                        fit: BoxFit.cover,
-                                      )
-                                    : Container(
-                                        color: Colors.white12,
-                                        width: 50,
-                                        height: 75,
-                                        child: const Icon(Icons.collections_bookmark_rounded, color: Colors.white24, size: 24),
-                                      ),
-                              ),
-                              const SizedBox(width: 16),
-                              
-                              // Info and Progress Bar
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      widget.list.name,
-                                      style: GoogleFonts.outfit(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    if (widget.list.description != null && widget.list.description!.trim().isNotEmpty) ...[
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        widget.list.description!,
-                                        style: GoogleFonts.inter(fontSize: 11, color: AppTheme.textSecondary),
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ],
-                                    const SizedBox(height: 10),
-                                    
-                                    // Progress indicators
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          '$totalCount Film • $watchedCount İzlenen',
-                                          style: GoogleFonts.inter(fontSize: 10, color: Colors.white70, fontWeight: FontWeight.bold),
-                                        ),
-                                        Text(
-                                          '%${(progress * 100).toInt()}',
-                                          style: GoogleFonts.outfit(
-                                            fontSize: 11,
-                                            color: progress == 1.0 ? Colors.greenAccent : AppTheme.accentColor,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 6),
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(4),
-                                      child: LinearProgressIndicator(
-                                        value: progress,
-                                        minHeight: 4,
-                                        backgroundColor: Colors.white12,
-                                        valueColor: AlwaysStoppedAnimation<Color>(
-                                          progress == 1.0 ? Colors.greenAccent : AppTheme.accentColor,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                      CustomListSummaryHeader(
+                        list: widget.list,
+                        coverPath: coverPath,
+                        totalCount: totalCount,
+                        watchedCount: watchedCount,
+                        progress: progress,
+                        isPublic: _isPublic,
+                        onStopSharing: _stopSharing,
                       ),
-
-                      // Community share status — starting a share only
-                      // happens via the compose bar's "Koleksiyon Paylaş"
-                      // flow (share_compose_sheet.dart); this is stop-only,
-                      // so there's no "isPublic" ambiguity about who
-                      // initiates the first Firestore write.
-                      if (_isPublic)
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                          child: Row(
-                            children: [
-                              Icon(Icons.public_rounded, color: AppTheme.accentColor, size: 14),
-                              const SizedBox(width: 6),
-                              Text(
-                                'Toplulukla paylaşılıyor',
-                                style: GoogleFonts.inter(fontSize: 11, color: AppTheme.accentColor, fontWeight: FontWeight.bold),
-                              ),
-                              const Spacer(),
-                              TextButton(
-                                onPressed: _stopSharing,
-                                style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero),
-                                child: Text(
-                                  'Paylaşımı Durdur',
-                                  style: GoogleFonts.inter(fontSize: 11, color: AppTheme.textSecondary, decoration: TextDecoration.underline),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
                       const SizedBox(height: 8),
 
                       // Marathon challenge banner (v0.9.0)
                       if (widget.list.targetDate != null) ...[
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                          child: Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: AppTheme.accentColor.withValues(alpha: 0.4), width: 1.5),
-                              gradient: LinearGradient(
-                                colors: [
-                                  AppTheme.accentColor.withValues(alpha: 0.08),
-                                  Colors.purple.withValues(alpha: 0.04),
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppTheme.accentColor.withValues(alpha: 0.05),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.timer_outlined, color: AppTheme.accentColor, size: 24),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text(
-                                            '🏁 Maraton Mücadelesi',
-                                            style: GoogleFonts.outfit(
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                          Text(
-                                            DateFormat('dd.MM.yyyy').format(widget.list.targetDate!),
-                                            style: GoogleFonts.inter(
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.bold,
-                                              color: AppTheme.accentColor,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        widget.list.targetDate!.isBefore(DateTime.now())
-                                            ? 'Süre Doldu! ⚠️'
-                                            : 'Hedefe ulaşmak için ${widget.list.targetDate!.difference(DateTime.now()).inDays + 1} gün kaldı.',
-                                        style: GoogleFonts.inter(
-                                          fontSize: 11,
-                                          color: Colors.white70,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        progress == 1.0
-                                            ? 'Tebrikler, maratonu tamamladınız! 🎉'
-                                            : 'Kalan: ${totalCount - watchedCount} film.',
-                                        style: GoogleFonts.inter(
-                                          fontSize: 9.5,
-                                          fontWeight: FontWeight.w600,
-                                          color: progress == 1.0 ? Colors.greenAccent : AppTheme.textSecondary,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
+                          child: CustomListMarathonBanner(
+                            targetDate: widget.list.targetDate!,
+                            progress: progress,
+                            remainingCount: totalCount - watchedCount,
                           ),
                         ),
                         const SizedBox(height: 8),
                       ],
-                      
+
                       // Movies List Area
                       Expanded(
                         child: movies.isEmpty
-                            ? _buildEmptyMoviesState()
+                            ? const CustomListEmptyState()
                             : ReorderableListView.builder(
                                 padding: const EdgeInsets.only(left: 16, right: 16, bottom: 80),
                                 itemCount: movies.length,
                                 onReorderItem: (oldIdx, newIdx) => _onReorder(movies, oldIdx, newIdx),
                                 itemBuilder: (context, index) {
                                   final item = movies[index];
-                                  final movie = item.movie;
-                                  final isWatched =
-                                      watchedMovieIds.contains((tmdbId: movie.tmdbId, isTv: movie.isTv));
+                                  final isWatched = watchedMovieIds
+                                      .contains((tmdbId: item.movie.tmdbId, isTv: item.movie.isTv));
 
-                                  return Material(
-                                    key: ValueKey('${movie.tmdbId}_${movie.isTv}'),
-                                    color: Colors.transparent,
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
-                                      decoration: const BoxDecoration(
-                                        border: Border(bottom: BorderSide(color: Colors.white10, width: 0.5)),
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          // Reorder drag listener
-                                          ReorderableDragStartListener(
-                                            index: index,
-                                            child: const Icon(Icons.drag_indicator_rounded, size: 18, color: Colors.white30),
-                                          ),
-                                          const SizedBox(width: 8),
-
-                                          // Movie Poster
-                                          ClipRRect(
-                                            borderRadius: BorderRadius.circular(4),
-                                            child: AppNetworkImage(
-                                              imageUrl: movie.posterPath != null
-                                                  ? '${ApiConstants.imagePathW185}${movie.posterPath}'
-                                                  : '',
-                                              width: 32,
-                                              height: 48,
-                                              fit: BoxFit.cover,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 12),
-
-                                          // Title & Metadata
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Row(
-                                                  children: [
-                                                    Expanded(
-                                                      child: Text(
-                                                        movie.title,
-                                                        style: GoogleFonts.inter(
-                                                          fontSize: 13,
-                                                          fontWeight: FontWeight.bold,
-                                                          color: Colors.white,
-                                                        ),
-                                                        maxLines: 1,
-                                                        overflow: TextOverflow.ellipsis,
-                                                      ),
-                                                    ),
-                                                    if (isWatched) ...[
-                                                      const SizedBox(width: 6),
-                                                      const Icon(Icons.check_circle_rounded, color: Colors.greenAccent, size: 14),
-                                                    ],
-                                                  ],
-                                                ),
-                                                const SizedBox(height: 2),
-                                                Text(
-                                                  '${movie.releaseYear != null ? "${movie.releaseYear} • " : ""}${movie.director ?? "Yönetmen Yok"}',
-                                                  style: GoogleFonts.inter(fontSize: 11, color: AppTheme.textSecondary),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          const SizedBox(width: 12),
-
-                                          // View Details Button
-                                          IconButton(
-                                            icon: const Icon(Icons.info_outline_rounded, color: Colors.white60, size: 20),
-                                            onPressed: () {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) => MovieDetailScreen(tmdbId: movie.tmdbId, isTv: movie.isTv),
-                                                ),
-                                              );
-                                            },
-                                          ),
-
-                                          // Delete Movie Button
-                                          IconButton(
-                                            icon: const Icon(Icons.remove_circle_outline_rounded, color: Colors.redAccent, size: 20),
-                                            onPressed: () => _removeMovie(movie.tmdbId, movie.isTv),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
+                                  return CustomListMovieTile(
+                                    item: item,
+                                    index: index,
+                                    isWatched: isWatched,
+                                    onRemove: () => _removeMovie(item.movie.tmdbId, item.movie.isTv),
                                   );
                                 },
                               ),
@@ -495,31 +229,6 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
           ],
         );
       },
-    );
-  }
-
-  Widget _buildEmptyMoviesState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.movie_filter_rounded, size: 56, color: AppTheme.textSecondary.withValues(alpha: 0.3)),
-          const SizedBox(height: 12),
-          Text(
-            'Bu Koleksiyon Boş',
-            style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white70),
-          ),
-          const SizedBox(height: 6),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 42),
-            child: Text(
-              'Keşfet sekmesinden filmler arayarak veya detay sayfalarından bu koleksiyona filmler ekleyebilirsiniz.',
-              style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary, height: 1.4),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:drift/drift.dart' show Value;
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/database/database_provider.dart';
 import '../../../../core/database/app_database.dart';
+import '../../../../core/database/movie_repository.dart';
 
 // Dialog to set/clear a movie's personal favorite ranking. Takes tmdbId/isTv
 // explicitly rather than reaching into MovieDetailScreen's State, so it can
@@ -105,75 +103,12 @@ Future<void> _updateRank(
   required Map<String, dynamic> movieData,
   required UserMovieSetting? settings,
   required int? rank,
-}) async {
-  final crew = movieData['credits']?['crew'] as List<dynamic>?;
-  final directorName = crew?.where((e) => e['job'] == 'Director').firstOrNull?['name'] as String?;
-
-  final cast = movieData['credits']?['cast'] as List<dynamic>?;
-  final actorsString = cast?.take(5).map((e) => e['name']).join(', ');
-
-  final genresData = movieData['genres'] as List<dynamic>?;
-  final genresString = genresData?.map((e) => e['name']).join(', ');
-
-  final releaseDateStr = movieData['release_date'] as String? ?? '';
-  final releaseYear = DateTime.tryParse(releaseDateStr)?.year;
-
-  if (kIsWeb) {
-    final notifier = ref.read(webMovieSettingsProvider.notifier);
-    final currentMap = ref.read(webMovieSettingsProvider);
-    final updatedMap = Map<MovieKey, UserMovieSetting>.from(currentMap);
-    updatedMap[(tmdbId: tmdbId, isTv: isTv)] = UserMovieSetting(
-      tmdbId: tmdbId,
-      isTv: isTv,
-      isFavorite: settings?.isFavorite ?? false,
-      isReWatchList: settings?.isReWatchList ?? false,
-      personalNotes: settings?.personalNotes,
-      personalTags: settings?.personalTags,
-      personalRanking: rank,
-      updatedAt: DateTime.now(),
-      isActivelyWatching: settings?.isActivelyWatching ?? false,
-      lastWatchedEpisode: settings?.lastWatchedEpisode,
-    );
-    notifier.state = updatedMap;
-    return;
-  }
-
-  final db = ref.read(databaseProvider);
-  try {
-    // createdAt intentionally absent, see MovieDetailScreen._toggleFavorite for why.
-    await db.into(db.movies).insertOnConflictUpdate(
-          MoviesCompanion.insert(
-            tmdbId: tmdbId,
-            title: movieData['title'] as String,
-            originalTitle: Value(movieData['original_title'] as String?),
-            posterPath: Value(movieData['poster_path'] as String?),
-            backdropPath: Value(movieData['backdrop_path'] as String?),
-            releaseYear: Value(releaseYear),
-            runtime: Value(movieData['runtime'] as int?),
-            genres: Value(genresString),
-            director: Value(directorName),
-            actors: Value(actorsString),
-            overview: Value(movieData['overview'] as String?),
-            isTv: Value(isTv),
-          ),
-        );
-
-    await db.into(db.userMovieSettings).insertOnConflictUpdate(
-          UserMovieSetting(
-            tmdbId: tmdbId,
-            isTv: isTv,
-            isFavorite: settings?.isFavorite ?? false,
-            isReWatchList: settings?.isReWatchList ?? false,
-            personalNotes: settings?.personalNotes,
-            personalTags: settings?.personalTags,
-            personalRanking: rank,
-            updatedAt: DateTime.now(),
-            isActivelyWatching: settings?.isActivelyWatching ?? false,
-            lastWatchedEpisode: settings?.lastWatchedEpisode,
-          ),
-        );
-  } catch (e, st) {
-    debugPrint('rank_dialog._updateRank failed: $e\n$st');
-    rethrow;
-  }
+}) {
+  return ref.read(movieRepositoryProvider).updatePersonalRankingLocal(
+        tmdbId: tmdbId,
+        isTv: isTv,
+        movieData: movieData,
+        settings: settings,
+        rank: rank,
+      );
 }
