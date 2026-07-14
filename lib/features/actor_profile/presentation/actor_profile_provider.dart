@@ -13,20 +13,17 @@ final personDetailsProvider = FutureProvider.family<Map<String, dynamic>?, int>(
 final actorFilmographyProvider = FutureProvider.family<List<Map<String, dynamic>>, int>((ref, personId) async {
   final tmdbService = ref.watch(tmdbServiceProvider);
 
-  // Fetch both movies and tv shows featuring this person
-  final movies = await tmdbService.discoverMovies(withCast: personId.toString());
-  final tvShows = await tmdbService.discoverTvShows(withPeople: personId.toString());
-
-  // Merge the lists
-  final combined = <Map<String, dynamic>>[...movies, ...tvShows];
+  // Fetch combined credits (both movies and TV shows) featuring this person
+  final credits = await tmdbService.getPersonCombinedCredits(personId);
 
   // Sort by popularity descending
-  combined.sort((a, b) {
+  final sorted = List<Map<String, dynamic>>.from(credits);
+  sorted.sort((a, b) {
     final popA = (a['popularity'] as num?)?.toDouble() ?? 0.0;
     final popB = (b['popularity'] as num?)?.toDouble() ?? 0.0;
     return popB.compareTo(popA);
   });
 
   // Limit to top 20 items
-  return combined.take(20).toList();
+  return sorted.take(20).toList();
 });
