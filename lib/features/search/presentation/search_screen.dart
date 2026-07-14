@@ -157,14 +157,18 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               ),
             ),
 
-            // Filter Chips Row
-            const SizedBox(height: 4),
-            SearchGenreChips(
-              genres: _genres,
-              selectedGenreId: searchState.selectedGenreId,
-              onGenreSelected: searchNotifier.setGenre,
-            ),
-            const SizedBox(height: 12),
+            // Filter Chips Row (only relevant while actively searching — the
+            // empty-query state shows its own Kategori/Zaman/Tür chip rows
+            // inside SearchResultsView instead, avoiding stacked chip rows)
+            if (searchState.query.trim().isNotEmpty) ...[
+              const SizedBox(height: 4),
+              SearchGenreChips(
+                genres: _genres,
+                selectedGenreId: searchState.selectedGenreId,
+                onGenreSelected: searchNotifier.setGenre,
+              ),
+              const SizedBox(height: 12),
+            ],
 
             // Search Results Grid
             Expanded(
