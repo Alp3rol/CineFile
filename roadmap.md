@@ -479,13 +479,16 @@ graph TD
     *   **✅ Test güvenilirliği**: `widget_test.dart`'ın gerçek bir TMDb ağ isteği tetikleyip (Ana Sayfa'nın öneri şeridi üzerinden) test teardown'ında "Timer is still pending" ile başarısız olması kök nedenine inilerek düzeltildi (`recommendationsProvider` test override'ı). `NotificationService`, `flutter_local_notifications`'ın test ortamında platform kanalı olmadığı için attığı (ve zaten yakalanıp loglanan, ama gürültülü) `LateInitializationError`'ları artık test ortamını tespit edip atlıyor.
     *   `dart analyze lib` ve `flutter test` (59/59) her adımdan sonra çalıştırılıp temiz/yeşil tutuldu.
 
-#### **🔜 v1.6.0: "CineFile Wrapped" — Paylaşılabilir Yıllık Özet**
-*   **Hedef**: Mevcut İçgörüler verisini (yönetmen/tür/puan dağılımı, streak, toplam süre — zaten v0.8.x'te hesaplanıyor) yıl sonunda tek, görsel olarak zengin ve dışa aktarılabilir bir "özet kart" haline getirerek hem kullanıcıya değer katmak hem de organik paylaşım/keşif kanalı açmak.
+#### **🔜 v1.6.0: Keşfet'te "Haftanın Popüler Film/Dizileri"**
+*   **Hedef**: Keşfet ekranındaki arama kutusu boşken gösterilen statik "Keşfetmeye Başlayın" yer tutucusunu, TMDb'nin `/trending/*/week` uçlarından beslenen, mevcut 3'lü poster grid'i yeniden kullanan gerçek bir "Haftanın Popüler Film/Dizileri" listesiyle değiştirerek Keşfet'i arama yapılmadan önce de keşfedilebilir hale getirmek.
 *   **İşler**:
-    *   Mevcut `insightsProvider` çıktısından türeyen, belirli bir takvim yılına odaklı yeni bir `yearInReviewProvider`.
-    *   Dikey, story/poster formatında bir özet ekranı (en çok izlenen film/dizi, toplam süre, en aktif ay, puan ortalaması, streak rekoru) — zaten var olan `GenreChartCard`, zaman kıyaslama kartı gibi bileşenlerin yeniden kullanılması (kod tekrarı yok).
-    *   `share_plus` (zaten bağımlılıklarda mevcut) ile ekran görüntüsünü PNG olarak dışa aktarıp paylaşma.
-    *   İsteğe bağlı: Topluluk Akışı'na bu özeti `post` tipi olarak (v1.4.0'daki `movie`/`diary_snapshot`/`collection` post modeline dördüncü bir `year_review` tipi eklenerek) paylaşabilme.
+    *   `tmdb_service.dart`'a `getPopularMovies`/`getPopularTvShows` ile aynı örüntüde iki yeni metod: `getTrendingMoviesThisWeek()` (`/trending/movie/week`) ve `getTrendingTvShowsThisWeek()` (`/trending/tv/week`).
+    *   Yeni `trendingThisWeekProvider` (`FutureProvider<List<Map<String,dynamic>>>`, `lib/features/search/presentation/trending_provider.dart`) — iki listeyi birleştirip karıştırır, kullanıcının kütüphanesine göre **filtrelemez** (hedef bilinçli olarak tüm haftanın trendini göstermek).
+    *   `search_results_view.dart`'taki boş-sorgu dalı bu sağlayıcıyı izleyecek şekilde güncellendi; grid oluşturma mantığı ortak bir yardımcıya çıkarılıp hem arama sonuçları hem de trend listesi tarafından paylaşılıyor. Hata durumunda eski statik boş-durum ekranına zarifçe geri dönülüyor (kırık/boş ekran yok).
+    *   `tmdb_service.dart`'a dört ek metod: `getTrendingMoviesToday()`/`getTrendingTvShowsToday()` (`/trending/*/day`) ve `getTopRatedMovies()`/`getTopRatedTvShows()` (`/*/top_rated`), mevcut kardeş metodlarla aynı örüntüde.
+    *   `trendingThisWeekProvider` → `trendingProvider`: yeni `discoverCategoryProvider`/`discoverTimeWindowProvider` (`StateProvider`) izlenerek Trend/Popüler/En Çok Oy Alan ve Bu Hafta/Bugün eksenlerine göre farklı TMDb kaynağından besleniyor; Trend'de karıştırma korunuyor, Popüler/En Çok Oy Alan'da TMDb sıralaması film/dizi round-robin ile korunuyor.
+    *   Keşfet'in boş-sorgu görünümüne iki filtre satırı eklendi: Kategori+Zaman (Trend seçiliyken "Bu Hafta"/"Bugün" alt-çipleri beliriyor) ve Tür (Hepsi/Film/Dizi, yeni `discoverMediaFilterProvider` ile tamamen istemci taraflı, ağ isteği tetiklemiyor).
+    *   `SearchGenreChips`, sorgu boşken artık gizleniyor (Keşfet'in yeni filtre satırlarıyla üst üste binmesin diye).
 
 #### **🔜 v1.6.1: Bildirimler, İçerik Yönetimi ve Admin Moderasyonu**
 *   **Hedef**: Topluluk özelliklerini (v1.2-v1.4) "yayınla ve unut" aşamasından çıkarıp, kullanıcıların etkileşimden haberdar olduğu, kendi içeriğini yönetebildiği **ve** uygunsuz içeriğin sahipsiz kalmadığı olgun bir sosyal deneyime taşımak.
@@ -501,9 +504,17 @@ graph TD
         *   `suspended = true` olan kullanıcılar `firestore.rules` seviyesinde yeni post/yorum/beğeni oluşturamaz; giriş yaptıklarında uygulama içi bir bilgilendirme ekranı gösterilir (hesap engellenmemiş, sadece topluluk yazma yetkisi kısıtlanmış — kendi günlüğüne native tarafta kayıt tutmaya devam edebilir).
         *   Not: Bu, ölçeklenebilir/kurumsal bir yetkilendirme sistemi değil, tek geliştiricili küçük ölçekli bir topluluk için "yeterince güvenli" bir çözüm — kullanıcı sayısı büyürse Custom Claims + Cloud Functions'a geçiş ayrı bir görev olarak değerlendirilmeli.
 
+#### **🔜 v1.6.2: "CineFile Wrapped" — Paylaşılabilir Yıllık Özet**
+*   **Hedef**: Mevcut İçgörüler verisini (yönetmen/tür/puan dağılımı, streak, toplam süre — zaten v0.8.x'te hesaplanıyor) yıl sonunda tek, görsel olarak zengin ve dışa aktarılabilir bir "özet kart" haline getirerek hem kullanıcıya değer katmak hem de organik paylaşım/keşif kanalı açmak.
+*   **İşler**:
+    *   Mevcut `insightsProvider` çıktısından türeyen, belirli bir takvim yılına odaklı yeni bir `yearInReviewProvider`.
+    *   Dikey, story/poster formatında bir özet ekranı (en çok izlenen film/dizi, toplam süre, en aktif ay, puan ortalaması, streak rekoru) — zaten var olan `GenreChartCard`, zaman kıyaslama kartı gibi bileşenlerin yeniden kullanılması (kod tekrarı yok).
+    *   `share_plus` (zaten bağımlılıklarda mevcut) ile ekran görüntüsünü PNG olarak dışa aktarıp paylaşma.
+    *   İsteğe bağlı: Topluluk Akışı'na bu özeti `post` tipi olarak (v1.4.0'daki `movie`/`diary_snapshot`/`collection` post modeline dördüncü bir `year_review` tipi eklenerek) paylaşabilme.
+
 ---
 
 ## 📈 Proje Durumu
 
-Uygulama planlanan tüm MVP aşamalarını ve büyük sosyal özellikleri (Faz 3, 4, 5) başarıyla tamamlamıştır. v1.4.x serisi arayüz/marka cilası ile kapandı. Sıradaki odak (v1.5.0-v1.6.0): açık kalan veri güvenliği eksiklerini kapatmak, sosyal özellikleri bildirim/yönetim katmanıyla olgunlaştırmak, büyüyen dosyaları CLAUDE.md kurallarına göre bölmek ve yıl sonu özet özelliğiyle yeni bir kullanıcı değeri eklemek.
+Uygulama planlanan tüm MVP aşamalarını ve büyük sosyal özellikleri (Faz 3, 4, 5) başarıyla tamamlamıştır. v1.4.x serisi arayüz/marka cilası ile kapandı. Sıradaki odak (v1.5.0-v1.6.2): açık kalan veri güvenliği eksiklerini kapatmak, Keşfet ekranına haftanın popüler film/dizilerini eklemek, sosyal özellikleri bildirim/yönetim katmanıyla olgunlaştırmak, büyüyen dosyaları CLAUDE.md kurallarına göre bölmek ve yıl sonu özet özelliğiyle yeni bir kullanıcı değeri eklemek.
 

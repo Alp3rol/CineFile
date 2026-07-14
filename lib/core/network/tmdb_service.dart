@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../constants/api_constants.dart';
 import 'dio_client.dart';
@@ -323,6 +324,179 @@ class TmdbService {
       }).toList();
     } on DioException catch (e) {
       throw Exception('TMDb Popüler Dizi Hatası: ${e.message}');
+    }
+  }
+
+  /// Get this week's trending movies (TMDb /trending/movie/week)
+  Future<List<Map<String, dynamic>>> getTrendingMoviesThisWeek({String language = 'tr-TR'}) async {
+    if (_apiKey.isEmpty) {
+      return [];
+    }
+
+    try {
+      final response = await _dio.get(
+        '/trending/movie/week',
+        queryParameters: {
+          'api_key': _apiKey,
+          'language': language,
+        },
+      );
+
+      final results = response.data['results'] as List<dynamic>;
+      return results.map((item) {
+        final data = item as Map<String, dynamic>;
+        return {...data, 'media_type': 'movie'};
+      }).toList();
+    } on DioException catch (e) {
+      debugPrint('TMDb Haftalık Trend Film Hatası: ${e.message}');
+      throw Exception('TMDb Haftalık Trend Film Hatası: ${e.message}');
+    }
+  }
+
+  /// Get this week's trending TV shows (TMDb /trending/tv/week)
+  Future<List<Map<String, dynamic>>> getTrendingTvShowsThisWeek({String language = 'tr-TR'}) async {
+    if (_apiKey.isEmpty) {
+      return [];
+    }
+
+    try {
+      final response = await _dio.get(
+        '/trending/tv/week',
+        queryParameters: {
+          'api_key': _apiKey,
+          'language': language,
+        },
+      );
+
+      final results = response.data['results'] as List<dynamic>;
+      return results.map((item) {
+        final data = item as Map<String, dynamic>;
+        return {
+          ...data,
+          'title': data['name'] ?? data['original_name'] ?? 'Bilinmeyen Dizi',
+          'release_date': data['first_air_date'] ?? '',
+          'media_type': 'tv',
+        };
+      }).toList();
+    } on DioException catch (e) {
+      debugPrint('TMDb Haftalık Trend Dizi Hatası: ${e.message}');
+      throw Exception('TMDb Haftalık Trend Dizi Hatası: ${e.message}');
+    }
+  }
+
+  /// Get today's trending movies (TMDb /trending/movie/day)
+  Future<List<Map<String, dynamic>>> getTrendingMoviesToday({String language = 'tr-TR'}) async {
+    if (_apiKey.isEmpty) {
+      return [];
+    }
+
+    try {
+      final response = await _dio.get(
+        '/trending/movie/day',
+        queryParameters: {
+          'api_key': _apiKey,
+          'language': language,
+        },
+      );
+
+      final results = response.data['results'] as List<dynamic>;
+      return results.map((item) {
+        final data = item as Map<String, dynamic>;
+        return {...data, 'media_type': 'movie'};
+      }).toList();
+    } on DioException catch (e) {
+      debugPrint('TMDb Günlük Trend Film Hatası: ${e.message}');
+      throw Exception('TMDb Günlük Trend Film Hatası: ${e.message}');
+    }
+  }
+
+  /// Get today's trending TV shows (TMDb /trending/tv/day)
+  Future<List<Map<String, dynamic>>> getTrendingTvShowsToday({String language = 'tr-TR'}) async {
+    if (_apiKey.isEmpty) {
+      return [];
+    }
+
+    try {
+      final response = await _dio.get(
+        '/trending/tv/day',
+        queryParameters: {
+          'api_key': _apiKey,
+          'language': language,
+        },
+      );
+
+      final results = response.data['results'] as List<dynamic>;
+      return results.map((item) {
+        final data = item as Map<String, dynamic>;
+        return {
+          ...data,
+          'title': data['name'] ?? data['original_name'] ?? 'Bilinmeyen Dizi',
+          'release_date': data['first_air_date'] ?? '',
+          'media_type': 'tv',
+        };
+      }).toList();
+    } on DioException catch (e) {
+      debugPrint('TMDb Günlük Trend Dizi Hatası: ${e.message}');
+      throw Exception('TMDb Günlük Trend Dizi Hatası: ${e.message}');
+    }
+  }
+
+  /// Get top rated movies (TMDb /movie/top_rated)
+  Future<List<Map<String, dynamic>>> getTopRatedMovies({int page = 1, String language = 'tr-TR'}) async {
+    if (_apiKey.isEmpty) {
+      return [];
+    }
+
+    try {
+      final response = await _dio.get(
+        '/movie/top_rated',
+        queryParameters: {
+          'api_key': _apiKey,
+          'page': page,
+          'language': language,
+        },
+      );
+
+      final results = response.data['results'] as List<dynamic>;
+      return results.map((item) {
+        final data = item as Map<String, dynamic>;
+        return {...data, 'media_type': 'movie'};
+      }).toList();
+    } on DioException catch (e) {
+      debugPrint('TMDb En Çok Oy Alan Film Hatası: ${e.message}');
+      throw Exception('TMDb En Çok Oy Alan Film Hatası: ${e.message}');
+    }
+  }
+
+  /// Get top rated TV shows (TMDb /tv/top_rated)
+  Future<List<Map<String, dynamic>>> getTopRatedTvShows({int page = 1, String language = 'tr-TR'}) async {
+    if (_apiKey.isEmpty) {
+      return [];
+    }
+
+    try {
+      final response = await _dio.get(
+        '/tv/top_rated',
+        queryParameters: {
+          'api_key': _apiKey,
+          'page': page,
+          'language': language,
+        },
+      );
+
+      final results = response.data['results'] as List<dynamic>;
+      return results.map((item) {
+        final data = item as Map<String, dynamic>;
+        return {
+          ...data,
+          'title': data['name'] ?? data['original_name'] ?? 'Bilinmeyen Dizi',
+          'release_date': data['first_air_date'] ?? '',
+          'media_type': 'tv',
+        };
+      }).toList();
+    } on DioException catch (e) {
+      debugPrint('TMDb En Çok Oy Alan Dizi Hatası: ${e.message}');
+      throw Exception('TMDb En Çok Oy Alan Dizi Hatası: ${e.message}');
     }
   }
 
