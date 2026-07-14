@@ -168,26 +168,15 @@ final recommendationsProvider = FutureProvider<List<RecommendationItem>>((ref) a
       try {
         final actorId = await tmdbService.searchPersonId(topActor);
         if (actorId != null) {
-          final actorMovies = await tmdbService.discoverMovies(withCast: actorId.toString());
-          for (final m in actorMovies) {
-            final id = m['id'] as int;
-            if (!libraryKeys.contains('${id}_false')) {
-              recommendationsMap['${id}_false'] = RecommendationItem.fromJson(
-                m,
+          final credits = await tmdbService.getPersonCombinedCredits(actorId);
+          for (final item in credits) {
+            final id = item['id'] as int;
+            final isTv = item['media_type'] == 'tv';
+            if (!libraryKeys.contains('${id}_$isTv')) {
+              recommendationsMap['${id}_$isTv'] = RecommendationItem.fromJson(
+                item,
                 reason: '$topActor Rol Alıyor',
-                isTvOverride: false,
-              );
-            }
-          }
-
-          final actorTv = await tmdbService.discoverTvShows(withPeople: actorId.toString());
-          for (final tv in actorTv) {
-            final id = tv['id'] as int;
-            if (!libraryKeys.contains('${id}_true')) {
-              recommendationsMap['${id}_true'] = RecommendationItem.fromJson(
-                tv,
-                reason: '$topActor Rol Alıyor',
-                isTvOverride: true,
+                isTvOverride: isTv,
               );
             }
           }
