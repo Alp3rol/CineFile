@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:filmdizi/features/auth/controllers/auth_controller.dart';
+import 'package:filmdizi/features/recommendations/presentation/recommendations_provider.dart';
 import 'package:filmdizi/main.dart';
 
 void main() {
@@ -29,6 +30,16 @@ void main() {
           firebaseAuthProvider
               .overrideWithValue(MockFirebaseAuth(signedIn: true, mockUser: MockUser(uid: 'test-uid', email: 'test@test.com'))),
           firestoreProvider.overrideWithValue(firestore),
+          // HomeScreen's HomeRecommendationsList triggers a real TMDb fetch
+          // via recommendationsProvider on first build. That request goes
+          // through DioClient's custom connectionFactory (dio_client.dart),
+          // which schedules Socket.connect timeout Timers a couple seconds
+          // out — still pending when this test's short pumps finish below,
+          // tripping flutter_test's "Timer is still pending" teardown
+          // assertion. Short-circuiting the provider itself (rather than
+          // just the network layer) avoids Dio/Socket timer scheduling
+          // entirely instead of racing it.
+          recommendationsProvider.overrideWith((ref) async => const []),
         ],
         child: const MyApp(),
       ),

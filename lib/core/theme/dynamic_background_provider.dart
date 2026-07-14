@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:palette_generator/palette_generator.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import '../constants/api_constants.dart';
@@ -121,22 +120,20 @@ class DynamicBackgroundNotifier extends StateNotifier<DynamicBackgroundState> {
         imageProvider = CachedNetworkImageProvider(imageUrl);
       }
 
-      final palette = await PaletteGenerator.fromImageProvider(
-        imageProvider,
-        maximumColorCount: 5,
+      // material_color_utilities-backed, built into Flutter — replaced the
+      // (now-discontinued) palette_generator package. Always returns a full
+      // scheme, so unlike palette_generator's per-swatch nullable fields
+      // there's no dominant/vibrant/any fallback chain needed here.
+      final scheme = await ColorScheme.fromImageProvider(
+        provider: imageProvider,
+        brightness: Brightness.dark,
       );
+      final color = scheme.primary;
 
-      // Prefer dominant color, fallback to vibrant, fallback to any color
-      final color = palette.dominantColor?.color ??
-          palette.vibrantColor?.color ??
-          palette.colors.firstOrNull;
-
-      if (color != null) {
-        // Store in cache
-        _colorCache[key] = color;
-        // Apply if still visible
-        _updateActiveColor(key, color);
-      }
+      // Store in cache
+      _colorCache[key] = color;
+      // Apply if still visible
+      _updateActiveColor(key, color);
     } catch (e) {
       debugPrint('Error extracting color for key $key: $e. Falling back to HSL color.');
       final fallbackColor = _getPlaceholderColor(key);

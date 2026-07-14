@@ -20,8 +20,19 @@ class NotificationService {
 
   NotificationService(this._ref);
 
+  // flutter_local_notifications' native implementations reach for
+  // platform-channel-backed singletons that are never initialized under
+  // flutter_test (no real OS notification surface) — every plugin call
+  // throws a LateInitializationError there. It's already caught and
+  // logged below, so it never fails a test, but it's noisy on every test
+  // that mounts MainShell (which calls initialize()/syncNotifications()
+  // unconditionally in initState). Checking the binding's runtime type
+  // name avoids a dart:io Platform.environment check, which would break
+  // web compilation.
+  bool get _isTestEnvironment => WidgetsBinding.instance.runtimeType.toString().contains('Test');
+
   Future<void> initialize() async {
-    if (kIsWeb) return;
+    if (kIsWeb || _isTestEnvironment) return;
 
     try {
       // 1. Timezone Database Initialization
@@ -72,7 +83,7 @@ class NotificationService {
 
   /// Request runtime permissions for Android 13+ and iOS
   Future<bool> requestPermissions() async {
-    if (kIsWeb) return false;
+    if (kIsWeb || _isTestEnvironment) return false;
 
     // iOS Request
     final iosImplementation = _notificationsPlugin.resolvePlatformSpecificImplementation<
@@ -104,7 +115,7 @@ class NotificationService {
     required DateTime releaseDate,
     required bool isTv,
   }) async {
-    if (kIsWeb) return;
+    if (kIsWeb || _isTestEnvironment) return;
 
     try {
       final localTimezone = tz.local;
@@ -164,7 +175,7 @@ class NotificationService {
 
   /// Cancel a scheduled notification
   Future<void> cancelReleaseReminder(int id, bool isTv) async {
-    if (kIsWeb) return;
+    if (kIsWeb || _isTestEnvironment) return;
     try {
       // In v22.0.1, cancel takes a named argument 'id'
       await _notificationsPlugin.cancel(id: id.hashCode);
@@ -176,7 +187,7 @@ class NotificationService {
 
   /// Cancel all notifications
   Future<void> cancelAllReminders() async {
-    if (kIsWeb) return;
+    if (kIsWeb || _isTestEnvironment) return;
     try {
       await _notificationsPlugin.cancelAll();
       debugPrint('Cancelled all notifications.');
@@ -187,7 +198,7 @@ class NotificationService {
 
   /// Synchronize scheduled notifications with the current Firestore settings
   Future<void> syncNotifications() async {
-    if (kIsWeb) return;
+    if (kIsWeb || _isTestEnvironment) return;
 
     final remindersEnabled = _ref.read(releaseRemindersEnabledProvider);
     if (!remindersEnabled) {

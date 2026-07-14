@@ -17,7 +17,7 @@ Bu dosya, önceki bir kod denetiminde bulunan ve düzeltilen sorunların **tekra
 
 ## Bağımlılıklar
 
-- EOL (end-of-life) etiketli paket ekleme/güncelleme. `sqlite3_flutter_libs` kaldırıldı, yerine `sqlite3` (native-assets ile Flutter plugin işlevini de sağlıyor) kullanılıyor. Yeni bir paket eklerken pub.dev'de "discontinued"/"+eol" uyarısı var mı kontrol et.
+- EOL (end-of-life) etiketli paket ekleme/güncelleme. `sqlite3_flutter_libs` kaldırıldı, yerine `sqlite3` (native-assets ile Flutter plugin işlevini de sağlıyor) kullanılıyor. `palette_generator` de aynı sebeple kaldırıldı (pub.dev "discontinued") — yerine Flutter SDK'ya gömülü, `material_color_utilities` tabanlı `ColorScheme.fromImageProvider` kullanılıyor (`lib/core/theme/dynamic_background_provider.dart`), ekstra bağımlılık gerektirmiyor. Yeni bir paket eklerken pub.dev'de "discontinued"/"+eol" uyarısı var mı kontrol et; `flutter pub get`/`flutter test` çıktısında "N packages is/are discontinued" satırı da bunu yakalar.
 
 ## Hata yönetimi
 
@@ -30,8 +30,8 @@ Bu dosya, önceki bir kod denetiminde bulunan ve düzeltilen sorunların **tekra
 
 ## Mock/Demo veri
 
-- Mock film verisi (Interstellar, Inception, Dune: Part Two, The Dark Knight, Oppenheimer, Spider-Verse) şu an **3 farklı dosyada** birebir kopyalanmış durumda: `lib/core/network/tmdb_service.dart`, `lib/features/movie_detail/presentation/movie_detail_provider.dart`, `lib/features/search/presentation/search_provider.dart`. (`home_screen.dart`'taki kopya daha sonraki bir refactor'da kaldırıldı — mock veri artık orada yok.) Bu tekrarın somut bir sonucu yaşandı: iki filmin `poster_path` alanı uydurma/geçersizdi ve TMDb CDN'de 404 dönüyordu (Ana Sayfa'da bozuk poster olarak görüldü).
-  - Bu dosyalardan birindeki bir mock filmi değiştirirsen, **diğer 2 dosyayı da güncellemeyi unutma** (veya bunları ortak bir `MockDataSource`'a taşımayı öner).
+- Mock film verisi (Interstellar, Inception, Dune: Part Two, The Dark Knight, Oppenheimer, Spider-Verse) şu an **2 farklı dosyada** birebir kopyalanmış durumda: `lib/core/network/tmdb_service.dart`, `lib/features/movie_detail/presentation/movie_detail_provider.dart`. (`home_screen.dart` ve `search_provider.dart`'taki kopyalar daha sonraki refactor'larda kaldırıldı — `search_provider.dart` artık gerçek TMDb servisini çağırıyor, mock veri barındırmıyor.) Bu tekrarın somut bir sonucu yaşandı: iki filmin `poster_path` alanı uydurma/geçersizdi ve TMDb CDN'de 404 dönüyordu (Ana Sayfa'da bozuk poster olarak görüldü).
+  - Bu dosyalardan birindeki bir mock filmi değiştirirsen, **diğer dosyayı da güncellemeyi unutma** (veya bunları ortak bir `MockDataSource`'a taşımayı öner).
   - Yeni bir mock film eklerken `poster_path`/`backdrop_path` gibi TMDb hash'lerini **uydurma** — gerçek TMDb sayfasından doğrula (örn. `https://www.themoviedb.org/movie/<id>` üzerinden gerçek CDN path'ini al) veya `null` bırak (placeholder gösterilsin, kırık görsel değil).
 
 ## Widget dosya boyutu
