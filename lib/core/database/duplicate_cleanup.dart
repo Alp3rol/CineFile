@@ -1,9 +1,9 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../features/auth/controllers/auth_controller.dart';
 import 'app_database.dart';
 import 'database_provider.dart';
+import 'movie_repository.dart';
 import 'episode_logging.dart';
 
 // A show/movie with more than one diary entry on the same calendar day —
@@ -109,15 +109,9 @@ Future<void> cleanupDuplicateGroup(WidgetRef ref, DuplicateWatchGroup group) asy
         }
         await batch.commit();
       }
-    } else if (kIsWeb) {
-      final idsToDelete = toDelete.map((r) => r.record.id).toSet();
-      final currentList = ref.read(webWatchRecordsProvider);
-      ref.read(webWatchRecordsProvider.notifier).state =
-          currentList.where((r) => !idsToDelete.contains(r.id)).toList();
     } else {
-      final db = ref.read(databaseProvider);
       final idsToDelete = toDelete.map((r) => r.record.id).toList();
-      await (db.delete(db.watchRecords)..where((t) => t.id.isIn(idsToDelete))).go();
+      await ref.read(movieRepositoryProvider).deleteWatchRecordsByIds(idsToDelete);
     }
   }
 

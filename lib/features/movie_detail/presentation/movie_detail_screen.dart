@@ -3,11 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/widgets/dynamic_background_wrapper.dart';
-import '../../../../core/constants/api_constants.dart';
 import '../../../../core/database/database_provider.dart';
 import '../../../../core/database/app_database.dart';
 import '../../../../core/theme/dynamic_background_provider.dart';
@@ -15,8 +12,11 @@ import '../../main_shell.dart';
 import 'movie_detail_provider.dart';
 import 'add_watch_record_sheet.dart';
 import 'widgets/movie_detail_action_widgets.dart';
-import 'widgets/movie_detail_timeline_item.dart';
-import 'widgets/movie_watch_status_badge.dart';
+import 'widgets/movie_detail_backdrop.dart';
+import 'widgets/movie_detail_cast_list.dart';
+import 'widgets/movie_detail_floating_header.dart';
+import 'widgets/movie_detail_header_row.dart';
+import 'widgets/movie_detail_timeline_section.dart';
 import 'widgets/rank_dialog.dart';
 import '../../journal/presentation/widgets/add_to_list_sheet.dart';
 import '../../auth/controllers/auth_controller.dart';
@@ -91,7 +91,14 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
         'isFavorite': !isFavorite,
         'updatedAt': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('Favori durumu güncellenemedi: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Favori durumu güncellenemedi. Lütfen tekrar deneyin.')),
+        );
+      }
+    }
   }
 
   Future<void> _toggleWatchlist(WidgetRef ref, Map<String, dynamic> movieData) async {
@@ -169,7 +176,14 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
           }
         }
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('İzleme listesi güncellenemedi: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('İzleme listesi güncellenemedi. Lütfen tekrar deneyin.')),
+        );
+      }
+    }
   }
 
   // Delete Watch Record
@@ -238,13 +252,6 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
     super.dispose();
   }
 
-  String _formatVoteCount(int count) {
-    if (count >= 1000) {
-      return '${(count / 1000).toStringAsFixed(1)}k';
-    }
-    return count.toString();
-  }
-
   @override
   Widget build(BuildContext context) {
     final detailAsync = ref.watch(movieDetailProvider((tmdbId: tmdbId, isTv: isTv)));
@@ -281,11 +288,11 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
           final title = movieData['title'] as String;
           final tagline = movieData['tagline'] as String? ?? '';
           final overview = movieData['overview'] as String? ?? 'Özet bulunmuyor.';
-          
+
           final releaseDateStr = movieData['release_date'] as String? ?? '';
           final year = releaseDateStr.split('-').first;
           final runtime = movieData['runtime'] as int? ?? 0;
-          
+
           final genres = movieData['genres'] as List<dynamic>?;
           final genresString = genres?.map((e) => e['name']).join(', ') ?? '';
 
@@ -293,7 +300,7 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
           final director = crew?.where((e) => e['job'] == 'Director').firstOrNull?['name'] as String? ?? 'Bilinmiyor';
 
           final cast = movieData['credits']?['cast'] as List<dynamic>?;
-          
+
           final voteAverage = movieData['vote_average'] as num?;
           final voteCount = movieData['vote_count'] as int?;
 
@@ -307,89 +314,22 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
 
           return Stack(
             children: [
-              // 1. Blurred Backdrop Image
-              // NOTE: gated only on backdropPath (stable per movie), NOT on
-              // backdropOpacity. backdropOpacity flips to 0 exactly at
-              // scrollOffset >= 200 — if that also removed this Positioned
-              // from the Stack's children list, the list length would
-              // change mid-scroll, and Flutter's unkeyed list
-              // reconciliation would reassign this Element's identity to
-              // a different subtree (the scroll content below), destroying
-              // and recreating it — resetting the ScrollController's
-              // position and snapping the page back to the top. Opacity
-              // alone (below) already makes this invisible at 0.
-              if (backdropPath != null)
-                Positioned(
-                  top: backdropTop,
-                  left: 0,
-                  right: 0,
-                  height: 480,
-                  child: Opacity(
-                    opacity: backdropOpacity,
-                    child: ShaderMask(
-                      shaderCallback: (rect) {
-                        return const LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.black,
-                            Colors.transparent,
-                          ],
-                          stops: [0.65, 1.0],
-                        ).createShader(Rect.fromLTRB(0, 0, rect.width, rect.height));
-                      },
-                      blendMode: BlendMode.dstIn,
-                      child: AppNetworkImage(
-                        imageUrl: '${ApiConstants.imagePathW780}$backdropPath',
-                        width: MediaQuery.of(context).size.width,
-                        height: 480,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                ),
-              
-              // 2. Black Fading Mask — always present for the same reason
-              // as the backdrop image above; opacity alone drives visibility.
+              // 1. Blurred Backdrop + Fading Mask — see MovieDetailBackdrop's
+              // doc comment for why this stays a single always-present
+              // Positioned entry regardless of backdropPath/opacity.
               Positioned(
                 top: backdropTop,
                 left: 0,
                 right: 0,
                 height: 480,
-                child: Opacity(
+                child: MovieDetailBackdrop(
+                  backdropPath: backdropPath,
                   opacity: backdropOpacity,
-                  child: ShaderMask(
-                    shaderCallback: (rect) {
-                      return const LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.black,
-                          Colors.transparent,
-                        ],
-                        stops: [0.65, 1.0],
-                      ).createShader(Rect.fromLTRB(0, 0, rect.width, rect.height));
-                    },
-                    blendMode: BlendMode.dstIn,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.black.withValues(alpha: 0.4),
-                            Colors.black.withValues(alpha: 0.85),
-                          ],
-                          stops: const [0.0, 1.0],
-                        ),
-                      ),
-                    ),
-                  ),
+                  width: MediaQuery.of(context).size.width,
                 ),
               ),
 
-
-              // 3. Main Scrollable Content
+              // 2. Main Scrollable Content
               Positioned.fill(
                 child: SafeArea(
                   child: SingleChildScrollView(
@@ -398,115 +338,19 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-
-
-                        // Poster, Title & Metadata row
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Hero animation for poster
-                            Hero(
-                              tag: 'poster_${tmdbId}_$isTv',
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: AppNetworkImage(
-                                  imageUrl: posterPath != null
-                                      ? '${ApiConstants.imagePathW500}$posterPath'
-                                      : '',
-                                  seed: title,
-                                  width: 120,
-                                  height: 180,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            
-                            // Movie Metadata
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    title,
-                                    style: GoogleFonts.outfit(
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  if (tagline.isNotEmpty) ...[
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      '"$tagline"',
-                                      style: GoogleFonts.inter(
-                                        fontSize: 12,
-                                        fontStyle: FontStyle.italic,
-                                        color: AppTheme.textSecondary,
-                                      ),
-                                    ),
-                                  ],
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    [
-                                      if (year.isNotEmpty) year,
-                                      if (runtime > 0) '$runtime dk',
-                                      if (genresString.isNotEmpty) genresString,
-                                    ].join(' • '),
-                                    style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary),
-                                  ),
-                                  if (voteAverage != null && voteAverage > 0) ...[
-                                    const SizedBox(height: 8),
-                                    Row(
-                                      children: [
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                          decoration: BoxDecoration(
-                                            color: const Color(0xFF0d253f).withValues(alpha: 0.7), // TMDb dark blue
-                                            borderRadius: BorderRadius.circular(8),
-                                            border: Border.all(
-                                              color: const Color(0xFF90cea1).withValues(alpha: 0.5), // TMDb light green
-                                              width: 1,
-                                            ),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              const Icon(
-                                                Icons.star_rounded,
-                                                color: Color(0xFF90cea1),
-                                                size: 14,
-                                              ),
-                                              const SizedBox(width: 4),
-                                              Text(
-                                                voteAverage.toStringAsFixed(1),
-                                                style: GoogleFonts.outfit(
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.white,
-                                                ),
-                                              ),
-                                              if (voteCount != null && voteCount > 0) ...[
-                                                const SizedBox(width: 4),
-                                                Text(
-                                                  '(${_formatVoteCount(voteCount)})',
-                                                  style: GoogleFonts.inter(
-                                                    fontSize: 10,
-                                                    color: Colors.white70,
-                                                  ),
-                                                ),
-                                              ],
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                  if (isTv) MovieWatchStatusBadge(setting: settingsAsync.value, totalEpisodes: movieData['number_of_episodes'] as int?),
-                                ],
-                              ),
-                            ),
-                          ],
+                        MovieDetailHeaderRow(
+                          tmdbId: tmdbId,
+                          isTv: isTv,
+                          posterPath: posterPath,
+                          title: title,
+                          tagline: tagline,
+                          year: year,
+                          runtime: runtime,
+                          genresString: genresString,
+                          voteAverage: voteAverage,
+                          voteCount: voteCount,
+                          settings: settingsAsync.value,
+                          totalEpisodes: movieData['number_of_episodes'] as int?,
                         ),
                         const SizedBox(height: 20),
 
@@ -600,96 +444,13 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
                         ),
                         const SizedBox(height: 28),
 
-                        // Actors List Section
-                        if (cast != null && cast.isNotEmpty) ...[
-                          Text(
-                            'Oyuncular',
-                            style: Theme.of(context).textTheme.titleLarge,
-                          ),
-                          const SizedBox(height: 12),
-                          SizedBox(
-                            height: 90,
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: cast.length > 8 ? 8 : cast.length,
-                              itemBuilder: (context, idx) {
-                                final actor = cast[idx];
-                                return Container(
-                                  width: 80,
-                                  margin: const EdgeInsets.only(right: 12),
-                                  child: Column(
-                                    children: [
-                                      // Avatar Circle
-                                      CircleAvatar(
-                                        radius: 26,
-                                        backgroundColor: AppTheme.surfaceColor,
-                                        backgroundImage: actor['profile_path'] != null
-                                            ? NetworkImage('${ApiConstants.imagePathW500}${actor['profile_path']}')
-                                            : null,
-                                        child: actor['profile_path'] == null
-                                            ? const Icon(Icons.person_rounded, color: Colors.grey)
-                                            : null,
-                                      ),
-                                      const SizedBox(height: 6),
-                                      Text(
-                                        actor['name'] as String,
-                                        style: GoogleFonts.inter(fontSize: 10, color: Colors.white),
-                                        textAlign: TextAlign.center,
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                        ],
+                        MovieDetailCastList(cast: cast),
 
-                        // Timeline of Watch Records (Zaman Tüneli)
-                        Text(
-                          'İzleme Geçmişim',
-                          style: Theme.of(context).textTheme.titleLarge,
+                        MovieDetailTimelineSection(
+                          watchRecordsAsync: watchRecordsAsync,
+                          onDelete: (recordId) => _deleteRecord(context, ref, recordId),
                         ),
-                        const SizedBox(height: 12),
-                        watchRecordsAsync.when(
-                          loading: () => const Center(child: CircularProgressIndicator()),
-                          error: (err, stack) => Text('İzleme geçmişi hatası: $err'),
-                          data: (records) {
-                            if (records.isEmpty) {
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 20),
-                                child: Center(
-                                  child: Column(
-                                    children: [
-                                      Icon(Icons.history_rounded, color: AppTheme.textSecondary.withValues(alpha: 0.4), size: 40),
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        'Bu filmi henüz izlemediniz.',
-                                        style: GoogleFonts.inter(color: AppTheme.textSecondary, fontSize: 13),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            }
 
-                            return ListView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: records.length,
-                              itemBuilder: (context, idx) {
-                                final record = records[idx];
-                                return MovieDetailTimelineItem(
-                                  record: record,
-                                  isLast: idx == records.length - 1,
-                                  onDelete: () => _deleteRecord(context, ref, record.id),
-                                );
-                              },
-                            );
-                          },
-                        ),
                         // TMDB Atıf
                         const SizedBox(height: 20),
                         Center(
@@ -725,92 +486,20 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
                   ),
                 ),
               ),
-              
-              // 4. Sticky Floating Header Buttons
+
+              // 3. Sticky Floating Header Buttons
               Positioned(
                 top: 0,
                 left: 0,
                 right: 0,
-                child: SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        GestureDetector(
-                          onTap: () => Navigator.pop(context),
-                          child: GlassContainer(
-                            padding: const EdgeInsets.all(8),
-                            borderRadius: 12,
-                            opacity: 0.7,
-                            child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
-                          ),
-                        ),
-                        Row(
-                          children: [
-                            // Favorite toggle button
-                            // Watchlist toggle button
-                            GestureDetector(
-                              onTap: () => _toggleWatchlist(ref, movieData),
-                              child: GlassContainer(
-                                padding: const EdgeInsets.all(8),
-                                borderRadius: 12,
-                                opacity: 0.7,
-                                child: Icon(
-                                  isReWatchList ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
-                                  color: isReWatchList ? AppTheme.accentColor : Colors.white,
-                                  size: 20,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-
-                            GestureDetector(
-                              onTap: () => _toggleFavorite(ref, movieData),
-                              child: GlassContainer(
-                                padding: const EdgeInsets.all(8),
-                                borderRadius: 12,
-                                opacity: 0.7,
-                                child: Icon(
-                                  isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-                                  color: isFavorite ? Colors.red : Colors.white,
-                                  size: 20,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            
-                            // Rank button
-                            GestureDetector(
-                              onTap: () => showRankDialog(context, ref, tmdbId: tmdbId, isTv: isTv, movieData: movieData, settings: settingsAsync.value),
-                              child: GlassContainer(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                                borderRadius: 12,
-                                opacity: 0.7,
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(Icons.format_list_numbered_rounded, color: AppTheme.accentColor, size: 16),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      settingsAsync.value?.personalRanking != null
-                                          ? '#${settingsAsync.value!.personalRanking}'
-                                          : 'Sıra Belirle',
-                                      style: GoogleFonts.outfit(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
+                child: MovieDetailFloatingHeader(
+                  onBack: () => Navigator.pop(context),
+                  onToggleWatchlist: () => _toggleWatchlist(ref, movieData),
+                  isReWatchList: isReWatchList,
+                  onToggleFavorite: () => _toggleFavorite(ref, movieData),
+                  isFavorite: isFavorite,
+                  onRankTap: () => showRankDialog(context, ref, tmdbId: tmdbId, isTv: isTv, movieData: movieData, settings: settingsAsync.value),
+                  personalRanking: settingsAsync.value?.personalRanking,
                 ),
               ),
             ],
@@ -835,5 +524,4 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
       ShareParams(text: '$title — CineFile\nhttps://www.themoviedb.org/movie/$tmdbId'),
     );
   }
-
 }

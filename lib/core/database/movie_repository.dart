@@ -23,6 +23,7 @@ abstract class MovieRepository {
   Future<void> removeMovieFromCustomList(int listId, int tmdbId, bool isTv);
   Future<void> reorderCustomListMovies(int listId, Map<MovieKey, int> rankings);
   Future<void> updateWatchRecordRankings(Map<MovieKey, int?> rankings);
+  Future<void> deleteWatchRecordsByIds(List<int> ids);
   // Turns a collection's "Koleksiyon Paylaş" live sync on/off. When turned
   // on, mirrors the collection's current contents to Firestore's
   // shared_collections/{ownerId_listId} immediately; when turned off,
@@ -239,6 +240,12 @@ class NativeMovieRepository implements MovieRepository {
       rethrow;
     }
   }
+
+  @override
+  Future<void> deleteWatchRecordsByIds(List<int> ids) async {
+    if (ids.isEmpty) return;
+    await (_db.delete(_db.watchRecords)..where((t) => t.id.isIn(ids))).go();
+  }
 }
 
 class WebMovieRepository implements MovieRepository {
@@ -394,4 +401,13 @@ class WebMovieRepository implements MovieRepository {
   // expected to be called. A no-op rather than a crash if it ever is.
   @override
   Future<void> setCollectionVisibility(int listId, bool isPublic) async {}
+
+  @override
+  Future<void> deleteWatchRecordsByIds(List<int> ids) async {
+    if (ids.isEmpty) return;
+    final idsToDelete = ids.toSet();
+    final notifier = _ref.read(webWatchRecordsProvider.notifier);
+    final currentList = _ref.read(webWatchRecordsProvider);
+    notifier.state = currentList.where((r) => !idsToDelete.contains(r.id)).toList();
+  }
 }

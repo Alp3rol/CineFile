@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/database/database_provider.dart';
 import '../../../core/network/tmdb_service.dart';
@@ -130,7 +131,9 @@ final recommendationsProvider = FutureProvider<List<RecommendationItem>>((ref) a
           }
         }
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('Tür bazlı öneri getirilemedi: $e');
+    }
   }
 
   // 2. Discover by top director
@@ -152,7 +155,9 @@ final recommendationsProvider = FutureProvider<List<RecommendationItem>>((ref) a
             }
           }
         }
-      } catch (_) {}
+      } catch (e) {
+        debugPrint('Yönetmen bazlı öneri getirilemedi: $e');
+      }
     }
   }
 
@@ -187,7 +192,9 @@ final recommendationsProvider = FutureProvider<List<RecommendationItem>>((ref) a
             }
           }
         }
-      } catch (_) {}
+      } catch (e) {
+        debugPrint('Oyuncu bazlı öneri getirilemedi: $e');
+      }
     }
   }
 
