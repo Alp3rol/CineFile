@@ -6,8 +6,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import '../../../../core/constants/api_constants.dart';
-import '../../../../core/database/database_provider.dart';
-import '../../../../core/database/app_database.dart';
+import '../../../../core/database/movie_repository.dart';
 
 const _secureStorage = FlutterSecureStorage();
 const _secureApiKeyStorageKey = 'tmdb_api_key';
@@ -177,229 +176,18 @@ class ReleaseRemindersNotifier extends StateNotifier<bool> {
   }
 }
 
-// Backup & Restore Services
+// Backup & Restore Services — delegates the actual web-vs-native storage
+// work to MovieRepository (see movie_repository.dart's exportBackupData/
+// importBackupData) rather than branching on kIsWeb here.
+// `ref` stays `dynamic` (not WidgetRef) because tests call this with a bare
+// ProviderContainer, which also exposes a compatible `.read()`.
 class BackupService {
-  static Future<Map<String, dynamic>> exportData(dynamic ref) async {
-    if (kIsWeb) {
-      final records = ref.read(webWatchRecordsProvider);
-      final settings = ref.read(webMovieSettingsProvider);
-      final movies = ref.read(webMoviesProvider);
-      final customLists = ref.read(webCustomListsProvider);
-      final customListMovies = ref.read(webCustomListMoviesProvider);
-      
-      return {
-        'version': 1,
-        'movies': movies.values.map((m) => {
-          'tmdbId': m.tmdbId,
-          'isTv': m.isTv,
-          'title': m.title,
-          'originalTitle': m.originalTitle,
-          'posterPath': m.posterPath,
-          'backdropPath': m.backdropPath,
-          'releaseYear': m.releaseYear,
-          'runtime': m.runtime,
-          'genres': m.genres,
-          'director': m.director,
-          'actors': m.actors,
-          'overview': m.overview,
-          'createdAt': m.createdAt.toIso8601String(),
-          'totalEpisodes': m.totalEpisodes,
-        }).toList(),
-        'watch_records': records.map((r) => {
-          'id': r.id,
-          'movieId': r.movieId,
-          'isTv': r.isTv,
-          'watchDate': r.watchDate.toIso8601String(),
-          'watchPlace': r.watchPlace,
-          'watchCompanion': r.watchCompanion,
-          'rating': r.rating,
-          'mood': r.mood,
-          'notes': r.notes,
-          'watchNumber': r.watchNumber,
-          'createdAt': r.createdAt.toIso8601String(),
-          'episodeCount': r.episodeCount,
-          'isPublic': r.isPublic,
-        }).toList(),
-        'user_movie_settings': settings.values.map((s) => {
-          'tmdbId': s.tmdbId,
-          'isTv': s.isTv,
-          'isFavorite': s.isFavorite,
-          'isReWatchList': s.isReWatchList,
-          'personalNotes': s.personalNotes,
-          'personalTags': s.personalTags,
-          'updatedAt': s.updatedAt.toIso8601String(),
-          'isActivelyWatching': s.isActivelyWatching,
-          'lastWatchedEpisode': s.lastWatchedEpisode,
-        }).toList(),
-        'custom_lists': customLists.values.map((l) => {
-          'id': l.id,
-          'name': l.name,
-          'description': l.description,
-          'targetDate': l.targetDate?.toIso8601String(),
-          'createdAt': l.createdAt.toIso8601String(),
-          'isPublic': l.isPublic,
-        }).toList(),
-        'custom_list_movies': customListMovies.map((m) => {
-          'listId': m.listId,
-          'movieId': m.movieId,
-          'isTv': m.isTv,
-          'rankingOrder': m.rankingOrder,
-          'addedAt': m.addedAt.toIso8601String(),
-        }).toList(),
-      };
-    }
-    
-    final db = ref.read(databaseProvider);
-    final movies = await db.select(db.movies).get();
-    final records = await db.select(db.watchRecords).get();
-    final settings = await db.select(db.userMovieSettings).get();
-    final customLists = await db.select(db.customLists).get();
-    final customListMovies = await db.select(db.customListMovies).get();
-    
-    return {
-      'version': 1,
-      'movies': movies.map((m) => m.toJson()).toList(),
-      'watch_records': records.map((r) => r.toJson()).toList(),
-      'user_movie_settings': settings.map((s) => s.toJson()).toList(),
-      'custom_lists': customLists.map((l) => l.toJson()).toList(),
-      'custom_list_movies': customListMovies.map((m) => m.toJson()).toList(),
-    };
+  static Future<Map<String, dynamic>> exportData(dynamic ref) {
+    return ref.read(movieRepositoryProvider).exportBackupData();
   }
 
-  static Future<void> importData(dynamic ref, Map<String, dynamic> json) async {
-    final moviesList = json['movies'] as List<dynamic>? ?? [];
-    final recordsList = json['watch_records'] as List<dynamic>? ?? [];
-    final settingsList = json['user_movie_settings'] as List<dynamic>? ?? [];
-    final customListsList = json['custom_lists'] as List<dynamic>? ?? [];
-    final customListMoviesList = json['custom_list_movies'] as List<dynamic>? ?? [];
-    
-    if (kIsWeb) {
-      // Restore Web In-memory states
-      final watchRecords = recordsList.map((x) {
-        final map = x as Map<String, dynamic>;
-        return WatchRecord(
-          id: map['id'] as int,
-          movieId: map['movieId'] as int,
-          // Absent in backups made before the movie/TV id-collision fix.
-          isTv: map['isTv'] as bool? ?? false,
-          watchDate: DateTime.parse(map['watchDate'] as String),
-          watchPlace: map['watchPlace'] as String?,
-          watchCompanion: map['watchCompanion'] as String?,
-          rating: (map['rating'] as num).toDouble(),
-          mood: map['mood'] as String?,
-          notes: map['notes'] as String?,
-          watchNumber: map['watchNumber'] as int,
-          createdAt: DateTime.parse(map['createdAt'] as String),
-          // Absent in backups made before episode-count tracking existed.
-          episodeCount: map['episodeCount'] as int? ?? 1,
-          // Absent in backups made before the community privacy toggle
-          // existed — treat as private, consistent with the opt-in default.
-          isPublic: map['isPublic'] as bool? ?? false,
-        );
-      }).toList();
-      
-      final movieSettings = <MovieKey, UserMovieSetting>{};
-      for (final x in settingsList) {
-        final map = x as Map<String, dynamic>;
-        final id = map['tmdbId'] as int;
-        final settingIsTv = map['isTv'] as bool? ?? false;
-        movieSettings[(tmdbId: id, isTv: settingIsTv)] = UserMovieSetting(
-          tmdbId: id,
-          isTv: settingIsTv,
-          isFavorite: map['isFavorite'] as bool? ?? false,
-          isReWatchList: map['isReWatchList'] as bool? ?? false,
-          personalNotes: map['personalNotes'] as String?,
-          personalTags: map['personalTags'] as String?,
-          updatedAt: DateTime.parse(map['updatedAt'] as String),
-          // Absent in backups made before "Aktif İzliyorum" tracking existed.
-          isActivelyWatching: map['isActivelyWatching'] as bool? ?? false,
-          lastWatchedEpisode: map['lastWatchedEpisode'] as int?,
-        );
-      }
-      
-      final movies = <MovieKey, Movie>{};
-      for (final x in moviesList) {
-        final map = x as Map<String, dynamic>;
-        final id = map['tmdbId'] as int;
-        final movieIsTv = map['isTv'] as bool? ?? false;
-        movies[(tmdbId: id, isTv: movieIsTv)] = Movie(
-          tmdbId: id,
-          title: map['title'] as String,
-          originalTitle: map['originalTitle'] as String?,
-          posterPath: map['posterPath'] as String?,
-          backdropPath: map['backdropPath'] as String?,
-          releaseYear: map['releaseYear'] as int?,
-          runtime: map['runtime'] as int?,
-          genres: map['genres'] as String?,
-          director: map['director'] as String?,
-          actors: map['actors'] as String?,
-          overview: map['overview'] as String?,
-          isTv: movieIsTv,
-          createdAt: DateTime.parse(map['createdAt'] as String),
-          totalEpisodes: map['totalEpisodes'] as int?,
-        );
-      }
-
-      final customLists = <int, CustomList>{};
-      for (final x in customListsList) {
-        final map = x as Map<String, dynamic>;
-        final id = map['id'] as int;
-        customLists[id] = CustomList(
-          id: id,
-          name: map['name'] as String,
-          description: map['description'] as String?,
-          targetDate: map['targetDate'] != null ? DateTime.parse(map['targetDate'] as String) : null,
-          createdAt: map['createdAt'] != null ? DateTime.parse(map['createdAt'] as String) : DateTime.now(),
-          isPublic: map['isPublic'] as bool? ?? false,
-        );
-      }
-
-      final customListMovies = customListMoviesList.map((x) {
-        final map = x as Map<String, dynamic>;
-        return CustomListMovie(
-          listId: map['listId'] as int,
-          movieId: map['movieId'] as int,
-          isTv: map['isTv'] as bool? ?? false,
-          rankingOrder: map['rankingOrder'] as int?,
-          addedAt: map['addedAt'] != null ? DateTime.parse(map['addedAt'] as String) : DateTime.now(),
-        );
-      }).toList();
-      
-      ref.read(webWatchRecordsProvider.notifier).state = watchRecords;
-      ref.read(webMovieSettingsProvider.notifier).state = movieSettings;
-      ref.read(webMoviesProvider.notifier).state = movies;
-      ref.read(webCustomListsProvider.notifier).state = customLists;
-      ref.read(webCustomListMoviesProvider.notifier).state = customListMovies;
-      return;
-    }
-    
-    // Restore Native Database
-    final db = ref.read(databaseProvider);
-    
-    await db.transaction(() async {
-      // Clear tables first (respect foreign keys: relation tables first)
-      await db.delete(db.customListMovies).go();
-      await db.delete(db.customLists).go();
-      await db.delete(db.watchRecords).go();
-      await db.delete(db.userMovieSettings).go();
-      await db.delete(db.movies).go();
-      
-      for (final x in moviesList) {
-        await db.into(db.movies).insertOnConflictUpdate(Movie.fromJson(x as Map<String, dynamic>));
-      }
-      for (final x in settingsList) {
-        await db.into(db.userMovieSettings).insertOnConflictUpdate(UserMovieSetting.fromJson(x as Map<String, dynamic>));
-      }
-      for (final x in recordsList) {
-        await db.into(db.watchRecords).insertOnConflictUpdate(WatchRecord.fromJson(x as Map<String, dynamic>));
-      }
-      for (final x in customListsList) {
-        await db.into(db.customLists).insertOnConflictUpdate(CustomList.fromJson(x as Map<String, dynamic>));
-      }
-      for (final x in customListMoviesList) {
-        await db.into(db.customListMovies).insertOnConflictUpdate(CustomListMovie.fromJson(x as Map<String, dynamic>));
-      }
-    });
+  static Future<void> importData(dynamic ref, Map<String, dynamic> json) {
+    return ref.read(movieRepositoryProvider).importBackupData(json);
   }
 }
 

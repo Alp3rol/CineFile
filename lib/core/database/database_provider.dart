@@ -50,6 +50,19 @@ final watchRecordsForMovieProvider = StreamProvider.family<List<WatchRecord>, Mo
       });
 });
 
+// Reactive settings lookup unifying the web-guest in-memory map and the
+// native/signed-in Firestore stream (movieSettingsProvider below) behind one
+// AsyncValue — lets callers (e.g. add_watch_record_sheet.dart's episode-
+// tracking seed) ref.watch a single provider instead of branching on kIsWeb
+// themselves. A reactive read via ref.watch, so this kIsWeb branch is within
+// this file's documented exception (see CLAUDE.md).
+final movieSettingsSnapshotProvider = Provider.family<AsyncValue<UserMovieSetting?>, MovieKey>((ref, key) {
+  if (kIsWeb) {
+    return AsyncValue.data(ref.watch(webMovieSettingsProvider)[key]);
+  }
+  return ref.watch(movieSettingsProvider(key));
+});
+
 // Stream provider to get settings for a specific movie
 final movieSettingsProvider = StreamProvider.family<UserMovieSetting?, MovieKey>((ref, key) {
   final authState = ref.watch(authStateProvider);
@@ -695,57 +708,7 @@ Future<void> deleteWatchRecord(WidgetRef ref, WatchRecord record) async {
     return;
   }
 
-  if (kIsWeb) {
-    final notifier = ref.read(webWatchRecordsProvider.notifier);
-    final currentList = ref.read(webWatchRecordsProvider);
-    notifier.state = currentList.where((r) => r.id != recordId).toList();
-    return;
-  }
-  
-  final db = ref.read(databaseProvider);
-  await (db.delete(db.watchRecords)..where((t) => t.id.equals(recordId))).go();
-
-  // Recalculate Drift settings progress
-  final remainingRecords = await (db.select(db.watchRecords)
-    ..where((t) => t.movieId.equals(record.movieId) & t.isTv.equals(record.isTv))
-    ..orderBy([(t) => OrderingTerm.desc(t.watchDate)]))
-    .get();
-
-  final settingsQuery = db.select(db.userMovieSettings)
-    ..where((t) => t.tmdbId.equals(record.movieId) & t.isTv.equals(record.isTv));
-  final existingSetting = await settingsQuery.getSingleOrNull();
-
-  if (existingSetting != null) {
-    if (remainingRecords.isEmpty) {
-      await db.into(db.userMovieSettings).insertOnConflictUpdate(
-        existingSetting.copyWith(
-          isActivelyWatching: false,
-          lastWatchedEpisode: const Value(null),
-        ),
-      );
-    } else {
-      final latestRecord = remainingRecords.first;
-      final latestWatchNumber = latestRecord.watchNumber;
-      
-      final currentEpisodeProgress = remainingRecords
-          .where((r) => r.watchNumber == latestWatchNumber)
-          .fold<int>(0, (acc, r) => acc + r.episodeCount);
-
-      final movieQuery = db.select(db.movies)
-        ..where((t) => t.tmdbId.equals(record.movieId) & t.isTv.equals(record.isTv));
-      final movie = await movieQuery.getSingleOrNull();
-      final totalEpisodes = movie?.totalEpisodes;
-      
-      final newIsActivelyWatching = totalEpisodes == null || currentEpisodeProgress < totalEpisodes;
-
-      await db.into(db.userMovieSettings).insertOnConflictUpdate(
-        existingSetting.copyWith(
-          isActivelyWatching: newIsActivelyWatching,
-          lastWatchedEpisode: Value(currentEpisodeProgress),
-        ),
-      );
-    }
-  }
+  await ref.read(movieRepositoryProvider).deleteWatchRecordLocal(record);
 }
 
 Future<void> updateWatchRecord(
@@ -798,39 +761,10 @@ Future<void> updateWatchRecord(
     return;
   }
 
-  if (kIsWeb) {
-    final notifier = ref.read(webWatchRecordsProvider.notifier);
-    final currentList = ref.read(webWatchRecordsProvider);
-    notifier.state = currentList.map((r) {
-      if (r.id == recordId) {
-        return WatchRecord(
-          id: r.id,
-          movieId: r.movieId,
-          isTv: r.isTv,
-          watchDate: watchDate ?? r.watchDate,
-          watchPlace: r.watchPlace,
-          watchCompanion: r.watchCompanion,
-          rating: r.rating,
-          mood: r.mood,
-          notes: r.notes,
-          watchNumber: r.watchNumber,
-          tags: r.tags,
-          createdAt: r.createdAt,
-          episodeCount: episodeCount ?? r.episodeCount,
-          isPublic: isPublic ?? r.isPublic,
-        );
-      }
-      return r;
-    }).toList();
-    return;
-  }
-
-  final db = ref.read(databaseProvider);
-  await (db.update(db.watchRecords)..where((t) => t.id.equals(recordId))).write(
-    WatchRecordsCompanion(
-      watchDate: watchDate != null ? Value(watchDate) : const Value.absent(),
-      episodeCount: episodeCount != null ? Value(episodeCount) : const Value.absent(),
-      isPublic: isPublic != null ? Value(isPublic) : const Value.absent(),
-    ),
-  );
+  await ref.read(movieRepositoryProvider).updateWatchRecordLocal(
+        record,
+        watchDate: watchDate,
+        episodeCount: episodeCount,
+        isPublic: isPublic,
+      );
 }

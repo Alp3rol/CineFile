@@ -441,15 +441,14 @@ graph TD
         *   Vitrin başlığı ve doğrudan vitrini düzenlemeyi sağlayan özel kalem ikonu raf kutusunun içine konumlandırıldı.
     *   **✅ Premium Seçim Paneli (`_PremiumFeaturedSelectorDialog`)**: Vitrini düzenle butonu için klasik gri Material diyalog kutusu tamamen kaldırılarak, **film afiş önizlemeli (40x60px), tür çipli (Film/Dizi) ve parlayan dairesel onay halkalı özel bir buzlu cam dialog kutusu** kodlandı. Degrade "Kaydet" ve minimalist "İptal" butonları eklendi.
 
-#### **🔜 v1.5.1: Kişisel Film/Dizi Önerisi Motoru**
+#### **✅ v1.5.1: Kişisel Film/Dizi Önerisi Motoru**
 *   **Hedef**: v0.9.3'teki "Bu Hafta Ne İzlesem?" kartından farklı olarak — o sadece kütüphanede zaten var olup izlenmemiş yapımları öneriyor — kullanıcının izleme geçmişinden çıkarılan bir zevk profiliyle, kütüphanede hiç olmayan **yeni** film/dizi keşifleri sunmak.
 *   **İşler**:
     *   **✅ TMDb Puan Rozeti & Özet Kartları**: Detay sayfasına TMDb `vote_average` ve `vote_count` bilgileriyle şık bir rozet (badge) yerleştirildi. Bu premium tasarım dili (lacivert arka plan ve açık yeşil sınır çizgisi), sayfadaki diğer 3 özet kartına ("Puanım", "Yönetmen", "Ortam") da yansıtılarak görsel bütünlük sağlandı.
-    *   Kullanıcının en çok izlediği/en yüksek puan verdiği tür, yönetmen ve oyunculardan (`allWatchRecordsProvider` + `Movies` verisi üzerinden, zaten İçgörüler'de hesaplanan istatistiklerin yeniden kullanılması) basit bir ağırlıklı "zevk profili" çıkarılması.
-    *   TMDb `/discover/movie` ve `/discover/tv` uç noktalarının bu profildeki tür/oyuncu/yönetmen ID'leriyle sorgulanması; sonuçların kullanıcının kütüphanesinde (herhangi bir `WatchRecords` veya `UserMovieSettings` kaydı) zaten bulunanlar elenerek filtrelenmesi.
-    *   Keşfet sekmesine veya Ana Sayfa'ya (hero banner altına) yatay kaydırılabilir "Sana Özel" öneri şeridi eklenmesi; her karta dokununca doğrudan Film Detay sayfasına gidilmesi (mevcut `AppNetworkImage`/poster kart bileşenlerinin yeniden kullanılması).
-    *   Öneri kalitesinin TMDb'nin kaba tür/anahtar-kelime eşleştirmesine bağlı olduğu göz önünde bulundurularak, kullanıcıya "Neden önerildi?" (ör. "Christopher Nolan filmlerini sevdiğin için") kısa bir açıklama etiketi gösterilmesi — beklenti yönetimi için.
-    *   Kütüphanesi boş/çok küçük (ör. <5 kayıt) kullanıcılar için öneri şeridinin gizlenmesi veya jenerik popüler içerikle (TMDb `/trending`) doldurulması.
+    *   **✅ Zevk Profili & Discover Sorgusu**: Kullanıcının en çok izlediği tür/yönetmen/oyunculardan (`allWatchRecordsProvider` + `insightsProvider`'ın zaten hesapladığı istatistiklerin yeniden kullanılması) çıkarılan basit bir ağırlıklı profil, TMDb `/discover/movie` ve `/discover/tv` uç noktalarını sorguluyor; kütüphanede (herhangi bir `WatchRecords`/`UserMovieSettings` kaydı) zaten bulunan yapımlar eleniyor (`recommendations_provider.dart`).
+    *   **✅ "Sana Özel" Şeridi**: Ana Sayfa'ya yatay kaydırılabilir öneri şeridi eklendi (`HomeRecommendationsList`), her karta dokununca Film Detay sayfasına gidiyor.
+    *   **✅ "Neden önerildi?" Etiketi**: Her öneri kartı `RecommendationItem.reason` alanıyla kısa bir açıklama gösteriyor (ör. "Christopher Nolan filmlerini sevdiğin için").
+    *   **✅ Boş/Küçük Kütüphane Fallback**: <5 kayıtlı veya `insights == null` kullanıcılar için TMDb popüler film/dizi listesine (`getPopularMovies`/`getPopularTvShows`) düşülüyor.
 
 #### **✅ v1.5.1a: Yaklaşan Çıkışlar İçin Yerel Bildirim**
 *   **Hedef**: "İzleyeceklerim" listesine eklenen ama henüz vizyona/yayına girmemiş bir film/dizinin çıkış tarihini kullanıcının elle takip etmesini gerektirmeden, çıkış günü geldiğinde otomatik hatırlatmak — mevcut Takvim sekmesiyle ve v0.9.5'te zaten doğrulanan `release_date` verisiyle doğal olarak örtüşen bir özellik.
@@ -461,13 +460,24 @@ graph TD
     *   **✅ Ayarlar ve İzin Yönetimi**: Ayarlar sayfasına "Çıkış Hatırlatıcıları" açma/kapama anahtarı eklendi, opt-in olarak izin isteme süreçleri ve otomatik senkronizasyon entegre edildi.
     *   **✅ Çıkış Tarihi Doğrulaması**: Sadece gelecekteki çıkışlar için bildirim planlanır, geçmiştekiler elenir. Uçuş sırasındaki değişiklikler uygulama açılışında otomatik güncellenir.
 
-#### **🔜 v1.5.2: Kod Kalitesi ve Dosya Bölme Cilası**
-*   **Hedef**: CLAUDE.md'deki 300-400 satır kuralını aşan ekranları `widgets/` alt klasörlerine bölmek ve test kapsamını genişletmek.
+#### **✅ v1.5.2: Kod Kalitesi ve Dosya Bölme Cilası**
+*   **Hedef**: CLAUDE.md'deki 300-400 satır kuralını aşan ekranları `widgets/` alt klasörlerine bölmek, önceki denetimde bulunan (sessiz catch, `kIsWeb` sızıntısı, EOL bağımlılık) sorunları gidermek ve test kapsamını/güvenilirliğini artırmak.
 *   **İşler**:
-    *   Bölünecek öncelikli dosyalar (satır sayısına göre): `community_feed_screen.dart` (956), `database_provider.dart` (836 — sadece kIsWeb `StreamProvider`ları hariç, bkz. CLAUDE.md istisnası), `contribution_heatmap.dart` (734), `movie_detail_screen.dart` (684), `journal_screen.dart` (661), `add_watch_record_sheet.dart` (606), `settings_screen.dart` (590).
-    *   State'i olan metodlar ayrılırken CLAUDE.md kuralına uyulması: state callback/parametre (`ValueChanged<T>` vb.) olarak geçilecek, State sınıfının private alanlarına doğrudan erişilmeyecek.
-    *   Yeni bölünen widget'lar için render testleri (mevcut `*_render_test.dart` desenine uygun).
-    *   `dart analyze lib` ve `flutter test` her adımdan sonra çalıştırılıp temiz/yeşil tutulacak.
+    *   **✅ Dosya Bölme** — CLAUDE.md'nin "state callback/parametre olarak geçilir, State'in private alanlarına doğrudan erişilmez" kuralına uyularak 9 dosya bölündü:
+        *   `user_profile_screen.dart` 1327 → 150 satır (8 widget dosyası)
+        *   `community_feed_screen.dart` 956 → 375 satır (3 widget dosyası)
+        *   `contribution_heatmap.dart` 734 → 253 satır (4 yardımcı dosya: grid/legend/badges/utils)
+        *   `insights_misc_cards.dart` 580 satır → 5 bağımsız widget dosyasına ayrıştırıldı (dosya silindi)
+        *   `custom_list_detail_screen.dart` 525 → 234 satır (4 widget dosyası)
+        *   `movie_detail_screen.dart` 853 → 527 satır (5 widget dosyası)
+        *   `search_screen.dart` 476 → 192 satır (3 widget dosyası)
+        *   `journal_screen.dart` 661 → 365 satır (4 widget dosyası + saf mantık `journal_logic.dart`)
+        *   `settings_screen.dart` 614 → 117 satır (6 widget dosyası)
+        *   `add_watch_record_sheet.dart` 606 → 507 satır (3 dosya — form state yoğunluğu nedeniyle bilinçli olarak eşiğin biraz üzerinde bırakıldı)
+        *   Not: `database_provider.dart` (836), `settings_provider.dart` (554), `insights_provider.dart` (436), `tmdb_service.dart` (422), `movie_repository.dart` (413) bilinçli olarak kapsam dışı bırakıldı — bunlar widget/ekran değil, provider/servis katmanı dosyaları (CLAUDE.md'nin "Widget dosya boyutu" kuralı ekranları hedefliyor).
+    *   **✅ Önceki denetim bulgularının düzeltilmesi**: `movie_detail_screen.dart` ve `recommendations_provider.dart`'taki sessiz `catch (_) {}` blokları loglanır/kullanıcıya bildirilir hale getirildi; `duplicate_cleanup.dart`'taki elle yazılmış `kIsWeb` dallanması `MovieRepository.deleteWatchRecordsByIds` metoduna taşındı; discontinued `palette_generator` paketi kaldırılıp yerine Flutter'a gömülü `ColorScheme.fromImageProvider` (`material_color_utilities`) geçirildi.
+    *   **✅ Test güvenilirliği**: `widget_test.dart`'ın gerçek bir TMDb ağ isteği tetikleyip (Ana Sayfa'nın öneri şeridi üzerinden) test teardown'ında "Timer is still pending" ile başarısız olması kök nedenine inilerek düzeltildi (`recommendationsProvider` test override'ı). `NotificationService`, `flutter_local_notifications`'ın test ortamında platform kanalı olmadığı için attığı (ve zaten yakalanıp loglanan, ama gürültülü) `LateInitializationError`'ları artık test ortamını tespit edip atlıyor.
+    *   `dart analyze lib` ve `flutter test` (59/59) her adımdan sonra çalıştırılıp temiz/yeşil tutuldu.
 
 #### **🔜 v1.6.0: "CineFile Wrapped" — Paylaşılabilir Yıllık Özet**
 *   **Hedef**: Mevcut İçgörüler verisini (yönetmen/tür/puan dağılımı, streak, toplam süre — zaten v0.8.x'te hesaplanıyor) yıl sonunda tek, görsel olarak zengin ve dışa aktarılabilir bir "özet kart" haline getirerek hem kullanıcıya değer katmak hem de organik paylaşım/keşif kanalı açmak.

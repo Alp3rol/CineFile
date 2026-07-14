@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -6,6 +5,7 @@ import '../../features/auth/controllers/auth_controller.dart';
 import '../widgets/premium_toast.dart';
 import 'app_database.dart';
 import 'database_provider.dart';
+import 'movie_repository.dart';
 
 // Bumps the "which episode am I on" progress counter for a show the user is
 // actively tracking, WITHOUT creating a diary/journal log entry. Used by
@@ -50,7 +50,6 @@ Future<void> writeEpisodeProgressSettings({
 }) async {
   final movieId = movie.tmdbId;
   final isTv = movie.isTv;
-  final now = DateTime.now();
 
   // --- Firebase Firestore path (primary for authenticated users, all platforms) ---
   final authState = ref.read(authStateProvider);
@@ -82,42 +81,13 @@ Future<void> writeEpisodeProgressSettings({
     return;
   }
 
-  // --- Fallback for unauthenticated users ---
-  if (kIsWeb) {
-    final key = (tmdbId: movieId, isTv: isTv);
-    final currentSettings = ref.read(webMovieSettingsProvider);
-    final updatedSettings = Map<MovieKey, UserMovieSetting>.from(currentSettings);
-    updatedSettings[key] = UserMovieSetting(
-      tmdbId: movieId,
-      isTv: isTv,
-      isFavorite: setting.isFavorite,
-      isReWatchList: setting.isReWatchList,
-      personalRanking: setting.personalRanking,
-      personalNotes: setting.personalNotes,
-      personalTags: setting.personalTags,
-      updatedAt: now,
-      isActivelyWatching: isActivelyWatching,
-      lastWatchedEpisode: lastWatchedEpisode,
-    );
-    ref.read(webMovieSettingsProvider.notifier).state = updatedSettings;
-    return;
-  }
-
-  // --- Fallback: local Drift/SQLite path (offline / unauthenticated / native) ---
-  final db = ref.read(databaseProvider);
-  await db.into(db.userMovieSettings).insertOnConflictUpdate(
-        UserMovieSetting(
-          tmdbId: movieId,
-          isTv: isTv,
-          isFavorite: setting.isFavorite,
-          isReWatchList: setting.isReWatchList,
-          personalRanking: setting.personalRanking,
-          personalNotes: setting.personalNotes,
-          personalTags: setting.personalTags,
-          updatedAt: now,
-          isActivelyWatching: isActivelyWatching,
-          lastWatchedEpisode: lastWatchedEpisode,
-        ),
+  // --- Fallback for unauthenticated users (web-vs-native handled by MovieRepository) ---
+  await ref.read(movieRepositoryProvider).writeEpisodeProgressSettingsLocal(
+        tmdbId: movieId,
+        isTv: isTv,
+        setting: setting,
+        lastWatchedEpisode: lastWatchedEpisode,
+        isActivelyWatching: isActivelyWatching,
       );
 }
 
