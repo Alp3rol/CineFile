@@ -52,7 +52,7 @@ Bu dosya, önceki bir kod denetiminde bulunan ve düzeltilen sorunların **tekra
 
 - `AppTheme.borderColor` (lib/core/theme/app_theme.dart) artık **alfa gömülü** bir sabit (`Color(0x0FFFFFFF)`, ~%6 beyaz hairline border) — üzerine tekrar `.withOpacity()` uygulama, zaten yarı saydam. Yeni bir yerde border rengi gerekiyorsa doğrudan `AppTheme.borderColor` kullan.
 - Poster/afiş yer tutucuları (`lib/core/widgets/app_network_image.dart`, `posterPlaceholderGradient()`) artık düz renk+ikon değil, film başlığından/`imageUrl`'den türetilen deterministik bir gradyan. Yeni bir poster gösteren yer eklerken `AppNetworkImage`'a mümkünse `seed: <film başlığı>` geç (poster path boşsa bile görsel çeşitlilik sağlar).
-- `DateFormat(..., 'tr_TR')` gibi **locale belirten** `intl` çağrıları kullanma — uygulama `initializeDateFormatting()` ile locale verisini hiç başlatmıyor, runtime'da hata fırlatır. Türkçe ay adı gerekiyorsa `lib/features/journal/presentation/widgets/journal_record_list.dart`'taki gibi elle bir ay-adı listesi kullan, ya da locale belirtmeden numara bazlı format kullan (`DateFormat('dd.MM.yyyy')`).
+- DateFormat(..., 'tr_TR') gibi **locale belirten** `intl` çağrıları artık güvenle kullanılabilir — uygulama başlangıcında (`lib/main.dart` içinde) `initializeDateFormatting('tr_TR', null)` çağrılarak locale verisi başlatılmıştır. Türkçe gün/ay isimlerini formatlamak için `DateFormat('d MMMM y', 'tr_TR')` gibi standart kalıplar tercih edilmelidir.
 
 ## Yol haritası
 

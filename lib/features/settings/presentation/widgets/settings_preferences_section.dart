@@ -7,22 +7,9 @@ import '../../../../core/services/notification_service.dart';
 import '../settings_provider.dart';
 import 'settings_section_header.dart';
 
-// "Tercihler" card: dark mode / auto-play-trailer (visual-only today, see
-// class doc in settings_screen.dart) plus the real release-reminders and
-// dynamic-background toggles.
+// "Tercihler" card: release-reminders and dynamic-background toggles.
 class SettingsPreferencesSection extends ConsumerWidget {
-  final bool darkModeEnabled;
-  final bool autoPlayTrailer;
-  final ValueChanged<bool> onDarkModeChanged;
-  final ValueChanged<bool> onAutoPlayTrailerChanged;
-
-  const SettingsPreferencesSection({
-    super.key,
-    required this.darkModeEnabled,
-    required this.autoPlayTrailer,
-    required this.onDarkModeChanged,
-    required this.onAutoPlayTrailerChanged,
-  });
+  const SettingsPreferencesSection({super.key});
 
   Widget _divider() {
     return const Divider(height: 1, indent: 16, endIndent: 16, color: AppTheme.borderColor);
@@ -101,20 +88,6 @@ class SettingsPreferencesSection extends ConsumerWidget {
           opacity: 0.6,
           child: Column(
             children: [
-              _toggleRow(
-                icon: Icons.dark_mode_rounded,
-                label: 'Karanlık Mod',
-                value: darkModeEnabled,
-                onChanged: onDarkModeChanged,
-              ),
-              _divider(),
-              _toggleRow(
-                icon: Icons.play_circle_outline_rounded,
-                label: 'Otomatik Fragman Oynat',
-                value: autoPlayTrailer,
-                onChanged: onAutoPlayTrailerChanged,
-              ),
-              _divider(),
               _toggleRow(
                 icon: Icons.notifications_active_outlined,
                 label: 'Çıkış Hatırlatıcıları',

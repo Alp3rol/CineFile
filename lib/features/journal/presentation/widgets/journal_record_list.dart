@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:intl/intl.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/widgets/quick_advance_tag.dart';
@@ -10,18 +11,8 @@ import '../../../../core/database/database_provider.dart';
 import '../../../movie_detail/presentation/movie_detail_screen.dart';
 import 'watch_record_preview_dialog.dart';
 
-const _monthsTr = [
-  'OCAK', 'ŞUBAT', 'MART', 'NİSAN', 'MAYIS', 'HAZİRAN',
-  'TEMMUZ', 'AĞUSTOS', 'EYLÜL', 'EKİM', 'KASIM', 'ARALIK',
-];
-
-const _monthsTrTitleCase = [
-  'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
-  'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık',
-];
-
 String _formatDayMonthYear(DateTime date) {
-  return '${date.day} ${_monthsTrTitleCase[date.month - 1]} ${date.year}';
+  return DateFormat('d MMMM y', 'tr_TR').format(date);
 }
 
 // Whether the show this watch record belongs to has been fully watched via
@@ -64,7 +55,7 @@ class JournalRecordsList extends ConsumerWidget {
     final groupOrder = <String>[];
     for (final item in sorted) {
       final date = item.record.watchDate;
-      final key = '${_monthsTr[date.month - 1]} ${date.year}';
+      final key = DateFormat('MMMM yyyy', 'tr_TR').format(date).toUpperCase();
       if (!groups.containsKey(key)) {
         groups[key] = [];
         groupOrder.add(key);

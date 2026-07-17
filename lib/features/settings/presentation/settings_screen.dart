@@ -16,13 +16,6 @@ class SettingsScreen extends ConsumerStatefulWidget {
 }
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
-  // Visual-only preferences: the app is always dark-themed and Turkish-only
-  // today, so these don't change any actual behavior yet. They exist so the
-  // "Tercihler" section matches the reference design; wire them up to real
-  // functionality if/when light theme, trailers, or i18n are added.
-  bool _darkModeEnabled = true;
-  bool _autoPlayTrailer = false;
-
   final ScrollController _scrollController = ScrollController();
   bool _showScrollToTop = false;
 
@@ -80,12 +73,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SettingsPreferencesSection(
-                      darkModeEnabled: _darkModeEnabled,
-                      autoPlayTrailer: _autoPlayTrailer,
-                      onDarkModeChanged: (v) => setState(() => _darkModeEnabled = v),
-                      onAutoPlayTrailerChanged: (v) => setState(() => _autoPlayTrailer = v),
-                    ),
+                    const SettingsPreferencesSection(),
                     const SizedBox(height: 32),
 
                     const SettingsBackupSection(),

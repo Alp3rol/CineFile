@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:filmdizi/core/database/app_database.dart';
 import 'package:filmdizi/core/database/database_provider.dart';
 import 'package:filmdizi/features/journal/presentation/journal_screen.dart';
@@ -34,6 +35,10 @@ WatchRecordWithMovie _record(int id, {String watchPlace = 'Sinema', DateTime? wa
 }
 
 void main() {
+  setUpAll(() async {
+    await initializeDateFormatting('tr_TR', null);
+  });
+
   testWidgets('JournalScreen renders records grouped by month, supports search and filter, opens preview dialog',
       (tester) async {
     tester.view.physicalSize = const Size(1080, 2400);
