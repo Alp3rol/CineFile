@@ -181,6 +181,7 @@ Map<MovieKey, UserMovieSetting> _movieSettingsMapFromSnapshot(QuerySnapshot<Map<
       updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       isActivelyWatching: data['isActivelyWatching'] ?? false,
       lastWatchedEpisode: data['lastWatchedEpisode'] as int?,
+      lastEpisodeProgressAt: (data['lastEpisodeProgressAt'] as Timestamp?)?.toDate(),
     );
   }
   return map;

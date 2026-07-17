@@ -481,6 +481,7 @@ class NativeMovieRepository implements MovieRepository {
             updatedAt: DateTime.now(),
             isActivelyWatching: isActivelyWatching,
             lastWatchedEpisode: lastWatchedEpisode,
+            lastEpisodeProgressAt: DateTime.now(),
           ),
         );
   }
@@ -909,6 +910,7 @@ class WebMovieRepository implements MovieRepository {
       updatedAt: DateTime.now(),
       isActivelyWatching: isActivelyWatching,
       lastWatchedEpisode: lastWatchedEpisode,
+      lastEpisodeProgressAt: DateTime.now(),
     );
     _ref.read(webMovieSettingsProvider.notifier).state = updatedSettings;
   }

@@ -1855,6 +1855,17 @@ class $UserMovieSettingsTable extends UserMovieSettings
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _lastEpisodeProgressAtMeta =
+      const VerificationMeta('lastEpisodeProgressAt');
+  @override
+  late final GeneratedColumn<DateTime> lastEpisodeProgressAt =
+      GeneratedColumn<DateTime>(
+        'last_episode_progress_at',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
   @override
   List<GeneratedColumn> get $columns => [
     tmdbId,
@@ -1867,6 +1878,7 @@ class $UserMovieSettingsTable extends UserMovieSettings
     updatedAt,
     isActivelyWatching,
     lastWatchedEpisode,
+    lastEpisodeProgressAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1960,6 +1972,15 @@ class $UserMovieSettingsTable extends UserMovieSettings
         ),
       );
     }
+    if (data.containsKey('last_episode_progress_at')) {
+      context.handle(
+        _lastEpisodeProgressAtMeta,
+        lastEpisodeProgressAt.isAcceptableOrUnknown(
+          data['last_episode_progress_at']!,
+          _lastEpisodeProgressAtMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -2009,6 +2030,10 @@ class $UserMovieSettingsTable extends UserMovieSettings
         DriftSqlType.int,
         data['${effectivePrefix}last_watched_episode'],
       ),
+      lastEpisodeProgressAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_episode_progress_at'],
+      ),
     );
   }
 
@@ -2030,6 +2055,7 @@ class UserMovieSetting extends DataClass
   final DateTime updatedAt;
   final bool isActivelyWatching;
   final int? lastWatchedEpisode;
+  final DateTime? lastEpisodeProgressAt;
   const UserMovieSetting({
     required this.tmdbId,
     required this.isTv,
@@ -2041,6 +2067,7 @@ class UserMovieSetting extends DataClass
     required this.updatedAt,
     required this.isActivelyWatching,
     this.lastWatchedEpisode,
+    this.lastEpisodeProgressAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2062,6 +2089,11 @@ class UserMovieSetting extends DataClass
     map['is_actively_watching'] = Variable<bool>(isActivelyWatching);
     if (!nullToAbsent || lastWatchedEpisode != null) {
       map['last_watched_episode'] = Variable<int>(lastWatchedEpisode);
+    }
+    if (!nullToAbsent || lastEpisodeProgressAt != null) {
+      map['last_episode_progress_at'] = Variable<DateTime>(
+        lastEpisodeProgressAt,
+      );
     }
     return map;
   }
@@ -2086,6 +2118,9 @@ class UserMovieSetting extends DataClass
       lastWatchedEpisode: lastWatchedEpisode == null && nullToAbsent
           ? const Value.absent()
           : Value(lastWatchedEpisode),
+      lastEpisodeProgressAt: lastEpisodeProgressAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastEpisodeProgressAt),
     );
   }
 
@@ -2105,6 +2140,9 @@ class UserMovieSetting extends DataClass
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       isActivelyWatching: serializer.fromJson<bool>(json['isActivelyWatching']),
       lastWatchedEpisode: serializer.fromJson<int?>(json['lastWatchedEpisode']),
+      lastEpisodeProgressAt: serializer.fromJson<DateTime?>(
+        json['lastEpisodeProgressAt'],
+      ),
     );
   }
   @override
@@ -2121,6 +2159,9 @@ class UserMovieSetting extends DataClass
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'isActivelyWatching': serializer.toJson<bool>(isActivelyWatching),
       'lastWatchedEpisode': serializer.toJson<int?>(lastWatchedEpisode),
+      'lastEpisodeProgressAt': serializer.toJson<DateTime?>(
+        lastEpisodeProgressAt,
+      ),
     };
   }
 
@@ -2135,6 +2176,7 @@ class UserMovieSetting extends DataClass
     DateTime? updatedAt,
     bool? isActivelyWatching,
     Value<int?> lastWatchedEpisode = const Value.absent(),
+    Value<DateTime?> lastEpisodeProgressAt = const Value.absent(),
   }) => UserMovieSetting(
     tmdbId: tmdbId ?? this.tmdbId,
     isTv: isTv ?? this.isTv,
@@ -2152,6 +2194,9 @@ class UserMovieSetting extends DataClass
     lastWatchedEpisode: lastWatchedEpisode.present
         ? lastWatchedEpisode.value
         : this.lastWatchedEpisode,
+    lastEpisodeProgressAt: lastEpisodeProgressAt.present
+        ? lastEpisodeProgressAt.value
+        : this.lastEpisodeProgressAt,
   );
   UserMovieSetting copyWithCompanion(UserMovieSettingsCompanion data) {
     return UserMovieSetting(
@@ -2179,6 +2224,9 @@ class UserMovieSetting extends DataClass
       lastWatchedEpisode: data.lastWatchedEpisode.present
           ? data.lastWatchedEpisode.value
           : this.lastWatchedEpisode,
+      lastEpisodeProgressAt: data.lastEpisodeProgressAt.present
+          ? data.lastEpisodeProgressAt.value
+          : this.lastEpisodeProgressAt,
     );
   }
 
@@ -2194,7 +2242,8 @@ class UserMovieSetting extends DataClass
           ..write('personalTags: $personalTags, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('isActivelyWatching: $isActivelyWatching, ')
-          ..write('lastWatchedEpisode: $lastWatchedEpisode')
+          ..write('lastWatchedEpisode: $lastWatchedEpisode, ')
+          ..write('lastEpisodeProgressAt: $lastEpisodeProgressAt')
           ..write(')'))
         .toString();
   }
@@ -2211,6 +2260,7 @@ class UserMovieSetting extends DataClass
     updatedAt,
     isActivelyWatching,
     lastWatchedEpisode,
+    lastEpisodeProgressAt,
   );
   @override
   bool operator ==(Object other) =>
@@ -2225,7 +2275,8 @@ class UserMovieSetting extends DataClass
           other.personalTags == this.personalTags &&
           other.updatedAt == this.updatedAt &&
           other.isActivelyWatching == this.isActivelyWatching &&
-          other.lastWatchedEpisode == this.lastWatchedEpisode);
+          other.lastWatchedEpisode == this.lastWatchedEpisode &&
+          other.lastEpisodeProgressAt == this.lastEpisodeProgressAt);
 }
 
 class UserMovieSettingsCompanion extends UpdateCompanion<UserMovieSetting> {
@@ -2239,6 +2290,7 @@ class UserMovieSettingsCompanion extends UpdateCompanion<UserMovieSetting> {
   final Value<DateTime> updatedAt;
   final Value<bool> isActivelyWatching;
   final Value<int?> lastWatchedEpisode;
+  final Value<DateTime?> lastEpisodeProgressAt;
   final Value<int> rowid;
   const UserMovieSettingsCompanion({
     this.tmdbId = const Value.absent(),
@@ -2251,6 +2303,7 @@ class UserMovieSettingsCompanion extends UpdateCompanion<UserMovieSetting> {
     this.updatedAt = const Value.absent(),
     this.isActivelyWatching = const Value.absent(),
     this.lastWatchedEpisode = const Value.absent(),
+    this.lastEpisodeProgressAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   UserMovieSettingsCompanion.insert({
@@ -2264,6 +2317,7 @@ class UserMovieSettingsCompanion extends UpdateCompanion<UserMovieSetting> {
     this.updatedAt = const Value.absent(),
     this.isActivelyWatching = const Value.absent(),
     this.lastWatchedEpisode = const Value.absent(),
+    this.lastEpisodeProgressAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : tmdbId = Value(tmdbId);
   static Insertable<UserMovieSetting> custom({
@@ -2277,6 +2331,7 @@ class UserMovieSettingsCompanion extends UpdateCompanion<UserMovieSetting> {
     Expression<DateTime>? updatedAt,
     Expression<bool>? isActivelyWatching,
     Expression<int>? lastWatchedEpisode,
+    Expression<DateTime>? lastEpisodeProgressAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2292,6 +2347,8 @@ class UserMovieSettingsCompanion extends UpdateCompanion<UserMovieSetting> {
         'is_actively_watching': isActivelyWatching,
       if (lastWatchedEpisode != null)
         'last_watched_episode': lastWatchedEpisode,
+      if (lastEpisodeProgressAt != null)
+        'last_episode_progress_at': lastEpisodeProgressAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2307,6 +2364,7 @@ class UserMovieSettingsCompanion extends UpdateCompanion<UserMovieSetting> {
     Value<DateTime>? updatedAt,
     Value<bool>? isActivelyWatching,
     Value<int?>? lastWatchedEpisode,
+    Value<DateTime?>? lastEpisodeProgressAt,
     Value<int>? rowid,
   }) {
     return UserMovieSettingsCompanion(
@@ -2320,6 +2378,8 @@ class UserMovieSettingsCompanion extends UpdateCompanion<UserMovieSetting> {
       updatedAt: updatedAt ?? this.updatedAt,
       isActivelyWatching: isActivelyWatching ?? this.isActivelyWatching,
       lastWatchedEpisode: lastWatchedEpisode ?? this.lastWatchedEpisode,
+      lastEpisodeProgressAt:
+          lastEpisodeProgressAt ?? this.lastEpisodeProgressAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2357,6 +2417,11 @@ class UserMovieSettingsCompanion extends UpdateCompanion<UserMovieSetting> {
     if (lastWatchedEpisode.present) {
       map['last_watched_episode'] = Variable<int>(lastWatchedEpisode.value);
     }
+    if (lastEpisodeProgressAt.present) {
+      map['last_episode_progress_at'] = Variable<DateTime>(
+        lastEpisodeProgressAt.value,
+      );
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2376,6 +2441,7 @@ class UserMovieSettingsCompanion extends UpdateCompanion<UserMovieSetting> {
           ..write('updatedAt: $updatedAt, ')
           ..write('isActivelyWatching: $isActivelyWatching, ')
           ..write('lastWatchedEpisode: $lastWatchedEpisode, ')
+          ..write('lastEpisodeProgressAt: $lastEpisodeProgressAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -3991,6 +4057,7 @@ typedef $$UserMovieSettingsTableCreateCompanionBuilder =
       Value<DateTime> updatedAt,
       Value<bool> isActivelyWatching,
       Value<int?> lastWatchedEpisode,
+      Value<DateTime?> lastEpisodeProgressAt,
       Value<int> rowid,
     });
 typedef $$UserMovieSettingsTableUpdateCompanionBuilder =
@@ -4005,6 +4072,7 @@ typedef $$UserMovieSettingsTableUpdateCompanionBuilder =
       Value<DateTime> updatedAt,
       Value<bool> isActivelyWatching,
       Value<int?> lastWatchedEpisode,
+      Value<DateTime?> lastEpisodeProgressAt,
       Value<int> rowid,
     });
 
@@ -4064,6 +4132,11 @@ class $$UserMovieSettingsTableFilterComposer
 
   ColumnFilters<int> get lastWatchedEpisode => $composableBuilder(
     column: $table.lastWatchedEpisode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lastEpisodeProgressAt => $composableBuilder(
+    column: $table.lastEpisodeProgressAt,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -4126,6 +4199,11 @@ class $$UserMovieSettingsTableOrderingComposer
     column: $table.lastWatchedEpisode,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<DateTime> get lastEpisodeProgressAt => $composableBuilder(
+    column: $table.lastEpisodeProgressAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$UserMovieSettingsTableAnnotationComposer
@@ -4180,6 +4258,11 @@ class $$UserMovieSettingsTableAnnotationComposer
     column: $table.lastWatchedEpisode,
     builder: (column) => column,
   );
+
+  GeneratedColumn<DateTime> get lastEpisodeProgressAt => $composableBuilder(
+    column: $table.lastEpisodeProgressAt,
+    builder: (column) => column,
+  );
 }
 
 class $$UserMovieSettingsTableTableManager
@@ -4232,6 +4315,7 @@ class $$UserMovieSettingsTableTableManager
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<bool> isActivelyWatching = const Value.absent(),
                 Value<int?> lastWatchedEpisode = const Value.absent(),
+                Value<DateTime?> lastEpisodeProgressAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => UserMovieSettingsCompanion(
                 tmdbId: tmdbId,
@@ -4244,6 +4328,7 @@ class $$UserMovieSettingsTableTableManager
                 updatedAt: updatedAt,
                 isActivelyWatching: isActivelyWatching,
                 lastWatchedEpisode: lastWatchedEpisode,
+                lastEpisodeProgressAt: lastEpisodeProgressAt,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -4258,6 +4343,7 @@ class $$UserMovieSettingsTableTableManager
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<bool> isActivelyWatching = const Value.absent(),
                 Value<int?> lastWatchedEpisode = const Value.absent(),
+                Value<DateTime?> lastEpisodeProgressAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => UserMovieSettingsCompanion.insert(
                 tmdbId: tmdbId,
@@ -4270,6 +4356,7 @@ class $$UserMovieSettingsTableTableManager
                 updatedAt: updatedAt,
                 isActivelyWatching: isActivelyWatching,
                 lastWatchedEpisode: lastWatchedEpisode,
+                lastEpisodeProgressAt: lastEpisodeProgressAt,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

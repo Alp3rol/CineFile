@@ -76,6 +76,7 @@ Future<void> writeEpisodeProgressSettings({
       'updatedAt': FieldValue.serverTimestamp(),
       'isActivelyWatching': isActivelyWatching,
       'lastWatchedEpisode': lastWatchedEpisode,
+      'lastEpisodeProgressAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
 
     return;

@@ -48,6 +48,7 @@ void main() {
       ProviderScope(
         overrides: [
           allWatchRecordsProvider.overrideWith((ref) => Stream.value(records)),
+          allMovieSettingsProvider.overrideWith((ref) => Stream.value(const {})),
         ],
         child: const MaterialApp(home: Scaffold(body: InsightsScreen())),
       ),
@@ -64,6 +65,7 @@ void main() {
       ProviderScope(
         overrides: [
           allWatchRecordsProvider.overrideWith((ref) => Stream.value(const [])),
+          allMovieSettingsProvider.overrideWith((ref) => Stream.value(const {})),
         ],
         child: const MaterialApp(home: Scaffold(body: InsightsScreen())),
       ),

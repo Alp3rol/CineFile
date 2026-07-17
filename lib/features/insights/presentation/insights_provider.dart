@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/database/database_provider.dart';
+import 'widgets/contribution_heatmap_utils.dart';
 
 class BadgeState {
   final String id;
@@ -80,7 +81,28 @@ class InsightsData {
 final insightsProvider = Provider<InsightsData?>((ref) {
   final watchRecordsAsync = ref.watch(allWatchRecordsProvider);
   final list = watchRecordsAsync.value;
-  if (list == null || list.isEmpty) return null;
+  final settingsMap = ref.watch(allMovieSettingsProvider).value ?? {};
+  if (list == null) return null;
+
+  // Quick-tap "advance episode" activity (no diary entry, see
+  // episode_logging.dart's writeEpisodeProgressSettings) also counts toward
+  // the streak/heatmap — but only for (movie, day) pairs that don't already
+  // have a real diary entry, so the same day's activity is never counted
+  // twice. Anything else (totalWatchCount, genre/director stats, badges...)
+  // deliberately stays based on real diary entries only.
+  final loggedMovieDayKeys = <String>{
+    for (final r in list) '${r.movie.tmdbId}_${r.movie.isTv}_${formatHeatmapDateKey(r.record.watchDate)}',
+  };
+  final progressOnlyDates = <DateTime>{};
+  for (final entry in settingsMap.entries) {
+    final progressAt = entry.value.lastEpisodeProgressAt;
+    if (progressAt == null) continue;
+    final key = '${entry.key.tmdbId}_${entry.key.isTv}_${formatHeatmapDateKey(progressAt)}';
+    if (loggedMovieDayKeys.contains(key)) continue;
+    progressOnlyDates.add(DateTime(progressAt.year, progressAt.month, progressAt.day));
+  }
+
+  if (list.isEmpty && progressOnlyDates.isEmpty) return null;
 
   final totalWatchCount = list.length;
   final uniqueTitleCount = list.map((r) => (r.movie.tmdbId, r.movie.isTv)).toSet().length;
@@ -170,14 +192,19 @@ final insightsProvider = Provider<InsightsData?>((ref) {
     }
   }
 
+  // Fold in dedup'd quick-tap episode-progress days at a flat weight of 1
+  // each (there's no per-tap episode count to sum, unlike a real
+  // WatchRecords row's episodeCount).
+  for (final date in progressOnlyDates) {
+    final dateKey = formatHeatmapDateKey(date);
+    dailyWatchCounts[dateKey] = (dailyWatchCounts[dateKey] ?? 0) + 1;
+  }
+
   // Calculate Streaks
-  final uniqueDates = list
-      .map((r) {
-        final d = r.record.watchDate;
-        return DateTime(d.year, d.month, d.day);
-      })
-      .toSet()
-      .toList()
+  final uniqueDates = <DateTime>{
+    for (final r in list) DateTime(r.record.watchDate.year, r.record.watchDate.month, r.record.watchDate.day),
+    ...progressOnlyDates,
+  }.toList()
     ..sort();
 
   int currentStreak = 0;
