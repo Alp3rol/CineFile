@@ -43,10 +43,20 @@ class _MovieDetailTvEpisodesSectionState extends ConsumerState<MovieDetailTvEpis
     _selectedSeasonNumber = _calculateInitialSeason();
   }
 
+  // Seasons with a positive season_number (excludes "Specials"), sorted
+  // ascending — TMDb usually returns seasons in order already, but the
+  // cumulative episode-count math below depends on it, so sort explicitly
+  // rather than assume.
+  List<dynamic> get _sortedRegularSeasons {
+    final seasons = widget.seasons.where((s) => (s['season_number'] as int? ?? 0) > 0).toList();
+    seasons.sort((a, b) => (a['season_number'] as int? ?? 0).compareTo(b['season_number'] as int? ?? 0));
+    return seasons;
+  }
+
   // Smartly calculate which season tab to pre-select based on user's current progress
   int _calculateInitialSeason() {
     final lastWatched = widget.settings?.lastWatchedEpisode ?? 0;
-    final regularSeasons = widget.seasons.where((s) => (s['season_number'] as int? ?? 0) > 0).toList();
+    final regularSeasons = _sortedRegularSeasons;
 
     if (lastWatched > 0 && regularSeasons.isNotEmpty) {
       int totalCount = 0;
@@ -67,8 +77,7 @@ class _MovieDetailTvEpisodesSectionState extends ConsumerState<MovieDetailTvEpis
   // Maps a season number and episode number to a single overall sequential index
   int _calculateOverallEpisodeNumber(int seasonNumber, int episodeNumber) {
     int count = 0;
-    final regularSeasons = widget.seasons.where((s) => (s['season_number'] as int? ?? 0) > 0).toList();
-    for (final season in regularSeasons) {
+    for (final season in _sortedRegularSeasons) {
       final sNum = season['season_number'] as int? ?? 1;
       if (sNum < seasonNumber) {
         count += season['episode_count'] as int? ?? 0;
@@ -142,7 +151,7 @@ class _MovieDetailTvEpisodesSectionState extends ConsumerState<MovieDetailTvEpis
       if (shouldUpdate) {
         await _writeProgress(
           lastWatchedEpisode: targetEpisodeIndex,
-          isActivelyWatching: targetEpisodeIndex < (widget.totalEpisodes ?? 0),
+          isActivelyWatching: widget.totalEpisodes == null || targetEpisodeIndex < widget.totalEpisodes!,
           successMessage: '$episodeNumber. Bölüm izlendi olarak işaretlendi.',
         );
       }
@@ -207,7 +216,7 @@ class _MovieDetailTvEpisodesSectionState extends ConsumerState<MovieDetailTvEpis
   @override
   Widget build(BuildContext context) {
     ref.watch(authStateProvider);
-    final regularSeasons = widget.seasons.where((s) => (s['season_number'] as int? ?? 0) > 0).toList();
+    final regularSeasons = _sortedRegularSeasons;
     if (regularSeasons.isEmpty) return const SizedBox.shrink();
 
     final lastWatched = widget.settings?.lastWatchedEpisode ?? 0;
