@@ -373,4 +373,103 @@ void main() {
     // making 1 < 0 false and incorrectly flipping isActivelyWatching off.
     expect(doc.data()?['isActivelyWatching'], isTrue);
   });
+
+  testWidgets('shows a "Sıradaki" badge only on the next unwatched episode', (tester) async {
+    final movie = Movie(
+      tmdbId: 1,
+      title: 'Test Dizi',
+      isTv: true,
+      createdAt: DateTime.now(),
+    );
+
+    final initialSetting = UserMovieSetting(
+      tmdbId: 1,
+      isTv: true,
+      isFavorite: false,
+      isReWatchList: false,
+      updatedAt: DateTime.now(),
+      lastWatchedEpisode: 0,
+      isActivelyWatching: true,
+    );
+
+    await container.read(authStateProvider.future);
+
+    await tester.pumpWidget(_wrap(movie: movie, settings: initialSetting));
+    await tester.pumpAndSettle();
+
+    // lastWatchedEpisode is 0, so episode 1 (overall index 1) is next up.
+    expect(find.text('▶ SIRADAKİ'), findsOneWidget);
+  });
+
+  testWidgets('"Bu Sezonu İzledim" completes the season via the existing bulk-confirm flow, and hides once complete',
+      (tester) async {
+    final movie = Movie(
+      tmdbId: 1,
+      title: 'Test Dizi',
+      isTv: true,
+      createdAt: DateTime.now(),
+    );
+
+    final initialSetting = UserMovieSetting(
+      tmdbId: 1,
+      isTv: true,
+      isFavorite: false,
+      isReWatchList: false,
+      updatedAt: DateTime.now(),
+      lastWatchedEpisode: 0,
+      isActivelyWatching: true,
+    );
+
+    await container.read(authStateProvider.future);
+
+    await tester.pumpWidget(_wrap(movie: movie, settings: initialSetting));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Bu Sezonu İzledim'), findsOneWidget);
+
+    await tester.tap(find.text('Bu Sezonu İzledim'));
+    await tester.pumpAndSettle();
+
+    // Season 1 has 2 episodes; jumping from 0 straight to 2 is non-adjacent,
+    // so the existing bulk-confirm dialog should appear.
+    expect(find.text('Bölümleri İzledin mi?'), findsOneWidget);
+
+    await tester.tap(find.text('Evet'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 3));
+
+    final doc = await firestore
+        .collection('users')
+        .doc(uid)
+        .collection('movie_settings')
+        .doc('1_true')
+        .get();
+    expect(doc.data()?['lastWatchedEpisode'], 2);
+  });
+
+  testWidgets('"Bu Sezonu İzledim" is hidden once the selected season is already fully watched', (tester) async {
+    final movie = Movie(
+      tmdbId: 1,
+      title: 'Test Dizi',
+      isTv: true,
+      createdAt: DateTime.now(),
+    );
+
+    final initialSetting = UserMovieSetting(
+      tmdbId: 1,
+      isTv: true,
+      isFavorite: false,
+      isReWatchList: false,
+      updatedAt: DateTime.now(),
+      lastWatchedEpisode: 2, // Season 1 (2 episodes) already fully watched.
+      isActivelyWatching: true,
+    );
+
+    await container.read(authStateProvider.future);
+
+    await tester.pumpWidget(_wrap(movie: movie, settings: initialSetting));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Bu Sezonu İzledim'), findsNothing);
+  });
 }

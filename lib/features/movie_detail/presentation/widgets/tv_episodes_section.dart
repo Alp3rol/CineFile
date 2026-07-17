@@ -5,6 +5,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/premium_toast.dart';
 import '../../../../core/database/app_database.dart';
 import '../../../../core/database/episode_logging.dart';
+import '../../../../core/utils/tv_episode_math.dart';
 import '../../../auth/controllers/auth_controller.dart';
 import '../tv_season_provider.dart';
 import 'tv_episode_list_item.dart';
@@ -43,15 +44,7 @@ class _MovieDetailTvEpisodesSectionState extends ConsumerState<MovieDetailTvEpis
     _selectedSeasonNumber = _calculateInitialSeason();
   }
 
-  // Seasons with a positive season_number (excludes "Specials"), sorted
-  // ascending — TMDb usually returns seasons in order already, but the
-  // cumulative episode-count math below depends on it, so sort explicitly
-  // rather than assume.
-  List<dynamic> get _sortedRegularSeasons {
-    final seasons = widget.seasons.where((s) => (s['season_number'] as int? ?? 0) > 0).toList();
-    seasons.sort((a, b) => (a['season_number'] as int? ?? 0).compareTo(b['season_number'] as int? ?? 0));
-    return seasons;
-  }
+  List<dynamic> get _sortedRegularSeasons => sortedRegularSeasons(widget.seasons);
 
   // Smartly calculate which season tab to pre-select based on user's current progress
   int _calculateInitialSeason() {
@@ -76,14 +69,7 @@ class _MovieDetailTvEpisodesSectionState extends ConsumerState<MovieDetailTvEpis
 
   // Maps a season number and episode number to a single overall sequential index
   int _calculateOverallEpisodeNumber(int seasonNumber, int episodeNumber) {
-    int count = 0;
-    for (final season in _sortedRegularSeasons) {
-      final sNum = season['season_number'] as int? ?? 1;
-      if (sNum < seasonNumber) {
-        count += season['episode_count'] as int? ?? 0;
-      }
-    }
-    return count + episodeNumber;
+    return calculateOverallEpisodeNumber(_sortedRegularSeasons, seasonNumber, episodeNumber);
   }
 
   Future<void> _toggleEpisodeWatched(int targetEpisodeIndex, int episodeNumber) async {
@@ -262,23 +248,57 @@ class _MovieDetailTvEpisodesSectionState extends ConsumerState<MovieDetailTvEpis
               );
             }
 
-            return ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: episodes.length,
-              itemBuilder: (context, index) {
-                final e = episodes[index] as Map<String, dynamic>;
-                final epNum = e['episode_number'] as int? ?? (index + 1);
-                final overallIndex = _calculateOverallEpisodeNumber(_selectedSeasonNumber, epNum);
-                final isWatched = overallIndex <= lastWatched;
+            // Last episode of the currently selected season, used by the
+            // "Bu Sezonu İzledim" bulk-complete button below.
+            final lastEpisodeNumber = episodes
+                .map((e) => (e as Map<String, dynamic>)['episode_number'] as int? ?? 0)
+                .fold(0, (max, n) => n > max ? n : max);
+            final lastOverallIndex = _calculateOverallEpisodeNumber(_selectedSeasonNumber, lastEpisodeNumber);
+            final seasonAlreadyComplete = lastOverallIndex <= lastWatched;
 
-                return TvEpisodeListItem(
-                  episode: e,
-                  episodeNumber: epNum,
-                  isWatched: isWatched,
-                  onToggleWatched: () => _toggleEpisodeWatched(overallIndex, epNum),
-                );
-              },
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (!seasonAlreadyComplete && lastEpisodeNumber > 0)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12.0),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: () => _toggleEpisodeWatched(lastOverallIndex, lastEpisodeNumber),
+                        icon: const Icon(Icons.done_all_rounded, size: 18, color: AppTheme.accentColor),
+                        label: Text(
+                          'Bu Sezonu İzledim',
+                          style: GoogleFonts.inter(fontWeight: FontWeight.w600, color: AppTheme.accentColor),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: AppTheme.accentColor, width: 1),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                      ),
+                    ),
+                  ),
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: episodes.length,
+                  itemBuilder: (context, index) {
+                    final e = episodes[index] as Map<String, dynamic>;
+                    final epNum = e['episode_number'] as int? ?? (index + 1);
+                    final overallIndex = _calculateOverallEpisodeNumber(_selectedSeasonNumber, epNum);
+                    final isWatched = overallIndex <= lastWatched;
+
+                    return TvEpisodeListItem(
+                      episode: e,
+                      episodeNumber: epNum,
+                      isWatched: isWatched,
+                      isNextUp: overallIndex == lastWatched + 1,
+                      onToggleWatched: () => _toggleEpisodeWatched(overallIndex, epNum),
+                    );
+                  },
+                ),
+              ],
             );
           },
         ),
