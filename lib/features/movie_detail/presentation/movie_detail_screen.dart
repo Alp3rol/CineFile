@@ -17,6 +17,7 @@ import 'widgets/movie_detail_cast_list.dart';
 import 'widgets/movie_detail_floating_header.dart';
 import 'widgets/movie_detail_header_row.dart';
 import 'widgets/movie_detail_timeline_section.dart';
+import 'widgets/tv_episodes_section.dart';
 import 'widgets/rank_dialog.dart';
 import '../../journal/presentation/widgets/add_to_list_sheet.dart';
 import '../../auth/controllers/auth_controller.dart';
@@ -445,6 +446,30 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
                         const SizedBox(height: 28),
 
                         MovieDetailCastList(cast: cast, movieData: movieData),
+
+                        if (isTv) ...[
+                          const SizedBox(height: 28),
+                          MovieDetailTvEpisodesSection(
+                            movie: Movie(
+                              tmdbId: tmdbId,
+                              title: title,
+                              originalTitle: movieData['original_title'] as String? ?? movieData['original_name'] as String?,
+                              posterPath: posterPath,
+                              backdropPath: backdropPath,
+                              releaseYear: int.tryParse(year),
+                              runtime: runtime,
+                              genres: genresString,
+                              director: director,
+                              actors: cast?.take(5).map((e) => e['name']).join(', '),
+                              overview: overview,
+                              isTv: isTv,
+                              createdAt: DateTime.now(),
+                            ),
+                            seasons: movieData['seasons'] as List<dynamic>? ?? const [],
+                            settings: settingsAsync.value,
+                            totalEpisodes: movieData['number_of_episodes'] as int?,
+                          ),
+                        ],
 
                         MovieDetailTimelineSection(
                           watchRecordsAsync: watchRecordsAsync,
