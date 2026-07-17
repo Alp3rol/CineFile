@@ -70,6 +70,7 @@ void main() {
   Widget _wrap({
     required Movie movie,
     required UserMovieSetting? settings,
+    bool hasJournalEntry = true,
   }) {
     return UncontrolledProviderScope(
       container: container,
@@ -81,6 +82,8 @@ void main() {
               seasons: _seasonsData,
               settings: settings,
               totalEpisodes: 4,
+              hasJournalEntry: hasJournalEntry,
+              onRequestAddToJournal: () {},
             ),
           ),
         ),

@@ -468,6 +468,8 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
                             seasons: movieData['seasons'] as List<dynamic>? ?? const [],
                             settings: settingsAsync.value,
                             totalEpisodes: movieData['number_of_episodes'] as int?,
+                            hasJournalEntry: (watchRecordsAsync.value ?? const []).isNotEmpty,
+                            onRequestAddToJournal: () => _openAddWatchRecordSheet(context, movieData),
                           ),
                         ],
 

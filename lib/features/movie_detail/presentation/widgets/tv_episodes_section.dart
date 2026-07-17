@@ -17,6 +17,8 @@ class MovieDetailTvEpisodesSection extends ConsumerStatefulWidget {
   final List<dynamic> seasons;
   final UserMovieSetting? settings;
   final int? totalEpisodes;
+  final bool hasJournalEntry;
+  final VoidCallback onRequestAddToJournal;
 
   const MovieDetailTvEpisodesSection({
     super.key,
@@ -24,6 +26,8 @@ class MovieDetailTvEpisodesSection extends ConsumerStatefulWidget {
     required this.seasons,
     required this.settings,
     required this.totalEpisodes,
+    required this.hasJournalEntry,
+    required this.onRequestAddToJournal,
   });
 
   @override
@@ -32,6 +36,7 @@ class MovieDetailTvEpisodesSection extends ConsumerStatefulWidget {
 
 class _MovieDetailTvEpisodesSectionState extends ConsumerState<MovieDetailTvEpisodesSection> {
   late int _selectedSeasonNumber;
+  bool _journalPromptDismissed = false;
 
   @override
   void initState() {
@@ -165,12 +170,134 @@ class _MovieDetailTvEpisodesSectionState extends ConsumerState<MovieDetailTvEpis
     return result ?? false;
   }
 
+  /// Shows a one-time prompt when the user tries to mark an episode on a show
+  /// that has no journal entry yet. Returns the user's choice:
+  /// - true  → "Sadece Takip Et" (just track, proceed with toggle)
+  /// - false → "Günlüğe Ekle" (open add-record sheet, abort toggle)
+  Future<bool> _showJournalPromptDialog(BuildContext context) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: GlassContainer(
+            borderRadius: 24,
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppTheme.accentColor.withValues(alpha: 0.15),
+                      ),
+                      child: const Icon(Icons.bookmark_add_rounded, color: AppTheme.accentColor, size: 20),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Bu diziyi günlüğüne eklemek ister misin?',
+                        style: GoogleFonts.outfit(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                Text(
+                  'Günlüğe eklersen "Aktif İzliyorum" listende görünür ve istatistiklerine yansır.',
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    color: AppTheme.textSecondary,
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        child: Text(
+                          'Sadece Takip Et',
+                          style: GoogleFonts.inter(
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white70,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          gradient: const LinearGradient(
+                            colors: [
+                              AppTheme.accentColor,
+                              Colors.amberAccent,
+                            ],
+                          ),
+                        ),
+                        child: ElevatedButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Text(
+                            'Günlüğe Ekle',
+                            style: GoogleFonts.outfit(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+    return result ?? true; // default: just track
+  }
+
   Future<void> _toggleEpisodeWatched(int targetEpisodeIndex, int episodeNumber) async {
+    // One-time journal prompt for un-journaled shows
+    if (!widget.hasJournalEntry && !_journalPromptDismissed) {
+      final justTrack = await _showJournalPromptDialog(context);
+      if (!justTrack) {
+        // User chose "Günlüğe Ekle" — open the add-record sheet and abort toggle
+        widget.onRequestAddToJournal();
+        return;
+      }
+      setState(() {
+        _journalPromptDismissed = true;
+      });
+    }
+
     final currentLastWatched = widget.settings?.lastWatchedEpisode ?? 0;
     
     if (targetEpisodeIndex > currentLastWatched) {
       bool shouldUpdate = true;
       if (targetEpisodeIndex > currentLastWatched + 1) {
+        if (!mounted) return;
         shouldUpdate = await _showConfirmationDialog(
           context,
           title: 'Bölümleri İzledin mi?',
@@ -206,6 +333,7 @@ class _MovieDetailTvEpisodesSectionState extends ConsumerState<MovieDetailTvEpis
     } else {
       bool shouldUpdate = true;
       if (targetEpisodeIndex < currentLastWatched) {
+        if (!mounted) return;
         shouldUpdate = await _showConfirmationDialog(
           context,
           title: 'İzleme İlerlemesini Geri Al?',
