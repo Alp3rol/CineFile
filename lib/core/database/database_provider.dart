@@ -475,6 +475,8 @@ final activelyWatchingProvider = StreamProvider<List<ActivelyWatchingShow>>((ref
             list.add(ActivelyWatchingShow(watchWithMovie.movie, setting));
           }
         }
+        // Sort by setting.updatedAt descending so the most recently active show is first
+        list.sort((a, b) => b.setting.updatedAt.compareTo(a.setting.updatedAt));
         return list;
       });
 });
