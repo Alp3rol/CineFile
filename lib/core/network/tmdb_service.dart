@@ -654,4 +654,24 @@ class TmdbService {
       throw Exception('TMDb Combined Credits Hatası: ${e.message}');
     }
   }
+
+  /// Get detailed episodes for a specific season of a TV show
+  Future<Map<String, dynamic>?> getTvSeasonDetails(int tvId, int seasonNumber, {String language = 'tr-TR'}) async {
+    if (_apiKey.isEmpty) {
+      return null;
+    }
+    try {
+      final response = await _dio.get(
+        '/tv/$tvId/season/$seasonNumber',
+        queryParameters: {
+          'api_key': _apiKey,
+          'language': language,
+        },
+      );
+      return response.data as Map<String, dynamic>?;
+    } on DioException catch (e) {
+      debugPrint('TMDb Sezon Detay Hatası: ${e.message}');
+      return null;
+    }
+  }
 }
