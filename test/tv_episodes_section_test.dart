@@ -71,6 +71,8 @@ void main() {
     required Movie movie,
     required UserMovieSetting? settings,
     bool hasJournalEntry = true,
+    int? totalEpisodes = 4,
+    VoidCallback? onRequestAddToJournal,
   }) {
     return UncontrolledProviderScope(
       container: container,
@@ -81,9 +83,9 @@ void main() {
               movie: movie,
               seasons: _seasonsData,
               settings: settings,
-              totalEpisodes: 4,
+              totalEpisodes: totalEpisodes,
               hasJournalEntry: hasJournalEntry,
-              onRequestAddToJournal: () {},
+              onRequestAddToJournal: onRequestAddToJournal ?? () {},
             ),
           ),
         ),
@@ -208,6 +210,167 @@ void main() {
         .get();
 
     expect(doc.data()?['lastWatchedEpisode'], 0);
+    expect(doc.data()?['isActivelyWatching'], isTrue);
+  });
+
+  testWidgets('tapping a non-adjacent episode shows a bulk-confirm dialog; confirming jumps progress to it',
+      (tester) async {
+    final movie = Movie(
+      tmdbId: 1,
+      title: 'Test Dizi',
+      isTv: true,
+      createdAt: DateTime.now(),
+    );
+
+    final initialSetting = UserMovieSetting(
+      tmdbId: 1,
+      isTv: true,
+      isFavorite: false,
+      isReWatchList: false,
+      updatedAt: DateTime.now(),
+      lastWatchedEpisode: 0,
+      isActivelyWatching: true,
+    );
+
+    await container.read(authStateProvider.future);
+
+    await tester.pumpWidget(_wrap(movie: movie, settings: initialSetting));
+    await tester.pumpAndSettle();
+
+    // Episode 2 is not adjacent to lastWatchedEpisode 0, so a bulk-confirm
+    // dialog should appear instead of writing immediately.
+    await tester.tap(find.byKey(const ValueKey('episode_check_2')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Bölümleri İzledin mi?'), findsOneWidget);
+
+    await tester.tap(find.text('Evet'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 3));
+
+    final doc = await firestore
+        .collection('users')
+        .doc(uid)
+        .collection('movie_settings')
+        .doc('1_true')
+        .get();
+
+    expect(doc.data()?['lastWatchedEpisode'], 2);
+    expect(doc.data()?['isActivelyWatching'], isTrue);
+  });
+
+  testWidgets('un-journaled show prompts to add to journal; choosing "Günlüğe Ekle" opens the sheet without writing progress',
+      (tester) async {
+    final movie = Movie(
+      tmdbId: 1,
+      title: 'Test Dizi',
+      isTv: true,
+      createdAt: DateTime.now(),
+    );
+
+    await container.read(authStateProvider.future);
+
+    var addToJournalRequested = false;
+    await tester.pumpWidget(_wrap(
+      movie: movie,
+      settings: null,
+      hasJournalEntry: false,
+      onRequestAddToJournal: () => addToJournalRequested = true,
+    ));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('episode_check_1')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Bu diziyi günlüğüne eklemek ister misin?'), findsOneWidget);
+
+    await tester.tap(find.text('Günlüğe Ekle'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 3));
+
+    expect(addToJournalRequested, isTrue);
+
+    final doc = await firestore
+        .collection('users')
+        .doc(uid)
+        .collection('movie_settings')
+        .doc('1_true')
+        .get();
+    expect(doc.exists, isFalse);
+  });
+
+  testWidgets('un-journaled show prompts to add to journal; choosing "Sadece Takip Et" marks the episode as watched',
+      (tester) async {
+    final movie = Movie(
+      tmdbId: 1,
+      title: 'Test Dizi',
+      isTv: true,
+      createdAt: DateTime.now(),
+    );
+
+    await container.read(authStateProvider.future);
+
+    await tester.pumpWidget(_wrap(movie: movie, settings: null, hasJournalEntry: false));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('episode_check_1')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Bu diziyi günlüğüne eklemek ister misin?'), findsOneWidget);
+
+    await tester.tap(find.text('Sadece Takip Et'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 3));
+
+    final doc = await firestore
+        .collection('users')
+        .doc(uid)
+        .collection('movie_settings')
+        .doc('1_true')
+        .get();
+
+    expect(doc.exists, isTrue);
+    expect(doc.data()?['lastWatchedEpisode'], 1);
+  });
+
+  testWidgets('marking an episode when totalEpisodes is null (TMDb field missing) keeps the show actively watching',
+      (tester) async {
+    final movie = Movie(
+      tmdbId: 1,
+      title: 'Test Dizi',
+      isTv: true,
+      createdAt: DateTime.now(),
+    );
+
+    final initialSetting = UserMovieSetting(
+      tmdbId: 1,
+      isTv: true,
+      isFavorite: false,
+      isReWatchList: false,
+      updatedAt: DateTime.now(),
+      lastWatchedEpisode: 0,
+      isActivelyWatching: true,
+    );
+
+    await container.read(authStateProvider.future);
+
+    await tester.pumpWidget(_wrap(movie: movie, settings: initialSetting, totalEpisodes: null));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('episode_check_1')));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 3));
+
+    final doc = await firestore
+        .collection('users')
+        .doc(uid)
+        .collection('movie_settings')
+        .doc('1_true')
+        .get();
+
+    expect(doc.data()?['lastWatchedEpisode'], 1);
+    // Regression: totalEpisodes == null used to coerce to 0 via `?? 0`,
+    // making 1 < 0 false and incorrectly flipping isActivelyWatching off.
     expect(doc.data()?['isActivelyWatching'], isTrue);
   });
 }
