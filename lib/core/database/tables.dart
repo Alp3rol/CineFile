@@ -78,6 +78,12 @@ class UserMovieSettings extends Table {
   // reaches Movies.totalEpisodes — i.e. the show is "Tamamlandı".
   BoolColumn get isActivelyWatching => boolean().withDefault(const Constant(false))();
   IntColumn get lastWatchedEpisode => integer().nullable()();
+  // Timestamp of the last quick-tap episode-progress advance (writeEpisode-
+  // ProgressSettings), kept separate from `updatedAt` above because that
+  // field is bumped by ANY settings write (favorite, ranking, notes...).
+  // Insights/heatmap uses this dedicated field so favoriting a show isn't
+  // mistaken for a day of watching activity.
+  DateTimeColumn get lastEpisodeProgressAt => dateTime().nullable()();
 
   @override
   Set<Column> get primaryKey => {tmdbId, isTv};

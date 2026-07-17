@@ -59,6 +59,10 @@ void main() {
           // in the real app — overridden directly so this render test doesn't
           // need a Firebase test harness.
           activelyWatchingProvider.overrideWith((ref) => Stream.value(const [])),
+          // insightsProvider now also reads this (episode-progress heatmap
+          // dedup) — overridden for the same Firebase-avoidance reason as
+          // activelyWatchingProvider above.
+          allMovieSettingsProvider.overrideWith((ref) => Stream.value(const {})),
         ],
         child: const MaterialApp(home: HomeScreen()),
       ),
@@ -91,6 +95,10 @@ void main() {
           unwatchedMoviesProvider.overrideWith((ref) => Stream.value(const [])),
           favoriteMovieIdsProvider.overrideWith((ref) => Stream.value(const <MovieKey>{})),
           activelyWatchingProvider.overrideWith((ref) => Stream.value(const [])),
+          // insightsProvider now also reads this (episode-progress heatmap
+          // dedup) — overridden for the same Firebase-avoidance reason as
+          // activelyWatchingProvider above.
+          allMovieSettingsProvider.overrideWith((ref) => Stream.value(const {})),
         ],
         child: const MaterialApp(home: HomeScreen()),
       ),
@@ -123,6 +131,10 @@ void main() {
           unwatchedMoviesProvider.overrideWith((ref) => Stream.value(const [])),
           favoriteMovieIdsProvider.overrideWith((ref) => Stream.value(const <MovieKey>{})),
           activelyWatchingProvider.overrideWith((ref) => Stream.value(const [])),
+          // insightsProvider now also reads this (episode-progress heatmap
+          // dedup) — overridden for the same Firebase-avoidance reason as
+          // activelyWatchingProvider above.
+          allMovieSettingsProvider.overrideWith((ref) => Stream.value(const {})),
         ],
         child: const MaterialApp(home: HomeScreen()),
       ),

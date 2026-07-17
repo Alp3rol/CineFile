@@ -13,7 +13,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   @override
   MigrationStrategy get migration {
@@ -155,6 +155,15 @@ class AppDatabase extends _$AppDatabase {
           // is deleted or changed, only a visibility flag added.
           await m.addColumn(customLists, customLists.isPublic);
           from = 10;
+        }
+        if (from < 11) {
+          // v11: dedicated episode-progress timestamp so İçgörüler/heatmap
+          // can count quick-tap "advance episode" activity without
+          // conflating it with unrelated settings writes (favorite, rank,
+          // notes) that also touch `updatedAt`. New column defaults to
+          // null — no existing data changed.
+          await m.addColumn(userMovieSettings, userMovieSettings.lastEpisodeProgressAt);
+          from = 11;
         }
         if (from != to) {
           throw StateError(

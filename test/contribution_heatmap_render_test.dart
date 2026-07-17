@@ -60,6 +60,10 @@ void main() {
       ProviderScope(
         overrides: [
           allWatchRecordsProvider.overrideWith((ref) => Stream.value(records)),
+          // insightsProvider now also reads this (episode-progress heatmap
+          // dedup) — overridden so this render test doesn't need a Firebase
+          // test harness.
+          allMovieSettingsProvider.overrideWith((ref) => Stream.value(const {})),
         ],
         child: _harness(),
       ),
@@ -90,6 +94,10 @@ void main() {
       ProviderScope(
         overrides: [
           allWatchRecordsProvider.overrideWith((ref) => Stream.value(records)),
+          // insightsProvider now also reads this (episode-progress heatmap
+          // dedup) — overridden so this render test doesn't need a Firebase
+          // test harness.
+          allMovieSettingsProvider.overrideWith((ref) => Stream.value(const {})),
         ],
         child: _harness(),
       ),
