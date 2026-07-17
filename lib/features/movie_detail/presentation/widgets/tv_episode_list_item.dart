@@ -12,6 +12,10 @@ class TvEpisodeListItem extends StatelessWidget {
   final Map<String, dynamic> episode;
   final int episodeNumber;
   final bool isWatched;
+  // Whether this is the next unwatched episode in overall watch order —
+  // shows a "Sıradaki" badge and an amber accent border instead of the
+  // default unwatched styling.
+  final bool isNextUp;
   final VoidCallback onToggleWatched;
 
   const TvEpisodeListItem({
@@ -19,6 +23,7 @@ class TvEpisodeListItem extends StatelessWidget {
     required this.episode,
     required this.episodeNumber,
     required this.isWatched,
+    this.isNextUp = false,
     required this.onToggleWatched,
   });
 
@@ -45,8 +50,10 @@ class TvEpisodeListItem extends StatelessWidget {
         opacity: isWatched ? 0.6 : 0.4,
         useBlur: false, // Turn off blur for item rows to optimize list scroll performance
         border: Border.all(
-          color: isWatched ? AppTheme.accentColor.withValues(alpha: 0.3) : AppTheme.borderColor,
-          width: isWatched ? 1.5 : 1,
+          color: isWatched
+              ? AppTheme.accentColor.withValues(alpha: 0.3)
+              : (isNextUp ? Colors.amberAccent.withValues(alpha: 0.5) : AppTheme.borderColor),
+          width: isWatched || isNextUp ? 1.5 : 1,
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -69,6 +76,25 @@ class TvEpisodeListItem extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  if (isNextUp && !isWatched) ...[
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.amberAccent.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        '▶ SIRADAKİ',
+                        style: GoogleFonts.inter(
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.amberAccent,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                  ],
                   Text(
                     '$episodeNumber. $epName',
                     style: GoogleFonts.inter(
