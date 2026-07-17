@@ -490,13 +490,21 @@ graph TD
     *   Keşfet'in boş-sorgu görünümüne iki filtre satırı eklendi: Kategori+Zaman (Trend seçiliyken "Bu Hafta"/"Bugün" alt-çipleri beliriyor) ve Tür (Hepsi/Film/Dizi, yeni `discoverMediaFilterProvider` ile tamamen istemci taraflı, ağ isteği tetiklemiyor).
     *   `SearchGenreChips`, sorgu boşken artık gizleniyor (Keşfet'in yeni filtre satırlarıyla üst üste binmesin diye).
 
-#### **🔜 v1.7.0: Oyuncu Profili**
+#### **✅ v1.7.0: Oyuncu Profili**
 *   **Hedef**: Film/dizi detay sayfasındaki oyuncu kadrosunu statik bir liste olmaktan çıkarıp, bir oyuncuya dokunulduğunda TMDb'nin `/person/{id}` uç noktasından beslenen fotoğraf/biyografi bilgileriyle ve discover uç noktalarından türetilen filmografiyle premium bir profil sayfası açan, tıklanabilir bir keşif zinciri haline getirmek.
 *   **İşler**:
     *   `tmdb_service.dart`'a `getPersonDetails(int personId)` — mevcut metodlarla aynı örüntüde (`/person/{id}`, hata yönetimi/log stili birebir aynı).
     *   Yeni `lib/features/actor_profile/` özellik klasörü: `actor_profile_provider.dart` (`personDetailsProvider`/`actorFilmographyProvider`, ikisi de `.family<..., int>`, filmografi `discoverMovies(withCast:)` + `discoverTvShows(withPeople:)` birleşimini popülerliğe göre sıralar — `recommendations_provider.dart`'ta zaten kurulu aktör-bazlı öneri örüntüsünün yeniden kullanılması), `actor_profile_screen.dart`, `widgets/actor_profile_header.dart` (glassmorphism degrade-halka avatar, `profile_header_card.dart` ile görsel tutarlı), `widgets/actor_filmography_grid.dart` (Hepsi/Film/Dizi istemci taraflı filtreli poster grid).
     *   `lib/core/widgets/poster_grid.dart`: `search_results_view.dart`'taki tekrar eden 3'lü poster grid mantığı paylaşılan bir `PosterGrid` widget'ına çıkarıldı (hem Keşfet hem de yeni oyuncu filmografisi tarafından kullanılıyor; ayrıca `search_results_view.dart`'ı CLAUDE.md'nin dosya boyutu eşiğinin altına indirdi).
     *   `movie_detail_cast_list.dart`, `ConsumerWidget`'a çevrilerek her oyuncu kartı tıklanabilir hale getirildi; çevrimiçi veride mevcut TMDb id doğrudan kullanılıyor, nadir görülen çevrimdışı önbellek kaydında (id alanı olmayan) `searchPersonId` ile ada göre çözümleme deneniyor (bulunamazsa sessizce no-op + log).
+
+#### **✅ v1.7.1: Dizilerde Gelişmiş Bölüm Rehberi ve Günlüğe Ekleme Diyaloğu**
+*   **Hedef**: Dizi detay sayfasındaki "kaç bölüm izledim" takibini, TMDb'nin gerçek sezon/bölüm verisiyle (fotoğraf, ad, özet, yayın tarihi) beslenen tıklanabilir bir Bölüm Rehberi'ne dönüştürmek; ayrıca henüz günlüğe hiç eklenmemiş bir diziden doğrudan bölüm işaretlemeye çalışan kullanıcıya, kaydın sessizce sadece ilerleme sayacında mı kalacağını yoksa günlüğe de mi ekleneceğini sormak.
+*   **İşler**:
+    *   **✅ Gelişmiş Bölüm Rehberi**: `tmdb_service.dart`'a `getTvSeasonDetails(tvId, seasonNumber)` (`/tv/{id}/season/{n}`, mevcut metodlarla aynı hata yönetimi örüntüsü) ve yeni `tv_season_provider.dart` (`selectedSeasonProvider`, `tvSeasonDetailsProvider`) eklendi. Film Detay sayfasına, dizi ise sezon çipleri + bölüm listesi (afiş, ad, yayın tarihi `tr_TR` locale ile, özet, izlendi/izlenmedi toggle) gösteren `MovieDetailTvEpisodesSection` entegre edildi. İleri sıçramalı/geri alma işaretlemelerinde onay diyaloğu gösteriliyor.
+    *   **✅ Günlüğe Eklenmemiş Dizilerde Bölüm İşaretleme Diyaloğu (Seçenek D)**: Günlükte hiç kaydı olmayan bir dizide ilk bölüm işaretleme denemesinde, "Sadece Takip Et" (ilerleme sayacına yazar, günlüğe eklemez) veya "Günlüğe Ekle" (İzleme Kaydı Ekle formunu açar) seçeneklerini sunan tek seferlik cam diyalog eklendi.
+    *   **✅ Kod kalitesi cilası**: `tv_episodes_section.dart` başlangıçta 589 satıra ulaşınca CLAUDE.md'nin dosya boyutu kuralına uyularak 4 dosyaya bölündü — `tv_glass_choice_dialog.dart` (onay/günlük-prompt diyaloglarının paylaştığı tek bir `showGlassChoiceDialog` yardımcı fonksiyonu, önceden neredeyse birebir kopya iki diyalog vardı), `tv_season_chip_row.dart`, `tv_episode_list_item.dart`, ve orchestrator olarak kalan `tv_episodes_section.dart` (~270 satır).
+    *   `test/tv_episodes_section_test.dart` (3 widget testi: render, Firestore yazımı, geri alma) dosya bölünmesinden sonra da değişmeden geçiyor.
 
 #### **🔜 vx.x.x: Bildirimler, İçerik Yönetimi ve Admin Moderasyonu**
 *   **Hedef**: Topluluk özelliklerini (v1.2-v1.4) "yayınla ve unut" aşamasından çıkarıp, kullanıcıların etkileşimden haberdar olduğu, kendi içeriğini yönetebildiği **ve** uygunsuz içeriğin sahipsiz kalmadığı olgun bir sosyal deneyime taşımak.
@@ -524,5 +532,5 @@ graph TD
 
 ## 📈 Proje Durumu
 
-Uygulama planlanan tüm MVP aşamalarını ve büyük sosyal özellikleri (Faz 3, 4, 5) başarıyla tamamlamıştır. v1.4.x serisi arayüz/marka cilası ile kapandı. v1.6.0 (Keşfet'te Trend/Popüler/En Çok Oy Alan filtreleri) tamamlandı. Sıradaki odak v1.7.0: oyuncu kadrosunu tıklanabilir kılan Oyuncu Profili özelliği. Bildirim/moderasyon katmanı ve "CineFile Wrapped" yıl sonu özeti (eski v1.6.1/v1.6.2) tarih belirtilmeden `vx.x.x` olarak zamanlanmamış/backlog kalemleri haline getirildi.
+Uygulama planlanan tüm MVP aşamalarını ve büyük sosyal özellikleri (Faz 3, 4, 5) başarıyla tamamlamıştır. v1.4.x serisi arayüz/marka cilası ile kapandı. v1.6.0 (Keşfet'te Trend/Popüler/En Çok Oy Alan filtreleri), v1.7.0 (oyuncu kadrosunu tıklanabilir kılan Oyuncu Profili) ve v1.7.1 (dizilerde TMDb sezon/bölüm verisiyle beslenen Gelişmiş Bölüm Rehberi + günlüğe eklenmemiş dizilerde bölüm işaretleme diyaloğu) tamamlandı. Bildirim/moderasyon katmanı ve "CineFile Wrapped" yıl sonu özeti (eski v1.6.1/v1.6.2) tarih belirtilmeden `vx.x.x` olarak zamanlanmamış/backlog kalemleri haline getirildi.
 
