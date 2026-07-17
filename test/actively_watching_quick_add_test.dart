@@ -151,4 +151,37 @@ void main() {
     // The show is done, so the row (and quick-add button) is gone now.
     expect(find.text('Aktif Dizi'), findsNothing);
   });
+
+  testWidgets('activelyWatchingProvider returns shows sorted by updatedAt descending', (tester) async {
+    // Seed show 1 with updatedAt = 2 hours ago
+    await seedActivelyWatchingShow(tmdbId: 1, totalEpisodes: 10, lastWatchedEpisode: 3);
+    await firestore.collection('users').doc(uid).collection('movie_settings').doc('1_true').update({
+      'updatedAt': Timestamp.fromDate(DateTime.now().subtract(const Duration(hours: 2))),
+    });
+
+    // Seed show 2 with updatedAt = now (more recent)
+    await seedActivelyWatchingShow(tmdbId: 2, totalEpisodes: 5, lastWatchedEpisode: 1);
+    await firestore.collection('users').doc(uid).collection('movie_settings').doc('2_true').update({
+      'updatedAt': Timestamp.fromDate(DateTime.now()),
+    });
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          home: Consumer(builder: (context, ref, _) {
+            ref.watch(activelyWatchingProvider);
+            return const SizedBox();
+          }),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final list = container.read(activelyWatchingProvider).value!;
+    expect(list.length, 2);
+    // Show 2 should be first because it was updated more recently
+    expect(list[0].movie.tmdbId, 2);
+    expect(list[1].movie.tmdbId, 1);
+  });
 }
