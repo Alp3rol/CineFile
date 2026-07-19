@@ -124,9 +124,14 @@ class _CustomListsTabState extends ConsumerState<CustomListsTab>
                 // 1. Cover Image Background
                 Positioned.fill(
                   child: coverPath != null
-                      ? AppNetworkImage(
-                          imageUrl: '${ApiConstants.imagePathW500}$coverPath',
-                          fit: BoxFit.cover,
+                      ? LayoutBuilder(
+                          builder: (context, constraints) => AppNetworkImage(
+                            imageUrl: '${ApiConstants.imagePathW500}$coverPath',
+                            width: constraints.maxWidth.isFinite ? constraints.maxWidth : null,
+                            height: constraints.maxHeight.isFinite ? constraints.maxHeight : null,
+                            fit: BoxFit.cover,
+                            seed: list.name,
+                          ),
                         )
                       : Container(
                           decoration: BoxDecoration(

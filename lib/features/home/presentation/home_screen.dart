@@ -81,8 +81,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     });
 
     final recentlyAddedAsync = ref.watch(recentlyAddedMoviesProvider);
-    final insights = ref.watch(insightsProvider);
-    final weeklyGoal = ref.watch(weeklyGoalProvider);
     final unwatchedAsync = ref.watch(unwatchedMoviesProvider);
     final favoriteIdsAsync = ref.watch(favoriteMovieIdsProvider);
     final suggestionSeed = ref.watch(_homeSuggestionSeedProvider);
@@ -140,14 +138,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   children: [
                     // Streak Chip — the very top of the scrollable content,
                     // right below the header (only shown once a streak
-                    // actually exists).
-                    if (insights != null && insights.currentStreak >= 1) ...[
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: HomeStreakChip(streak: insights.currentStreak),
-                      ),
-                      const SizedBox(height: 20),
-                    ],
+                    // actually exists). Isolated in its own Consumer so an
+                    // insightsProvider change (e.g. favoriting a movie,
+                    // which also invalidates it) doesn't rebuild the whole
+                    // HomeScreen — only this small subtree.
+                    Consumer(
+                      builder: (context, ref, _) {
+                        final insights = ref.watch(insightsProvider);
+                        if (insights == null || insights.currentStreak < 1) return const SizedBox.shrink();
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 20),
+                              child: HomeStreakChip(streak: insights.currentStreak),
+                            ),
+                            const SizedBox(height: 20),
+                          ],
+                        );
+                      },
+                    ),
 
                     // Cinematic hero — the screen's top visual anchor.
                     // Highest priority: any actively-watching shows, shown as
@@ -170,10 +180,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       const SizedBox(height: 28),
                     ],
 
-                    // Stats Dashboard Section
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: HomeStatsDashboard(insights: insights, weeklyGoal: weeklyGoal),
+                    // Stats Dashboard Section — isolated in its own
+                    // Consumer for the same rebuild-scope reason as the
+                    // streak chip above.
+                    Consumer(
+                      builder: (context, ref, _) {
+                        final insights = ref.watch(insightsProvider);
+                        final weeklyGoal = ref.watch(weeklyGoalProvider);
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: HomeStatsDashboard(insights: insights, weeklyGoal: weeklyGoal),
+                        );
+                      },
                     ),
 
                     const SizedBox(height: 28),
@@ -191,14 +209,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     const SizedBox(height: 28),
                     HomeRecommendationsList(onOpenDetail: _openDetail),
 
-                    // Genre Distribution (reuses the existing Insights chart card)
-                    if (insights != null && insights.topGenres.isNotEmpty) ...[
-                      const SizedBox(height: 28),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: GenreChartCard(data: insights),
-                      ),
-                    ],
+                    // Genre Distribution (reuses the existing Insights chart
+                    // card) — isolated in its own Consumer for the same
+                    // rebuild-scope reason as the streak chip above.
+                    Consumer(
+                      builder: (context, ref, _) {
+                        final insights = ref.watch(insightsProvider);
+                        if (insights == null || insights.topGenres.isEmpty) return const SizedBox.shrink();
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 28),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 20),
+                              child: GenreChartCard(data: insights),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
 
                     // "Aktif İzlediklerin" quick-add row (hidden if nothing active).
                     // Intentionally shows all active shows even if one of
