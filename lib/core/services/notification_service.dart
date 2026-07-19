@@ -316,6 +316,15 @@ class NotificationService {
             .where('isReWatchList', isEqualTo: true)
             .get();
 
+        // Fetch the local movies table once, not once per watchlist doc.
+        // Keyed by (tmdbId, isTv) since a movie and a TV show can
+        // legitimately share the same numeric tmdbId (see v8 migration).
+        final db = _ref.read(databaseProvider);
+        final localMovies = await db.select(db.movies).get();
+        final localMoviesByKey = {
+          for (final m in localMovies) (tmdbId: m.tmdbId, isTv: m.isTv): m,
+        };
+
         for (final doc in snapshot.docs) {
           final data = doc.data();
           final tmdbId = data['movieId'] as int? ?? 0;
@@ -326,9 +335,7 @@ class NotificationService {
             final parsedDate = DateTime.tryParse(releaseDateStr);
             if (parsedDate != null && parsedDate.isAfter(DateTime.now())) {
               // Find local movie title or fetch basic title from cache
-              final db = _ref.read(databaseProvider);
-              final localMovies = await db.select(db.movies).get();
-              final localMovie = localMovies.where((m) => m.tmdbId == tmdbId && m.isTv == isTv).firstOrNull;
+              final localMovie = localMoviesByKey[(tmdbId: tmdbId, isTv: isTv)];
               final title = localMovie?.title ?? 'İzleme Listendeki Yapım';
 
               await scheduleReleaseReminder(

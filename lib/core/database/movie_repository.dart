@@ -204,11 +204,22 @@ class NativeMovieRepository implements MovieRepository {
     if (list == null) return;
 
     final movieRows = await (_db.select(_db.customListMovies)..where((t) => t.listId.equals(listId))).get();
+
+    // Fetch all referenced movies in one query instead of one per row.
+    // tmdbId.isIn(...) alone can return both a movie and a TV show sharing
+    // the same numeric tmdbId, so the (tmdbId, isTv) match still happens in
+    // Dart to keep the two correctly separated (see v8 migration).
+    final movieIds = movieRows.map((r) => r.movieId).toSet();
+    final movieRowsById = movieIds.isEmpty
+        ? const <MovieKey, Movie>{}
+        : {
+            for (final m in await (_db.select(_db.movies)..where((t) => t.tmdbId.isIn(movieIds))).get())
+              (tmdbId: m.tmdbId, isTv: m.isTv): m,
+          };
+
     final movies = <Map<String, dynamic>>[];
     for (final row in movieRows) {
-      final movie = await (_db.select(_db.movies)
-            ..where((t) => t.tmdbId.equals(row.movieId) & t.isTv.equals(row.isTv)))
-          .getSingleOrNull();
+      final movie = movieRowsById[(tmdbId: row.movieId, isTv: row.isTv)];
       if (movie == null) continue;
       movies.add({
         'tmdbId': movie.tmdbId,
