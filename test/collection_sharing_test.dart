@@ -99,4 +99,30 @@ void main() {
     final doc = await firestore.collection('shared_collections').doc('owner_$listId').get();
     expect(doc.exists, isFalse);
   });
+
+  test('mirroring correctly separates a movie and a TV show that share the same tmdbId', () async {
+    final repo = container.read(movieRepositoryProvider);
+    await repo.createCustomList('Mixed List', null);
+    final listId = (await db.select(db.customLists).get()).first.id;
+
+    // Same numeric tmdbId, one is a movie and the other a TV show — this is
+    // the exact collision the v8 migration made isTv part of the primary
+    // key for. The batched movie lookup in _mirrorSharedCollection must
+    // still resolve each row to its correct counterpart.
+    final movie = Movie(tmdbId: 42, title: 'The Movie', isTv: false, createdAt: DateTime.now());
+    final show = Movie(tmdbId: 42, title: 'The Show', isTv: true, createdAt: DateTime.now());
+    await repo.addMovieToCustomList(listId, movie);
+    await repo.addMovieToCustomList(listId, show);
+
+    await repo.setCollectionVisibility(listId, true);
+
+    final doc = await firestore.collection('shared_collections').doc('owner_$listId').get();
+    final movies = (doc.data()!['movies'] as List).cast<Map<String, dynamic>>();
+    expect(movies.length, 2);
+
+    final movieEntry = movies.firstWhere((m) => m['isTv'] == false);
+    final showEntry = movies.firstWhere((m) => m['isTv'] == true);
+    expect(movieEntry['title'], 'The Movie');
+    expect(showEntry['title'], 'The Show');
+  });
 }
