@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/widgets/quick_advance_tag.dart';
+import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/database/database_provider.dart';
 import '../../../movie_detail/presentation/movie_detail_screen.dart';
@@ -148,13 +148,14 @@ class _JournalRecordCard extends ConsumerWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
-                child: CachedNetworkImage(
+                child: AppNetworkImage(
                   imageUrl: movie.posterPath != null
                       ? '${ApiConstants.imagePathW185}${movie.posterPath}'
                       : '',
                   width: 56,
                   height: 84,
                   fit: BoxFit.cover,
+                  seed: movie.title,
                 ),
               ),
               const SizedBox(width: 12),
