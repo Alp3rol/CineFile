@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/dynamic_background_provider.dart';
 import '../../../../core/database/database_provider.dart';
 import '../../../../core/database/app_database.dart';
@@ -84,7 +85,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final unwatchedAsync = ref.watch(unwatchedMoviesProvider);
     final favoriteIdsAsync = ref.watch(favoriteMovieIdsProvider);
     final suggestionSeed = ref.watch(_homeSuggestionSeedProvider);
-    final activeShows = ref.watch(activelyWatchingProvider).value ?? const <ActivelyWatchingShow>[];
+    final activeShowsAsync = ref.watch(activelyWatchingProvider);
+    final activeShows = activeShowsAsync.value ?? const <ActivelyWatchingShow>[];
 
     // allWatchRecordsProvider is already sorted by watchDate desc; keep only
     // the latest watch per movie so a re-watched title doesn't show twice.
@@ -166,7 +168,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     // watched title so it doesn't disappear once nothing
                     // unwatched is left in the library. Hidden only when
                     // there's no data at all yet.
-                    if (activeShows.isNotEmpty) ...[
+                    if ((activeShowsAsync.isLoading && activeShows.isEmpty) ||
+                        (watchRecordsAsync.isLoading && recentlyWatched.isEmpty)) ...[
+                      const SizedBox(
+                        height: 450,
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentColor),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 28),
+                    ] else if (activeShows.isNotEmpty) ...[
                       HomeActiveHeroCarousel(shows: activeShows, onTap: _openDetail),
                       const SizedBox(height: 28),
                     ] else if (heroMovie != null) ...[

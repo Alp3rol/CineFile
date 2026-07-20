@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart';
@@ -235,7 +236,7 @@ class NativeMovieRepository implements MovieRepository {
     final username = userModel?.username ?? user.email!.split('@')[0];
     final avatarUrl = userModel?.avatarUrl ?? 'https://api.dicebear.com/7.x/bottts/png?seed=$username';
 
-    await _ref.read(firestoreProvider).collection('shared_collections').doc('${user.uid}_$listId').set({
+    unawaited(_ref.read(firestoreProvider).collection('shared_collections').doc('${user.uid}_$listId').set({
       'ownerId': user.uid,
       'ownerUsername': username,
       'ownerAvatarUrl': avatarUrl,
@@ -243,7 +244,7 @@ class NativeMovieRepository implements MovieRepository {
       'description': list.description,
       'movies': movies,
       'updatedAt': FieldValue.serverTimestamp(),
-    });
+    }));
   }
 
   @override
@@ -257,7 +258,7 @@ class NativeMovieRepository implements MovieRepository {
           .write(const CustomListsCompanion(isPublic: Value(false)));
       final user = _ref.read(authStateProvider).value;
       if (user != null) {
-        await _ref.read(firestoreProvider).collection('shared_collections').doc('${user.uid}_$listId').delete();
+        unawaited(_ref.read(firestoreProvider).collection('shared_collections').doc('${user.uid}_$listId').delete());
       }
     }
   }
