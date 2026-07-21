@@ -17,6 +17,7 @@ class GraphCanvas extends StatefulWidget {
 
   final String? selectedId;
   final Set<String> highlightIds;
+  final Set<String> pathEdgeKeys;
 
   final ValueChanged<String?> onSelect;
   final ValueChanged<GraphNode> onNavigate;
@@ -31,6 +32,7 @@ class GraphCanvas extends StatefulWidget {
     required this.visibleEdges,
     required this.selectedId,
     required this.highlightIds,
+    this.pathEdgeKeys = const {},
     required this.onSelect,
     required this.onNavigate,
     required this.onNodeLongPress,
@@ -102,6 +104,7 @@ class _GraphCanvasState extends State<GraphCanvas> {
                       nodesById: widget.graph.nodesById,
                       selectedId: widget.selectedId,
                       highlightIds: widget.highlightIds,
+                      pathEdgeKeys: widget.pathEdgeKeys,
                       repaint: _repaint,
                     ),
                   ),

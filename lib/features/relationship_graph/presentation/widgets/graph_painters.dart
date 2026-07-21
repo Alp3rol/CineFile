@@ -47,35 +47,47 @@ class GraphEdgePainter extends CustomPainter {
   /// nothing is selected, meaning "draw everything at normal emphasis".
   final Set<String> highlightIds;
 
+  /// Edge keys (sourceId<->targetId) belonging to the active shortest path.
+  final Set<String> pathEdgeKeys;
+
   /// Bumped by the host on drag so the painter repaints as positions mutate.
   GraphEdgePainter({
     required this.edges,
     required this.nodesById,
     required this.selectedId,
     required this.highlightIds,
+    this.pathEdgeKeys = const {},
     required Listenable repaint,
   }) : super(repaint: repaint);
 
   @override
   void paint(Canvas canvas, Size size) {
     final hasFocus = selectedId != null;
+    final hasPath = pathEdgeKeys.isNotEmpty;
+
     for (final e in edges) {
       final a = nodesById[e.sourceId];
       final b = nodesById[e.targetId];
       if (a == null || b == null) continue;
 
-      final lit = !hasFocus ||
-          (highlightIds.contains(e.sourceId) &&
-              highlightIds.contains(e.targetId));
+      final key1 = '${e.sourceId}<->${e.targetId}';
+      final key2 = '${e.targetId}<->${e.sourceId}';
+      final isPathEdge = hasPath && (pathEdgeKeys.contains(key1) || pathEdgeKeys.contains(key2));
 
-      final base = GraphStyle.edgeColor(e.type);
+      final lit = isPathEdge || (!hasPath && (!hasFocus ||
+          (highlightIds.contains(e.sourceId) &&
+              highlightIds.contains(e.targetId))));
+
+      final base = isPathEdge ? const Color(0xFFFFC107) : GraphStyle.edgeColor(e.type);
       final degree = b.degree; // person node degree
-      final width = (1.2 + (degree - 2).clamp(0, 8) * 0.35);
+      final width = isPathEdge ? 4.0 : (1.2 + (degree - 2).clamp(0, 8) * 0.35);
 
       final paint = Paint()
         ..style = PaintingStyle.stroke
         ..strokeCap = StrokeCap.round
-        ..color = base.withValues(alpha: lit ? 0.8 : 0.06)
+        ..color = isPathEdge
+            ? const Color(0xFFFFC107).withValues(alpha: 0.95)
+            : base.withValues(alpha: lit ? 0.8 : (hasFocus || hasPath ? 0.04 : 0.4))
         ..strokeWidth = lit ? width : 1;
 
       final p1 = a.position;
@@ -92,5 +104,6 @@ class GraphEdgePainter extends CustomPainter {
   bool shouldRepaint(covariant GraphEdgePainter old) =>
       old.selectedId != selectedId ||
       old.edges != edges ||
-      old.highlightIds != highlightIds;
+      old.highlightIds != highlightIds ||
+      old.pathEdgeKeys != pathEdgeKeys;
 }
