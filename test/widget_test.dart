@@ -52,6 +52,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
 
     expect(find.text('Ana Sayfa'), findsOneWidget);
-    expect(find.text('Ayarlar'), findsOneWidget);
+    // Settings moved off the bottom nav (into the home header); the 5th tab is
+    // now the İlişki Ağı ("Ağ") graph.
+    expect(find.text('Ağ'), findsOneWidget);
   });
 }
