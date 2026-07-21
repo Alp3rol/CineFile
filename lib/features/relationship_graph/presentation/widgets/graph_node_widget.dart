@@ -26,6 +26,7 @@ class GraphNodeWidget extends StatelessWidget {
 
   final VoidCallback onTap;
   final VoidCallback onDoubleTap;
+  final VoidCallback onLongPress;
   final ValueChanged<Offset> onDragUpdate;
   final VoidCallback onDragStart;
 
@@ -37,6 +38,7 @@ class GraphNodeWidget extends StatelessWidget {
     required this.showLabel,
     required this.onTap,
     required this.onDoubleTap,
+    required this.onLongPress,
     required this.onDragUpdate,
     required this.onDragStart,
   });
@@ -53,6 +55,7 @@ class GraphNodeWidget extends StatelessWidget {
         behavior: HitTestBehavior.opaque,
         onTap: onTap,
         onDoubleTap: onDoubleTap,
+        onLongPress: onLongPress,
         onPanStart: (_) => onDragStart(),
         onPanUpdate: (d) => onDragUpdate(d.delta),
         child: SizedBox(

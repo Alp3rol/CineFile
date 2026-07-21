@@ -79,6 +79,12 @@ service cloud.firestore {
       match /movie_settings/{settingId} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
       }
+
+      // İlişki Ağı manual curation (added/removed/hidden people). Owner-only,
+      // same as movie_settings.
+      match /graph_overrides/{overrideId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
     }
 
     // Follow edges, doc id "${followerId}_${followingId}".

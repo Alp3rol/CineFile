@@ -5,6 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:filmdizi/core/database/app_database.dart';
 import 'package:filmdizi/core/database/database_provider.dart';
+import 'package:filmdizi/features/relationship_graph/domain/graph_models.dart';
+import 'package:filmdizi/features/relationship_graph/domain/graph_overrides.dart';
+import 'package:filmdizi/features/relationship_graph/presentation/graph_overrides_provider.dart';
 import 'package:filmdizi/features/relationship_graph/presentation/relationship_graph_provider.dart';
 import 'package:filmdizi/features/relationship_graph/presentation/relationship_graph_screen.dart';
 
@@ -46,9 +49,11 @@ List<CreditPerson> _creditsFromMovie(Movie m) {
   }
   final actors = m.actors;
   if (actors != null) {
+    var i = 0;
     for (final a in actors.split(',')) {
       if (a.trim().isNotEmpty) {
-        list.add(CreditPerson(name: a.trim(), isDirector: false));
+        // order by position → passes the "featured" prominence default.
+        list.add(CreditPerson(name: a.trim(), isDirector: false, order: i++));
       }
     }
   }
@@ -62,6 +67,8 @@ Widget _app(List<WatchRecordWithMovie> records) {
       allMovieSettingsProvider.overrideWith((ref) => Stream.value(const {})),
       titleCreditsFetcherProvider
           .overrideWithValue((Movie m) async => _creditsFromMovie(m)),
+      // Avoid touching Firebase auth in tests.
+      graphOverridesProvider.overrideWith((ref) => Stream.value(GraphOverrides.empty)),
     ],
     child: const MaterialApp(home: RelationshipGraphScreen()),
   );

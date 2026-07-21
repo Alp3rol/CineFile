@@ -4,6 +4,8 @@ import '../../../core/database/app_database.dart';
 import '../../../core/database/database_provider.dart';
 import '../../../core/network/tmdb_service.dart';
 import '../domain/graph_models.dart';
+import '../domain/graph_overrides.dart';
+import 'graph_overrides_provider.dart';
 
 /// Safety cap on the number of "bridge" people rendered. The bridge rule
 /// (a person must connect ≥2 titles) already keeps this low for realistic
@@ -11,65 +13,64 @@ import '../domain/graph_models.dart';
 /// (highest degree) and drop the long tail so the canvas stays responsive.
 const int kMaxPersonNodes = 400;
 
-
 /// Max titles fetched concurrently, so a large library doesn't open hundreds of
 /// simultaneous TMDb connections. Repeat runs are cheap (Dio memory cache).
 const int _kFetchConcurrency = 6;
 
-/// One person in a title's credits. [id] is the TMDb person id when known
-/// (full-credits path); null only on the offline/stored-names fallback, where
-/// people are matched by normalized name instead.
-class CreditPerson {
-  final int? id;
-  final String name;
-  final String? profilePath;
-  final bool isDirector;
-  const CreditPerson({
-    this.id,
-    required this.name,
-    this.profilePath,
-    required this.isDirector,
-  });
-}
+/// The user-adjustable "kadro derinliği" (how much of each title's cast the
+/// graph shows by default). Changing it re-curates instantly — no refetch,
+/// since the raw credits are cached separately.
+final graphCastDepthProvider =
+    StateProvider<CastDepth>((_) => CastDepth.featured);
 
-/// Indirection point for fetching a title's credits, so widget tests can
-/// override it with a network-free stub (returning [] → the builder falls back
-/// to the movie's stored names, which are set in test fixtures).
+/// Test seam for fetching a title's credits (overridable to avoid network).
 final titleCreditsFetcherProvider =
     Provider<Future<List<CreditPerson>> Function(Movie)>((ref) {
   final service = ref.read(tmdbServiceProvider);
   return (movie) => _fetchCredits(service, movie);
 });
 
-/// The graph, enriched with each title's FULL cast (by person id) from TMDb.
-/// Async because it fetches credits; falls back to the stored top-5 names per
-/// title when a fetch fails (offline), so it always produces something.
-final relationshipGraphProvider = FutureProvider<RelationshipGraph>((ref) async {
-  final records = await ref.watch(allWatchRecordsProvider.future);
+/// Raw, un-curated credits per watched title, fetched from TMDb. Heavy, but
+/// only recomputed when the watch records change — depth/override tweaks reuse
+/// this cache. Returns titles too so the builder needs no second source.
+final rawTitleCreditsProvider = FutureProvider<
+    ({Map<String, Movie> titles, Map<String, List<CreditPerson>> credits})>(
+  (ref) async {
+    final records = await ref.watch(allWatchRecordsProvider.future);
 
-  // Unique titles keyed by (tmdbId, isTv).
-  final titles = <String, Movie>{};
-  for (final r in records) {
-    titles.putIfAbsent(_titleId(r.movie.tmdbId, r.movie.isTv), () => r.movie);
-  }
-  if (titles.isEmpty) return const RelationshipGraph(nodes: [], edges: []);
+    final titles = <String, Movie>{};
+    for (final r in records) {
+      titles.putIfAbsent(_titleId(r.movie.tmdbId, r.movie.isTv), () => r.movie);
+    }
+    final credits = <String, List<CreditPerson>>{};
+    if (titles.isEmpty) return (titles: titles, credits: credits);
 
-  final fetch = ref.read(titleCreditsFetcherProvider);
-  final creditsByTitle = <String, List<CreditPerson>>{};
-  final entries = titles.entries.toList();
-  for (var i = 0; i < entries.length; i += _kFetchConcurrency) {
-    final chunk = entries.skip(i).take(_kFetchConcurrency);
-    await Future.wait(chunk.map((e) async {
-      creditsByTitle[e.key] = await fetch(e.value);
-    }));
-  }
+    final fetch = ref.read(titleCreditsFetcherProvider);
+    final entries = titles.entries.toList();
+    for (var i = 0; i < entries.length; i += _kFetchConcurrency) {
+      final chunk = entries.skip(i).take(_kFetchConcurrency);
+      await Future.wait(chunk.map((e) async {
+        credits[e.key] = await fetch(e.value);
+      }));
+    }
+    return (titles: titles, credits: credits);
+  },
+);
 
-  return buildGraphFromCredits(titles, creditsByTitle);
+/// The curated graph: raw credits filtered by the prominence default and the
+/// user's manual add/remove/hide overrides. A plain [Provider] over cached
+/// inputs, so depth and override changes rebuild only this cheap step.
+final relationshipGraphProvider = Provider<AsyncValue<RelationshipGraph>>((ref) {
+  final rawAsync = ref.watch(rawTitleCreditsProvider);
+  final overrides = ref.watch(graphOverridesProvider).value ?? GraphOverrides.empty;
+  final depth = ref.watch(graphCastDepthProvider);
+  return rawAsync
+      .whenData((raw) => buildCuratedGraph(raw.titles, raw.credits, overrides, depth));
 });
 
-/// Fetches a title's full credits from TMDb and maps them to [CreditPerson]s.
-/// Prefers TV `aggregate_credits` (the whole recurring cast) over the flat
-/// `credits.cast`. Returns [] on any failure so the caller can fall back.
+/// Fetches a title's full credits from TMDb, capturing billing order and (for
+/// TV) episode counts for the prominence filter. Prefers TV `aggregate_credits`
+/// over the flat `credits.cast`. Returns the stored-names fallback on failure.
 Future<List<CreditPerson>> _fetchCredits(
     TmdbService service, Movie movie) async {
   try {
@@ -82,10 +83,6 @@ Future<List<CreditPerson>> _fetchCredits(
         const [];
     final crewRaw = (credits?['crew'] as List<dynamic>?) ?? const [];
 
-    // The FULL cast is kept intentionally: a real case had a bridge actor
-    // billed ~500th in a big Turkish show's aggregate credits, so any per-title
-    // cap dropped him. The bridge rule (≥2 shared titles) plus the highest-
-    // degree [kMaxPersonNodes] cap bound the final node count instead.
     final people = <CreditPerson>[];
     for (final c in castRaw) {
       final name = (c['name'] as String?)?.trim() ?? '';
@@ -95,6 +92,8 @@ Future<List<CreditPerson>> _fetchCredits(
         name: name,
         profilePath: c['profile_path'] as String?,
         isDirector: false,
+        order: c['order'] as int?,
+        episodeCount: c['total_episode_count'] as int?,
       ));
     }
     for (final c in crewRaw) {
@@ -115,8 +114,9 @@ Future<List<CreditPerson>> _fetchCredits(
   return _fallbackFromStoredNames(movie);
 }
 
-/// Offline fallback: the lossy top-5 `actors` / single `director` strings the
-/// DB already persists. Name-keyed (no ids), so it degrades to v1 behavior.
+/// Offline fallback: the DB's lossy top-5 `actors` / single `director` strings.
+/// These ARE the leads, so [order] is set by list position → they pass the
+/// prominence filter even though TMDb order is unavailable offline.
 List<CreditPerson> _fallbackFromStoredNames(Movie movie) {
   final people = <CreditPerson>[];
   final dir = movie.director;
@@ -130,22 +130,26 @@ List<CreditPerson> _fallbackFromStoredNames(Movie movie) {
   }
   final actors = movie.actors;
   if (actors != null) {
+    var i = 0;
     for (final a in actors.split(',')) {
       final name = a.trim();
       if (name.isNotEmpty) {
-        people.add(CreditPerson(name: name, isDirector: false));
+        people.add(CreditPerson(name: name, isDirector: false, order: i++));
       }
     }
   }
   return people;
 }
 
-/// Pure builder over already-fetched credits — testable without Riverpod.
-/// A person bridges titles when they appear in ≥2 of them; person identity is
-/// the TMDb id when available, else the normalized name.
-RelationshipGraph buildGraphFromCredits(
+/// Pure, testable builder. Includes a person in a title when they're prominent
+/// at [depth], OR promoted (manually added somewhere), OR a manual add for this
+/// title — minus per-title removals and global hides. Then applies the bridge
+/// rule (≥2 titles) and the [kMaxPersonNodes] cap.
+RelationshipGraph buildCuratedGraph(
   Map<String, Movie> titles,
   Map<String, List<CreditPerson>> creditsByTitle,
+  GraphOverrides overrides,
+  CastDepth depth,
 ) {
   final titleNodes = <String, GraphNode>{};
   titles.forEach((id, m) {
@@ -159,26 +163,47 @@ RelationshipGraph buildGraphFromCredits(
     );
   });
 
+  final promoted = overrides.promotedKeys;
   final people = <String, _PersonAgg>{};
-  creditsByTitle.forEach((titleId, credits) {
-    if (!titleNodes.containsKey(titleId)) return;
-    for (final p in credits) {
-      final key = p.id != null ? 'id:${p.id}' : 'nm:${_normalize(p.name)}';
-      if (key == 'nm:') continue;
-      final agg = people.putIfAbsent(
-        key,
-        () => _PersonAgg(key, p.name, p.id, p.profilePath),
-      );
-      agg.profilePath ??= p.profilePath;
-      final role = p.isDirector ? GraphEdgeType.directed : GraphEdgeType.actedIn;
-      final existing = agg.titleRoles[titleId];
-      if (existing == null || role == GraphEdgeType.directed) {
-        agg.titleRoles[titleId] = role;
+
+  void ingest(String titleId, CreditPerson p) {
+    final key = personKey(p);
+    if (key == 'nm:') return;
+    final agg = people.putIfAbsent(
+      key,
+      () => _PersonAgg(key, p.name, p.id, p.profilePath),
+    );
+    agg.profilePath ??= p.profilePath;
+    final role = p.isDirector ? GraphEdgeType.directed : GraphEdgeType.actedIn;
+    final existing = agg.titleRoles[titleId];
+    if (existing == null || role == GraphEdgeType.directed) {
+      agg.titleRoles[titleId] = role;
+    }
+    if (p.isDirector) agg.directedAny = true;
+    if (!p.isDirector) agg.actedAny = true;
+  }
+
+  titles.forEach((titleId, movie) {
+    final tOv = overrides.forTitle(titleId);
+    final removed = tOv.removedKeys;
+    for (final p in creditsByTitle[titleId] ?? const []) {
+      final key = personKey(p);
+      if (removed.contains(key)) continue;
+      if (!isProminent(p, isTv: movie.isTv, depth: depth) &&
+          !promoted.contains(key)) {
+        continue;
       }
-      if (p.isDirector) agg.directedAny = true;
-      if (!p.isDirector) agg.actedAny = true;
+      ingest(titleId, p);
+    }
+    for (final p in tOv.added) {
+      if (removed.contains(personKey(p))) continue;
+      ingest(titleId, p);
     }
   });
+
+  for (final key in overrides.hiddenKeys) {
+    people.remove(key);
+  }
 
   final bridges = people.values.where((p) => p.titleRoles.length >= 2).toList()
     ..sort((a, b) => b.titleRoles.length.compareTo(a.titleRoles.length));
@@ -211,8 +236,16 @@ RelationshipGraph buildGraphFromCredits(
   );
 }
 
-/// Name-only graph builder (no ids). Retained as the pure reference logic used
-/// by unit tests and mirrored by [_fallbackFromStoredNames] at runtime.
+/// Uncurated build (full cast, no overrides) — used by unit tests and as the
+/// [CastDepth.all] equivalent.
+RelationshipGraph buildGraphFromCredits(
+  Map<String, Movie> titles,
+  Map<String, List<CreditPerson>> creditsByTitle,
+) =>
+    buildCuratedGraph(titles, creditsByTitle, GraphOverrides.empty, CastDepth.all);
+
+/// Name-only build from the stored `actors`/`director` strings. Retained as the
+/// pure reference used by unit tests and mirrored by [_fallbackFromStoredNames].
 RelationshipGraph buildRelationshipGraph(List<WatchRecordWithMovie> records) {
   final titles = <String, Movie>{};
   final credits = <String, List<CreditPerson>>{};
@@ -225,9 +258,6 @@ RelationshipGraph buildRelationshipGraph(List<WatchRecordWithMovie> records) {
 }
 
 String _titleId(int tmdbId, bool isTv) => 'title:$tmdbId:$isTv';
-
-String _normalize(String s) =>
-    s.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
 
 String? _imageUrl(String? path) {
   if (path == null || path.isEmpty) return null;

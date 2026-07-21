@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
+import '../../domain/graph_models.dart';
 
-/// Top toolbar: a title, a search field that jumps to a matching node, and a
-/// "fit to screen" action that recenters the whole graph.
+/// Top toolbar: a title, a search field that jumps to a matching node, a
+/// cast-depth (kadro derinliği) selector, and a "fit to screen" action.
 class GraphToolbar extends StatelessWidget {
   final int titleCount;
   final int personCount;
   final ValueChanged<String> onSearch;
   final VoidCallback onFit;
+  final CastDepth depth;
+  final ValueChanged<CastDepth> onDepthChanged;
 
   const GraphToolbar({
     super.key,
@@ -16,7 +19,15 @@ class GraphToolbar extends StatelessWidget {
     required this.personCount,
     required this.onSearch,
     required this.onFit,
+    required this.depth,
+    required this.onDepthChanged,
   });
+
+  static String _depthLabel(CastDepth d) => switch (d) {
+        CastDepth.leads => 'Başroller',
+        CastDepth.featured => 'Öne çıkanlar',
+        CastDepth.all => 'Tüm kadro',
+      };
 
   @override
   Widget build(BuildContext context) {
@@ -65,6 +76,33 @@ class GraphToolbar extends StatelessWidget {
                 ),
               ),
             ),
+          ),
+          PopupMenuButton<CastDepth>(
+            tooltip: 'Kadro derinliği',
+            initialValue: depth,
+            onSelected: onDepthChanged,
+            icon: const Icon(Icons.tune_rounded, color: AppTheme.textSecondary),
+            itemBuilder: (context) => [
+              for (final d in CastDepth.values)
+                PopupMenuItem(
+                  value: d,
+                  child: Row(
+                    children: [
+                      Icon(
+                        d == depth
+                            ? Icons.radio_button_checked_rounded
+                            : Icons.radio_button_unchecked_rounded,
+                        size: 16,
+                        color: d == depth
+                            ? AppTheme.accentColor
+                            : AppTheme.textSecondary,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(_depthLabel(d)),
+                    ],
+                  ),
+                ),
+            ],
           ),
           IconButton(
             tooltip: 'Ekrana sığdır',
