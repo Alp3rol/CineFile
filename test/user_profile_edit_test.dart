@@ -1,10 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:filmdizi/features/auth/controllers/auth_controller.dart';
-import 'package:filmdizi/features/auth/models/user_model.dart';
 
 void main() {
   group('AuthController - Profile Edit Tests', () {

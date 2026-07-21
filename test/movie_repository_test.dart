@@ -13,7 +13,6 @@ import 'package:filmdizi/core/database/app_database.dart';
 import 'package:filmdizi/core/database/database_provider.dart';
 import 'package:filmdizi/core/database/movie_repository.dart';
 import 'package:filmdizi/features/auth/controllers/auth_controller.dart';
-import 'package:drift/drift.dart';
 
 void main() {
   late AppDatabase db;

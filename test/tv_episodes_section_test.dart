@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:filmdizi/core/database/app_database.dart';
-import 'package:filmdizi/core/database/database_provider.dart';
 import 'package:filmdizi/features/auth/controllers/auth_controller.dart';
 import 'package:filmdizi/features/movie_detail/presentation/widgets/tv_episodes_section.dart';
 import 'package:filmdizi/features/movie_detail/presentation/tv_season_provider.dart';
@@ -67,7 +66,7 @@ void main() {
     container.dispose();
   });
 
-  Widget _wrap({
+  Widget wrapWidget({
     required Movie movie,
     required UserMovieSetting? settings,
     bool hasJournalEntry = true,
@@ -101,7 +100,7 @@ void main() {
       createdAt: DateTime.now(),
     );
 
-    await tester.pumpWidget(_wrap(movie: movie, settings: null));
+    await tester.pumpWidget(wrapWidget(movie: movie, settings: null));
     // Let the StreamProvider and FutureProvider both settle.
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
@@ -138,7 +137,7 @@ void main() {
     // Pre-resolve auth so the stream is in AsyncData before the widget mounts.
     await container.read(authStateProvider.future);
 
-    await tester.pumpWidget(_wrap(movie: movie, settings: initialSetting));
+    await tester.pumpWidget(wrapWidget(movie: movie, settings: initialSetting));
     await tester.pumpAndSettle();
 
     // Tapping the first unchecked episode (episode 1)
@@ -194,7 +193,7 @@ void main() {
     // Pre-resolve auth
     await container.read(authStateProvider.future);
 
-    await tester.pumpWidget(_wrap(movie: movie, settings: initialSetting));
+    await tester.pumpWidget(wrapWidget(movie: movie, settings: initialSetting));
     await tester.pumpAndSettle();
 
     // Tap first checked episode (episode 1) to uncheck it
@@ -234,7 +233,7 @@ void main() {
 
     await container.read(authStateProvider.future);
 
-    await tester.pumpWidget(_wrap(movie: movie, settings: initialSetting));
+    await tester.pumpWidget(wrapWidget(movie: movie, settings: initialSetting));
     await tester.pumpAndSettle();
 
     // Episode 2 is not adjacent to lastWatchedEpisode 0, so a bulk-confirm
@@ -271,7 +270,7 @@ void main() {
     await container.read(authStateProvider.future);
 
     var addToJournalRequested = false;
-    await tester.pumpWidget(_wrap(
+    await tester.pumpWidget(wrapWidget(
       movie: movie,
       settings: null,
       hasJournalEntry: false,
@@ -310,7 +309,7 @@ void main() {
 
     await container.read(authStateProvider.future);
 
-    await tester.pumpWidget(_wrap(movie: movie, settings: null, hasJournalEntry: false));
+    await tester.pumpWidget(wrapWidget(movie: movie, settings: null, hasJournalEntry: false));
     await tester.pumpAndSettle();
 
     await tester.tap(find.byKey(const ValueKey('episode_check_1')));
@@ -354,7 +353,7 @@ void main() {
 
     await container.read(authStateProvider.future);
 
-    await tester.pumpWidget(_wrap(movie: movie, settings: initialSetting, totalEpisodes: null));
+    await tester.pumpWidget(wrapWidget(movie: movie, settings: initialSetting, totalEpisodes: null));
     await tester.pumpAndSettle();
 
     await tester.tap(find.byKey(const ValueKey('episode_check_1')));
@@ -394,7 +393,7 @@ void main() {
 
     await container.read(authStateProvider.future);
 
-    await tester.pumpWidget(_wrap(movie: movie, settings: initialSetting));
+    await tester.pumpWidget(wrapWidget(movie: movie, settings: initialSetting));
     await tester.pumpAndSettle();
 
     // lastWatchedEpisode is 0, so episode 1 (overall index 1) is next up.
@@ -422,7 +421,7 @@ void main() {
 
     await container.read(authStateProvider.future);
 
-    await tester.pumpWidget(_wrap(movie: movie, settings: initialSetting));
+    await tester.pumpWidget(wrapWidget(movie: movie, settings: initialSetting));
     await tester.pumpAndSettle();
 
     expect(find.text('Bu Sezonu İzledim'), findsOneWidget);
@@ -467,7 +466,7 @@ void main() {
 
     await container.read(authStateProvider.future);
 
-    await tester.pumpWidget(_wrap(movie: movie, settings: initialSetting));
+    await tester.pumpWidget(wrapWidget(movie: movie, settings: initialSetting));
     await tester.pumpAndSettle();
 
     expect(find.text('Bu Sezonu İzledim'), findsNothing);

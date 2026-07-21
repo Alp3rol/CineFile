@@ -4,7 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:filmdizi/core/database/app_database.dart';
 import 'package:filmdizi/core/database/database_provider.dart';
 import 'package:filmdizi/features/settings/presentation/settings_provider.dart';
-import 'package:drift/drift.dart';
 
 void main() {
   group('BackupService Native Tests', () {
