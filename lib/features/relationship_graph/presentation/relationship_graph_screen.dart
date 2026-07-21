@@ -183,6 +183,8 @@ class _RelationshipGraphScreenState
                     .length,
                 onSearch: _onSearch,
                 onFit: _fitToContent,
+                onResetLayout: _resetNodePositions,
+                isLoading: ref.watch(rawTitleCreditsProvider).isRefreshing,
                 depth: ref.watch(graphCastDepthProvider),
                 onDepthChanged: (d) =>
                     ref.read(graphCastDepthProvider.notifier).state = d,
@@ -277,6 +279,25 @@ class _RelationshipGraphScreenState
     final dx = (_viewport.width - _contentSize.width * s) / 2;
     final dy = (_viewport.height - _contentSize.height * s) / 2;
     _controller.value = _transform(dx, dy, s);
+  }
+
+  void _resetNodePositions() {
+    final graph = _laidOut;
+    if (graph == null) return;
+    for (final n in graph.nodes) {
+      n.pinned = false;
+      n.position = Offset.zero;
+    }
+    setState(() {
+      _contentSize = computeForceDirectedLayout(graph);
+      _fitToContent();
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Düğüm konumları otomatik dizilime sıfırlandı.'),
+        duration: Duration(seconds: 2),
+      ),
+    );
   }
 
   void _centerOn(GraphNode node, {double scale = 1.0}) {
