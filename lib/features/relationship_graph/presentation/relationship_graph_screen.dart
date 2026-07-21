@@ -49,21 +49,52 @@ class _RelationshipGraphScreenState
 
   @override
   Widget build(BuildContext context) {
-    final graph = ref.watch(relationshipGraphProvider);
+    final asyncGraph = ref.watch(relationshipGraphProvider);
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: SafeArea(child: _body(graph)),
+      body: SafeArea(
+        child: asyncGraph.when(
+          // Keep the current graph on screen while a records change refetches
+          // credits, instead of flashing back to the spinner.
+          skipLoadingOnReload: true,
+          data: _body,
+          loading: _loading,
+          error: (_, _) => _errorState(),
+        ),
+      ),
     );
   }
 
-  Widget _body(RelationshipGraph? graph) {
-    if (graph == null) {
-      return const Center(
-        child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentColor),
+  Widget _loading() {
+    return const Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentColor),
+          ),
+          SizedBox(height: 16),
+          Text('Bağlantılar analiz ediliyor…',
+              style: TextStyle(color: AppTheme.textSecondary)),
+        ],
+      ),
+    );
+  }
+
+  Widget _errorState() {
+    return const Center(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 40),
+        child: Text(
+          'Bağlantılar yüklenemedi. İnternet bağlantını kontrol edip tekrar dene.',
+          textAlign: TextAlign.center,
+          style: TextStyle(color: AppTheme.textSecondary),
         ),
-      );
-    }
+      ),
+    );
+  }
+
+  Widget _body(RelationshipGraph graph) {
     if (!graph.hasConnections) return const GraphEmptyState();
 
     // Lay out once per distinct graph instance (the provider only returns a
@@ -274,8 +305,17 @@ class _RelationshipGraphScreenState
       ));
       return;
     }
-    // Person node: name-based v1 has no id, resolve it on demand (same pattern
-    // as movie_detail_cast_list).
+    // Person node from full credits already carries the TMDb person id → open
+    // the profile directly, no lookup needed.
+    if (node.tmdbId != null) {
+      unawaited(Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => ActorProfileScreen(actorId: node.tmdbId!)),
+      ));
+      return;
+    }
+    // Fallback (offline name-based node): resolve the id from the name, same
+    // pattern as movie_detail_cast_list.
     final messenger = ScaffoldMessenger.of(context);
     messenger.showSnackBar(
       SnackBar(

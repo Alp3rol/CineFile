@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/api_constants.dart';
+import '../../../core/database/app_database.dart';
 import '../../../core/database/database_provider.dart';
+import '../../../core/network/tmdb_service.dart';
 import '../domain/graph_models.dart';
 
 /// Safety cap on the number of "bridge" people rendered. The bridge rule
@@ -9,91 +11,190 @@ import '../domain/graph_models.dart';
 /// (highest degree) and drop the long tail so the canvas stays responsive.
 const int kMaxPersonNodes = 400;
 
-/// Builds the İlişki Ağı from the current user's watch history. Mirrors
-/// [insightsProvider]: derives a value object from [allWatchRecordsProvider]
-/// so it recomputes automatically whenever logs change, and works for web
-/// guests too (name-based, so no network needed). Returns null while records
-/// are still loading; the screen distinguishes loading vs. empty separately.
-final relationshipGraphProvider = Provider<RelationshipGraph?>((ref) {
-  final list = ref.watch(allWatchRecordsProvider).value;
-  if (list == null) return null;
-  return buildRelationshipGraph(list);
+/// How many cast members (top billing order) we keep per title. The DB only
+/// persists the top 5, which misses bridge actors billed lower (a real
+/// complaint: an actor starring in one show but 6th-billed in another never
+/// connected them). Fetching full credits and keeping a generous slice fixes
+/// that while bounding node counts.
+const int _kCastPerTitle = 20;
+
+/// Max titles fetched concurrently, so a large library doesn't open hundreds of
+/// simultaneous TMDb connections. Repeat runs are cheap (Dio memory cache).
+const int _kFetchConcurrency = 6;
+
+/// One person in a title's credits. [id] is the TMDb person id when known
+/// (full-credits path); null only on the offline/stored-names fallback, where
+/// people are matched by normalized name instead.
+class CreditPerson {
+  final int? id;
+  final String name;
+  final String? profilePath;
+  final bool isDirector;
+  const CreditPerson({
+    this.id,
+    required this.name,
+    this.profilePath,
+    required this.isDirector,
+  });
+}
+
+/// Indirection point for fetching a title's credits, so widget tests can
+/// override it with a network-free stub (returning [] → the builder falls back
+/// to the movie's stored names, which are set in test fixtures).
+final titleCreditsFetcherProvider =
+    Provider<Future<List<CreditPerson>> Function(Movie)>((ref) {
+  final service = ref.read(tmdbServiceProvider);
+  return (movie) => _fetchCredits(service, movie);
 });
 
-/// Pure builder (no Riverpod) so it can be unit-tested directly with a hand-
-/// built record list. v1 links titles by the lossy comma-separated
-/// `movie.director` / `movie.actors` name strings — the only person data the
-/// DB currently persists. v2 will swap the person key from normalized-name to
-/// TMDb personId without changing this function's shape.
-RelationshipGraph buildRelationshipGraph(List<WatchRecordWithMovie> records) {
-  // 1. One node per unique watched title, keyed by (tmdbId, isTv) since a
-  //    movie and a show can share a numeric id.
+/// The graph, enriched with each title's FULL cast (by person id) from TMDb.
+/// Async because it fetches credits; falls back to the stored top-5 names per
+/// title when a fetch fails (offline), so it always produces something.
+final relationshipGraphProvider = FutureProvider<RelationshipGraph>((ref) async {
+  final records = await ref.watch(allWatchRecordsProvider.future);
+
+  // Unique titles keyed by (tmdbId, isTv).
+  final titles = <String, Movie>{};
+  for (final r in records) {
+    titles.putIfAbsent(_titleId(r.movie.tmdbId, r.movie.isTv), () => r.movie);
+  }
+  if (titles.isEmpty) return const RelationshipGraph(nodes: [], edges: []);
+
+  final fetch = ref.read(titleCreditsFetcherProvider);
+  final creditsByTitle = <String, List<CreditPerson>>{};
+  final entries = titles.entries.toList();
+  for (var i = 0; i < entries.length; i += _kFetchConcurrency) {
+    final chunk = entries.skip(i).take(_kFetchConcurrency);
+    await Future.wait(chunk.map((e) async {
+      creditsByTitle[e.key] = await fetch(e.value);
+    }));
+  }
+
+  return buildGraphFromCredits(titles, creditsByTitle);
+});
+
+/// Fetches a title's full credits from TMDb and maps them to [CreditPerson]s.
+/// Prefers TV `aggregate_credits` (the whole recurring cast) over the flat
+/// `credits.cast`. Returns [] on any failure so the caller can fall back.
+Future<List<CreditPerson>> _fetchCredits(
+    TmdbService service, Movie movie) async {
+  try {
+    final data = await service.getMovieDetails(movie.tmdbId, isTv: movie.isTv);
+    if (data == null) return const [];
+    final credits = data['credits'] as Map<String, dynamic>?;
+    final aggregate = data['aggregate_credits'] as Map<String, dynamic>?;
+    final castRaw = (aggregate?['cast'] as List<dynamic>?) ??
+        (credits?['cast'] as List<dynamic>?) ??
+        const [];
+    final crewRaw = (credits?['crew'] as List<dynamic>?) ?? const [];
+
+    final people = <CreditPerson>[];
+    for (final c in castRaw.take(_kCastPerTitle)) {
+      final name = (c['name'] as String?)?.trim() ?? '';
+      if (name.isEmpty) continue;
+      people.add(CreditPerson(
+        id: c['id'] as int?,
+        name: name,
+        profilePath: c['profile_path'] as String?,
+        isDirector: false,
+      ));
+    }
+    for (final c in crewRaw) {
+      if (c['job'] != 'Director') continue;
+      final name = (c['name'] as String?)?.trim() ?? '';
+      if (name.isEmpty) continue;
+      people.add(CreditPerson(
+        id: c['id'] as int?,
+        name: name,
+        profilePath: c['profile_path'] as String?,
+        isDirector: true,
+      ));
+    }
+    if (people.isNotEmpty) return people;
+  } catch (_) {
+    // fall through to the stored-names fallback
+  }
+  return _fallbackFromStoredNames(movie);
+}
+
+/// Offline fallback: the lossy top-5 `actors` / single `director` strings the
+/// DB already persists. Name-keyed (no ids), so it degrades to v1 behavior.
+List<CreditPerson> _fallbackFromStoredNames(Movie movie) {
+  final people = <CreditPerson>[];
+  final dir = movie.director;
+  if (dir != null) {
+    for (final d in dir.split(',')) {
+      final name = d.trim();
+      if (name.isNotEmpty) {
+        people.add(CreditPerson(name: name, isDirector: true));
+      }
+    }
+  }
+  final actors = movie.actors;
+  if (actors != null) {
+    for (final a in actors.split(',')) {
+      final name = a.trim();
+      if (name.isNotEmpty) {
+        people.add(CreditPerson(name: name, isDirector: false));
+      }
+    }
+  }
+  return people;
+}
+
+/// Pure builder over already-fetched credits — testable without Riverpod.
+/// A person bridges titles when they appear in ≥2 of them; person identity is
+/// the TMDb id when available, else the normalized name.
+RelationshipGraph buildGraphFromCredits(
+  Map<String, Movie> titles,
+  Map<String, List<CreditPerson>> creditsByTitle,
+) {
   final titleNodes = <String, GraphNode>{};
-  for (final r in records) {
-    final m = r.movie;
-    final id = _titleId(m.tmdbId, m.isTv);
-    titleNodes.putIfAbsent(
-      id,
-      () => GraphNode(
-        id: id,
-        type: m.isTv ? GraphNodeType.tv : GraphNodeType.movie,
-        label: m.title,
-        imageUrl: _posterUrl(m.posterPath),
-        tmdbId: m.tmdbId,
-        isTv: m.isTv,
-      ),
+  titles.forEach((id, m) {
+    titleNodes[id] = GraphNode(
+      id: id,
+      type: m.isTv ? GraphNodeType.tv : GraphNodeType.movie,
+      label: m.title,
+      imageUrl: _imageUrl(m.posterPath),
+      tmdbId: m.tmdbId,
+      isTv: m.isTv,
     );
-  }
+  });
 
-  // 2. Aggregate people across titles. Person identity is the normalized name.
   final people = <String, _PersonAgg>{};
-  void addPerson(String rawName, String titleId, GraphEdgeType role) {
-    final name = rawName.trim();
-    if (name.isEmpty) return;
-    final key = _normalize(name);
-    if (key.isEmpty) return;
-    final agg = people.putIfAbsent(key, () => _PersonAgg(name));
-    // A director credit outranks an acting credit for the same title (so the
-    // edge reads as "directed" rather than a coincidental cast listing).
-    final existing = agg.titleRoles[titleId];
-    if (existing == null || role == GraphEdgeType.directed) {
-      agg.titleRoles[titleId] = role;
-    }
-    if (role == GraphEdgeType.directed) agg.directedAny = true;
-    if (role == GraphEdgeType.actedIn) agg.actedAny = true;
-  }
-
-  for (final r in records) {
-    final m = r.movie;
-    final id = _titleId(m.tmdbId, m.isTv);
-    final dir = m.director;
-    if (dir != null) {
-      for (final d in dir.split(',')) {
-        addPerson(d, id, GraphEdgeType.directed);
+  creditsByTitle.forEach((titleId, credits) {
+    if (!titleNodes.containsKey(titleId)) return;
+    for (final p in credits) {
+      final key = p.id != null ? 'id:${p.id}' : 'nm:${_normalize(p.name)}';
+      if (key == 'nm:') continue;
+      final agg = people.putIfAbsent(
+        key,
+        () => _PersonAgg(key, p.name, p.id, p.profilePath),
+      );
+      agg.profilePath ??= p.profilePath;
+      final role = p.isDirector ? GraphEdgeType.directed : GraphEdgeType.actedIn;
+      final existing = agg.titleRoles[titleId];
+      if (existing == null || role == GraphEdgeType.directed) {
+        agg.titleRoles[titleId] = role;
       }
+      if (p.isDirector) agg.directedAny = true;
+      if (!p.isDirector) agg.actedAny = true;
     }
-    final actors = m.actors;
-    if (actors != null) {
-      for (final a in actors.split(',')) {
-        addPerson(a, id, GraphEdgeType.actedIn);
-      }
-    }
-  }
+  });
 
-  // 3. Bridge rule: keep only people connecting ≥2 distinct titles, capped to
-  //    the highest-degree kMaxPersonNodes.
   final bridges = people.values.where((p) => p.titleRoles.length >= 2).toList()
     ..sort((a, b) => b.titleRoles.length.compareTo(a.titleRoles.length));
 
   final personNodes = <GraphNode>[];
   final edges = <GraphEdge>[];
   for (final p in bridges.take(kMaxPersonNodes)) {
-    final pid = 'person:${_normalize(p.displayName)}';
+    final pid = 'person:${p.key}';
     personNodes.add(GraphNode(
       id: pid,
-      // Icon/color hint only; each edge still carries its own precise role.
       type: p.directedAny ? GraphNodeType.director : GraphNodeType.actor,
       label: p.displayName,
+      imageUrl: _imageUrl(p.profilePath),
+      tmdbId: p.id,
       degree: p.titleRoles.length,
     ));
     p.titleRoles.forEach((titleId, role) {
@@ -102,7 +203,6 @@ RelationshipGraph buildRelationshipGraph(List<WatchRecordWithMovie> records) {
     });
   }
 
-  // 4. Drop isolated titles (no bridge touches them) — they'd be lone islands.
   final connectedTitleIds = <String>{for (final e in edges) e.sourceId};
   final keptTitles =
       titleNodes.values.where((n) => connectedTitleIds.contains(n.id)).toList();
@@ -113,23 +213,36 @@ RelationshipGraph buildRelationshipGraph(List<WatchRecordWithMovie> records) {
   );
 }
 
+/// Name-only graph builder (no ids). Retained as the pure reference logic used
+/// by unit tests and mirrored by [_fallbackFromStoredNames] at runtime.
+RelationshipGraph buildRelationshipGraph(List<WatchRecordWithMovie> records) {
+  final titles = <String, Movie>{};
+  final credits = <String, List<CreditPerson>>{};
+  for (final r in records) {
+    final id = _titleId(r.movie.tmdbId, r.movie.isTv);
+    titles.putIfAbsent(id, () => r.movie);
+    credits[id] = _fallbackFromStoredNames(r.movie);
+  }
+  return buildGraphFromCredits(titles, credits);
+}
+
 String _titleId(int tmdbId, bool isTv) => 'title:$tmdbId:$isTv';
 
-/// Turkish names vary in casing/spacing across TMDb payloads; normalize to a
-/// stable dedup key. Not locale-aware (Dart's toLowerCase isn't), but
-/// consistent, which is all dedup needs.
 String _normalize(String s) =>
     s.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
 
-String? _posterUrl(String? posterPath) {
-  if (posterPath == null || posterPath.isEmpty) return null;
-  return '${ApiConstants.imagePathW185}$posterPath';
+String? _imageUrl(String? path) {
+  if (path == null || path.isEmpty) return null;
+  return '${ApiConstants.imagePathW185}$path';
 }
 
 class _PersonAgg {
+  final String key;
   final String displayName;
+  final int? id;
+  String? profilePath;
   final Map<String, GraphEdgeType> titleRoles = {}; // titleId -> role
   bool directedAny = false;
   bool actedAny = false;
-  _PersonAgg(this.displayName);
+  _PersonAgg(this.key, this.displayName, this.id, this.profilePath);
 }

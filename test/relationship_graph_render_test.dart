@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:filmdizi/core/database/app_database.dart';
 import 'package:filmdizi/core/database/database_provider.dart';
+import 'package:filmdizi/features/relationship_graph/presentation/relationship_graph_provider.dart';
 import 'package:filmdizi/features/relationship_graph/presentation/relationship_graph_screen.dart';
 
 WatchRecordWithMovie _rec(int id, String title, {String? actors}) {
@@ -30,11 +31,37 @@ WatchRecordWithMovie _rec(int id, String title, {String? actors}) {
   return WatchRecordWithMovie(record, movie);
 }
 
+// Network-free credits fetcher: mirrors the production offline fallback by
+// deriving CreditPerson entries from the movie's stored actor/director strings,
+// so tests exercise the real graph build without hitting TMDb.
+List<CreditPerson> _creditsFromMovie(Movie m) {
+  final list = <CreditPerson>[];
+  final dir = m.director;
+  if (dir != null) {
+    for (final d in dir.split(',')) {
+      if (d.trim().isNotEmpty) {
+        list.add(CreditPerson(name: d.trim(), isDirector: true));
+      }
+    }
+  }
+  final actors = m.actors;
+  if (actors != null) {
+    for (final a in actors.split(',')) {
+      if (a.trim().isNotEmpty) {
+        list.add(CreditPerson(name: a.trim(), isDirector: false));
+      }
+    }
+  }
+  return list;
+}
+
 Widget _app(List<WatchRecordWithMovie> records) {
   return ProviderScope(
     overrides: [
       allWatchRecordsProvider.overrideWith((ref) => Stream.value(records)),
       allMovieSettingsProvider.overrideWith((ref) => Stream.value(const {})),
+      titleCreditsFetcherProvider
+          .overrideWithValue((Movie m) async => _creditsFromMovie(m)),
     ],
     child: const MaterialApp(home: RelationshipGraphScreen()),
   );
