@@ -12,6 +12,7 @@ class GraphToolbar extends StatefulWidget {
   final VoidCallback onFit;
   final VoidCallback? onResetLayout;
   final VoidCallback? onFindPath;
+  final VoidCallback? onOpenDna;
   final bool isLoading;
   final CastDepth depth;
   final ValueChanged<CastDepth> onDepthChanged;
@@ -24,6 +25,7 @@ class GraphToolbar extends StatefulWidget {
     required this.onFit,
     this.onResetLayout,
     this.onFindPath,
+    this.onOpenDna,
     this.isLoading = false,
     required this.depth,
     required this.onDepthChanged,
@@ -194,6 +196,15 @@ class _GraphToolbarState extends State<GraphToolbar> {
                     ),
                 ],
               ),
+
+              if (widget.onOpenDna != null)
+                IconButton(
+                  tooltip: 'CineDNA Analitiği',
+                  constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
+                  padding: EdgeInsets.zero,
+                  onPressed: widget.onOpenDna,
+                  icon: const Text('🧬', style: TextStyle(fontSize: 16)),
+                ),
 
               if (widget.onFindPath != null)
                 IconButton(

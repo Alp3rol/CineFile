@@ -11,6 +11,7 @@ import '../domain/graph_models.dart';
 import '../domain/graph_path_finder.dart';
 import 'graph_overrides_provider.dart';
 import 'relationship_graph_provider.dart';
+import 'screens/cine_dna_screen.dart';
 import 'widgets/add_person_sheet.dart';
 import 'widgets/graph_canvas.dart';
 import 'widgets/graph_empty_state.dart';
@@ -202,6 +203,7 @@ class _RelationshipGraphScreenState
                       graph: graph,
                       onPathFound: _handlePathFound,
                     ),
+                    onOpenDna: () => CineDnaScreen.navigate(context, graph),
                     isLoading: ref.watch(rawTitleCreditsProvider).isRefreshing,
                     depth: ref.watch(graphCastDepthProvider),
                     onDepthChanged: (d) =>

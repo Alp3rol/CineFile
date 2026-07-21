@@ -3,7 +3,9 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../domain/graph_models.dart';
+import 'discover_mode_sheet.dart';
 import 'graph_style.dart';
+import 'relationship_explanation_sheet.dart';
 
 /// Slide-in detail panel for the selected node. Lists the node's direct
 /// relationships (tap one to jump to it) and offers a deep link into the
@@ -129,7 +131,7 @@ class GraphInspectorPanel extends StatelessWidget {
                 padding: EdgeInsets.zero,
                 itemCount: neighbors.length,
                 separatorBuilder: (_, _) => const SizedBox(height: 6),
-                itemBuilder: (context, i) => _neighborTile(neighbors[i]),
+                itemBuilder: (context, i) => _neighborTile(context, neighbors[i]),
               ),
             ),
           ),
@@ -153,32 +155,58 @@ class GraphInspectorPanel extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 8),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: () => onOpenDetail(node),
-              icon: Icon(
-                  node.type.isTitle
-                      ? Icons.open_in_new_rounded
-                      : Icons.person_search_rounded,
-                  size: 18),
-              label: Text(node.type.isTitle ? 'Detaya git' : 'Profili aç'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: color.withValues(alpha: 0.18),
-                foregroundColor: color,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
+          const SizedBox(height: 12),
+          // Discover Mode & Detail action buttons.
+          Row(
+            children: [
+              if (node.type.isPerson)
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      DiscoverModeSheet.show(
+                        context,
+                        personNode: node,
+                        watchedNeighbors: neighbors,
+                      );
+                    },
+                    icon: const Icon(Icons.stars_rounded,
+                        size: 16, color: Color(0xFFFFC107)),
+                    label: const Text('Keşfet (Öneriler)'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0xFFFFC107),
+                      side: const BorderSide(color: Color(0xFFFFC107)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                ),
+              if (node.type.isPerson) const SizedBox(width: 8),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () => onOpenDetail(node),
+                  icon: Icon(
+                      node.type.isTitle
+                          ? Icons.open_in_new_rounded
+                          : Icons.person_search_rounded,
+                      size: 16),
+                  label: Text(node.type.isTitle ? 'Detaya git' : 'Profili aç'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: color.withValues(alpha: 0.18),
+                    foregroundColor: color,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _neighborTile(GraphNode n) {
+  Widget _neighborTile(BuildContext context, GraphNode n) {
     final color = GraphStyle.colorFor(n.type);
     return GestureDetector(
       onTap: () => onSelectNeighbor(n.id),
@@ -194,11 +222,31 @@ class GraphInspectorPanel extends StatelessWidget {
                 style: const TextStyle(
                     fontSize: 13, color: AppTheme.textPrimary)),
           ),
+          IconButton(
+            visualDensity: VisualDensity.compact,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 26, minHeight: 26),
+            tooltip: 'Neden bağlı?',
+            onPressed: () {
+              final title = node.type.isTitle ? node : n;
+              final person = node.type.isPerson ? node : n;
+              RelationshipExplanationSheet.show(
+                context,
+                titleNode: title,
+                personNode: person,
+                edgeType: person.type == GraphNodeType.director
+                    ? GraphEdgeType.directed
+                    : GraphEdgeType.actedIn,
+              );
+            },
+            icon: const Icon(Icons.help_outline_rounded,
+                size: 15, color: AppTheme.textSecondary),
+          ),
           // Remove this specific link (person↔title). Tooltip clarifies scope.
           IconButton(
             visualDensity: VisualDensity.compact,
             padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+            constraints: const BoxConstraints(minWidth: 26, minHeight: 26),
             tooltip: 'Bu bağlantıyı kaldır',
             onPressed: () => onRemoveNeighbor(n),
             icon: const Icon(Icons.close_rounded,
