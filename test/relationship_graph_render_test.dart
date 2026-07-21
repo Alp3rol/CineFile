@@ -92,6 +92,13 @@ void main() {
     // Toolbar + at least one title node label present.
     expect(find.text('İlişki Ağı'), findsOneWidget);
     expect(find.text('Son Yaz'), findsWidgets);
+
+    // Verify reset layout button exists and is interactive
+    final resetButton = find.byTooltip('Konumları sıfırla');
+    expect(resetButton, findsOneWidget);
+    await tester.tap(resetButton);
+    await tester.pumpAndSettle();
+    expect(find.text('Düğüm konumları otomatik dizilime sıfırlandı.'), findsOneWidget);
   });
 
   testWidgets('shows empty state when nothing connects', (tester) async {
