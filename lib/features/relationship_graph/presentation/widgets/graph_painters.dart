@@ -14,10 +14,10 @@ class GraphGridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final minorPaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.035)
+      ..color = Colors.white.withValues(alpha: 0.012)
       ..strokeWidth = 1;
     final majorPaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.07)
+      ..color = Colors.white.withValues(alpha: 0.028)
       ..strokeWidth = 1;
 
     for (double x = 0; x <= size.width; x += _minor) {
@@ -37,7 +37,7 @@ class GraphGridPainter extends CustomPainter {
 /// Draws the edges as cubic bezier curves between node centers. When a node is
 /// selected, edges touching it are highlighted and all others fade back, giving
 /// the "focus" effect. Edge color encodes the relationship (actor vs director);
-/// thickness scales gently with the bridging person's degree.
+/// thickness and opacity scale with Connection Strength (bridge degree).
 class GraphEdgePainter extends CustomPainter {
   final List<GraphEdge> edges;
   final Map<String, GraphNode> nodesById;
@@ -72,23 +72,48 @@ class GraphEdgePainter extends CustomPainter {
 
       final key1 = '${e.sourceId}<->${e.targetId}';
       final key2 = '${e.targetId}<->${e.sourceId}';
-      final isPathEdge = hasPath && (pathEdgeKeys.contains(key1) || pathEdgeKeys.contains(key2));
+      final isPathEdge =
+          hasPath && (pathEdgeKeys.contains(key1) || pathEdgeKeys.contains(key2));
 
-      final lit = isPathEdge || (!hasPath && (!hasFocus ||
-          (highlightIds.contains(e.sourceId) &&
-              highlightIds.contains(e.targetId))));
+      final lit = isPathEdge ||
+          (!hasPath &&
+              (!hasFocus ||
+                  (highlightIds.contains(e.sourceId) &&
+                      highlightIds.contains(e.targetId))));
 
-      final base = isPathEdge ? const Color(0xFFFFC107) : GraphStyle.edgeColor(e.type);
-      final degree = b.degree; // person node degree
-      final width = isPathEdge ? 4.0 : (1.2 + (degree - 2).clamp(0, 8) * 0.35);
+      final base =
+          isPathEdge ? const Color(0xFFFFC107) : GraphStyle.edgeColor(e.type);
+      final degree = b.degree; // person node degree (Connection Strength)
+
+      // Tiered Connection Strength: Width & Opacity
+      final double width;
+      final double baseAlpha;
+      if (isPathEdge) {
+        width = 4.5;
+        baseAlpha = 0.95;
+      } else if (degree >= 4) {
+        // Strong connection
+        width = 3.2;
+        baseAlpha = 0.90;
+      } else if (degree == 3) {
+        // Medium connection
+        width = 2.0;
+        baseAlpha = 0.60;
+      } else {
+        // Weak connection
+        width = 1.1;
+        baseAlpha = 0.25;
+      }
+
+      final strokeAlpha = lit
+          ? baseAlpha
+          : (hasFocus || hasPath ? 0.03 : baseAlpha * 0.4);
 
       final paint = Paint()
         ..style = PaintingStyle.stroke
         ..strokeCap = StrokeCap.round
-        ..color = isPathEdge
-            ? const Color(0xFFFFC107).withValues(alpha: 0.95)
-            : base.withValues(alpha: lit ? 0.8 : (hasFocus || hasPath ? 0.04 : 0.4))
-        ..strokeWidth = lit ? width : 1;
+        ..color = base.withValues(alpha: strokeAlpha)
+        ..strokeWidth = lit ? width : 1.0;
 
       final p1 = a.position;
       final p2 = b.position;

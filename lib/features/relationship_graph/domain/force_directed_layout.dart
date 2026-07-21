@@ -31,11 +31,9 @@ Size computeForceDirectedLayout(
   // pass is O(n²). Small graphs get a fully-settled look; large ones stay fast.
   final iters = iterations ?? (n < 60 ? 300 : (n < 200 ? 150 : 80));
 
-  // Fixed ideal edge length so node spacing stays consistent and compact no
-  // matter how big the graph is — a larger graph grows in extent rather than
-  // in the gaps between neighbors, which keeps the fitted zoom comfortable
-  // instead of shrinking everything to a distant speck-cloud.
-  const k = 120.0;
+  // Fixed ideal edge length so node spacing stays generous and readable no
+  // matter how big the graph is.
+  const k = 180.0;
   final side = k * math.sqrt(n.toDouble()) * 1.3;
 
   // Index lookup for edge endpoints.

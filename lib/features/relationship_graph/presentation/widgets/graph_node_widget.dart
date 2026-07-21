@@ -9,8 +9,9 @@ import 'graph_style.dart';
 /// it with `left: pos.dx - size.width/2, top: pos.dy - size.height/2` and edges
 /// connect to the same center point.
 Size graphNodeSize(GraphNode node) {
-  if (node.type.isTitle) return const Size(128, 56);
-  final d = 40 + (node.degree.clamp(2, 14) - 2) * 3.0; // 40..76
+  if (node.type.isTitle) return const Size(130, 56);
+  // Heat-Graph Node Score: scale node diameter based on bridge degree (connections count)
+  final d = (44.0 + (node.degree.clamp(2, 12) - 2) * 3.5).clamp(44.0, 80.0);
   return Size(d, d);
 }
 
