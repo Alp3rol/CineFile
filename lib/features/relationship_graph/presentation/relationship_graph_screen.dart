@@ -8,6 +8,7 @@ import '../../actor_profile/presentation/actor_profile_screen.dart';
 import '../../movie_detail/presentation/movie_detail_screen.dart';
 import '../domain/force_directed_layout.dart';
 import '../domain/graph_models.dart';
+import '../domain/graph_path_finder.dart';
 import 'graph_overrides_provider.dart';
 import 'relationship_graph_provider.dart';
 import 'widgets/add_person_sheet.dart';
@@ -18,6 +19,7 @@ import 'widgets/graph_inspector_panel.dart';
 import 'widgets/graph_mini_map.dart';
 import 'widgets/graph_style.dart';
 import 'widgets/graph_toolbar.dart';
+import 'widgets/path_finder_sheet.dart';
 
 /// İlişki Ağı — the interactive node graph of the user's watched titles linked
 /// by shared actors/directors. Derives its data from [relationshipGraphProvider]
@@ -41,6 +43,7 @@ class _RelationshipGraphScreenState
   bool _didInitialFit = false;
 
   String? _selectedId;
+  GraphPathResult? _activePath;
   bool _showActors = true;
   bool _showDirectors = true;
 
@@ -141,6 +144,11 @@ class _RelationshipGraphScreenState
     final selectedNode =
         _selectedId == null ? null : byId[_selectedId!];
 
+    final pathEdgeKeys = _activePath?.edges
+            .map((e) => '${e.sourceId}<->${e.targetId}')
+            .toSet() ??
+        const {};
+
     return LayoutBuilder(
       builder: (context, constraints) {
         _viewport = constraints.biggest;
@@ -163,43 +171,50 @@ class _RelationshipGraphScreenState
                 visibleEdges: visibleEdges,
                 selectedId: _selectedId,
                 highlightIds: highlightIds,
+                pathEdgeKeys: pathEdgeKeys,
                 onSelect: (id) => setState(() => _selectedId = id),
                 onNavigate: _navigateTo,
                 onNodeLongPress: _showNodeMenu,
               ),
             ),
 
-            // Toolbar.
+            // Top Overlay (Toolbar + Filter Bar).
             Positioned(
               top: 8,
               left: 12,
               right: 12,
-              child: GraphToolbar(
-                titleCount: visibleNodeIds
-                    .where((id) => byId[id]?.type.isTitle ?? false)
-                    .length,
-                personCount: visibleNodeIds
-                    .where((id) => byId[id]?.type.isPerson ?? false)
-                    .length,
-                onSearch: _onSearch,
-                onFit: _fitToContent,
-                onResetLayout: _resetNodePositions,
-                isLoading: ref.watch(rawTitleCreditsProvider).isRefreshing,
-                depth: ref.watch(graphCastDepthProvider),
-                onDepthChanged: (d) =>
-                    ref.read(graphCastDepthProvider.notifier).state = d,
-              ),
-            ),
-
-            // Filter bar.
-            Positioned(
-              top: 84,
-              left: 12,
-              child: GraphFilterBar(
-                showActors: _showActors,
-                showDirectors: _showDirectors,
-                onActorsChanged: (v) => setState(() => _showActors = v),
-                onDirectorsChanged: (v) => setState(() => _showDirectors = v),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  GraphToolbar(
+                    titleCount: visibleNodeIds
+                        .where((id) => byId[id]?.type.isTitle ?? false)
+                        .length,
+                    personCount: visibleNodeIds
+                        .where((id) => byId[id]?.type.isPerson ?? false)
+                        .length,
+                    onSearch: _onSearch,
+                    onFit: _fitToContent,
+                    onResetLayout: _resetNodePositions,
+                    onFindPath: () => PathFinderSheet.show(
+                      context,
+                      graph: graph,
+                      onPathFound: _handlePathFound,
+                    ),
+                    isLoading: ref.watch(rawTitleCreditsProvider).isRefreshing,
+                    depth: ref.watch(graphCastDepthProvider),
+                    onDepthChanged: (d) =>
+                        ref.read(graphCastDepthProvider.notifier).state = d,
+                  ),
+                  const SizedBox(height: 8),
+                  GraphFilterBar(
+                    showActors: _showActors,
+                    showDirectors: _showDirectors,
+                    onActorsChanged: (v) => setState(() => _showActors = v),
+                    onDirectorsChanged: (v) => setState(() => _showDirectors = v),
+                  ),
+                ],
               ),
             ),
 
@@ -259,10 +274,56 @@ class _RelationshipGraphScreenState
                 ),
               ),
             ),
+
+            // Active Path Banner.
+            if (_activePath != null)
+              Positioned(
+                bottom: 12,
+                right: 12,
+                child: Material(
+                  color: AppTheme.surfaceColor,
+                  borderRadius: BorderRadius.circular(16),
+                  elevation: 6,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 6),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.alt_route_rounded,
+                            color: Color(0xFFFFC107), size: 20),
+                        const SizedBox(width: 8),
+                        Text(
+                          '${_activePath!.distance} Adımda Bağlantı Bulundu',
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 13),
+                        ),
+                        const SizedBox(width: 4),
+                        IconButton(
+                          icon: const Icon(Icons.close_rounded, size: 18),
+                          onPressed: () => setState(() => _activePath = null),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
           ],
         );
       },
     );
+  }
+
+  void _handlePathFound(GraphPathResult? res) {
+    setState(() => _activePath = res);
+    if (res == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Seçilen iki öğe arasında bağlantı bulunamadı.'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   void _fitToContent() {

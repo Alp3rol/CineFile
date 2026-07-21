@@ -89,6 +89,8 @@ class _MiniMapPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    canvas.clipRect(Offset.zero & box);
+
     final scale = math.min(
         box.width / contentSize.width, box.height / contentSize.height);
     final ox = (box.width - contentSize.width * scale) / 2;
@@ -114,12 +116,20 @@ class _MiniMapPainter extends CustomPainter {
       ox + bottomRight.dx * scale,
       oy + bottomRight.dy * scale,
     );
+    // Draw viewport fill
+    canvas.drawRect(
+      rect,
+      Paint()
+        ..style = PaintingStyle.fill
+        ..color = AppTheme.accentColor.withValues(alpha: 0.12),
+    );
+    // Draw viewport border
     canvas.drawRect(
       rect,
       Paint()
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 1
-        ..color = AppTheme.accentColor.withValues(alpha: 0.9),
+        ..strokeWidth = 1.2
+        ..color = AppTheme.accentColor.withValues(alpha: 0.8),
     );
   }
 
