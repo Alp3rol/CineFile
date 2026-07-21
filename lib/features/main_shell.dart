@@ -8,7 +8,7 @@ import 'home/presentation/home_screen.dart';
 import 'search/presentation/search_screen.dart';
 import 'journal/presentation/journal_screen.dart';
 import 'community/presentation/community_feed_screen.dart';
-import 'settings/presentation/settings_screen.dart';
+import 'relationship_graph/presentation/relationship_graph_screen.dart';
 import '../core/services/notification_service.dart';
 import '../core/database/database_provider.dart';
 import 'settings/presentation/settings_provider.dart';
@@ -30,7 +30,7 @@ class _MainShellState extends ConsumerState<MainShell> {
     SearchScreen(),
     JournalScreen(),
     CommunityFeedScreen(),
-    SettingsScreen(),
+    RelationshipGraphScreen(),
   ];
 
   @override
@@ -88,7 +88,7 @@ class _MainShellState extends ConsumerState<MainShell> {
                   _buildNavItem(selectedIndex, 1, Icons.search_rounded, Icons.search_outlined, 'Keşfet'),
                   _buildNavItem(selectedIndex, 2, Icons.book_rounded, Icons.book_outlined, 'Günlük'),
                   _buildNavItem(selectedIndex, 3, Icons.people_rounded, Icons.people_outline_rounded, 'Topluluk'),
-                  _buildNavItem(selectedIndex, 4, Icons.settings_rounded, Icons.settings_outlined, 'Ayarlar'),
+                  _buildNavItem(selectedIndex, 4, Icons.hub_rounded, Icons.hub_outlined, 'Ağ'),
                 ],
               ),
             ),
