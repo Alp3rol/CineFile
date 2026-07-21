@@ -11,12 +11,6 @@ import '../domain/graph_models.dart';
 /// (highest degree) and drop the long tail so the canvas stays responsive.
 const int kMaxPersonNodes = 400;
 
-/// How many cast members (top billing order) we keep per title. The DB only
-/// persists the top 5, which misses bridge actors billed lower (a real
-/// complaint: an actor starring in one show but 6th-billed in another never
-/// connected them). Fetching full credits and keeping a generous slice fixes
-/// that while bounding node counts.
-const int _kCastPerTitle = 20;
 
 /// Max titles fetched concurrently, so a large library doesn't open hundreds of
 /// simultaneous TMDb connections. Repeat runs are cheap (Dio memory cache).
@@ -88,8 +82,12 @@ Future<List<CreditPerson>> _fetchCredits(
         const [];
     final crewRaw = (credits?['crew'] as List<dynamic>?) ?? const [];
 
+    // The FULL cast is kept intentionally: a real case had a bridge actor
+    // billed ~500th in a big Turkish show's aggregate credits, so any per-title
+    // cap dropped him. The bridge rule (≥2 shared titles) plus the highest-
+    // degree [kMaxPersonNodes] cap bound the final node count instead.
     final people = <CreditPerson>[];
-    for (final c in castRaw.take(_kCastPerTitle)) {
+    for (final c in castRaw) {
       final name = (c['name'] as String?)?.trim() ?? '';
       if (name.isEmpty) continue;
       people.add(CreditPerson(
