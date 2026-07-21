@@ -150,10 +150,21 @@ class GraphNodeWidget extends StatelessWidget {
             ? [BoxShadow(color: color.withValues(alpha: 0.55), blurRadius: 16)]
             : [BoxShadow(color: color.withValues(alpha: 0.18), blurRadius: 8)],
       ),
-      child: Center(
-        child: Icon(GraphStyle.iconFor(node.type),
-            size: size.width * 0.42, color: color),
-      ),
+      clipBehavior: Clip.antiAlias,
+      child: (node.imageUrl != null && node.imageUrl!.isNotEmpty)
+          ? AppNetworkImage(
+              imageUrl: node.imageUrl!,
+              seed: node.label,
+              fit: BoxFit.cover,
+              errorWidget: Center(
+                child: Icon(GraphStyle.iconFor(node.type),
+                    size: size.width * 0.42, color: color),
+              ),
+            )
+          : Center(
+              child: Icon(GraphStyle.iconFor(node.type),
+                  size: size.width * 0.42, color: color),
+            ),
     );
   }
 

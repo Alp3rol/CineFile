@@ -121,6 +121,56 @@ void main() {
     });
   });
 
+  group('buildGraphFromCredits (full-credits, id-based)', () {
+    Movie m(int id, String title, {bool isTv = false}) => Movie(
+          tmdbId: id,
+          title: title,
+          isTv: isTv,
+          runtime: 100,
+          createdAt: DateTime(2024, 1, 1),
+        );
+
+    test('same person id bridges titles despite differing name spellings', () {
+      // The real bug: an actor billed in the top-5 of one title but lower in
+      // another. With full credits keyed by id, they still bridge — and even a
+      // Halil Babür / Halil Babur spelling mismatch collapses to one node.
+      final titles = {
+        'title:1:false': m(1, 'Son Yaz'),
+        'title:2:true': m(2, 'Çukur', isTv: true),
+      };
+      final credits = {
+        'title:1:false': const [
+          CreditPerson(id: 99, name: 'Halil Babür', isDirector: false),
+        ],
+        'title:2:true': const [
+          CreditPerson(id: 99, name: 'Halil Babur', isDirector: false),
+        ],
+      };
+      final g = buildGraphFromCredits(titles, credits);
+      expect(g.personCount, 1);
+      final p = g.nodes.firstWhere((n) => n.type.isPerson);
+      expect(p.tmdbId, 99);
+      expect(p.degree, 2);
+      expect(g.titleCount, 2);
+    });
+
+    test('a person in only one title is not a bridge', () {
+      final titles = {'title:1:false': m(1, 'A'), 'title:2:false': m(2, 'B')};
+      final credits = {
+        'title:1:false': const [
+          CreditPerson(id: 1, name: 'Shared', isDirector: false),
+          CreditPerson(id: 2, name: 'Solo', isDirector: false),
+        ],
+        'title:2:false': const [
+          CreditPerson(id: 1, name: 'Shared', isDirector: false),
+        ],
+      };
+      final g = buildGraphFromCredits(titles, credits);
+      final ids = g.nodes.where((n) => n.type.isPerson).map((n) => n.tmdbId);
+      expect(ids, [1]);
+    });
+  });
+
   group('computeForceDirectedLayout', () {
     RelationshipGraph sample() => buildRelationshipGraph([
           _rec(1, 'Son Yaz', actors: 'Ali Atay, Alperen Duymaz'),
