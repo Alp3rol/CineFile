@@ -15,6 +15,11 @@ class GraphInspectorPanel extends StatelessWidget {
   final ValueChanged<GraphNode> onOpenDetail;
   final VoidCallback onClose;
 
+  /// Curation callbacks (İlişki Ağı kişiselleştirme).
+  final VoidCallback onAddPerson; // title node → open add-person sheet
+  final VoidCallback onHidePerson; // person node → hide globally
+  final ValueChanged<GraphNode> onRemoveNeighbor; // remove a neighbor link
+
   const GraphInspectorPanel({
     super.key,
     required this.node,
@@ -22,6 +27,9 @@ class GraphInspectorPanel extends StatelessWidget {
     required this.onSelectNeighbor,
     required this.onOpenDetail,
     required this.onClose,
+    required this.onAddPerson,
+    required this.onHidePerson,
+    required this.onRemoveNeighbor,
   });
 
   @override
@@ -126,6 +134,26 @@ class GraphInspectorPanel extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
+          // Curation action (title → Kişi Ekle, person → Grafta Gizle).
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: node.type.isTitle ? onAddPerson : onHidePerson,
+              icon: Icon(
+                  node.type.isTitle
+                      ? Icons.person_add_alt_1_rounded
+                      : Icons.visibility_off_rounded,
+                  size: 18),
+              label: Text(node.type.isTitle ? 'Kişi Ekle' : 'Grafta Gizle'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppTheme.textSecondary,
+                side: const BorderSide(color: AppTheme.borderColor),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
@@ -166,8 +194,16 @@ class GraphInspectorPanel extends StatelessWidget {
                 style: const TextStyle(
                     fontSize: 13, color: AppTheme.textPrimary)),
           ),
-          const Icon(Icons.chevron_right_rounded,
-              size: 16, color: AppTheme.textSecondary),
+          // Remove this specific link (person↔title). Tooltip clarifies scope.
+          IconButton(
+            visualDensity: VisualDensity.compact,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+            tooltip: 'Bu bağlantıyı kaldır',
+            onPressed: () => onRemoveNeighbor(n),
+            icon: const Icon(Icons.close_rounded,
+                size: 15, color: AppTheme.textSecondary),
+          ),
         ],
       ),
     );

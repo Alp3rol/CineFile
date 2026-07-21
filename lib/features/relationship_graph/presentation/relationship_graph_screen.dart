@@ -8,12 +8,15 @@ import '../../actor_profile/presentation/actor_profile_screen.dart';
 import '../../movie_detail/presentation/movie_detail_screen.dart';
 import '../domain/force_directed_layout.dart';
 import '../domain/graph_models.dart';
+import 'graph_overrides_provider.dart';
 import 'relationship_graph_provider.dart';
+import 'widgets/add_person_sheet.dart';
 import 'widgets/graph_canvas.dart';
 import 'widgets/graph_empty_state.dart';
 import 'widgets/graph_filter_bar.dart';
 import 'widgets/graph_inspector_panel.dart';
 import 'widgets/graph_mini_map.dart';
+import 'widgets/graph_style.dart';
 import 'widgets/graph_toolbar.dart';
 
 /// İlişki Ağı — the interactive node graph of the user's watched titles linked
@@ -162,6 +165,7 @@ class _RelationshipGraphScreenState
                 highlightIds: highlightIds,
                 onSelect: (id) => setState(() => _selectedId = id),
                 onNavigate: _navigateTo,
+                onNodeLongPress: _showNodeMenu,
               ),
             ),
 
@@ -179,6 +183,9 @@ class _RelationshipGraphScreenState
                     .length,
                 onSearch: _onSearch,
                 onFit: _fitToContent,
+                depth: ref.watch(graphCastDepthProvider),
+                onDepthChanged: (d) =>
+                    ref.read(graphCastDepthProvider.notifier).state = d,
               ),
             ),
 
@@ -241,6 +248,10 @@ class _RelationshipGraphScreenState
                             },
                             onOpenDetail: _navigateTo,
                             onClose: () => setState(() => _selectedId = null),
+                            onAddPerson: () => _addPersonTo(selectedNode),
+                            onHidePerson: () => _hidePerson(selectedNode),
+                            onRemoveNeighbor: (neighbor) =>
+                                _removeLink(selectedNode, neighbor),
                           ),
                         ),
                 ),
@@ -346,5 +357,103 @@ class _RelationshipGraphScreenState
         const SnackBar(content: Text('Profil aranırken bir hata oluştu.')),
       );
     }
+  }
+
+  // --- Kişisel kürasyon ---
+
+  /// The stable person key encoded in a person node's id (`'person:<key>'`).
+  String _personKeyOf(GraphNode personNode) => personNode.id.startsWith('person:')
+      ? personNode.id.substring('person:'.length)
+      : personNode.id;
+
+  void _addPersonTo(GraphNode titleNode) {
+    if (!titleNode.type.isTitle || titleNode.tmdbId == null) return;
+    AddPersonSheet.show(context,
+        tmdbId: titleNode.tmdbId!,
+        isTv: titleNode.isTv,
+        titleLabel: titleNode.label);
+  }
+
+  Future<void> _hidePerson(GraphNode personNode) async {
+    if (!personNode.type.isPerson) return;
+    await ref
+        .read(graphOverridesControllerProvider)
+        .hidePerson(_personKeyOf(personNode));
+    if (mounted) setState(() => _selectedId = null);
+  }
+
+  Future<void> _removeLink(GraphNode selected, GraphNode neighbor) async {
+    final title = selected.type.isTitle ? selected : neighbor;
+    final person = selected.type.isPerson ? selected : neighbor;
+    if (!title.type.isTitle || !person.type.isPerson || title.tmdbId == null) {
+      return;
+    }
+    await ref
+        .read(graphOverridesControllerProvider)
+        .removePersonFromTitle(title.tmdbId!, title.isTv, _personKeyOf(person));
+  }
+
+  /// Long-press context menu on a node.
+  void _showNodeMenu(GraphNode node) {
+    setState(() => _selectedId = node.id);
+    final isTitle = node.type.isTitle;
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppTheme.surfaceColor,
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 10),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                  color: Colors.white24,
+                  borderRadius: BorderRadius.circular(2)),
+            ),
+            ListTile(
+              leading: Icon(GraphStyle.iconFor(node.type),
+                  color: GraphStyle.colorFor(node.type)),
+              title: Text(node.label,
+                  maxLines: 1, overflow: TextOverflow.ellipsis),
+              subtitle: Text(GraphStyle.labelFor(node.type)),
+            ),
+            const Divider(height: 1),
+            if (isTitle)
+              ListTile(
+                leading: const Icon(Icons.person_add_alt_1_rounded),
+                title: const Text('Kişi Ekle'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _addPersonTo(node);
+                },
+              )
+            else
+              ListTile(
+                leading: const Icon(Icons.visibility_off_rounded),
+                title: const Text('Grafta Gizle'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _hidePerson(node);
+                },
+              ),
+            ListTile(
+              leading: Icon(isTitle
+                  ? Icons.open_in_new_rounded
+                  : Icons.person_search_rounded),
+              title: Text(isTitle ? 'Detaya git' : 'Profili aç'),
+              onTap: () {
+                Navigator.pop(ctx);
+                _navigateTo(node);
+              },
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
   }
 }

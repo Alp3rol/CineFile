@@ -20,6 +20,7 @@ class GraphCanvas extends StatefulWidget {
 
   final ValueChanged<String?> onSelect;
   final ValueChanged<GraphNode> onNavigate;
+  final ValueChanged<GraphNode> onNodeLongPress;
 
   const GraphCanvas({
     super.key,
@@ -32,6 +33,7 @@ class GraphCanvas extends StatefulWidget {
     required this.highlightIds,
     required this.onSelect,
     required this.onNavigate,
+    required this.onNodeLongPress,
   });
 
   @override
@@ -131,6 +133,7 @@ class _GraphCanvasState extends State<GraphCanvas> {
           showLabel: showLabels,
           onTap: () => widget.onSelect(node.id),
           onDoubleTap: () => widget.onNavigate(node),
+          onLongPress: () => widget.onNodeLongPress(node),
           onDragStart: () {
             node.pinned = true;
             if (widget.selectedId != node.id) widget.onSelect(node.id);

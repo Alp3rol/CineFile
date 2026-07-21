@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:filmdizi/core/database/app_database.dart';
 import 'package:filmdizi/core/database/database_provider.dart';
 import 'package:filmdizi/features/relationship_graph/domain/graph_models.dart';
+import 'package:filmdizi/features/relationship_graph/domain/graph_overrides.dart';
 import 'package:filmdizi/features/relationship_graph/domain/force_directed_layout.dart';
 import 'package:filmdizi/features/relationship_graph/presentation/relationship_graph_provider.dart';
 
@@ -168,6 +169,108 @@ void main() {
       final g = buildGraphFromCredits(titles, credits);
       final ids = g.nodes.where((n) => n.type.isPerson).map((n) => n.tmdbId);
       expect(ids, [1]);
+    });
+  });
+
+  group('buildCuratedGraph (prominence + overrides)', () {
+    Movie m(int id, String title, {bool isTv = false}) => Movie(
+          tmdbId: id,
+          title: title,
+          isTv: isTv,
+          runtime: 100,
+          createdAt: DateTime(2024, 1, 1),
+        );
+    CreditPerson lead(int id, String name) =>
+        CreditPerson(id: id, name: name, isDirector: false, order: 1);
+    CreditPerson extra(int id, String name) =>
+        CreditPerson(id: id, name: name, isDirector: false, order: 400);
+
+    final titles = {
+      'title:1:false': m(1, 'A'),
+      'title:2:false': m(2, 'B'),
+    };
+    String keyOf(int id) => personKeyFor(id: id, name: 'x');
+
+    test('featured depth drops low-billed extras but keeps leads', () {
+      final credits = {
+        'title:1:false': [lead(1, 'Lead'), extra(9, 'Extra')],
+        'title:2:false': [lead(1, 'Lead'), extra(9, 'Extra')],
+      };
+      final g = buildCuratedGraph(
+          titles, credits, GraphOverrides.empty, CastDepth.featured);
+      final personIds = g.nodes.where((n) => n.type.isPerson).map((n) => n.tmdbId);
+      expect(personIds, [1]); // extra (order 400) filtered out by default
+    });
+
+    test('CastDepth.all keeps the low-billed extra (v1 behavior)', () {
+      final credits = {
+        'title:1:false': [extra(9, 'Extra')],
+        'title:2:false': [extra(9, 'Extra')],
+      };
+      final g = buildCuratedGraph(
+          titles, credits, GraphOverrides.empty, CastDepth.all);
+      expect(g.personCount, 1);
+    });
+
+    test('manual add forces a bridge TMDb never credited (Behzat Ç. case)', () {
+      // Person 7 leads title A but is entirely absent from title B's credits.
+      final credits = {
+        'title:1:false': [lead(7, 'Halil Babür')],
+        'title:2:false': <CreditPerson>[],
+      };
+      final overrides = GraphOverrides(perTitle: {
+        'title:2:false': TitleOverride(
+            added: [const CreditPerson(id: 7, name: 'Halil Babür', isDirector: false)]),
+      });
+      final g =
+          buildCuratedGraph(titles, credits, overrides, CastDepth.featured);
+      expect(g.personCount, 1);
+      final p = g.nodes.firstWhere((n) => n.type.isPerson);
+      expect(p.tmdbId, 7);
+      expect(p.degree, 2);
+    });
+
+    test('promoted person bypasses prominence in their other title too', () {
+      // Person 9 is a low-billed extra in A, and manually added to B → promoted,
+      // so their A credit is included despite the depth filter → bridge forms.
+      final credits = {
+        'title:1:false': [extra(9, 'Guest')],
+        'title:2:false': <CreditPerson>[],
+      };
+      final overrides = GraphOverrides(perTitle: {
+        'title:2:false': TitleOverride(
+            added: [const CreditPerson(id: 9, name: 'Guest', isDirector: false)]),
+      });
+      final g =
+          buildCuratedGraph(titles, credits, overrides, CastDepth.featured);
+      expect(g.personCount, 1);
+      expect(g.nodes.firstWhere((n) => n.type.isPerson).degree, 2);
+    });
+
+    test('global hide removes a person from the graph', () {
+      final credits = {
+        'title:1:false': [lead(1, 'Lead')],
+        'title:2:false': [lead(1, 'Lead')],
+      };
+      final overrides = GraphOverrides(hiddenKeys: {keyOf(1)});
+      final g =
+          buildCuratedGraph(titles, credits, overrides, CastDepth.featured);
+      expect(g.personCount, 0);
+      expect(g.hasConnections, isFalse);
+    });
+
+    test('remove-from-title drops the link only for that title', () {
+      final credits = {
+        'title:1:false': [lead(1, 'Lead')],
+        'title:2:false': [lead(1, 'Lead')],
+      };
+      final overrides = GraphOverrides(perTitle: {
+        'title:2:false': TitleOverride(removedKeys: {keyOf(1)}),
+      });
+      final g =
+          buildCuratedGraph(titles, credits, overrides, CastDepth.featured);
+      // Now only in title A → no longer a bridge.
+      expect(g.personCount, 0);
     });
   });
 

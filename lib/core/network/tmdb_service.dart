@@ -524,6 +524,39 @@ class TmdbService {
     }
   }
 
+  /// Search people by name, returning the full result list (id, name,
+  /// profile_path, known_for_department) — used by the İlişki Ağı "add person"
+  /// picker, where [searchPersonId]'s first-result-only shape isn't enough.
+  Future<List<Map<String, dynamic>>> searchPeople(String query,
+      {String language = 'tr-TR'}) async {
+    if (_apiKey.isEmpty || query.trim().isEmpty) {
+      return [];
+    }
+    try {
+      final response = await _dio.get(
+        '/search/person',
+        queryParameters: {
+          'api_key': _apiKey,
+          'query': query,
+          'language': language,
+          'page': 1,
+        },
+      );
+      final results = (response.data['results'] as List<dynamic>? ?? const []);
+      return results
+          .whereType<Map<String, dynamic>>()
+          .map((r) => {
+                'id': r['id'],
+                'name': r['name'],
+                'profile_path': r['profile_path'],
+                'known_for_department': r['known_for_department'],
+              })
+          .toList();
+    } on DioException catch (e) {
+      throw Exception('TMDb Person Search Hatası: ${e.message}');
+    }
+  }
+
   /// Discover movies by genres, crew, or cast
   Future<List<Map<String, dynamic>>> discoverMovies({
     String? withGenres,
