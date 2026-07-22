@@ -43,6 +43,9 @@ class GraphNode {
   /// Written by the layout engine and by drag interactions.
   Offset position;
 
+  /// Cluster grouping identifier for map graph mode.
+  int? clusterId;
+
   /// True once the user has dragged this node; the layout engine then leaves
   /// it fixed where the user placed it.
   bool pinned;
@@ -56,6 +59,7 @@ class GraphNode {
     this.isTv = false,
     this.degree = 0,
     this.position = Offset.zero,
+    this.clusterId,
     this.pinned = false,
   });
 }
