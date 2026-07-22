@@ -12,6 +12,11 @@
 .swiftpm/
 migrate_working_dir/
 
+# AI Configuration
+.claude/
+CLAUDE.md
+
+
 # IntelliJ related
 *.iml
 *.ipr
