@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../core/utils/safe_parsers.dart';
 
 // A community feed post. Three kinds today:
 //   - 'movie': a snapshot of ONE diary entry the user chose to share, plus
@@ -101,22 +102,23 @@ class CommunityPost {
       userAvatarUrl: map['userAvatarUrl'] as String? ?? '',
       type: map['type'] as String? ?? 'movie',
       caption: map['caption'] as String? ?? '',
-      createdAt: (map['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      starredBy: List<String>.from(map['starredBy'] ?? []),
-      commentCount: (map['commentCount'] as num?)?.toInt() ?? 0,
-      movieId: (map['movieId'] as num?)?.toInt(),
-      isTv: map['isTv'] == null ? null : (map['isTv'] == true || map['isTv'] == 1),
+      createdAt: parseDateTime(map['createdAt']),
+      starredBy: parseStringList(map['starredBy']),
+      commentCount: parseInt(map['commentCount']) ?? 0,
+      movieId: parseInt(map['movieId']),
+      isTv: map['isTv'] == null ? null : parseBool(map['isTv']),
       movieTitle: map['movieTitle'] as String?,
       moviePosterPath: map['moviePosterPath'] as String?,
-      releaseYear: (map['releaseYear'] as num?)?.toInt(),
-      rating: (map['rating'] as num?)?.toDouble(),
+      releaseYear: parseInt(map['releaseYear']),
+      rating: parseDouble(map['rating']),
       mood: map['mood'] as String?,
-      watchDate: (map['watchDate'] as Timestamp?)?.toDate(),
+      watchDate: parseNullableDateTime(map['watchDate']),
       entries: (map['entries'] as List<dynamic>? ?? [])
           .map((e) {
-            final entry = Map<String, dynamic>.from(e as Map);
+            if (e is! Map) return <String, dynamic>{};
+            final entry = Map<String, dynamic>.from(e);
             final ts = entry['watchDate'];
-            if (ts is Timestamp) entry['watchDate'] = ts.toDate();
+            entry['watchDate'] = parseNullableDateTime(ts);
             return entry;
           })
           .toList(),

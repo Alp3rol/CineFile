@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../features/auth/controllers/auth_controller.dart';
+import '../utils/safe_parsers.dart';
 import 'app_database.dart';
 import 'database_provider.dart';
 import 'movie_repository.dart';
@@ -86,12 +87,12 @@ Future<void> cleanupDuplicateGroup(WidgetRef ref, DuplicateWatchGroup group) asy
         final record = r.record;
         for (final doc in query.docs) {
           final data = doc.data();
-          final docWatchDate = (data['watchDate'] as Timestamp?)?.toDate();
+          final docWatchDate = parseNullableDateTime(data['watchDate']);
           final isHashCodeMatch = doc.id.hashCode == record.id;
           final isExactMatch = docWatchDate != null &&
               docWatchDate.isAtSameMomentAs(record.watchDate) &&
-              data['watchNumber'] == record.watchNumber &&
-              data['episodeCount'] == record.episodeCount;
+              parseInt(data['watchNumber']) == record.watchNumber &&
+              parseInt(data['episodeCount']) == record.episodeCount;
           if (isHashCodeMatch || isExactMatch) {
             docsToDelete.add(doc.reference);
             break;

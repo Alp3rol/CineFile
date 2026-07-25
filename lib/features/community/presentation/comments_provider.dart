@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../core/utils/safe_parsers.dart';
 
 class CommentModel {
   final String id;
@@ -36,7 +37,7 @@ class CommentModel {
       username: map['username'] as String? ?? 'Bilinmeyen Kullanıcı',
       userAvatarUrl: map['userAvatarUrl'] as String? ?? 'https://api.dicebear.com/7.x/bottts/png?seed=unknown',
       text: map['text'] as String? ?? '',
-      createdAt: (map['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      createdAt: parseDateTime(map['createdAt']),
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/database/database_provider.dart';
 import '../../../../core/database/app_database.dart';
+import '../../../../core/utils/safe_parsers.dart';
 
 class DiaryLogModel {
   final String id;
@@ -111,31 +112,31 @@ class DiaryLogModel {
       userId: map['userId'] as String? ?? '',
       username: map['username'] as String? ?? '',
       userAvatarUrl: map['userAvatarUrl'] as String? ?? '',
-      movieId: (map['movieId'] as num?)?.toInt() ?? 0,
+      movieId: parseInt(map['movieId']) ?? 0,
       movieTitle: map['movieTitle'] as String? ?? '',
       moviePosterPath: map['moviePosterPath'] as String?,
       movieBackdropPath: map['movieBackdropPath'] as String?,
-      releaseYear: ((map['movieReleaseYear'] ?? map['releaseYear']) as num?)?.toInt(),
-      runtime: ((map['movieRuntime'] ?? map['runtime']) as num?)?.toInt(),
+      releaseYear: parseInt(map['movieReleaseYear'] ?? map['releaseYear']),
+      runtime: parseInt(map['movieRuntime'] ?? map['runtime']),
       genres: (map['movieGenres'] ?? map['genres']) as String?,
       director: (map['movieDirector'] ?? map['director']) as String?,
       actors: (map['movieActors'] ?? map['actors']) as String?,
       overview: (map['movieOverview'] ?? map['overview']) as String?,
-      isTv: map['isTv'] == true || map['isTv'] == 1,
-      totalEpisodes: ((map['movieTotalEpisodes'] ?? map['totalEpisodes']) as num?)?.toInt(),
-      watchDate: (map['watchDate'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      isTv: parseBool(map['isTv']),
+      totalEpisodes: parseInt(map['movieTotalEpisodes'] ?? map['totalEpisodes']),
+      watchDate: parseDateTime(map['watchDate']) ?? DateTime.now(),
       watchPlace: map['watchPlace'] as String?,
       watchCompanion: map['watchCompanion'] as String?,
-      rating: (map['rating'] as num?)?.toDouble() ?? 0.0,
+      rating: parseDouble(map['rating']) ?? 0.0,
       mood: map['mood'] as String? ?? '🍿',
       notes: map['notes'] as String?,
-      watchNumber: (map['watchNumber'] as num?)?.toInt() ?? 1,
+      watchNumber: parseInt(map['watchNumber']) ?? 1,
       tags: map['tags'] as String?,
-      episodeCount: (map['episodeCount'] as num?)?.toInt() ?? 1,
-      createdAt: (map['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      starredBy: List<String>.from(map['starredBy'] ?? []),
-      commentCount: (map['commentCount'] as num?)?.toInt() ?? 0,
-      isPublic: map['isPublic'] == true || map['isPublic'] == 1,
+      episodeCount: parseInt(map['episodeCount']) ?? 1,
+      createdAt: parseDateTime(map['createdAt']) ?? DateTime.now(),
+      starredBy: parseStringList(map['starredBy']),
+      commentCount: parseInt(map['commentCount']) ?? 0,
+      isPublic: parseBool(map['isPublic']),
     );
   }
 
