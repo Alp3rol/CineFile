@@ -10,12 +10,16 @@ import 'features/auth/presentation/auth_gate.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_core_web/firebase_core_web.dart';
+import 'package:firebase_auth_web/firebase_auth_web.dart';
+import 'package:cloud_firestore_web/cloud_firestore_web.dart';
 import 'firebase_options.dart';
 
 final firebaseInitProvider = FutureProvider<FirebaseApp>((ref) async {
   if (kIsWeb) {
     try {
       FirebaseCoreWeb.registerWith(webPluginRegistrar);
+      FirebaseAuthWeb.registerWith(webPluginRegistrar);
+      FirebaseFirestoreWeb.registerWith(webPluginRegistrar);
     } catch (_) {}
   }
   if (Firebase.apps.isNotEmpty) {
@@ -34,6 +38,8 @@ void main() async {
   if (kIsWeb) {
     try {
       FirebaseCoreWeb.registerWith(webPluginRegistrar);
+      FirebaseAuthWeb.registerWith(webPluginRegistrar);
+      FirebaseFirestoreWeb.registerWith(webPluginRegistrar);
     } catch (_) {}
   }
 
