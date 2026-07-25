@@ -1,65 +1,43 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/theme/app_theme.dart';
+import '../../auth/controllers/auth_controller.dart';
 import '../../auth/presentation/widgets/user_profile_avatar_button.dart';
-import '../../../../core/widgets/scroll_to_top_button.dart';
 import 'widgets/settings_backup_section.dart';
-import 'widgets/settings_credits_footer.dart';
 import 'widgets/settings_preferences_section.dart';
 import 'widgets/settings_tmdb_attribution.dart';
 
-
-class SettingsScreen extends ConsumerStatefulWidget {
+class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
   @override
-  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final canPop = Navigator.of(context).canPop();
 
-class _SettingsScreenState extends ConsumerState<SettingsScreen> {
-  final ScrollController _scrollController = ScrollController();
-  bool _showScrollToTop = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _scrollController.addListener(_onScroll);
-  }
-
-  @override
-  void dispose() {
-    _scrollController.removeListener(_onScroll);
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  void _onScroll() {
-    final show = _scrollController.offset > 200;
-    if (show != _showScrollToTop) {
-      setState(() {
-        _showScrollToTop = show;
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Sticky Screen Title & Profile Avatar
+            // Sticky Screen Title with Back Button & Profile Avatar
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                  if (canPop) ...[
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                    const SizedBox(width: 4),
+                  ],
                   Text(
                     'Ayarlar',
                     style: Theme.of(context).textTheme.displayLarge,
                   ),
+                  const Spacer(),
                   const UserProfileAvatarButton(),
                 ],
               ),
@@ -68,37 +46,76 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             // Scrollable Content
             Expanded(
               child: SingleChildScrollView(
-                controller: _scrollController,
-                padding: const EdgeInsets.only(left: 20, right: 20, bottom: 120),
+                padding: const EdgeInsets.only(left: 20, right: 20, bottom: 100),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SettingsPreferencesSection(),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 24),
 
                     const SettingsBackupSection(),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 24),
 
                     const SettingsTmdbAttribution(),
                     const SizedBox(height: 32),
 
-                    const SettingsCreditsFooter(),
+                    // Sign Out (Çıkış Yap) Button
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.redAccent.withValues(alpha: 0.15),
+                          foregroundColor: Colors.redAccent,
+                          elevation: 0,
+                          side: const BorderSide(color: Colors.redAccent, width: 1.2),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        icon: const Icon(Icons.logout_rounded, size: 20),
+                        label: Text(
+                          'Çıkış Yap',
+                          style: GoogleFonts.outfit(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        onPressed: () async {
+                          final confirm = await showDialog<bool>(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              backgroundColor: AppTheme.surfaceColor,
+                              title: const Text('Çıkış Yap', style: TextStyle(color: Colors.white)),
+                              content: const Text(
+                                'Hesabınızdan çıkış yapmak istediğinize emin misiniz?',
+                                style: TextStyle(color: Colors.white70),
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.of(context).pop(false),
+                                  child: const Text('İptal', style: TextStyle(color: Colors.white70)),
+                                ),
+                                TextButton(
+                                  onPressed: () => Navigator.of(context).pop(true),
+                                  child: const Text('Çıkış Yap', style: TextStyle(color: Colors.redAccent)),
+                                ),
+                              ],
+                            ),
+                          );
+
+                          if (confirm == true && context.mounted) {
+                            await ref.read(authControllerProvider).signOut();
+                          }
+                        },
+                      ),
+                    ),
                   ],
                 ),
               ),
             ),
           ],
         ),
-      ),
-      floatingActionButton: ScrollToTopButton(
-        onPressed: () {
-          _scrollController.animateTo(
-            0,
-            duration: const Duration(milliseconds: 500),
-            curve: Curves.easeInOut,
-          );
-        },
-        show: _showScrollToTop,
       ),
     );
   }

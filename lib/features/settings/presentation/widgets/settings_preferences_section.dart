@@ -22,7 +22,7 @@ class SettingsPreferencesSection extends ConsumerWidget {
     required ValueChanged<bool> onChanged,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
       child: Row(
         children: [
           Icon(icon, size: 20, color: AppTheme.textSecondary),
@@ -52,7 +52,7 @@ class SettingsPreferencesSection extends ConsumerWidget {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         child: Row(
           children: [
             Icon(icon, size: 20, color: AppTheme.textSecondary),

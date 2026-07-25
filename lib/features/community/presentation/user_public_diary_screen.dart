@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../movie_detail/presentation/movie_detail_screen.dart';
+import '../../relationship_graph/presentation/screens/cine_twin_screen.dart';
 
 // Renders a "Günlüğünü Paylaş" post's FROZEN entries snapshot — the list
 // passed in is exactly what was captured at share time (see
@@ -24,6 +25,15 @@ class UserPublicDiaryScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.bolt_rounded, color: AppTheme.accentColor),
+            tooltip: 'CineTwin Uyumunu Gör',
+            onPressed: () {
+              CineTwinScreen.navigate(context, username, entries);
+            },
+          ),
+        ],
       ),
       body: SafeArea(
         child: entries.isEmpty

@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../auth/models/user_model.dart';
 import '../../../auth/presentation/user_profile_screen.dart';
+import '../../../relationship_graph/presentation/screens/cine_twin_screen.dart';
 import 'follow_button.dart';
 
 // Shared row for a user search result — avatar + @username + follower
@@ -51,7 +52,14 @@ class UserSearchResultTile extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            SizedBox(width: 110, child: FollowButton(targetUserId: user.id)),
+            IconButton(
+              icon: const Icon(Icons.bolt_rounded, color: AppTheme.accentColor, size: 20),
+              tooltip: 'CineTwin Uyumunu Gör',
+              onPressed: () {
+                CineTwinScreen.navigate(context, user.username, []);
+              },
+            ),
+            SizedBox(width: 100, child: FollowButton(targetUserId: user.id)),
           ],
         ),
       ),
