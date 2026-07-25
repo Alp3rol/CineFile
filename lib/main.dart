@@ -14,17 +14,32 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   GoogleFonts.config.allowRuntimeFetching = true;
   await initializeDateFormatting('tr_TR', null);
+
   try {
     debugPrint('Initializing Firebase...');
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+    }
     debugPrint('Firebase initialized successfully!');
   } catch (e, stack) {
     debugPrint('CRITICAL ERROR during Firebase init: $e');
     debugPrint(stack.toString());
+
+    // Fallback: If Firebase apps is still empty, retry with web options directly
+    if (Firebase.apps.isEmpty) {
+      try {
+        await Firebase.initializeApp(
+          options: DefaultFirebaseOptions.web,
+        );
+        debugPrint('Fallback Firebase init succeeded!');
+      } catch (e2) {
+        debugPrint('Fallback Firebase init failed: $e2');
+      }
+    }
   }
-  
+
   runApp(
     const ProviderScope(
       child: MyApp(),
