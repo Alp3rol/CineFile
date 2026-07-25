@@ -286,24 +286,24 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
 
           final backdropPath = movieData['backdrop_path'] as String?;
           final posterPath = movieData['poster_path'] as String?;
-          final title = movieData['title'] as String;
-          final tagline = movieData['tagline'] as String? ?? '';
-          final overview = movieData['overview'] as String? ?? 'Özet bulunmuyor.';
+          final title = (movieData['title'] ?? movieData['name'] ?? movieData['original_title'] ?? movieData['original_name'] ?? 'Bilinmeyen Yapım').toString();
+          final tagline = (movieData['tagline'] ?? '').toString();
+          final overview = (movieData['overview'] ?? 'Özet bulunmuyor.').toString();
 
-          final releaseDateStr = movieData['release_date'] as String? ?? '';
-          final year = releaseDateStr.split('-').first;
-          final runtime = movieData['runtime'] as int? ?? 0;
+          final releaseDateStr = (movieData['release_date'] ?? movieData['first_air_date'] ?? '').toString();
+          final year = releaseDateStr.isNotEmpty ? releaseDateStr.split('-').first : '';
+          final runtime = (movieData['runtime'] as num?)?.toInt() ?? 0;
 
           final genres = movieData['genres'] as List<dynamic>?;
-          final genresString = genres?.map((e) => e['name']).join(', ') ?? '';
+          final genresString = genres?.map((e) => (e is Map) ? (e['name'] ?? '') : '').where((s) => s.toString().isNotEmpty).join(', ') ?? '';
 
           final crew = movieData['credits']?['crew'] as List<dynamic>?;
-          final director = crew?.where((e) => e['job'] == 'Director').firstOrNull?['name'] as String? ?? 'Bilinmiyor';
+          final director = crew?.where((e) => (e is Map) && e['job'] == 'Director').firstOrNull?['name'] as String? ?? 'Bilinmiyor';
 
           final cast = movieData['credits']?['cast'] as List<dynamic>?;
 
-          final voteAverage = movieData['vote_average'] as num?;
-          final voteCount = movieData['vote_count'] as int?;
+          final voteAverage = (movieData['vote_average'] as num?)?.toDouble();
+          final voteCount = (movieData['vote_count'] as num?)?.toInt();
 
           final isFavorite = settingsAsync.value?.isFavorite ?? false;
           final isReWatchList = settingsAsync.value?.isReWatchList ?? false;
@@ -351,7 +351,7 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
                           voteAverage: voteAverage,
                           voteCount: voteCount,
                           settings: settingsAsync.value,
-                          totalEpisodes: movieData['number_of_episodes'] as int?,
+                          totalEpisodes: (movieData['number_of_episodes'] as num?)?.toInt(),
                         ),
                         const SizedBox(height: 20),
 
@@ -405,7 +405,7 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
                                 final movie = Movie(
                                   tmdbId: tmdbId,
                                   title: title,
-                                  originalTitle: movieData['original_title'] as String?,
+                                  originalTitle: (movieData['original_title'] ?? movieData['original_name']) as String?,
                                   posterPath: posterPath,
                                   backdropPath: backdropPath,
                                   releaseYear: int.tryParse(year),
@@ -453,7 +453,7 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
                             movie: Movie(
                               tmdbId: tmdbId,
                               title: title,
-                              originalTitle: movieData['original_title'] as String? ?? movieData['original_name'] as String?,
+                              originalTitle: (movieData['original_title'] ?? movieData['original_name']) as String?,
                               posterPath: posterPath,
                               backdropPath: backdropPath,
                               releaseYear: int.tryParse(year),
@@ -467,7 +467,7 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
                             ),
                             seasons: movieData['seasons'] as List<dynamic>? ?? const [],
                             settings: settingsAsync.value,
-                            totalEpisodes: movieData['number_of_episodes'] as int?,
+                            totalEpisodes: (movieData['number_of_episodes'] as num?)?.toInt(),
                             hasJournalEntry: (watchRecordsAsync.value ?? const []).isNotEmpty,
                             onRequestAddToJournal: () => _openAddWatchRecordSheet(context, movieData),
                           ),

@@ -54,8 +54,8 @@ class _MovieDetailTvEpisodesSectionState extends ConsumerState<MovieDetailTvEpis
     if (lastWatched > 0 && regularSeasons.isNotEmpty) {
       int totalCount = 0;
       for (final season in regularSeasons) {
-        final sNum = season['season_number'] as int? ?? 1;
-        final epCount = season['episode_count'] as int? ?? 0;
+        final sNum = (season['season_number'] as num?)?.toInt() ?? 1;
+        final epCount = (season['episode_count'] as num?)?.toInt() ?? 0;
         if (lastWatched > totalCount && lastWatched <= totalCount + epCount) {
           return sNum;
         }
@@ -64,7 +64,7 @@ class _MovieDetailTvEpisodesSectionState extends ConsumerState<MovieDetailTvEpis
     }
 
     // Default to the first season in the list, or 1 if empty
-    return regularSeasons.isNotEmpty ? (regularSeasons.first['season_number'] as int? ?? 1) : 1;
+    return regularSeasons.isNotEmpty ? ((regularSeasons.first['season_number'] as num?)?.toInt() ?? 1) : 1;
   }
 
   // Maps a season number and episode number to a single overall sequential index
@@ -251,7 +251,7 @@ class _MovieDetailTvEpisodesSectionState extends ConsumerState<MovieDetailTvEpis
             // Last episode of the currently selected season, used by the
             // "Bu Sezonu İzledim" bulk-complete button below.
             final lastEpisodeNumber = episodes
-                .map((e) => (e as Map<String, dynamic>)['episode_number'] as int? ?? 0)
+                .map((e) => (e is Map) ? ((e['episode_number'] as num?)?.toInt() ?? 0) : 0)
                 .fold(0, (max, n) => n > max ? n : max);
             final lastOverallIndex = _calculateOverallEpisodeNumber(_selectedSeasonNumber, lastEpisodeNumber);
             final seasonAlreadyComplete = lastOverallIndex <= lastWatched;
@@ -285,7 +285,7 @@ class _MovieDetailTvEpisodesSectionState extends ConsumerState<MovieDetailTvEpis
                   itemCount: episodes.length,
                   itemBuilder: (context, index) {
                     final e = episodes[index] as Map<String, dynamic>;
-                    final epNum = e['episode_number'] as int? ?? (index + 1);
+                    final epNum = (e['episode_number'] as num?)?.toInt() ?? (index + 1);
                     final overallIndex = _calculateOverallEpisodeNumber(_selectedSeasonNumber, epNum);
                     final isWatched = overallIndex <= lastWatched;
 

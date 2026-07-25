@@ -27,7 +27,7 @@ class TvSeasonChipRow extends StatelessWidget {
         itemCount: seasons.length,
         itemBuilder: (context, index) {
           final s = seasons[index];
-          final sNum = s['season_number'] as int? ?? 1;
+          final sNum = (s['season_number'] as num?)?.toInt() ?? 1;
           final sName = s['name'] as String? ?? '$sNum. Sezon';
           final posterPath = s['poster_path'] as String?;
           final isSelected = selectedSeasonNumber == sNum;

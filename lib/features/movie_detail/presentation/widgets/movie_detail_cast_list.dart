@@ -75,7 +75,8 @@ class MovieDetailCastList extends ConsumerWidget {
             itemCount: cast.length > 8 ? 8 : cast.length,
             itemBuilder: (context, idx) {
               final actor = cast[idx];
-              final actorId = actor['id'] as int?;
+              final actorId = (actor['id'] as num?)?.toInt();
+              final actorName = (actor['name'] ?? '').toString();
               return GestureDetector(
                 onTap: () async {
                   if (actorId != null) {
@@ -89,7 +90,7 @@ class MovieDetailCastList extends ConsumerWidget {
                       ),
                     ));
                   } else {
-                    await _resolveAndNavigate(context, ref, actor['name'] as String);
+                    await _resolveAndNavigate(context, ref, actorName);
                   }
                 },
                 child: Container(
@@ -110,7 +111,7 @@ class MovieDetailCastList extends ConsumerWidget {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        actor['name'] as String,
+                        actorName,
                         style: GoogleFonts.inter(fontSize: 10, color: Colors.white),
                         textAlign: TextAlign.center,
                         maxLines: 2,

@@ -10,8 +10,8 @@
 // returns seasons in order already, but the cumulative episode-count math
 // below depends on it, so sort explicitly rather than assume.
 List<dynamic> sortedRegularSeasons(List<dynamic> seasons) {
-  final result = seasons.where((s) => (s['season_number'] as int? ?? 0) > 0).toList();
-  result.sort((a, b) => (a['season_number'] as int? ?? 0).compareTo(b['season_number'] as int? ?? 0));
+  final result = seasons.where((s) => ((s['season_number'] as num?)?.toInt() ?? 0) > 0).toList();
+  result.sort((a, b) => ((a['season_number'] as num?)?.toInt() ?? 0).compareTo((b['season_number'] as num?)?.toInt() ?? 0));
   return result;
 }
 
@@ -21,9 +21,9 @@ List<dynamic> sortedRegularSeasons(List<dynamic> seasons) {
 int calculateOverallEpisodeNumber(List<dynamic> sortedSeasons, int seasonNumber, int episodeNumber) {
   int count = 0;
   for (final season in sortedSeasons) {
-    final sNum = season['season_number'] as int? ?? 1;
+    final sNum = (season['season_number'] as num?)?.toInt() ?? 1;
     if (sNum < seasonNumber) {
-      count += season['episode_count'] as int? ?? 0;
+      count += (season['episode_count'] as num?)?.toInt() ?? 0;
     }
   }
   return count + episodeNumber;
@@ -41,8 +41,8 @@ int calculateOverallEpisodeNumber(List<dynamic> sortedSeasons, int seasonNumber,
   if (overallIndex < 1) return null;
   int consumed = 0;
   for (final season in sortedSeasons) {
-    final sNum = season['season_number'] as int? ?? 1;
-    final epCount = season['episode_count'] as int? ?? 0;
+    final sNum = (season['season_number'] as num?)?.toInt() ?? 1;
+    final epCount = (season['episode_count'] as num?)?.toInt() ?? 0;
     if (overallIndex <= consumed + epCount) {
       return (seasonNumber: sNum, episodeNumberInSeason: overallIndex - consumed);
     }

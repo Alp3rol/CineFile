@@ -77,7 +77,7 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
   void initState() {
     super.initState();
     _selectedDate = DateTime.now();
-    _totalEpisodes = widget.movieData['number_of_episodes'] as int?;
+    _totalEpisodes = (widget.movieData['number_of_episodes'] as num?)?.toInt();
   }
 
   // Seeds _isActivelyWatching/_lastWatchedEpisode from the show's persisted
@@ -89,7 +89,7 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
   void _seedFromSettingsIfNeeded() {
     if (_seededFromSettings || widget.movieData['media_type'] != 'tv') return;
 
-    final tmdbId = widget.movieData['id'] as int;
+    final tmdbId = (widget.movieData['id'] as num).toInt();
     final asyncSettings = ref.watch(movieSettingsSnapshotProvider((tmdbId: tmdbId, isTv: true)));
     if (!asyncSettings.hasValue) return; // still loading — try again next build
     final existing = asyncSettings.value;
@@ -125,7 +125,7 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
   // A movie/show can't have been watched before it was released. Falls back
   // to a wide-open range if the release date is missing or unparsable.
   DateTime get _earliestWatchDate {
-    final releaseDateStr = widget.movieData['release_date'] as String?;
+    final releaseDateStr = (widget.movieData['release_date'] ?? widget.movieData['first_air_date']) as String?;
     final releaseDate = releaseDateStr != null && releaseDateStr.isNotEmpty ? DateTime.tryParse(releaseDateStr) : null;
     if (releaseDate == null) return DateTime(2000);
     final now = DateTime.now();
@@ -177,7 +177,7 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
     final username = userModel?.username ?? user.email!.split('@')[0];
     final avatarUrl = userModel?.avatarUrl ?? 'https://api.dicebear.com/7.x/bottts/png?seed=$username';
 
-    final movieId = widget.movieData['id'] as int;
+    final movieId = (widget.movieData['id'] as num).toInt();
 
     // Combine date and current time
     final now = DateTime.now();
@@ -191,16 +191,16 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
 
     // Extract director and actors
     final crew = widget.movieData['credits']?['crew'] as List<dynamic>?;
-    final directorName = crew?.where((e) => e['job'] == 'Director').firstOrNull?['name'] as String?;
+    final directorName = crew?.where((e) => (e is Map) && e['job'] == 'Director').firstOrNull?['name'] as String?;
 
     final cast = widget.movieData['credits']?['cast'] as List<dynamic>?;
-    final actorsString = cast?.take(5).map((e) => e['name']).join(', ');
+    final actorsString = cast?.take(5).map((e) => (e is Map) ? (e['name'] ?? '') : '').where((s) => s.toString().isNotEmpty).join(', ');
 
     // Extract genres
     final genresData = widget.movieData['genres'] as List<dynamic>?;
-    final genresString = genresData?.map((e) => e['name']).join(', ');
+    final genresString = genresData?.map((e) => (e is Map) ? (e['name'] ?? '') : '').where((s) => s.toString().isNotEmpty).join(', ');
 
-    final releaseDateStr = widget.movieData['release_date'] as String? ?? '';
+    final releaseDateStr = (widget.movieData['release_date'] ?? widget.movieData['first_air_date'] ?? '').toString();
     final releaseYear = DateTime.tryParse(releaseDateStr)?.year;
     final isTv = widget.movieData['media_type'] == 'tv';
 
@@ -228,6 +228,8 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
           .get();
       final watchNumber = existingRecordsQuery.docs.length + 1;
 
+      final movieTitle = (widget.movieData['title'] ?? widget.movieData['name'] ?? 'Bilinmeyen Yapım').toString();
+
       // 2. Generate a new log document
       final logRef = ref.read(firestoreProvider).collection('logs').doc();
       final logData = {
@@ -247,12 +249,12 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
         'tags': _tagsController.text.trim().isEmpty ? null : _tagsController.text.trim(),
         'episodeCount': episodeCountForRecord,
         'createdAt': FieldValue.serverTimestamp(),
-        'movieTitle': widget.movieData['title'] as String,
-        'movieOriginalTitle': widget.movieData['original_title'] as String?,
+        'movieTitle': movieTitle,
+        'movieOriginalTitle': (widget.movieData['original_title'] ?? widget.movieData['original_name']) as String?,
         'moviePosterPath': widget.movieData['poster_path'] as String?,
         'movieBackdropPath': widget.movieData['backdrop_path'] as String?,
         'movieReleaseYear': releaseYear,
-        'movieRuntime': widget.movieData['runtime'] as int?,
+        'movieRuntime': (widget.movieData['runtime'] as num?)?.toInt(),
         'movieGenres': genresString,
         'movieDirector': directorName,
         'movieActors': actorsString,
@@ -290,7 +292,7 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
 
       if (mounted) {
         Navigator.pop(context);
-        showPremiumToast(context, '${widget.movieData['title']} günlüğünüze başarıyla eklendi!');
+        showPremiumToast(context, '${widget.movieData['title'] ?? widget.movieData['name'] ?? 'İçerik'} günlüğünüze başarıyla eklendi!');
       }
     } catch (e) {
       if (mounted) {
