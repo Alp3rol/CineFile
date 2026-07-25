@@ -48,9 +48,9 @@ final cineTwinProvider = Provider.family<CineTwinResult?, CineTwinParams>((ref, 
 
   // Convert target user's public entries
   final userBLogs = params.targetEntries.map((e) {
-    final movieId = (e['movieId'] ?? e['tmdbId'] ?? 0) as int;
+    final movieId = ((e['movieId'] ?? e['tmdbId'] ?? 0) as num).toInt();
     final title = (e['title'] ?? e['movieTitle'] ?? 'Film') as String;
-    final isTv = (e['isTv'] ?? false) as bool;
+    final isTv = e['isTv'] == true || e['isTv'] == 1;
     final posterPath = e['moviePosterPath'] as String?;
     final rating = (e['rating'] as num?)?.toDouble();
     final director = e['director'] as String?;

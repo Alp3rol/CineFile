@@ -105,7 +105,7 @@ class CommunityPost {
       starredBy: List<String>.from(map['starredBy'] ?? []),
       commentCount: (map['commentCount'] as num?)?.toInt() ?? 0,
       movieId: (map['movieId'] as num?)?.toInt(),
-      isTv: map['isTv'] as bool?,
+      isTv: map['isTv'] == null ? null : (map['isTv'] == true || map['isTv'] == 1),
       movieTitle: map['movieTitle'] as String?,
       moviePosterPath: map['moviePosterPath'] as String?,
       releaseYear: (map['releaseYear'] as num?)?.toInt(),

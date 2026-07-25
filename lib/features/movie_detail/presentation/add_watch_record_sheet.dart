@@ -280,8 +280,8 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
       await settingsRef.set({
         'movieId': movieId,
         'isTv': isTv,
-        'isFavorite': existingSetting?['isFavorite'] ?? false,
-        'isReWatchList': existingSetting?['isReWatchList'] ?? false,
+        'isFavorite': existingSetting?['isFavorite'] == true || existingSetting?['isFavorite'] == 1,
+        'isReWatchList': existingSetting?['isReWatchList'] == true || existingSetting?['isReWatchList'] == 1,
         'personalRanking': existingSetting?['personalRanking'],
         'personalNotes': existingSetting?['personalNotes'],
         'personalTags': existingSetting?['personalTags'],

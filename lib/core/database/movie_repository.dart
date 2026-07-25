@@ -809,7 +809,7 @@ class WebMovieRepository implements MovieRepository {
         id: (map['id'] as num).toInt(),
         movieId: (map['movieId'] as num).toInt(),
         // Absent in backups made before the movie/TV id-collision fix.
-        isTv: map['isTv'] as bool? ?? false,
+        isTv: map['isTv'] == true || map['isTv'] == 1,
         watchDate: DateTime.parse(map['watchDate'] as String),
         watchPlace: map['watchPlace'] as String?,
         watchCompanion: map['watchCompanion'] as String?,
@@ -822,7 +822,7 @@ class WebMovieRepository implements MovieRepository {
         episodeCount: (map['episodeCount'] as num?)?.toInt() ?? 1,
         // Absent in backups made before the community privacy toggle
         // existed — treat as private, consistent with the opt-in default.
-        isPublic: map['isPublic'] as bool? ?? false,
+        isPublic: map['isPublic'] == true || map['isPublic'] == 1,
       );
     }).toList();
 
@@ -830,17 +830,17 @@ class WebMovieRepository implements MovieRepository {
     for (final x in settingsList) {
       final map = x as Map<String, dynamic>;
       final id = (map['tmdbId'] as num).toInt();
-      final settingIsTv = map['isTv'] as bool? ?? false;
+      final settingIsTv = map['isTv'] == true || map['isTv'] == 1;
       movieSettings[(tmdbId: id, isTv: settingIsTv)] = UserMovieSetting(
         tmdbId: id,
         isTv: settingIsTv,
-        isFavorite: map['isFavorite'] as bool? ?? false,
-        isReWatchList: map['isReWatchList'] as bool? ?? false,
+        isFavorite: map['isFavorite'] == true || map['isFavorite'] == 1,
+        isReWatchList: map['isReWatchList'] == true || map['isReWatchList'] == 1,
         personalNotes: map['personalNotes'] as String?,
         personalTags: map['personalTags'] as String?,
         updatedAt: DateTime.parse(map['updatedAt'] as String),
         // Absent in backups made before "Aktif İzliyorum" tracking existed.
-        isActivelyWatching: map['isActivelyWatching'] as bool? ?? false,
+        isActivelyWatching: map['isActivelyWatching'] == true || map['isActivelyWatching'] == 1,
         lastWatchedEpisode: (map['lastWatchedEpisode'] as num?)?.toInt(),
       );
     }
@@ -849,7 +849,7 @@ class WebMovieRepository implements MovieRepository {
     for (final x in moviesList) {
       final map = x as Map<String, dynamic>;
       final id = (map['tmdbId'] as num).toInt();
-      final movieIsTv = map['isTv'] as bool? ?? false;
+      final movieIsTv = map['isTv'] == true || map['isTv'] == 1;
       movies[(tmdbId: id, isTv: movieIsTv)] = Movie(
         tmdbId: id,
         title: map['title'] as String,
@@ -878,7 +878,7 @@ class WebMovieRepository implements MovieRepository {
         description: map['description'] as String?,
         targetDate: map['targetDate'] != null ? DateTime.parse(map['targetDate'] as String) : null,
         createdAt: map['createdAt'] != null ? DateTime.parse(map['createdAt'] as String) : DateTime.now(),
-        isPublic: map['isPublic'] as bool? ?? false,
+        isPublic: map['isPublic'] == true || map['isPublic'] == 1,
       );
     }
 
@@ -887,7 +887,7 @@ class WebMovieRepository implements MovieRepository {
       return CustomListMovie(
         listId: (map['listId'] as num).toInt(),
         movieId: (map['movieId'] as num).toInt(),
-        isTv: map['isTv'] as bool? ?? false,
+        isTv: map['isTv'] == true || map['isTv'] == 1,
         rankingOrder: (map['rankingOrder'] as num?)?.toInt(),
         addedAt: map['addedAt'] != null ? DateTime.parse(map['addedAt'] as String) : DateTime.now(),
       );

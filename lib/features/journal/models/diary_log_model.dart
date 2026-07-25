@@ -121,7 +121,7 @@ class DiaryLogModel {
       director: (map['movieDirector'] ?? map['director']) as String?,
       actors: (map['movieActors'] ?? map['actors']) as String?,
       overview: (map['movieOverview'] ?? map['overview']) as String?,
-      isTv: map['isTv'] as bool? ?? false,
+      isTv: map['isTv'] == true || map['isTv'] == 1,
       totalEpisodes: ((map['movieTotalEpisodes'] ?? map['totalEpisodes']) as num?)?.toInt(),
       watchDate: (map['watchDate'] as Timestamp?)?.toDate() ?? DateTime.now(),
       watchPlace: map['watchPlace'] as String?,
@@ -135,7 +135,7 @@ class DiaryLogModel {
       createdAt: (map['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       starredBy: List<String>.from(map['starredBy'] ?? []),
       commentCount: (map['commentCount'] as num?)?.toInt() ?? 0,
-      isPublic: map['isPublic'] as bool? ?? false,
+      isPublic: map['isPublic'] == true || map['isPublic'] == 1,
     );
   }
 
