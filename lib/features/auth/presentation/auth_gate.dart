@@ -44,13 +44,6 @@ class AuthGate extends ConsumerWidget {
         ),
       ),
       error: (err, stack) {
-        // Self-healing attempt if Firebase was not initialized during main() startup
-        if (Firebase.apps.isEmpty) {
-          Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform).then((_) {
-            ref.invalidate(authStateProvider);
-          }).catchError((_) {});
-        }
-
         return Scaffold(
           backgroundColor: AppTheme.backgroundColor,
           body: Center(
@@ -82,9 +75,7 @@ class AuthGate extends ConsumerWidget {
                   ElevatedButton.icon(
                     onPressed: () async {
                       try {
-                        if (Firebase.apps.isEmpty) {
-                          await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-                        }
+                        await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
                       } catch (_) {}
                       ref.invalidate(authStateProvider);
                     },

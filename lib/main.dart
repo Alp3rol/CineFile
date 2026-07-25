@@ -16,28 +16,20 @@ void main() async {
   await initializeDateFormatting('tr_TR', null);
 
   try {
-    debugPrint('Initializing Firebase...');
-    if (Firebase.apps.isEmpty) {
-      await Firebase.initializeApp(
-        options: DefaultFirebaseOptions.currentPlatform,
-      );
-    }
+    debugPrint('Initializing Firebase in Dart...');
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
     debugPrint('Firebase initialized successfully!');
-  } catch (e, stack) {
-    debugPrint('CRITICAL ERROR during Firebase init: $e');
-    debugPrint(stack.toString());
-
-    // Fallback: If Firebase apps is still empty, retry with web options directly
-    if (Firebase.apps.isEmpty) {
-      try {
-        await Firebase.initializeApp(
-          options: DefaultFirebaseOptions.web,
-        );
-        debugPrint('Fallback Firebase init succeeded!');
-      } catch (e2) {
-        debugPrint('Fallback Firebase init failed: $e2');
-      }
+  } on FirebaseException catch (e) {
+    if (e.code == 'duplicate-app' || e.toString().contains('already exists')) {
+      debugPrint('Firebase app already registered.');
+    } else {
+      debugPrint('FirebaseException during init: $e');
     }
+  } catch (e, stack) {
+    debugPrint('ERROR during Firebase init: $e');
+    debugPrint(stack.toString());
   }
 
   runApp(
@@ -60,11 +52,9 @@ class MyApp extends StatelessWidget {
       theme: AppTheme.darkTheme,
       scrollBehavior: CineFileScrollBehavior(),
       builder: (context, child) {
-        // Web'de geniş ekranda cihaz seçici frame'i göster
         if (kIsWeb) {
           return WebDeviceFrame(child: child!);
         }
-        // Mobilde normal görünüm
         return child!;
       },
       home: const AuthGate(),
