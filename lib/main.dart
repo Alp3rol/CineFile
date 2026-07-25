@@ -3,14 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'core/theme/app_theme.dart';
 import 'core/widgets/web_device_frame.dart';
 import 'features/auth/presentation/auth_gate.dart';
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_core_web/firebase_core_web.dart';
 import 'firebase_options.dart';
 
 final firebaseInitProvider = FutureProvider<FirebaseApp>((ref) async {
+  if (kIsWeb) {
+    try {
+      FirebaseCoreWeb.registerWith(webPluginRegistrar);
+    } catch (_) {}
+  }
   if (Firebase.apps.isNotEmpty) {
     return Firebase.app();
   }
@@ -23,6 +30,12 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   GoogleFonts.config.allowRuntimeFetching = true;
   await initializeDateFormatting('tr_TR', null);
+
+  if (kIsWeb) {
+    try {
+      FirebaseCoreWeb.registerWith(webPluginRegistrar);
+    } catch (_) {}
+  }
 
   runApp(
     const ProviderScope(

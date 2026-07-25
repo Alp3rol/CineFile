@@ -442,7 +442,7 @@ packages:
     source: hosted
     version: "7.1.0"
   firebase_core_web:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: firebase_core_web
       sha256: "30ba3ae56f5beb2cea836033201570612c911661889f815eca73b6056c7b55bf"
@@ -604,7 +604,7 @@ packages:
     source: sdk
     version: "0.0.0"
   flutter_web_plugins:
-    dependency: transitive
+    dependency: "direct main"
     description: flutter
     source: sdk
     version: "0.0.0"
