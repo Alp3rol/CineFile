@@ -130,10 +130,8 @@ class MovieDetailStickyCta extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Positioned(
-      bottom: 20,
-      left: 20,
-      right: 20,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
