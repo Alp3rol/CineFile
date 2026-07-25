@@ -85,12 +85,12 @@ final movieSettingsProvider = StreamProvider.family<UserMovieSetting?, MovieKey>
           isTv: key.isTv,
           isFavorite: data['isFavorite'] ?? false,
           isReWatchList: data['isReWatchList'] ?? false,
-          personalRanking: data['personalRanking'] as int?,
+          personalRanking: (data['personalRanking'] as num?)?.toInt(),
           personalNotes: data['personalNotes'] as String?,
           personalTags: data['personalTags'] as String?,
           updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
           isActivelyWatching: data['isActivelyWatching'] ?? false,
-          lastWatchedEpisode: data['lastWatchedEpisode'] as int?,
+          lastWatchedEpisode: (data['lastWatchedEpisode'] as num?)?.toInt(),
         );
       });
 });
@@ -147,12 +147,12 @@ final watchRecordsForUserProvider = StreamProvider.family<List<WatchRecordWithMo
               isTv: key.isTv,
               isFavorite: data['isFavorite'] ?? false,
               isReWatchList: data['isReWatchList'] ?? false,
-              personalRanking: data['personalRanking'] as int?,
+              personalRanking: (data['personalRanking'] as num?)?.toInt(),
               personalNotes: data['personalNotes'] as String?,
               personalTags: data['personalTags'] as String?,
               updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
               isActivelyWatching: data['isActivelyWatching'] ?? false,
-              lastWatchedEpisode: data['lastWatchedEpisode'] as int?,
+              lastWatchedEpisode: (data['lastWatchedEpisode'] as num?)?.toInt(),
             );
           }
           
@@ -167,7 +167,7 @@ Map<MovieKey, UserMovieSetting> _movieSettingsMapFromSnapshot(QuerySnapshot<Map<
   final map = <MovieKey, UserMovieSetting>{};
   for (final doc in snapshot.docs) {
     final data = doc.data();
-    final movieId = data['movieId'] as int?;
+    final movieId = (data['movieId'] as num?)?.toInt();
     final isTv = data['isTv'] as bool?;
     if (movieId == null || isTv == null) continue;
     map[(tmdbId: movieId, isTv: isTv)] = UserMovieSetting(
@@ -175,12 +175,12 @@ Map<MovieKey, UserMovieSetting> _movieSettingsMapFromSnapshot(QuerySnapshot<Map<
       isTv: isTv,
       isFavorite: data['isFavorite'] ?? false,
       isReWatchList: data['isReWatchList'] ?? false,
-      personalRanking: data['personalRanking'] as int?,
+      personalRanking: (data['personalRanking'] as num?)?.toInt(),
       personalNotes: data['personalNotes'] as String?,
       personalTags: data['personalTags'] as String?,
       updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       isActivelyWatching: data['isActivelyWatching'] ?? false,
-      lastWatchedEpisode: data['lastWatchedEpisode'] as int?,
+      lastWatchedEpisode: (data['lastWatchedEpisode'] as num?)?.toInt(),
       lastEpisodeProgressAt: (data['lastEpisodeProgressAt'] as Timestamp?)?.toDate(),
     );
   }
@@ -358,7 +358,7 @@ final favoriteMovieIdsProvider = StreamProvider<Set<MovieKey>>((ref) {
       .map((snapshot) {
         return snapshot.docs.map((doc) {
           final data = doc.data();
-          final movieId = data['movieId'] as int? ?? 0;
+          final movieId = (data['movieId'] as num?)?.toInt() ?? 0;
           final isTv = data['isTv'] as bool? ?? false;
           return (tmdbId: movieId, isTv: isTv);
         }).toSet();
@@ -445,7 +445,7 @@ final activelyWatchingProvider = StreamProvider<List<ActivelyWatchingShow>>((ref
         final list = <ActivelyWatchingShow>[];
         for (final doc in snapshot.docs) {
           final data = doc.data();
-          final movieId = data['movieId'] as int? ?? 0;
+          final movieId = (data['movieId'] as num?)?.toInt() ?? 0;
           final isTv = data['isTv'] as bool? ?? false;
           
           final logSnapshot = await ref.read(firestoreProvider)
@@ -465,12 +465,12 @@ final activelyWatchingProvider = StreamProvider<List<ActivelyWatchingShow>>((ref
               isTv: isTv,
               isFavorite: data['isFavorite'] ?? false,
               isReWatchList: data['isReWatchList'] ?? false,
-              personalRanking: data['personalRanking'] as int?,
+              personalRanking: (data['personalRanking'] as num?)?.toInt(),
               personalNotes: data['personalNotes'] as String?,
               personalTags: data['personalTags'] as String?,
               updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
               isActivelyWatching: true,
-              lastWatchedEpisode: data['lastWatchedEpisode'] as int?,
+              lastWatchedEpisode: (data['lastWatchedEpisode'] as num?)?.toInt(),
             );
             
             list.add(ActivelyWatchingShow(watchWithMovie.movie, setting));

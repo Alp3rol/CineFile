@@ -230,7 +230,7 @@ class NativeMovieRepository implements MovieRepository {
         'rankingOrder': row.rankingOrder ?? 0,
       });
     }
-    movies.sort((a, b) => (a['rankingOrder'] as int).compareTo(b['rankingOrder'] as int));
+    movies.sort((a, b) => ((a['rankingOrder'] as num?)?.toInt() ?? 0).compareTo((b['rankingOrder'] as num?)?.toInt() ?? 0));
 
     final userModel = _ref.read(userModelProvider);
     final username = userModel?.username ?? user.email!.split('@')[0];
@@ -392,7 +392,7 @@ class NativeMovieRepository implements MovieRepository {
               posterPath: Value(movieData['poster_path'] as String?),
               backdropPath: Value(movieData['backdrop_path'] as String?),
               releaseYear: Value(releaseYear),
-              runtime: Value(movieData['runtime'] as int?),
+              runtime: Value((movieData['runtime'] as num?)?.toInt()),
               genres: Value(genresString),
               director: Value(directorName),
               actors: Value(actorsString),
@@ -806,8 +806,8 @@ class WebMovieRepository implements MovieRepository {
     final watchRecords = recordsList.map((x) {
       final map = x as Map<String, dynamic>;
       return WatchRecord(
-        id: map['id'] as int,
-        movieId: map['movieId'] as int,
+        id: (map['id'] as num).toInt(),
+        movieId: (map['movieId'] as num).toInt(),
         // Absent in backups made before the movie/TV id-collision fix.
         isTv: map['isTv'] as bool? ?? false,
         watchDate: DateTime.parse(map['watchDate'] as String),
@@ -816,10 +816,10 @@ class WebMovieRepository implements MovieRepository {
         rating: (map['rating'] as num).toDouble(),
         mood: map['mood'] as String?,
         notes: map['notes'] as String?,
-        watchNumber: map['watchNumber'] as int,
+        watchNumber: (map['watchNumber'] as num).toInt(),
         createdAt: DateTime.parse(map['createdAt'] as String),
         // Absent in backups made before episode-count tracking existed.
-        episodeCount: map['episodeCount'] as int? ?? 1,
+        episodeCount: (map['episodeCount'] as num?)?.toInt() ?? 1,
         // Absent in backups made before the community privacy toggle
         // existed — treat as private, consistent with the opt-in default.
         isPublic: map['isPublic'] as bool? ?? false,
@@ -829,7 +829,7 @@ class WebMovieRepository implements MovieRepository {
     final movieSettings = <MovieKey, UserMovieSetting>{};
     for (final x in settingsList) {
       final map = x as Map<String, dynamic>;
-      final id = map['tmdbId'] as int;
+      final id = (map['tmdbId'] as num).toInt();
       final settingIsTv = map['isTv'] as bool? ?? false;
       movieSettings[(tmdbId: id, isTv: settingIsTv)] = UserMovieSetting(
         tmdbId: id,
@@ -841,14 +841,14 @@ class WebMovieRepository implements MovieRepository {
         updatedAt: DateTime.parse(map['updatedAt'] as String),
         // Absent in backups made before "Aktif İzliyorum" tracking existed.
         isActivelyWatching: map['isActivelyWatching'] as bool? ?? false,
-        lastWatchedEpisode: map['lastWatchedEpisode'] as int?,
+        lastWatchedEpisode: (map['lastWatchedEpisode'] as num?)?.toInt(),
       );
     }
 
     final movies = <MovieKey, Movie>{};
     for (final x in moviesList) {
       final map = x as Map<String, dynamic>;
-      final id = map['tmdbId'] as int;
+      final id = (map['tmdbId'] as num).toInt();
       final movieIsTv = map['isTv'] as bool? ?? false;
       movies[(tmdbId: id, isTv: movieIsTv)] = Movie(
         tmdbId: id,
@@ -856,22 +856,22 @@ class WebMovieRepository implements MovieRepository {
         originalTitle: map['originalTitle'] as String?,
         posterPath: map['posterPath'] as String?,
         backdropPath: map['backdropPath'] as String?,
-        releaseYear: map['releaseYear'] as int?,
-        runtime: map['runtime'] as int?,
+        releaseYear: (map['releaseYear'] as num?)?.toInt(),
+        runtime: (map['runtime'] as num?)?.toInt(),
         genres: map['genres'] as String?,
         director: map['director'] as String?,
         actors: map['actors'] as String?,
         overview: map['overview'] as String?,
         isTv: movieIsTv,
         createdAt: DateTime.parse(map['createdAt'] as String),
-        totalEpisodes: map['totalEpisodes'] as int?,
+        totalEpisodes: (map['totalEpisodes'] as num?)?.toInt(),
       );
     }
 
     final customLists = <int, CustomList>{};
     for (final x in customListsList) {
       final map = x as Map<String, dynamic>;
-      final id = map['id'] as int;
+      final id = (map['id'] as num).toInt();
       customLists[id] = CustomList(
         id: id,
         name: map['name'] as String,
@@ -885,10 +885,10 @@ class WebMovieRepository implements MovieRepository {
     final customListMovies = customListMoviesList.map((x) {
       final map = x as Map<String, dynamic>;
       return CustomListMovie(
-        listId: map['listId'] as int,
-        movieId: map['movieId'] as int,
+        listId: (map['listId'] as num).toInt(),
+        movieId: (map['movieId'] as num).toInt(),
         isTv: map['isTv'] as bool? ?? false,
-        rankingOrder: map['rankingOrder'] as int?,
+        rankingOrder: (map['rankingOrder'] as num?)?.toInt(),
         addedAt: map['addedAt'] != null ? DateTime.parse(map['addedAt'] as String) : DateTime.now(),
       );
     }).toList();

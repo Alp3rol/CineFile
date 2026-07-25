@@ -20,7 +20,7 @@ class RecommendationItem {
   factory RecommendationItem.fromJson(Map<String, dynamic> json, {required String reason, bool? isTvOverride}) {
     final isTv = isTvOverride ?? (json['media_type'] == 'tv');
     return RecommendationItem(
-      tmdbId: json['id'] as int,
+      tmdbId: (json['id'] as num).toInt(),
       title: (isTv ? (json['name'] ?? json['original_name']) : (json['title'] ?? json['original_title'])) as String? ?? 'Bilinmeyen Yapım',
       posterPath: json['poster_path'] as String?,
       backdropPath: json['backdrop_path'] as String?,

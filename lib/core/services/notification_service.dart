@@ -327,7 +327,7 @@ class NotificationService {
 
         for (final doc in snapshot.docs) {
           final data = doc.data();
-          final tmdbId = data['movieId'] as int? ?? 0;
+          final tmdbId = (data['movieId'] as num?)?.toInt() ?? 0;
           final isTv = data['isTv'] as bool? ?? false;
           final releaseDateStr = data['releaseDate'] as String?;
 
