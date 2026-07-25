@@ -5,7 +5,6 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/database/database_provider.dart';
 import '../../models/user_model.dart';
 import 'featured_movies_stack.dart';
-import 'profile_section_header.dart';
 
 class FeaturedShowcaseSection extends ConsumerWidget {
   final UserModel userModel;
@@ -29,8 +28,6 @@ class FeaturedShowcaseSection extends ConsumerWidget {
             .where((r) => userModel.featuredMovieIds.contains('${r.movie.tmdbId}'))
             .toList();
 
-        // If it's not my profile and there are no featured movies, hide it completely.
-        // If it's my profile, we show the box with an empty state and edit button so the owner can set it up!
         if (featuredRecords.isEmpty && !isMe) return const SizedBox.shrink();
 
         return Column(
@@ -40,12 +37,25 @@ class FeaturedShowcaseSection extends ConsumerWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.015),
                 borderRadius: BorderRadius.circular(24),
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.03),
-                  width: 1,
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Colors.white.withValues(alpha: 0.05),
+                    Colors.white.withValues(alpha: 0.02),
+                  ],
                 ),
+                border: Border.all(
+                  color: AppTheme.accentColor.withValues(alpha: 0.25),
+                  width: 1.2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.2),
+                    blurRadius: 15,
+                  ),
+                ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -53,12 +63,32 @@ class FeaturedShowcaseSection extends ConsumerWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const ProfileSectionHeader(title: 'Favori Vitrinim'),
+                      Row(
+                        children: [
+                          const Icon(Icons.star_rounded, color: AppTheme.accentColor, size: 20),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Favori Vitrinim',
+                            style: GoogleFonts.outfit(
+                              fontSize: 17,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
                       if (isMe)
                         IconButton(
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(),
-                          icon: const Icon(Icons.edit_rounded, color: AppTheme.accentColor, size: 20),
+                          icon: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: AppTheme.accentColor.withValues(alpha: 0.15),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.edit_rounded, color: AppTheme.accentColor, size: 16),
+                          ),
                           onPressed: onEditPressed,
                           tooltip: 'Vitrini Düzenle',
                         ),
@@ -82,7 +112,7 @@ class FeaturedShowcaseSection extends ConsumerWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 24),
           ],
         );
       },

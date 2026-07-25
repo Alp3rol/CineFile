@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/widgets/quick_advance_tag.dart';
 import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/constants/api_constants.dart';
@@ -15,18 +14,12 @@ String _formatDayMonthYear(DateTime date) {
   return DateFormat('d MMMM y', 'tr_TR').format(date);
 }
 
-// Whether the show this watch record belongs to has been fully watched via
-// "Aktif İzliyorum" episode tracking (see UserMovieSettings).
 bool _isShowCompleted(WatchRecordWithMovie item) {
   final total = item.movie.totalEpisodes;
   final last = item.setting?.lastWatchedEpisode;
   return total != null && last != null && last >= total;
 }
 
-// Renders watch records grouped by month (newest month first), matching the
-// simplified card-list design. Replaces the former sortable table +
-// drag-to-reorder list; personal ranking can still be edited via the
-// long-press preview dialog.
 class JournalRecordsList extends ConsumerWidget {
   final List<WatchRecordWithMovie> items;
   final Future<void> Function(Map<MovieKey, int?> rankings) onUpdateRanking;
@@ -44,8 +37,6 @@ class JournalRecordsList extends ConsumerWidget {
     final sorted = List<WatchRecordWithMovie>.from(items)
       ..sort((a, b) => b.record.watchDate.compareTo(a.record.watchDate));
 
-    // The quick-advance tag only makes sense on a show's most recent watch
-    // record, matching the table view's behavior (see journal_table_list.dart).
     final latestWatchIds = <MovieKey, int>{};
     for (final item in sorted) {
       latestWatchIds.putIfAbsent((tmdbId: item.movie.tmdbId, isTv: item.movie.isTv), () => item.record.id);
@@ -65,8 +56,8 @@ class JournalRecordsList extends ConsumerWidget {
 
     return ListView.builder(
       controller: scrollController,
-      padding: const EdgeInsets.only(left: 16, right: 16, top: 4, bottom: 20),
-
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.only(left: 16, right: 16, top: 4, bottom: 24),
       itemCount: groupOrder.length,
       itemBuilder: (context, groupIndex) {
         final monthLabel = groupOrder[groupIndex];
@@ -75,19 +66,39 @@ class JournalRecordsList extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: EdgeInsets.only(top: groupIndex == 0 ? 4 : 20, bottom: 10),
-              child: Text(
-                monthLabel,
-                style: GoogleFonts.inter(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.5,
-                  color: AppTheme.textSecondary,
-                ),
+              padding: EdgeInsets.only(top: groupIndex == 0 ? 4 : 20, bottom: 12),
+              child: Row(
+                children: [
+                  Container(
+                    width: 3,
+                    height: 14,
+                    decoration: BoxDecoration(
+                      color: AppTheme.accentColor,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    monthLabel,
+                    style: GoogleFonts.outfit(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.0,
+                      color: AppTheme.accentColor,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Container(
+                      height: 0.8,
+                      color: Colors.white.withValues(alpha: 0.08),
+                    ),
+                  ),
+                ],
               ),
             ),
             ...monthItems.map((item) => Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
+                  padding: const EdgeInsets.only(bottom: 12),
                   child: _JournalRecordCard(
                     item: item,
                     onUpdateRanking: onUpdateRanking,
@@ -118,7 +129,7 @@ class _JournalRecordCard extends ConsumerWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         onTap: () {
           Navigator.push(
             context,
@@ -138,27 +149,61 @@ class _JournalRecordCard extends ConsumerWidget {
           onUpdateEpisodes: (newCount) => updateWatchRecord(ref, record, episodeCount: newCount),
           onUpdatePrivacy: (newValue) => updateWatchRecord(ref, record, isPublic: newValue),
         ),
-        child: GlassContainer(
-          borderRadius: 16,
-          opacity: 0.5,
-          useBlur: false, // per-row card inside a scrolling list — see GlassContainer's useBlur doc
-          padding: const EdgeInsets.all(10),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.white.withValues(alpha: 0.05),
+                Colors.white.withValues(alpha: 0.02),
+              ],
+            ),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.08),
+              width: 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.25),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.all(12),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: AppNetworkImage(
-                  imageUrl: movie.posterPath != null
-                      ? '${ApiConstants.imagePathW185}${movie.posterPath}'
-                      : '',
-                  width: 56,
-                  height: 84,
-                  fit: BoxFit.cover,
-                  seed: movie.title,
+              // 3D Shadowed Poster Card
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.4),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: AppNetworkImage(
+                    imageUrl: movie.posterPath != null
+                        ? '${ApiConstants.imagePathW185}${movie.posterPath}'
+                        : '',
+                    width: 60,
+                    height: 90,
+                    fit: BoxFit.cover,
+                    seed: movie.title,
+                  ),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 14),
+
+              // Title & Metadata
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -168,60 +213,106 @@ class _JournalRecordCard extends ConsumerWidget {
                         Flexible(
                           child: Text(
                             movie.title,
-                            style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                            style: GoogleFonts.outfit(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         if (_isShowCompleted(item)) ...[
-                          const SizedBox(width: 4),
-                          const Icon(Icons.check_circle_rounded, color: Colors.greenAccent, size: 12),
+                          const SizedBox(width: 6),
+                          const Icon(Icons.check_circle_rounded, color: Colors.greenAccent, size: 14),
                         ],
                       ],
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      [
-                        dateStr,
-                        if (record.watchPlace != null && record.watchPlace!.trim().isNotEmpty) record.watchPlace!,
-                      ].join(' • '),
-                      style: GoogleFonts.inter(fontSize: 11, color: AppTheme.textSecondary),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                      dateStr,
+                      style: GoogleFonts.inter(fontSize: 11.5, color: AppTheme.textSecondary),
                     ),
-                    if (record.watchCompanion != null && record.watchCompanion!.trim().isNotEmpty) ...[
-                      const SizedBox(height: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.05),
-                          borderRadius: BorderRadius.circular(100),
-                        ),
-                        child: Text(
-                          record.watchCompanion!,
-                          style: GoogleFonts.inter(fontSize: 10, color: Colors.white70),
-                        ),
-                      ),
-                    ],
+                    const SizedBox(height: 8),
+
+                    // Pills Row: Place & Companion
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 4,
+                      children: [
+                        if (record.watchPlace != null && record.watchPlace!.trim().isNotEmpty)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.05),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.white10, width: 0.5),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.location_on_rounded, size: 10, color: AppTheme.accentColor),
+                                const SizedBox(width: 3),
+                                Text(
+                                  record.watchPlace!,
+                                  style: GoogleFonts.inter(fontSize: 10, color: Colors.white70),
+                                ),
+                              ],
+                            ),
+                          ),
+                        if (record.watchCompanion != null && record.watchCompanion!.trim().isNotEmpty)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.05),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.white10, width: 0.5),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.people_rounded, size: 10, color: Colors.purpleAccent),
+                                const SizedBox(width: 3),
+                                Text(
+                                  record.watchCompanion!,
+                                  style: GoogleFonts.inter(fontSize: 10, color: Colors.white70),
+                                ),
+                              ],
+                            ),
+                          ),
+                      ],
+                    ),
                   ],
                 ),
               ),
+
               const SizedBox(width: 8),
+
+              // Rating Badge Column
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.star_rounded, color: AppTheme.ratingColor, size: 15),
-                      const SizedBox(width: 2),
-                      Text(
-                        record.rating.toStringAsFixed(1),
-                        style: GoogleFonts.outfit(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
-                      ),
-                    ],
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppTheme.ratingColor.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: AppTheme.ratingColor.withValues(alpha: 0.4), width: 0.8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.star_rounded, color: AppTheme.ratingColor, size: 14),
+                        const SizedBox(width: 3),
+                        Text(
+                          record.rating.toStringAsFixed(1),
+                          style: GoogleFonts.outfit(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
+                        ),
+                      ],
+                    ),
                   ),
                   if (isLatestWatch && item.setting?.isActivelyWatching == true) ...[
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 6),
                     QuickAdvanceTag(item: item),
                   ],
                 ],

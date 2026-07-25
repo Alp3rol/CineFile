@@ -14,36 +14,38 @@ class HomeHeaderBar extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Hoş Geldin,',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppTheme.textSecondary),
-              ),
-              Text(
-                'CineFile',
-                style: Theme.of(context).textTheme.displayLarge,
-              ),
-            ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Hoş Geldin,',
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppTheme.textSecondary),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  'CineFile',
+                  style: Theme.of(context).textTheme.displayLarge,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
           ),
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Settings moved off the bottom nav (which now hosts the İlişki
-              // Ağı tab) — reachable here from the home header instead.
               IconButton(
                 tooltip: 'Ayarlar',
                 onPressed: () => Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => const SettingsScreen()),
                 ),
-                icon: const Icon(Icons.settings_outlined,
-                    color: AppTheme.textSecondary),
+                icon: const Icon(Icons.settings_outlined, color: AppTheme.textSecondary),
               ),
               const SizedBox(width: 4),
-              // Soft accent glow ring so the avatar reads as a focal point
-              // instead of floating in empty space.
               Container(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,

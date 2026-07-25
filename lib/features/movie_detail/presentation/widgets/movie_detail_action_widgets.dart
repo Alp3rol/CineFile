@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/widgets/glass_container.dart';
 
-// One of the 3 "Puanım / Yönetmen / Ortam" summary cards under the poster.
 class MovieInfoCard extends StatelessWidget {
   final IconData icon;
   final Color iconColor;
@@ -20,22 +18,29 @@ class MovieInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GlassContainer(
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-      borderRadius: 14,
-      opacity: 0.7,
-      color: const Color(0xFF0d253f),
-      border: Border.all(
-        color: const Color(0xFF90cea1).withValues(alpha: 0.5),
-        width: 1,
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        color: const Color(0xFF1E1B4B).withValues(alpha: 0.6),
+        border: Border.all(
+          color: iconColor.withValues(alpha: 0.4),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: iconColor.withValues(alpha: 0.1),
+            blurRadius: 10,
+          ),
+        ],
       ),
       child: Column(
         children: [
-          Icon(icon, color: iconColor, size: 18),
+          Icon(icon, color: iconColor, size: 20),
           const SizedBox(height: 6),
           Text(
             value,
-            style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+            style: GoogleFonts.outfit(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
@@ -51,7 +56,6 @@ class MovieInfoCard extends StatelessWidget {
   }
 }
 
-// One of the 3 quick action buttons (Günlüğe Ekle / Listeye Ekle / Paylaş).
 class MovieQuickActionButton extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -73,19 +77,45 @@ class MovieQuickActionButton extends StatelessWidget {
       child: Column(
         children: [
           Container(
-            width: 52,
-            height: 52,
+            width: 56,
+            height: 56,
             decoration: BoxDecoration(
-              color: isPrimary ? AppTheme.accentColor : AppTheme.surfaceColor.withValues(alpha: 0.6),
+              gradient: isPrimary
+                  ? const LinearGradient(
+                      colors: [Color(0xFFFFB800), Color(0xFFFF8C00)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    )
+                  : null,
+              color: isPrimary ? null : Colors.white.withValues(alpha: 0.08),
               shape: BoxShape.circle,
-              border: isPrimary ? null : Border.all(color: AppTheme.borderColor),
+              border: isPrimary
+                  ? Border.all(color: Colors.amberAccent, width: 1.5)
+                  : Border.all(color: Colors.white24, width: 1),
+              boxShadow: isPrimary
+                  ? [
+                      BoxShadow(
+                        color: AppTheme.accentColor.withValues(alpha: 0.4),
+                        blurRadius: 16,
+                        spreadRadius: 1,
+                      ),
+                    ]
+                  : [],
             ),
-            child: Icon(icon, color: Colors.white, size: 22),
+            child: Icon(
+              icon,
+              color: isPrimary ? Colors.black : Colors.white,
+              size: 24,
+            ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           Text(
             label,
-            style: GoogleFonts.inter(fontSize: 11, color: AppTheme.textSecondary),
+            style: GoogleFonts.inter(
+              fontSize: 11,
+              fontWeight: isPrimary ? FontWeight.bold : FontWeight.w500,
+              color: isPrimary ? AppTheme.accentColor : Colors.white70,
+            ),
           ),
         ],
       ),
@@ -93,7 +123,6 @@ class MovieQuickActionButton extends StatelessWidget {
   }
 }
 
-// Sticky bottom CTA shown while a movie's details are loaded.
 class MovieDetailStickyCta extends StatelessWidget {
   final VoidCallback onTap;
 
@@ -101,32 +130,41 @@ class MovieDetailStickyCta extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: AppTheme.backgroundColor,
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
-          child: SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: ElevatedButton.icon(
-              onPressed: onTap,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.accentColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              icon: const Icon(Icons.add_task_rounded, color: Colors.white),
-              label: Text(
-                'Yeni İzleme Kaydı Ekle',
-                style: GoogleFonts.outfit(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
+    return Positioned(
+      bottom: 20,
+      left: 20,
+      right: 20,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: const LinearGradient(
+            colors: [Color(0xFFFFB800), Color(0xFFFF8C00)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: AppTheme.accentColor.withValues(alpha: 0.45),
+              blurRadius: 20,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: ElevatedButton.icon(
+          onPressed: onTap,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.transparent,
+            shadowColor: Colors.transparent,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          ),
+          icon: const Icon(Icons.add_circle_outline_rounded, color: Colors.black, size: 22),
+          label: Text(
+            'Günlüğüme Ekle',
+            style: GoogleFonts.outfit(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
             ),
           ),
         ),

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
 
-// Horizontal "Tümü" + genre filter chip row under the search bar.
 class SearchGenreChips extends StatelessWidget {
   final Map<String, int> genres;
   final int? selectedGenreId;
@@ -18,25 +17,44 @@ class SearchGenreChips extends StatelessWidget {
   Widget _genreChip({
     required String label,
     required bool isSelected,
-    required ValueChanged<bool> onSelected,
+    required VoidCallback onTap,
   }) {
-    return ChoiceChip(
-      label: Text(
-        label,
-        style: GoogleFonts.inter(
-          fontSize: 12,
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-          color: isSelected ? Colors.black : Colors.white70,
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14),
+          gradient: isSelected
+              ? const LinearGradient(
+                  colors: [Color(0xFFFFB800), Color(0xFFFF8C00)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                )
+              : null,
+          color: isSelected ? null : Colors.white.withValues(alpha: 0.05),
+          border: Border.all(
+            color: isSelected ? Colors.amberAccent : Colors.white12,
+            width: isSelected ? 1.2 : 0.8,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppTheme.accentColor.withValues(alpha: 0.3),
+                    blurRadius: 10,
+                  ),
+                ]
+              : [],
         ),
-      ),
-      selected: isSelected,
-      onSelected: onSelected,
-      backgroundColor: Colors.transparent,
-      selectedColor: AppTheme.accentColor,
-      showCheckmark: false,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(100),
-        side: BorderSide(color: isSelected ? Colors.transparent : AppTheme.borderColor),
+        child: Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 11.5,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+            color: isSelected ? Colors.black : Colors.white70,
+          ),
+        ),
       ),
     );
   }
@@ -44,34 +62,28 @@ class SearchGenreChips extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 40,
+      height: 38,
       child: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
         children: [
-          // "Tümü" (All) Chip
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
+            padding: const EdgeInsets.only(right: 6),
             child: _genreChip(
               label: 'Tümü',
               isSelected: selectedGenreId == null,
-              onSelected: (selected) {
-                if (selected) onGenreSelected(null);
-              },
+              onTap: () => onGenreSelected(null),
             ),
           ),
-
-          // Genre Chips mapping
           ...genres.entries.map((entry) {
             final isSelected = selectedGenreId == entry.value;
             return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
+              padding: const EdgeInsets.only(right: 6),
               child: _genreChip(
                 label: entry.key,
                 isSelected: isSelected,
-                onSelected: (selected) {
-                  onGenreSelected(selected ? entry.value : null);
-                },
+                onTap: () => onGenreSelected(isSelected ? null : entry.value),
               ),
             );
           }),

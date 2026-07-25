@@ -7,6 +7,7 @@ import '../models/user_model.dart';
 import 'widgets/edit_profile_sheet.dart';
 import 'widgets/featured_showcase_section.dart';
 import 'widgets/premium_featured_selector_dialog.dart';
+import 'widgets/profile_achievements_section.dart';
 import 'widgets/profile_actions_card.dart';
 import 'widgets/profile_header_card.dart';
 import 'widgets/recent_watches_grid.dart';
@@ -87,6 +88,9 @@ class UserProfileScreen extends ConsumerWidget {
                     isMe: isMe,
                     onEditPressed: () => _showFeaturedMoviesSelector(context, ref, userModel),
                   ),
+                  const SizedBox(height: 24),
+                  const ProfileAchievementsSection(),
+                  const SizedBox(height: 24),
                   RecentWatchesGrid(userId: effectiveUserId),
                   if (isMe) ...[
                     const SizedBox(height: 32),
