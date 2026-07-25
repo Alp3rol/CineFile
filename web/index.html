@@ -37,6 +37,20 @@
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAFj_zdN3IctmGLMWlrFprSR9aTUJk0Xqk",
+      authDomain: "cinefile-6252a.firebaseapp.com",
+      projectId: "cinefile-6252a",
+      storageBucket: "cinefile-6252a.firebasestorage.app",
+      messagingSenderId: "521976219913",
+      appId: "1:521976219913:web:afb75aedda726d625c2bd8",
+      measurementId: "G-BWZ95VSP0F"
+    };
+    if (typeof firebase !== 'undefined' && firebase.apps && !firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+  </script>
   <style>
     /* Clean full-screen style for local development */
     html, body {
