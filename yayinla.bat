@@ -16,8 +16,8 @@ echo.
 echo Adim 2: Yeni versiyon GitHub'a gonderiliyor (push)...
 cd build\web
 call git init
-call git config user.name "CineFile Deploy"
-call git config user.email "deploy@cinefile.local"
+call git config user.name "Alp3rol"
+call git config user.email "alp3rol17@gmail.com"
 call git checkout -b main
 call git add .
 
