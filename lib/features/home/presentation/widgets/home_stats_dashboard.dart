@@ -17,196 +17,277 @@ class HomeStatsDashboard extends StatelessWidget {
     final progress = weeklyGoal > 0 ? (thisWeekCount / weeklyGoal).clamp(0.0, 1.0) : 0.0;
     final remaining = (weeklyGoal - thisWeekCount).clamp(0, weeklyGoal);
     final goalText = totalWatchCount == 0
-        ? 'Bu hafta ilk izlemeni ekle.'
+        ? 'İlk izlemeni kütüphanene ekle!'
         : remaining == 0
-            ? 'Bu haftaki hedefine ulaştın!'
+            ? 'Tebrikler, haftalık hedefine ulaştın! 🎉'
             : 'Bu hafta $remaining film/dizi daha izlemelisin.';
     final textTheme = Theme.of(context).textTheme;
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // Switch to a vertical layout if screen width is mobile (< 500px)
-        final useVerticalLayout = MediaQuery.of(context).size.width < 500;
-
-        final totalStatsColumn = Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildMiniStat(context, 'Toplam İzleme', '$totalWatchCount', Icons.movie_outlined),
-            const SizedBox(height: 12),
-            _buildMiniStat(
-              context,
-              'Ortalama Puan',
-              totalWatchCount == 0 ? '-' : averageRating.toStringAsFixed(1),
-              Icons.star_border_rounded,
-              isRating: totalWatchCount > 0,
-            ),
-          ],
-        );
-
-        final weeklyGoalRow = Row(
-          children: [
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                SizedBox(
-                  height: 60,
-                  width: 60,
-                  child: CircularProgressIndicator(
-                    value: progress,
-                    strokeWidth: 5,
-                    backgroundColor: AppTheme.borderColor,
-                    valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.accentColor),
-                  ),
-                ),
-                Text(
-                  '$thisWeekCount/$weeklyGoal',
-                  style: textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.04),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Header Badge Row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
                 children: [
-                  Text(
-                    'Haftalık Hedef',
-                    style: textTheme.bodyMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: AppTheme.accentColor.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.bar_chart_rounded, color: AppTheme.accentColor, size: 16),
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(width: 8),
                   Text(
-                    goalText,
-                    style: textTheme.labelLarge,
+                    'ÖZET & İSTATİSTİKLER',
+                    style: textTheme.labelSmall?.copyWith(
+                      color: AppTheme.textSecondary,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.0,
+                      fontSize: 11,
+                    ),
                   ),
                 ],
               ),
-            ),
-          ],
-        );
-
-        if (useVerticalLayout) {
-          return GlassContainer(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-            borderRadius: 20,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Expanded(
-                      child: Center(
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: _buildMiniStat(context, 'Toplam İzleme', '$totalWatchCount', Icons.movie_outlined),
-                        ),
-                      ),
-                    ),
-                    Container(
-                      height: 24,
+              if (weeklyGoal > 0)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: progress >= 1.0 ? Colors.green.withValues(alpha: 0.2) : Colors.white.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: progress >= 1.0 ? Colors.green.withValues(alpha: 0.4) : Colors.white.withValues(alpha: 0.15),
                       width: 1,
-                      color: AppTheme.borderColor,
                     ),
-                    Expanded(
-                      child: Center(
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: _buildMiniStat(
-                            context,
-                            'Ortalama Puan',
-                            totalWatchCount == 0 ? '-' : averageRating.toStringAsFixed(1),
-                            Icons.star_border_rounded,
-                            isRating: totalWatchCount > 0,
+                  ),
+                  child: Text(
+                    progress >= 1.0 ? 'HEDEF TAMAM' : 'HAFTALIK HEDEF',
+                    style: TextStyle(
+                      color: progress >= 1.0 ? Colors.greenAccent : Colors.white70,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // Main Stats Content
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final isMobile = constraints.maxWidth < 450;
+
+              final totalCard = _buildStatTile(
+                context,
+                icon: Icons.movie_outlined,
+                iconColor: AppTheme.accentColor,
+                label: 'Toplam İzleme',
+                value: '$totalWatchCount',
+                unit: 'yapım',
+              );
+
+              final ratingCard = _buildStatTile(
+                context,
+                icon: Icons.star_rounded,
+                iconColor: Colors.amberAccent,
+                label: 'Ortalama Puan',
+                value: totalWatchCount == 0 ? '-' : averageRating.toStringAsFixed(1),
+                unit: totalWatchCount > 0 ? '/ 10' : '',
+              );
+
+              final goalCard = Row(
+                children: [
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      SizedBox(
+                        height: 56,
+                        width: 56,
+                        child: CircularProgressIndicator(
+                          value: progress,
+                          strokeWidth: 6,
+                          strokeCap: StrokeCap.round,
+                          backgroundColor: Colors.white.withValues(alpha: 0.08),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            progress >= 1.0 ? Colors.greenAccent : AppTheme.accentColor,
                           ),
                         ),
                       ),
+                      Text(
+                        '$thisWeekCount/$weeklyGoal',
+                        style: textTheme.labelLarge?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Haftalık Hedef',
+                          style: textTheme.titleSmall?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          goalText,
+                          style: textTheme.labelSmall?.copyWith(
+                            color: AppTheme.textSecondary,
+                            height: 1.3,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              );
+
+              if (isMobile) {
+                return Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(child: totalCard),
+                        const SizedBox(width: 10),
+                        Expanded(child: ratingCard),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.03),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.06), width: 1),
+                      ),
+                      child: goalCard,
                     ),
                   ],
-                ),
-                const SizedBox(height: 10),
-                Divider(color: AppTheme.borderColor, height: 1),
-                const SizedBox(height: 10),
-                weeklyGoalRow,
-              ],
-            ),
-          );
-        }
+                );
+              }
 
-        // Default layout for wider screens
-        return GlassContainer(
-          padding: const EdgeInsets.all(18),
-          borderRadius: 20,
-          child: Row(
-            children: [
-              // Total Stats
-              Expanded(
-                child: totalStatsColumn,
-              ),
-
-              // Divider Line
-              Container(
-                height: 70,
-                width: 1,
-                color: AppTheme.borderColor,
-                margin: const EdgeInsets.symmetric(horizontal: 16),
-              ),
-
-              // Weekly Goal Progress
-              Expanded(
-                child: weeklyGoalRow,
-              ),
-            ],
+              return Row(
+                children: [
+                  Expanded(child: totalCard),
+                  const SizedBox(width: 12),
+                  Expanded(child: ratingCard),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    flex: 2,
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.03),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.06), width: 1),
+                      ),
+                      child: goalCard,
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 
-  Widget _buildMiniStat(BuildContext context, String label, String value, IconData icon, {bool isRating = false}) {
+  Widget _buildStatTile(
+    BuildContext context, {
+    required IconData icon,
+    required Color iconColor,
+    required String label,
+    required String value,
+    required String unit,
+  }) {
     final textTheme = Theme.of(context).textTheme;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, color: isRating ? AppTheme.ratingColor : AppTheme.accentColor, size: 22),
-        const SizedBox(width: 8),
-        Flexible(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                label,
-                style: textTheme.labelLarge,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Flexible(
-                    child: Text(
-                      value,
-                      style: textTheme.displayMedium?.copyWith(fontSize: 22),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  if (isRating)
-                    Text(
-                      ' /10',
-                      style: textTheme.labelLarge,
-                    ),
-                ],
-              ),
-            ],
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.03),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.06), width: 1),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: iconColor.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: iconColor, size: 20),
           ),
-        ),
-      ],
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  label,
+                  style: textTheme.labelSmall?.copyWith(color: AppTheme.textSecondary, fontSize: 11),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Text(
+                      value,
+                      style: textTheme.titleLarge?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
+                    ),
+                    if (unit.isNotEmpty) ...[
+                      const SizedBox(width: 4),
+                      Text(
+                        unit,
+                        style: textTheme.labelSmall?.copyWith(color: AppTheme.textSecondary),
+                      ),
+                    ],
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

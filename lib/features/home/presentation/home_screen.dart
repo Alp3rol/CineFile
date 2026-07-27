@@ -6,13 +6,14 @@ import '../../../../core/database/database_provider.dart';
 import '../../../../core/database/app_database.dart';
 import '../../../../core/widgets/actively_watching_row.dart';
 import '../../insights/presentation/insights_provider.dart';
-import '../../insights/presentation/widgets/insights_charts.dart';
 import '../../movie_detail/presentation/movie_detail_screen.dart';
+import '../../settings/presentation/settings_provider.dart';
 import '../../main_shell.dart';
 import '../../../../core/widgets/scroll_to_top_button.dart';
 import 'widgets/home_header_bar.dart';
 import 'widgets/home_hero_banner.dart';
 import 'widgets/home_hero_carousel.dart';
+import 'widgets/home_stats_dashboard.dart';
 import 'widgets/home_content_lists.dart';
 import '../../recommendations/presentation/widgets/home_recommendations_list.dart';
 
@@ -172,8 +173,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             suggestion != null ? () => ref.read(_homeSuggestionSeedProvider.notifier).state++ : null,
                         onTap: () => _openDetail(heroMovie.tmdbId, heroMovie.isTv),
                       ),
-                      const SizedBox(height: 28),
+                      const SizedBox(height: 24),
                     ],
+
+                    // Premium Redesigned Stats Dashboard
+                    Consumer(
+                      builder: (context, ref, _) {
+                        final insights = ref.watch(insightsProvider);
+                        final weeklyGoal = ref.watch(weeklyGoalProvider);
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: HomeStatsDashboard(insights: insights, weeklyGoal: weeklyGoal),
+                        );
+                      },
+                    ),
 
                     const SizedBox(height: 28),
 
@@ -189,26 +202,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
                     const SizedBox(height: 28),
                     HomeRecommendationsList(onOpenDetail: _openDetail),
-
-                    // Genre Distribution (reuses the existing Insights chart
-                    // card) — isolated in its own Consumer for the same
-                    // rebuild-scope reason as the streak chip above.
-                    Consumer(
-                      builder: (context, ref, _) {
-                        final insights = ref.watch(insightsProvider);
-                        if (insights == null || insights.topGenres.isEmpty) return const SizedBox.shrink();
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 28),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 20),
-                              child: GenreChartCard(data: insights),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
 
                     // "Aktif İzlediklerin" quick-add row (hidden if nothing active).
                     // Intentionally shows all active shows even if one of
