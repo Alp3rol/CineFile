@@ -8,13 +8,11 @@ import '../../../../core/widgets/actively_watching_row.dart';
 import '../../insights/presentation/insights_provider.dart';
 import '../../insights/presentation/widgets/insights_charts.dart';
 import '../../movie_detail/presentation/movie_detail_screen.dart';
-import '../../settings/presentation/settings_provider.dart';
 import '../../main_shell.dart';
 import '../../../../core/widgets/scroll_to_top_button.dart';
 import 'widgets/home_header_bar.dart';
 import 'widgets/home_hero_banner.dart';
 import 'widgets/home_hero_carousel.dart';
-import 'widgets/home_stats_dashboard.dart';
 import 'widgets/home_content_lists.dart';
 import '../../recommendations/presentation/widgets/home_recommendations_list.dart';
 
@@ -128,7 +126,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const HomeHeaderBar(),
+            Consumer(
+              builder: (context, ref, _) {
+                final insights = ref.watch(insightsProvider);
+                return HomeHeaderBar(streak: insights?.currentStreak ?? 0);
+              },
+            ),
 
             // Scrollable Content
             Expanded(
@@ -138,28 +141,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Streak Chip — the very top of the scrollable content,
-                    // right below the header (only shown once a streak
-                    // actually exists). Isolated in its own Consumer so an
-                    // insightsProvider change (e.g. favoriting a movie,
-                    // which also invalidates it) doesn't rebuild the whole
-                    // HomeScreen — only this small subtree.
-                    Consumer(
-                      builder: (context, ref, _) {
-                        final insights = ref.watch(insightsProvider);
-                        if (insights == null || insights.currentStreak < 1) return const SizedBox.shrink();
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 20),
-                              child: HomeStreakChip(streak: insights.currentStreak),
-                            ),
-                            const SizedBox(height: 20),
-                          ],
-                        );
-                      },
-                    ),
+                    const SizedBox(height: 4),
 
                     // Cinematic hero — the screen's top visual anchor.
                     // Highest priority: any actively-watching shows, shown as
@@ -171,7 +153,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     if ((activeShowsAsync.isLoading && activeShows.isEmpty) ||
                         (watchRecordsAsync.isLoading && recentlyWatched.isEmpty)) ...[
                       const SizedBox(
-                        height: 450,
+                        height: 360,
                         child: Center(
                           child: CircularProgressIndicator(
                             valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentColor),
@@ -192,20 +174,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                       const SizedBox(height: 28),
                     ],
-
-                    // Stats Dashboard Section — isolated in its own
-                    // Consumer for the same rebuild-scope reason as the
-                    // streak chip above.
-                    Consumer(
-                      builder: (context, ref, _) {
-                        final insights = ref.watch(insightsProvider);
-                        final weeklyGoal = ref.watch(weeklyGoalProvider);
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: HomeStatsDashboard(insights: insights, weeklyGoal: weeklyGoal),
-                        );
-                      },
-                    ),
 
                     const SizedBox(height: 28),
 

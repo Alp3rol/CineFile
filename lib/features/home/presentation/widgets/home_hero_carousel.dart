@@ -5,7 +5,6 @@ import '../../../../core/database/database_provider.dart';
 import '../../../../core/database/episode_logging.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/app_network_image.dart';
-import '../../../../core/widgets/glass_container.dart';
 
 /// Highest-priority hero variant: when the user has actively-watching shows
 /// (see UserMovieSettings.isActivelyWatching), the hero shows those instead
@@ -38,7 +37,7 @@ class _HomeActiveHeroCarouselState extends State<HomeActiveHeroCarousel> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          height: 400,
+          height: 360,
           child: PageView.builder(
             controller: _controller,
             itemCount: widget.shows.length,
@@ -53,19 +52,29 @@ class _HomeActiveHeroCarouselState extends State<HomeActiveHeroCarousel> {
           ),
         ),
         if (widget.shows.length > 1) ...[
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(widget.shows.length, (index) {
               final isActive = index == _currentPage;
               return AnimatedContainer(
-                duration: const Duration(milliseconds: 250),
-                margin: const EdgeInsets.symmetric(horizontal: 3),
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeOutCubic,
+                margin: const EdgeInsets.symmetric(horizontal: 4),
                 height: 6,
-                width: isActive ? 18 : 6,
+                width: isActive ? 24 : 8,
                 decoration: BoxDecoration(
-                  color: isActive ? AppTheme.accentColor : AppTheme.borderColor,
+                  color: isActive ? AppTheme.accentColor : Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(3),
+                  boxShadow: isActive
+                      ? [
+                          BoxShadow(
+                            color: AppTheme.accentColor.withValues(alpha: 0.5),
+                            blurRadius: 8,
+                            spreadRadius: 0,
+                          ),
+                        ]
+                      : null,
                 ),
               );
             }),
@@ -94,77 +103,212 @@ class _HomeActiveHeroSlide extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: GestureDetector(
         onTap: onTap,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
-          child: SizedBox(
-            height: 400,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                AppNetworkImage(
-                  // Never fabricate a backdrop path — fall back to the
-                  // title-seeded placeholder gradient when it's missing.
-                  imageUrl: backdropPath != null ? '${ApiConstants.imagePathW780}$backdropPath' : '',
-                  seed: movie.title,
-                  width: MediaQuery.of(context).size.width - 40,
-                  height: 400,
-                  fit: BoxFit.cover,
-                ),
-                // Bottom fade for text legibility over the backdrop.
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      stops: const [0.3, 1.0],
-                      colors: [
-                        Colors.black.withValues(alpha: 0.0),
-                        Colors.black.withValues(alpha: 0.88),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(color: AppTheme.accentColor.withValues(alpha: 0.3), width: 1),
+            boxShadow: [
+              BoxShadow(
+                color: AppTheme.accentColor.withValues(alpha: 0.2),
+                blurRadius: 26,
+                spreadRadius: -4,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(28),
+            child: SizedBox(
+              height: 360,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  AppNetworkImage(
+                    imageUrl: backdropPath != null ? '${ApiConstants.imagePathW780}$backdropPath' : '',
+                    seed: movie.title,
+                    width: MediaQuery.of(context).size.width - 40,
+                    height: 360,
+                    fit: BoxFit.cover,
+                  ),
+                  // Multi-stop cinematic gradient
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        stops: const [0.0, 0.25, 0.65, 1.0],
+                        colors: [
+                          Colors.black.withValues(alpha: 0.4),
+                          Colors.transparent,
+                          Colors.black.withValues(alpha: 0.65),
+                          Colors.black.withValues(alpha: 0.95),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // Top Header Badge Row
+                  Positioned(
+                    top: 16,
+                    left: 16,
+                    right: 16,
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.5),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: AppTheme.accentColor.withValues(alpha: 0.4), width: 1),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppTheme.accentColor.withValues(alpha: 0.3),
+                                blurRadius: 10,
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.play_circle_fill_rounded, color: AppTheme.accentColor, size: 14),
+                              const SizedBox(width: 6),
+                              Text(
+                                'İZLEMEYE DEVAM ET',
+                                style: textTheme.labelSmall?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.8,
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                ),
-                Positioned(
-                  right: 18,
-                  bottom: 18,
-                  child: GestureDetector(
-                    onTap: () => advanceEpisodeWithToast(context, ref, show),
-                    child: GlassContainer(
-                      padding: const EdgeInsets.all(10),
-                      borderRadius: 100,
-                      opacity: 0.85,
-                      child: const Icon(Icons.add_rounded, color: AppTheme.accentColor, size: 20),
+
+                  // Bottom Content & Quick Episode Increment Action
+                  Positioned(
+                    left: 20,
+                    right: 20,
+                    bottom: 20,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Episode Tag Badge
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1),
+                          ),
+                          child: Text(
+                            total != null ? 'Sıradaki: Bölüm $next / $total' : 'Sıradaki: Bölüm $next',
+                            style: textTheme.labelMedium?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+
+                        // Movie Title
+                        Text(
+                          movie.title,
+                          style: textTheme.displayMedium?.copyWith(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            height: 1.2,
+                            shadows: [
+                              const Shadow(color: Colors.black, blurRadius: 12),
+                            ],
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 14),
+
+                        // Action Buttons Row
+                        Row(
+                          children: [
+                            // Primary Watch / Detail Action
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: onTap,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 10),
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        AppTheme.accentColor,
+                                        AppTheme.accentColor.withValues(alpha: 0.8),
+                                      ],
+                                    ),
+                                    borderRadius: BorderRadius.circular(14),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: AppTheme.accentColor.withValues(alpha: 0.4),
+                                        blurRadius: 12,
+                                        offset: const Offset(0, 4),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 20),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        'Devam Et',
+                                        style: textTheme.labelLarge?.copyWith(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+
+                            // Quick Episode Increment Button (+1)
+                            GestureDetector(
+                              onTap: () => advanceEpisodeWithToast(context, ref, show),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(color: Colors.white.withValues(alpha: 0.25), width: 1),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.add_rounded, color: AppTheme.accentColor, size: 18),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      '+1 Bölüm',
+                                      style: textTheme.labelMedium?.copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
-                ),
-                Positioned(
-                  left: 18,
-                  right: 76,
-                  bottom: 18,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'İzlemeye Devam Et',
-                        style: textTheme.titleMedium,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        movie.title,
-                        style: textTheme.displayMedium,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        total != null ? 'Bölüm $next / $total' : 'Bölüm $next',
-                        style: textTheme.bodyMedium,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

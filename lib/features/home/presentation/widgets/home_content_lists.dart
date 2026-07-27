@@ -18,20 +18,52 @@ class HomeSectionTitle extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Expanded(
-            child: Text(
-              title,
-              style: Theme.of(context).textTheme.titleLarge,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 4,
+                height: 18,
+                decoration: BoxDecoration(
+                  color: AppTheme.accentColor,
+                  borderRadius: BorderRadius.circular(2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.accentColor.withValues(alpha: 0.5),
+                      blurRadius: 6,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                title,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: -0.2,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 8),
-          TextButton(
-            onPressed: onSeeAll,
-            child: Text(
-              'Tümünü Gör',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppTheme.accentColor),
+          InkWell(
+            onTap: onSeeAll,
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Tümünü Gör',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppTheme.accentColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  const Icon(Icons.arrow_forward_ios_rounded, color: AppTheme.accentColor, size: 12),
+                ],
+              ),
             ),
           ),
         ],
@@ -81,9 +113,9 @@ class HomeRecentlyAddedList extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     return SizedBox(
-      height: 235,
+      height: 245,
       child: ListView.builder(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 14),
         scrollDirection: Axis.horizontal,
         itemCount: items.length,
         itemBuilder: (context, index) {
@@ -92,41 +124,85 @@ class HomeRecentlyAddedList extends StatelessWidget {
           return GestureDetector(
             onTap: () => onOpenDetail(tmdbId, movie.isTv),
             child: Container(
-              width: 130,
+              width: 132,
               margin: const EdgeInsets.symmetric(horizontal: 6),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Poster
+                  // Poster Container with Border & Shadow
                   Hero(
                     tag: 'poster_${tmdbId}_${movie.isTv}',
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: AppNetworkImage(
-                        imageUrl: movie.posterPath != null
-                            ? '${ApiConstants.imagePathW500}${movie.posterPath}'
-                            : '',
-                        seed: movie.title,
-                        height: 180,
-                        width: 130,
-                        fit: BoxFit.cover,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.1), width: 1),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.4),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Stack(
+                          children: [
+                            AppNetworkImage(
+                              imageUrl: movie.posterPath != null
+                                  ? '${ApiConstants.imagePathW500}${movie.posterPath}'
+                                  : '',
+                              seed: movie.title,
+                              height: 185,
+                              width: 132,
+                              fit: BoxFit.cover,
+                            ),
+                            if (movie.releaseYear != null)
+                              Positioned(
+                                top: 8,
+                                right: 8,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withValues(alpha: 0.65),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    '${movie.releaseYear}',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 8),
 
                   // Title
                   Text(
                     movie.title,
-                    style: textTheme.labelLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+                    style: textTheme.labelLarge?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
+                  const SizedBox(height: 2),
 
                   // Subtitle
                   Text(
-                    '${movie.releaseYear ?? "?"} • ${movie.director ?? "Yönetmen Yok"}',
-                    style: textTheme.labelSmall,
+                    movie.director != null && movie.director!.isNotEmpty
+                        ? movie.director!
+                        : (movie.isTv ? 'Dizi' : 'Film'),
+                    style: textTheme.labelSmall?.copyWith(color: AppTheme.textSecondary),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
