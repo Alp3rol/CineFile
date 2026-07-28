@@ -2,6 +2,51 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // --- Social-interaction write guards (shared by `logs` and `posts`) ---
+    //
+    // Both collections let *other* users touch two fields — starredBy (like)
+    // and commentCount — on a document they don't own. Restricting which
+    // KEYS may change (hasOnly) is not enough on its own: it still let anyone
+    // replace the whole starredBy array (wiping every other user's like, or
+    // stuffing it with uids that never liked anything) or set commentCount to
+    // an arbitrary number. These two functions pin down the allowed *shape* of
+    // the change, not just its field names.
+    //
+    // `.get(field, default)` is used throughout because documents written
+    // before these fields existed simply don't have them.
+
+    // A like toggle may only add or remove the caller's own uid: the symmetric
+    // difference between the old and new arrays must contain nothing else.
+    function isOwnStarToggle() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['starredBy'])
+        && request.resource.data.get('starredBy', []).toSet()
+             .difference(resource.data.get('starredBy', []).toSet())
+             .hasOnly([request.auth.uid])
+        && resource.data.get('starredBy', []).toSet()
+             .difference(request.resource.data.get('starredBy', []).toSet())
+             .hasOnly([request.auth.uid]);
+    }
+
+    // A comment add/remove moves the counter by exactly one, in step with the
+    // matching write in the comments subcollection.
+    function isCommentCountStep() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['commentCount'])
+        && (request.resource.data.commentCount == resource.data.get('commentCount', 0) + 1
+            || request.resource.data.commentCount == resource.data.get('commentCount', 0) - 1);
+    }
+
+    // Following someone touches the *other* user's followerCount. Same
+    // reasoning as isCommentCountStep: allow the counter to move by one, not
+    // to be set to whatever the caller likes.
+    function isFollowCounterStep() {
+      return request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['followerCount', 'followingCount'])
+        && (request.resource.data.get('followerCount', 0) - resource.data.get('followerCount', 0)) >= -1
+        && (request.resource.data.get('followerCount', 0) - resource.data.get('followerCount', 0)) <= 1
+        && (request.resource.data.get('followingCount', 0) - resource.data.get('followingCount', 0)) >= -1
+        && (request.resource.data.get('followingCount', 0) - resource.data.get('followingCount', 0)) <= 1;
+    }
+
     // Diary logs — the source of the Community feed. A log is world-readable
     // only when its owner explicitly marked it isPublic == true; otherwise
     // only the owner can read it. starredBy/commentCount are updated by
@@ -14,7 +59,8 @@ service cloud.firestore {
       allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
       allow update: if request.auth != null && (
         request.auth.uid == resource.data.userId ||
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['starredBy', 'commentCount'])
+        isOwnStarToggle() ||
+        isCommentCountStep()
       );
       allow delete: if request.auth != null && request.auth.uid == resource.data.userId;
 
@@ -37,7 +83,8 @@ service cloud.firestore {
       allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
       allow update: if request.auth != null && (
         request.auth.uid == resource.data.userId ||
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['starredBy', 'commentCount'])
+        isOwnStarToggle() ||
+        isCommentCountStep()
       );
       allow delete: if request.auth != null && request.auth.uid == resource.data.userId;
 
@@ -62,17 +109,26 @@ service cloud.firestore {
       allow delete: if request.auth != null && request.auth.uid == resource.data.ownerId;
     }
 
-    // User profiles — public read (username/avatar/follower counts shown on
-    // any profile screen), but only the owner can write, except
-    // followerCount/followingCount which the follow/unfollow batch on
-    // *another* user's account also needs to touch.
-    // Unauthenticated users can read to check username availability during signup.
+    // User profiles — readable by any SIGNED-IN user (username/avatar/follower
+    // counts are shown on every profile screen and in user search), but only
+    // the owner can write, except followerCount/followingCount which the
+    // follow/unfollow batch on *another* user's account also needs to touch.
+    //
+    // This used to be `allow read: if true` so that signup could check whether
+    // a username was free without being authenticated. That made every
+    // document here world-readable — and the documents contained the user's
+    // email address, so anyone could enumerate every account's email. Two
+    // changes closed that: the email is no longer stored in this collection at
+    // all (it lives in Firebase Auth, where only its owner can see it), and
+    // username availability now goes through /usernames below, which is
+    // claimed *after* the account is created and therefore never needs an
+    // unauthenticated read.
     match /users/{userId} {
-      allow read: if true;
+      allow read: if request.auth != null;
       allow create: if request.auth != null && request.auth.uid == userId;
       allow update: if request.auth != null && (
         request.auth.uid == userId ||
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['followerCount', 'followingCount'])
+        isFollowCounterStep()
       );
       allow delete: if false;
 
@@ -85,6 +141,23 @@ service cloud.firestore {
       match /graph_overrides/{overrideId} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
       }
+    }
+
+    // Username registry, doc id is the lowercased username, body is
+    // { uid }. This collection exists purely to make usernames unique: a
+    // claim is a document *create*, and Firestore only allows create when the
+    // document does not already exist, so the uniqueness guarantee comes from
+    // the server rather than from a client-side "is it free?" read that two
+    // concurrent signups can both pass (see AuthController._claimUsername).
+    //
+    // Update is forbidden outright — a name is released by deleting the claim
+    // and creating the new one in the same transaction, never by rewriting an
+    // existing doc's uid, which would otherwise let someone hijack a claim.
+    match /usernames/{usernameLower} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.uid;
+      allow delete: if request.auth != null && request.auth.uid == resource.data.uid;
+      allow update: if false;
     }
 
     // Follow edges, doc id "${followerId}_${followingId}".

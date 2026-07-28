@@ -194,7 +194,7 @@ class _ShareComposeSheetState extends ConsumerState<ShareComposeSheet> {
   }
 
   Future<void> _submit() async {
-    final currentUser = ref.read(authStateProvider).value;
+    final currentUser = ref.currentUser;
     if (currentUser == null) {
       showPremiumToast(context, 'Lütfen önce giriş yapın.', isError: true);
       return;
@@ -202,9 +202,9 @@ class _ShareComposeSheetState extends ConsumerState<ShareComposeSheet> {
 
     setState(() => _submitting = true);
     try {
-      final userModel = ref.read(userModelProvider);
-      final username = userModel?.username ?? currentUser.email!.split('@')[0];
-      final avatarUrl = userModel?.avatarUrl ?? 'https://api.dicebear.com/7.x/bottts/png?seed=$username';
+      final identity = resolveUserIdentity(ref.read(userModelProvider), currentUser);
+      final username = identity.username;
+      final avatarUrl = identity.avatarUrl;
       final caption = _captionController.text.trim();
 
       CommunityPost post;

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/utils/safe_parsers.dart';
+import '../../auth/controllers/auth_controller.dart';
 
 class CommentModel {
   final String id;
@@ -43,7 +44,8 @@ class CommentModel {
 }
 
 final commentsProvider = StreamProvider.family<List<CommentModel>, String>((ref, postId) {
-  return FirebaseFirestore.instance
+  return ref
+      .watch(firestoreProvider)
       .collection('posts')
       .doc(postId)
       .collection('comments')

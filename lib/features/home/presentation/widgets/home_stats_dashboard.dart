@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/widgets/glass_container.dart';
 import '../../../insights/presentation/insights_provider.dart';
 
 class HomeStatsDashboard extends StatelessWidget {
@@ -262,23 +261,37 @@ class HomeStatsDashboard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 2),
+                // Both texts are Flexible: three of these cards sit side by
+                // side in Expanded slots, so on a narrow screen each gets
+                // roughly a third of the width — and a four-digit minute
+                // total next to its unit ("12.480 dk") overflowed the card by
+                // a dozen pixels. The number keeps priority; the unit is what
+                // gets clipped first if something has to give.
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.baseline,
                   textBaseline: TextBaseline.alphabetic,
                   children: [
-                    Text(
-                      value,
-                      style: textTheme.titleLarge?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
+                    Flexible(
+                      child: Text(
+                        value,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: textTheme.titleLarge?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                        ),
                       ),
                     ),
                     if (unit.isNotEmpty) ...[
                       const SizedBox(width: 4),
-                      Text(
-                        unit,
-                        style: textTheme.labelSmall?.copyWith(color: AppTheme.textSecondary),
+                      Flexible(
+                        child: Text(
+                          unit,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: textTheme.labelSmall?.copyWith(color: AppTheme.textSecondary),
+                        ),
                       ),
                     ],
                   ],
@@ -292,35 +305,7 @@ class HomeStatsDashboard extends StatelessWidget {
   }
 }
 
-// Same visual language as insights' contribution_heatmap buildStreakCard
-// (icon + color + one-line text), reimplemented locally since that function
-// is private to its own file. Uses GlassContainer so it matches the rest of
-// the screen's glass-panel language instead of a hand-rolled flat container.
-class HomeStreakChip extends StatelessWidget {
-  final int streak;
-
-  const HomeStreakChip({super.key, required this.streak});
-
-  @override
-  Widget build(BuildContext context) {
-    return GlassContainer(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      borderRadius: 14,
-      opacity: 0.5,
-      child: Row(
-        children: [
-          const Icon(Icons.local_fire_department_rounded, size: 22, color: Colors.orange),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              '$streak günlük seri devam ediyor!',
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.w600),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+// (HomeStreakChip used to live here. The premium-home redesign moved the
+// streak indicator into HomeHeaderBar's "N Gün" pill, leaving this class
+// unreferenced — removed rather than kept as a second, divergent rendering of
+// the same number.)

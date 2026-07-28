@@ -36,7 +36,7 @@ class SettingsBackupSection extends ConsumerWidget {
               ),
               const SizedBox(height: 6),
               Text(
-                'Tüm izleme geçmişinizi, favorilerinizi ve notlarınızı JSON formatında yedekleyebilir ve istediğiniz cihazda geri yükleyebilirsiniz.',
+                'Tüm izleme geçmişinizi, koleksiyonlarınızı, favorilerinizi ve notlarınızı JSON formatında yedekleyebilir ve istediğiniz cihazda geri yükleyebilirsiniz. Geri yükleme mevcut verilerin üzerine yazar.',
                 style: GoogleFonts.inter(
                   fontSize: 11,
                   color: AppTheme.textSecondary,

@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/database/database_provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
+import '../../../auth/controllers/auth_controller.dart';
 import '../../../auth/presentation/user_profile_screen.dart';
 import '../../../movie_detail/presentation/movie_detail_screen.dart';
 import '../../models/community_post_model.dart';
@@ -52,8 +53,8 @@ class CommunityPostCard extends ConsumerWidget {
     }
   }
 
-  Future<void> _toggleStar(String postId, List<String> starredBy, String currentUserId) async {
-    final postRef = FirebaseFirestore.instance.collection('posts').doc(postId);
+  Future<void> _toggleStar(WidgetRef ref, String postId, List<String> starredBy, String currentUserId) async {
+    final postRef = ref.read(firestoreProvider).collection('posts').doc(postId);
 
     if (starredBy.contains(currentUserId)) {
       await postRef.update({
@@ -104,7 +105,7 @@ class CommunityPostCard extends ConsumerWidget {
     );
   }
 
-  Widget _buildInteractionRow(BuildContext context, bool isStarred) {
+  Widget _buildInteractionRow(BuildContext context, WidgetRef ref, bool isStarred) {
     return Row(
       children: [
         GestureDetector(
@@ -115,7 +116,7 @@ class CommunityPostCard extends ConsumerWidget {
               );
               return;
             }
-            _toggleStar(post.id, post.starredBy, currentUser!.uid);
+            _toggleStar(ref, post.id, post.starredBy, currentUser!.uid);
           },
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -289,7 +290,7 @@ class CommunityPostCard extends ConsumerWidget {
             const SizedBox(height: 14),
             const Divider(color: Colors.white10, height: 1),
             const SizedBox(height: 10),
-            _buildInteractionRow(context, isStarred),
+            _buildInteractionRow(context, ref, isStarred),
           ],
         ),
       ),
@@ -344,7 +345,7 @@ class CommunityPostCard extends ConsumerWidget {
             const SizedBox(height: 14),
             const Divider(color: Colors.white10, height: 1),
             const SizedBox(height: 10),
-            _buildInteractionRow(context, isStarred),
+            _buildInteractionRow(context, ref, isStarred),
           ],
         ),
       ),
@@ -433,7 +434,7 @@ class CommunityPostCard extends ConsumerWidget {
             const SizedBox(height: 14),
             const Divider(color: Colors.white10, height: 1),
             const SizedBox(height: 10),
-            _buildInteractionRow(context, isStarred),
+            _buildInteractionRow(context, ref, isStarred),
           ],
         ),
       ),

@@ -9,7 +9,9 @@ import 'movie_detail_timeline_item.dart';
 // list itself.
 class MovieDetailTimelineSection extends StatelessWidget {
   final AsyncValue<List<WatchRecord>> watchRecordsAsync;
-  final Future<void> Function(int recordId) onDelete;
+  // Takes the whole record, not just its int id: deleting needs the record's
+  // remoteId to address the right Firestore document (see WatchRecords.remoteId).
+  final Future<void> Function(WatchRecord record) onDelete;
 
   const MovieDetailTimelineSection({
     super.key,
@@ -58,7 +60,7 @@ class MovieDetailTimelineSection extends StatelessWidget {
                 return MovieDetailTimelineItem(
                   record: record,
                   isLast: idx == records.length - 1,
-                  onDelete: () => onDelete(record.id),
+                  onDelete: () => onDelete(record),
                 );
               },
             );

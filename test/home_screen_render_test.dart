@@ -78,10 +78,15 @@ void main() {
     // "Son Eklediklerim" for this app's usage pattern), so watched-only
     // movies like "Real Watched Movie" no longer render anywhere on Home.
     expect(find.text('Real Added Movie'), findsOneWidget);
-    expect(find.text('2020 • Dir B'), findsOneWidget);
+    // The premium redesign renders year and director as separate labels
+    // rather than the old combined "2020 • Dir B" subtitle.
+    expect(find.text('2020'), findsWidgets);
+    expect(find.text('Dir B'), findsOneWidget);
 
     // Suggestion card: prefers the unwatched favorite over the non-favorite.
-    expect(find.text('Bu Hafta Ne İzlesem?'), findsOneWidget);
+    // The redesign moved the suggestion into the hero banner, whose badge is
+    // upper-cased.
+    expect(find.text('BU HAFTA NE İZLESEM?'), findsOneWidget);
     expect(find.text('Unwatched Favorite Movie'), findsOneWidget);
     expect(find.text('Unwatched Other Movie'), findsNothing);
   });
@@ -142,7 +147,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);
-    expect(find.textContaining('günlük seri devam ediyor'), findsOneWidget);
+    // The streak now shows as HomeHeaderBar's "N Gün" pill; the standalone
+    // "N günlük seri devam ediyor!" chip was dropped in the redesign.
+    expect(find.textContaining('Gün'), findsWidgets);
     // movieA has no genres set, so the genre chart (which hides on empty
     // topGenres) should stay hidden rather than throwing.
     expect(find.text('En Popüler Türler (Tür Dağılımı)'), findsNothing);

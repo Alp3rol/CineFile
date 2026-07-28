@@ -49,7 +49,9 @@ CineFile, izlediğiniz her film ve diziyi — hatta aynı yapımı birden fazla 
 
 ## 🔒 Gizlilik & Veri
 
-CineFile **yerel öncelikli** bir mimariyle çalışır: tüm izleme kayıtlarınız, notlarınız ve ayarlarınız varsayılan olarak **gizlidir** ve yalnızca siz görürsünüz. Topluluk özellikleri tamamen **opt-in**'dir — bir kaydı ya da koleksiyonu açıkça paylaşmadığınız sürece kimse göremez; sunucu tarafında da bu kurallar [`firestore.rules`](firestore.rules) ile zorunlu kılınır. Verilerinizi istediğiniz zaman JSON formatında dışa aktarabilir veya bir yedekten geri yükleyebilirsiniz.
+İzleme kayıtlarınız hesabınıza bağlı olarak Cloud Firestore'da tutulur; koleksiyonlarınız ise cihazınızdaki yerel veritabanında yaşar. Her iki tarafta da varsayılan **gizliliktir** ve kayıtlarınızı yalnızca siz görürsünüz. Topluluk özellikleri tamamen **opt-in**'dir — bir kaydı ya da koleksiyonu açıkça paylaşmadığınız sürece kimse göremez; sunucu tarafında da bu kurallar [`firestore.rules`](firestore.rules) ile zorunlu kılınır.
+
+E-posta adresiniz yalnızca Firebase Authentication'da tutulur, herkese açık profil dokümanınızda **saklanmaz**. Kullanıcı adı benzersizliği `usernames` koleksiyonundaki bir "claim" dokümanıyla sunucu tarafında güvence altına alınır. Verilerinizi istediğiniz zaman JSON formatında (izleme geçmişi + koleksiyonlar) dışa aktarabilir veya bir yedekten geri yükleyebilirsiniz.
 
 ## 🛠️ Teknolojik Altyapı
 
@@ -57,7 +59,7 @@ CineFile **yerel öncelikli** bir mimariyle çalışır: tüm izleme kayıtları
 |---|---|
 | Arayüz & Framework | Flutter (Android, iOS, Web, Windows) |
 | Durum Yönetimi | Riverpod |
-| Yerel Veritabanı | Drift (SQLite) — Web'de bellek içi (in-memory) simülasyon |
+| Yerel Veritabanı | Drift (SQLite) — koleksiyonlar ve başlık metadata'sı; Web'de bellek içi (in-memory) simülasyon |
 | Bulut & Kimlik Doğrulama | Firebase Auth + Cloud Firestore |
 | Ağ İstemcisi | Dio — özel proxy yönlendirme ve DoH entegrasyonu ile |
 | Grafikler | `fl_chart` |
@@ -72,7 +74,9 @@ flutter pub get
 flutter run
 ```
 
-> Uygulamayı çalıştırmak için `lib/core/constants/api_key.dart` içinde bir TMDb API anahtarı ve Firebase projeniz için oluşturulmuş `lib/firebase_options.dart` dosyası gerekir (ikisi de gizlilik nedeniyle `.gitignore`'dadır).
+> Uygulamayı çalıştırmak için `lib/core/constants/api_key.dart` içinde bir TMDb API anahtarı gerekir; bu dosya gizlilik nedeniyle `.gitignore`'dadır. `lib/firebase_options.dart` ise repoda mevcuttur — Firebase istemci konfigürasyonu tanım gereği geneldir, erişim `firestore.rules` ile kısıtlanır. Kendi Firebase projenizi kullanacaksanız `flutterfire configure` ile bu dosyayı yeniden üretin.
+>
+> **Not:** TMDb, API anahtarını sorgu parametresi olarak aldığı için web derlemesinde anahtar istemci paketine gömülür ve herkese görünürdür. Bu, tarayıcıda çalışan her istemci uygulaması için geçerlidir; anahtarı gizli tutmanız gerekiyorsa istekleri bir sunucu tarafı proxy üzerinden geçirin.
 
 ## 🗺️ Yol Haritası
 

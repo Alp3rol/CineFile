@@ -166,16 +166,15 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
   }
 
   Future<void> _saveRecord() async {
-    final authState = ref.read(authStateProvider);
-    final user = authState.value;
+    final user = ref.currentUser;
     if (user == null) {
       showPremiumToast(context, 'Lütfen önce giriş yapın.', isError: true);
       return;
     }
 
-    final userModel = ref.read(userModelProvider);
-    final username = userModel?.username ?? user.email!.split('@')[0];
-    final avatarUrl = userModel?.avatarUrl ?? 'https://api.dicebear.com/7.x/bottts/png?seed=$username';
+    final identity = resolveUserIdentity(ref.read(userModelProvider), user);
+    final username = identity.username;
+    final avatarUrl = identity.avatarUrl;
 
     final movieId = (widget.movieData['id'] as num).toInt();
 

@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../features/auth/controllers/auth_controller.dart';
-import '../utils/safe_parsers.dart';
 import 'app_database.dart';
 import 'database_provider.dart';
 import 'movie_repository.dart';
@@ -71,31 +70,50 @@ Future<void> cleanupDuplicateGroup(WidgetRef ref, DuplicateWatchGroup group) asy
   if (toDelete.isNotEmpty) {
     final movieId = keep.movie.tmdbId;
     final isTv = keep.movie.isTv;
-    final authState = ref.read(authStateProvider);
-    final user = authState.value;
+    final user = ref.currentUser;
 
     if (user != null) {
-      final query = await ref.read(firestoreProvider)
-          .collection('logs')
-          .where('userId', isEqualTo: user.uid)
-          .where('movieId', isEqualTo: movieId)
-          .where('isTv', isEqualTo: isTv)
-          .get();
+      final firestore = ref.read(firestoreProvider);
+      final keepRemoteId = keep.record.remoteId;
 
+      // Records carry their Firestore document id (see WatchRecords.remoteId),
+      // so the documents to remove are known outright.
+      //
+      // This used to search the movie's logs for a document matching each
+      // record's id hash, falling back to matching on
+      // (watchDate, watchNumber, episodeCount) — which is precisely the tuple
+      // that duplicates within one group share. That fallback could resolve a
+      // to-delete record to the *kept* record's document and delete the one
+      // entry the cleanup exists to preserve.
       final docsToDelete = <DocumentReference<Map<String, dynamic>>>[];
+      final unresolved = <WatchRecord>[];
       for (final r in toDelete) {
-        final record = r.record;
-        for (final doc in query.docs) {
-          final data = doc.data();
-          final docWatchDate = parseNullableDateTime(data['watchDate']);
-          final isHashCodeMatch = doc.id.hashCode == record.id;
-          final isExactMatch = docWatchDate != null &&
-              docWatchDate.isAtSameMomentAs(record.watchDate) &&
-              parseInt(data['watchNumber']) == record.watchNumber &&
-              parseInt(data['episodeCount']) == record.episodeCount;
-          if (isHashCodeMatch || isExactMatch) {
-            docsToDelete.add(doc.reference);
-            break;
+        final remoteId = r.record.remoteId;
+        if (remoteId != null && remoteId.isNotEmpty) {
+          docsToDelete.add(firestore.collection('logs').doc(remoteId));
+        } else {
+          unresolved.add(r.record);
+        }
+      }
+
+      // Legacy rows with no remoteId (restored from an old backup, or written
+      // by a build that predates the field) still need the hash lookup — but
+      // only the hash, never the ambiguous tuple, and never the kept document.
+      if (unresolved.isNotEmpty) {
+        final query = await firestore
+            .collection('logs')
+            .where('userId', isEqualTo: user.uid)
+            .where('movieId', isEqualTo: movieId)
+            .where('isTv', isEqualTo: isTv)
+            .get();
+
+        for (final record in unresolved) {
+          for (final doc in query.docs) {
+            if (doc.id == keepRemoteId) continue;
+            if (doc.id.hashCode == record.id) {
+              docsToDelete.add(doc.reference);
+              break;
+            }
           }
         }
       }

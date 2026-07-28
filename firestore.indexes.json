@@ -7,6 +7,23 @@
         { "fieldPath": "isPublic", "order": "ASCENDING" },
         { "fieldPath": "watchDate", "order": "DESCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "logs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "watchDate", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "logs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "isPublic", "order": "ASCENDING" },
+        { "fieldPath": "watchDate", "order": "DESCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

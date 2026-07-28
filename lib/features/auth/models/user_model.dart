@@ -1,6 +1,15 @@
+// Public profile document (`users/{uid}`). Every field here is world-readable
+// by any signed-in user — the Community feed, user search and profile screens
+// all read other people's docs — so NOTHING private may live in this model.
+//
+// In particular there is deliberately no `email` field: it used to be stored
+// here, which made every user's address readable by anyone (the collection is
+// read-open so search/profiles work). The address is already in Firebase Auth
+// where only its owner can see it, and nothing in the app ever displays
+// somebody else's — the places that need a display-name fallback derive it
+// from FirebaseAuth's own `User.email` for the *current* user only.
 class UserModel {
   final String id;
-  final String email;
   final String username;
   final String? avatarUrl;
   final String? bio;
@@ -10,7 +19,6 @@ class UserModel {
 
   UserModel({
     required this.id,
-    required this.email,
     required this.username,
     this.avatarUrl,
     this.bio,
@@ -22,7 +30,6 @@ class UserModel {
   factory UserModel.fromMap(Map<String, dynamic> map, String id) {
     return UserModel(
       id: id,
-      email: map['email'] ?? '',
       username: map['username'] ?? '',
       avatarUrl: map['avatarUrl'],
       bio: map['bio'],
@@ -34,7 +41,6 @@ class UserModel {
 
   Map<String, dynamic> toMap() {
     return {
-      'email': email,
       'username': username,
       'avatarUrl': avatarUrl,
       'bio': bio,
@@ -46,7 +52,6 @@ class UserModel {
 
   UserModel copyWith({
     String? id,
-    String? email,
     String? username,
     String? avatarUrl,
     String? bio,
@@ -56,7 +61,6 @@ class UserModel {
   }) {
     return UserModel(
       id: id ?? this.id,
-      email: email ?? this.email,
       username: username ?? this.username,
       avatarUrl: avatarUrl ?? this.avatarUrl,
       bio: bio ?? this.bio,

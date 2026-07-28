@@ -5,7 +5,7 @@
     "display": "standalone",
     "background_color": "#0B0D13",
     "theme_color": "#E8362E",
-    "description": "A new Flutter project.",
+    "description": "CineFile — film ve dizi izleme günlüğünüz: izlediklerinizi kaydedin, istatistiklerinizi keşfedin, toplulukla paylaşın.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

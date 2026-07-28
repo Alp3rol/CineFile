@@ -39,16 +39,23 @@ void main() {
           // just the network layer) avoids Dio/Socket timer scheduling
           // entirely instead of racing it.
           recommendationsProvider.overrideWith((ref) async => const []),
+          // MyApp waits on Firebase.initializeApp before mounting AuthGate;
+          // there is no real Firebase in a widget test, so report "ready"
+          // immediately and let the mocked auth/firestore above stand in.
+          firebaseInitProvider.overrideWith((ref) async {}),
         ],
         child: const MyApp(),
       ),
     );
     // Not pumpAndSettle: network images with no real network in tests keep
-    // retrying and never "settle". A couple of discrete pumps is enough for
-    // the auth stream + Firestore user doc fetch to resolve and swap the
-    // AuthGate's loading spinner for the real app.
+    // retrying and never "settle". Discrete pumps instead, enough for each
+    // async gate in the boot path to resolve in turn: MaterialApp's
+    // localizations, then firebaseInitProvider, then the auth stream and the
+    // Firestore user-doc fetch behind AuthGate.
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+    for (var i = 0; i < 3; i++) {
+      await tester.pump(const Duration(milliseconds: 500));
+    }
 
     expect(find.text('Ana Sayfa'), findsOneWidget);
     // Settings moved off the bottom nav (into the home header); the 5th tab is

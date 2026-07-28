@@ -22,15 +22,18 @@ void main() {
         firestoreProvider.overrideWithValue(firestore),
       ]);
 
-      // Seed the current user doc
+      // Seed the current user doc. No `email` field: it is deliberately not
+      // stored in this world-readable collection any more (see UserModel).
       await firestore.collection('users').doc(uid).set({
-        'email': 'tester@cinefile.com',
         'username': 'tester',
         'usernameLower': 'tester',
         'avatarUrl': 'https://api.dicebear.com/7.x/bottts/png?seed=tester',
         'followerCount': 0,
         'followingCount': 0,
       });
+      // ...and the matching claim in the registry that actually enforces
+      // uniqueness (AuthController._claimUsername).
+      await firestore.collection('usernames').doc('tester').set({'uid': uid});
 
       // Synchronize state provider
       await container.read(authControllerProvider).initUser(mockAuth.currentUser!);
@@ -67,15 +70,15 @@ void main() {
     });
 
     test('Fails when trying to update to a username that is already taken', () async {
-      // Seed another user doc with the target username
+      // Seed another user holding the target name, claim included.
       await firestore.collection('users').doc('another-uid').set({
-        'email': 'other@cinefile.com',
         'username': 'takenname',
         'usernameLower': 'takenname',
         'avatarUrl': '',
         'followerCount': 0,
         'followingCount': 0,
       });
+      await firestore.collection('usernames').doc('takenname').set({'uid': 'another-uid'});
 
       final authController = container.read(authControllerProvider);
       
@@ -90,6 +93,43 @@ void main() {
       // Verify that user doc was not updated in Firestore
       final doc = await firestore.collection('users').doc(uid).get();
       expect(doc.data()!['username'], 'tester'); // Stays 'tester'
+    });
+
+    // The registry, not a check-then-write query, is what makes names unique:
+    // a claim is a document create, which Firestore refuses if the document
+    // already exists. Renaming has to hand the old name back at the same time,
+    // or names would leak out of circulation forever.
+    test('A successful rename claims the new name and releases the old one', () async {
+      final result = await container.read(authControllerProvider).updateProfile(
+            username: 'cinephile99',
+            avatarUrl: '',
+            bio: '',
+          );
+      expect(result, isNull);
+
+      final claimed = await firestore.collection('usernames').doc('cinephile99').get();
+      expect(claimed.exists, isTrue);
+      expect(claimed.data()!['uid'], uid);
+
+      final released = await firestore.collection('usernames').doc('tester').get();
+      expect(released.exists, isFalse);
+    });
+
+    test('A rejected rename leaves the original claim intact', () async {
+      await firestore.collection('usernames').doc('takenname').set({'uid': 'another-uid'});
+
+      final result = await container.read(authControllerProvider).updateProfile(
+            username: 'takenname',
+            avatarUrl: '',
+            bio: '',
+          );
+      expect(result, 'Bu kullanıcı adı zaten alınmış.');
+
+      // The user keeps their own name, and the other user keeps theirs.
+      final own = await firestore.collection('usernames').doc('tester').get();
+      expect(own.data()!['uid'], uid);
+      final other = await firestore.collection('usernames').doc('takenname').get();
+      expect(other.data()!['uid'], 'another-uid');
     });
 
     test('Allows changing case of own username without "already taken" error', () async {

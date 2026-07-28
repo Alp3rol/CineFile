@@ -13,7 +13,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   @override
   MigrationStrategy get migration {
@@ -164,6 +164,16 @@ class AppDatabase extends _$AppDatabase {
           // null — no existing data changed.
           await m.addColumn(userMovieSettings, userMovieSettings.lastEpisodeProgressAt);
           from = 11;
+        }
+        if (from < 12) {
+          // v12: carry the Firestore `logs` document id on each watch record
+          // (see WatchRecords.remoteId) so edits/deletes address the exact
+          // document instead of searching for one whose id hashes to the
+          // local int key. New column defaults to null — existing local rows
+          // simply have no remote counterpart, which is the correct value for
+          // them.
+          await m.addColumn(watchRecords, watchRecords.remoteId);
+          from = 12;
         }
         if (from != to) {
           throw StateError(

@@ -104,6 +104,12 @@ class WatchRecordWithMovie {
   WatchRecordWithMovie(this.record, this.movie, {this.setting});
 }
 
+/// How many of a profile's most recent watch records the profile screens load.
+/// Generous enough for the "son izledikleri" grid and the featured showcase,
+/// bounded so viewing an active user's profile isn't an unbounded read of
+/// their entire history on every snapshot.
+const int kProfileWatchRecordLimit = 100;
+
 // Stream provider to get watch records for any user with movie details.
 // The owner sees all of their own logs (public + private) — that satisfies
 // firestore.rules' `auth.uid == resource.data.userId` clause. Viewing
@@ -121,46 +127,43 @@ final watchRecordsForUserProvider = StreamProvider.family<List<WatchRecordWithMo
     query = query.where('isPublic', isEqualTo: true);
   }
 
+  // A profile screen shows a recent-activity grid, not an entire life's worth
+  // of history, so the query is bounded. Ordering happens server-side because
+  // a `limit` without one would return an arbitrary subset rather than the
+  // newest entries (see firestore.indexes.json for the composite indexes this
+  // needs). The list is still sorted again below: Firestore's ordering is
+  // authoritative for *which* documents come back, but re-sorting keeps the
+  // output stable regardless.
   return query
+      .orderBy('watchDate', descending: true)
+      .limit(kProfileWatchRecordLimit)
       .snapshots()
       .asyncMap((snapshot) async {
         final logs = snapshot.docs.map((doc) => DiaryLogModel.fromMap(doc.data(), doc.id)).toList();
         // Sort descending by watchDate
         logs.sort((a, b) => b.watchDate.compareTo(a.watchDate));
-        
-        final list = <WatchRecordWithMovie>[];
-        for (final log in logs) {
-          final key = (tmdbId: log.movieId, isTv: log.isTv);
-          
-          // Get settings from Firestore
-          final settingsDoc = await ref.read(firestoreProvider)
+
+        // One query for the whole settings collection instead of a per-log
+        // document read. The previous shape issued one `get()` inside the
+        // loop, so rendering a 200-entry profile cost 200 extra document
+        // reads — repeated in full on every snapshot the listener emitted.
+        final settingsMap = _movieSettingsMapFromSnapshot(
+          await ref
+              .read(firestoreProvider)
               .collection('users')
               .doc(userId)
               .collection('movie_settings')
-              .doc('${key.tmdbId}_${key.isTv}')
-              .get();
-              
-          UserMovieSetting? setting;
-          if (settingsDoc.exists) {
-            final data = settingsDoc.data()!;
-            setting = UserMovieSetting(
-              tmdbId: key.tmdbId,
-              isTv: key.isTv,
-              isFavorite: parseBool(data['isFavorite']),
-              isReWatchList: parseBool(data['isReWatchList']),
-              personalRanking: parseInt(data['personalRanking']),
-              personalNotes: data['personalNotes'] as String?,
-              personalTags: data['personalTags'] as String?,
-              updatedAt: parseDateTime(data['updatedAt']),
-              isActivelyWatching: parseBool(data['isActivelyWatching']),
-              lastWatchedEpisode: parseInt(data['lastWatchedEpisode']),
-            );
-          }
-          
+              .get(),
+        );
+
+        return logs.map((log) {
           final wRecord = log.toWatchRecordWithMovie();
-          list.add(WatchRecordWithMovie(wRecord.record, wRecord.movie, setting: setting));
-        }
-        return list;
+          return WatchRecordWithMovie(
+            wRecord.record,
+            wRecord.movie,
+            setting: settingsMap[(tmdbId: log.movieId, isTv: log.isTv)],
+          );
+        }).toList();
       });
 });
 
@@ -429,58 +432,46 @@ class ActivelyWatchingShow {
   ActivelyWatchingShow(this.movie, this.setting);
 }
 
+// Derived entirely from the two streams the app already keeps open
+// (allWatchRecordsProvider for movie metadata, allMovieSettingsProvider for
+// the isActivelyWatching flag), so it costs no additional Firestore reads.
+//
+// It used to run its own `movie_settings` listener and then, for every
+// actively-watched show in each snapshot, fire a separate `logs` query just
+// to recover that show's title and poster — N round trips per emission, on a
+// widget that sits on the Home screen.
 final activelyWatchingProvider = StreamProvider<List<ActivelyWatchingShow>>((ref) {
-  final authState = ref.watch(authStateProvider);
-  final user = authState.value;
+  final user = ref.watch(authStateProvider).value;
   if (user == null) {
     return Stream.value(<ActivelyWatchingShow>[]);
   }
 
-  return ref.read(firestoreProvider)
-      .collection('users')
-      .doc(user.uid)
-      .collection('movie_settings')
-      .where('isActivelyWatching', isEqualTo: true)
-      .snapshots()
-      .asyncMap((snapshot) async {
-        final list = <ActivelyWatchingShow>[];
-        for (final doc in snapshot.docs) {
-          final data = doc.data();
-          final movieId = (data['movieId'] as num?)?.toInt() ?? 0;
-          final isTv = data['isTv'] == true || data['isTv'] == 1;
-          
-          final logSnapshot = await ref.read(firestoreProvider)
-              .collection('logs')
-              .where('userId', isEqualTo: user.uid)
-              .where('movieId', isEqualTo: movieId)
-              .where('isTv', isEqualTo: isTv)
-              .limit(1)
-              .get();
-              
-          if (logSnapshot.docs.isNotEmpty) {
-            final log = DiaryLogModel.fromMap(logSnapshot.docs.first.data(), logSnapshot.docs.first.id);
-            final watchWithMovie = log.toWatchRecordWithMovie();
-            
-            final setting = UserMovieSetting(
-              tmdbId: movieId,
-              isTv: isTv,
-              isFavorite: parseBool(data['isFavorite']),
-              isReWatchList: parseBool(data['isReWatchList']),
-              personalRanking: parseInt(data['personalRanking']),
-              personalNotes: data['personalNotes'] as String?,
-              personalTags: data['personalTags'] as String?,
-              updatedAt: parseDateTime(data['updatedAt']),
-              isActivelyWatching: true,
-              lastWatchedEpisode: parseInt(data['lastWatchedEpisode']),
-            );
-            
-            list.add(ActivelyWatchingShow(watchWithMovie.movie, setting));
-          }
-        }
-        // Sort by setting.updatedAt descending so the most recently active show is first
-        list.sort((a, b) => b.setting.updatedAt.compareTo(a.setting.updatedAt));
-        return list;
-      });
+  final records = ref.watch(allWatchRecordsProvider).value;
+  final settings = ref.watch(allMovieSettingsProvider).value;
+  if (records == null || settings == null) {
+    return Stream.value(<ActivelyWatchingShow>[]);
+  }
+
+  // First record per key wins; the list is already sorted newest-first, so
+  // this is the most recently logged metadata for the show.
+  final movieByKey = <MovieKey, Movie>{};
+  for (final r in records) {
+    movieByKey.putIfAbsent((tmdbId: r.movie.tmdbId, isTv: r.movie.isTv), () => r.movie);
+  }
+
+  final list = <ActivelyWatchingShow>[];
+  for (final entry in settings.entries) {
+    if (!entry.value.isActivelyWatching) continue;
+    final movie = movieByKey[entry.key];
+    // A show with no diary log behind it has no title/poster to render, same
+    // condition the old per-show `logs` query enforced by returning nothing.
+    if (movie == null) continue;
+    list.add(ActivelyWatchingShow(movie, entry.value));
+  }
+
+  // Most recently active show first.
+  list.sort((a, b) => b.setting.updatedAt.compareTo(a.setting.updatedAt));
+  return Stream.value(list);
 });
 
 // --- CUSTOM LISTS PROVIDERS AND ACTIONS ---
@@ -636,40 +627,54 @@ final sharedCollectionProvider = StreamProvider.family<Map<String, dynamic>?, St
 
 // --- WATCH RECORD ACTIONS ---
 
+/// Resolves the Firestore `logs` document a [WatchRecord] came from.
+///
+/// Records materialised from Firestore carry the document id in
+/// [WatchRecord.remoteId], so this is normally a direct reference with no
+/// lookup at all. The fallback exists only for rows that predate that field
+/// (restored from an older backup, or written by an older build still on the
+/// device): it matches on the id hash the old code used, and deliberately
+/// does NOT fall back further to matching on
+/// (watchDate, watchNumber, episodeCount) — that tuple is not unique for a
+/// show binged in one sitting, so it could resolve to a different record than
+/// the one the user acted on and delete the wrong entry.
+///
+/// Returns null when nothing matches, which callers surface as an error
+/// rather than silently doing nothing.
+Future<DocumentReference<Map<String, dynamic>>?> _resolveLogRef(
+  WidgetRef ref,
+  String userId,
+  WatchRecord record,
+) async {
+  final firestore = ref.read(firestoreProvider);
+  final remoteId = record.remoteId;
+  if (remoteId != null && remoteId.isNotEmpty) {
+    return firestore.collection('logs').doc(remoteId);
+  }
+
+  final query = await firestore
+      .collection('logs')
+      .where('userId', isEqualTo: userId)
+      .where('movieId', isEqualTo: record.movieId)
+      .where('isTv', isEqualTo: record.isTv)
+      .get();
+
+  for (final doc in query.docs) {
+    if (doc.id.hashCode == record.id) return doc.reference;
+  }
+  return null;
+}
+
 Future<void> deleteWatchRecord(WidgetRef ref, WatchRecord record) async {
-  final recordId = record.id;
-  final authState = ref.read(authStateProvider);
-  final user = authState.value;
+  final user = ref.currentUser;
 
   if (user != null) {
-    final query = await ref.read(firestoreProvider)
-        .collection('logs')
-        .where('userId', isEqualTo: user.uid)
-        .where('movieId', isEqualTo: record.movieId)
-        .where('isTv', isEqualTo: record.isTv)
-        .get();
-
-    bool deleted = false;
-    for (final doc in query.docs) {
-      final data = doc.data();
-      final docWatchDate = (data['watchDate'] as Timestamp?)?.toDate();
-      
-      final isHashCodeMatch = doc.id.hashCode == recordId;
-      final isExactMatch = docWatchDate != null && 
-          docWatchDate.isAtSameMomentAs(record.watchDate) &&
-          data['watchNumber'] == record.watchNumber &&
-          data['episodeCount'] == record.episodeCount;
-          
-      if (isHashCodeMatch || isExactMatch) {
-        await doc.reference.delete();
-        deleted = true;
-        break;
-      }
+    final logRef = await _resolveLogRef(ref, user.uid, record);
+    if (logRef == null) {
+      throw Exception(
+          'Firestore üzerinde silinecek eşleşen kayıt bulunamadı. (Film ID: ${record.movieId})');
     }
-    
-    if (!deleted) {
-      throw Exception('Firestore üzerinde silinecek eşleşen kayıt bulunamadı. (Sorgulanan film ID: ${record.movieId}, Log sayısı: ${query.docs.length})');
-    }
+    await logRef.delete();
 
     // Recalculate movie settings progress for this user & movie/show in Firestore
     final remainingQuery = await ref.read(firestoreProvider)
@@ -722,45 +727,28 @@ Future<void> updateWatchRecord(
   int? episodeCount,
   bool? isPublic,
 }) async {
-  final recordId = record.id;
-  final authState = ref.read(authStateProvider);
-  final user = authState.value;
+  final user = ref.currentUser;
 
   if (user != null) {
-    final query = await ref.read(firestoreProvider)
-        .collection('logs')
-        .where('userId', isEqualTo: user.uid)
-        .where('movieId', isEqualTo: record.movieId)
-        .where('isTv', isEqualTo: record.isTv)
-        .get();
+    final logRef = await _resolveLogRef(ref, user.uid, record);
+    if (logRef == null) {
+      throw Exception(
+          'Firestore üzerinde güncellenecek eşleşen kayıt bulunamadı. (Film ID: ${record.movieId})');
+    }
 
-    for (final doc in query.docs) {
-      final data = doc.data();
-      final docWatchDate = (data['watchDate'] as Timestamp?)?.toDate();
-      
-      final isHashCodeMatch = doc.id.hashCode == recordId;
-      final isExactMatch = docWatchDate != null && 
-          docWatchDate.isAtSameMomentAs(record.watchDate) &&
-          data['watchNumber'] == record.watchNumber &&
-          data['episodeCount'] == record.episodeCount;
+    final updates = <String, dynamic>{};
+    if (watchDate != null) {
+      updates['watchDate'] = Timestamp.fromDate(watchDate);
+    }
+    if (episodeCount != null) {
+      updates['episodeCount'] = episodeCount;
+    }
+    if (isPublic != null) {
+      updates['isPublic'] = isPublic;
+    }
 
-      if (isHashCodeMatch || isExactMatch) {
-        final updates = <String, dynamic>{};
-        if (watchDate != null) {
-          updates['watchDate'] = Timestamp.fromDate(watchDate);
-        }
-        if (episodeCount != null) {
-          updates['episodeCount'] = episodeCount;
-        }
-        if (isPublic != null) {
-          updates['isPublic'] = isPublic;
-        }
-
-        if (updates.isNotEmpty) {
-          await doc.reference.update(updates);
-        }
-        break;
-      }
+    if (updates.isNotEmpty) {
+      await logRef.update(updates);
     }
     return;
   }

@@ -52,8 +52,7 @@ Future<void> writeEpisodeProgressSettings({
   final isTv = movie.isTv;
 
   // --- Firebase Firestore path (primary for authenticated users, all platforms) ---
-  final authState = ref.read(authStateProvider);
-  final user = authState.value;
+  final user = ref.currentUser;
 
   if (user != null) {
     final settingsRef = ref.read(firestoreProvider)

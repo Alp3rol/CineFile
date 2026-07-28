@@ -3,29 +3,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_web_plugins/flutter_web_plugins.dart';
+import 'core/navigation/app_navigator.dart';
+import 'core/platform/firebase_web_registrar.dart';
 import 'core/theme/app_theme.dart';
 import 'core/widgets/web_device_frame.dart';
 import 'features/auth/presentation/auth_gate.dart';
 
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_core_web/firebase_core_web.dart';
-import 'package:firebase_auth_web/firebase_auth_web.dart';
-import 'package:cloud_firestore_web/cloud_firestore_web.dart';
 import 'firebase_options.dart';
 
-final firebaseInitProvider = FutureProvider<FirebaseApp>((ref) async {
-  if (kIsWeb) {
-    try {
-      FirebaseCoreWeb.registerWith(webPluginRegistrar);
-      FirebaseAuthWeb.registerWith(webPluginRegistrar);
-      FirebaseFirestoreWeb.registerWith(webPluginRegistrar);
-    } catch (_) {}
-  }
-  if (Firebase.apps.isNotEmpty) {
-    return Firebase.app();
-  }
-  return await Firebase.initializeApp(
+/// Completes once Firebase is ready; [MyApp] shows a spinner until it does and
+/// a retry screen if it fails.
+///
+/// Typed `void` rather than `FirebaseApp` because no consumer uses the app
+/// handle — and a plain "is it ready" signal is something a test can override
+/// with `(ref) async {}`, which a `FirebaseApp` return type made impossible.
+final firebaseInitProvider = FutureProvider<void>((ref) async {
+  registerFirebaseWebPlugins();
+  if (Firebase.apps.isNotEmpty) return;
+  await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 });
@@ -35,13 +31,7 @@ void main() async {
   GoogleFonts.config.allowRuntimeFetching = true;
   await initializeDateFormatting('tr_TR', null);
 
-  if (kIsWeb) {
-    try {
-      FirebaseCoreWeb.registerWith(webPluginRegistrar);
-      FirebaseAuthWeb.registerWith(webPluginRegistrar);
-      FirebaseFirestoreWeb.registerWith(webPluginRegistrar);
-    } catch (_) {}
-  }
+  registerFirebaseWebPlugins();
 
   runApp(
     const ProviderScope(
@@ -49,8 +39,6 @@ void main() async {
     ),
   );
 }
-
-final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 class MyApp extends ConsumerWidget {
   const MyApp({super.key});

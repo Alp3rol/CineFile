@@ -60,7 +60,7 @@ class GraphOverridesController {
   GraphOverridesController(this._ref);
 
   CollectionReference<Map<String, dynamic>>? _collection() {
-    final user = _ref.read(authStateProvider).value;
+    final user = _ref.currentUser;
     if (user == null) return null;
     return _ref
         .read(firestoreProvider)

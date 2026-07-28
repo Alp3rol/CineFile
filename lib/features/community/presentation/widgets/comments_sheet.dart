@@ -64,13 +64,14 @@ class _CommentsSheetState extends ConsumerState<CommentsSheet> {
 
     _commentController.clear();
 
-    final commentRef = FirebaseFirestore.instance
+    final firestore = ref.read(firestoreProvider);
+    final commentRef = firestore
         .collection('posts')
         .doc(widget.postId)
         .collection('comments')
         .doc();
 
-    final postRef = FirebaseFirestore.instance.collection('posts').doc(widget.postId);
+    final postRef = firestore.collection('posts').doc(widget.postId);
 
     final comment = CommentModel(
       id: commentRef.id,
@@ -82,7 +83,7 @@ class _CommentsSheetState extends ConsumerState<CommentsSheet> {
     );
 
     // Run as batch to ensure atomicity
-    final batch = FirebaseFirestore.instance.batch();
+    final batch = firestore.batch();
     batch.set(commentRef, comment.toMap());
     batch.update(postRef, {'commentCount': FieldValue.increment(1)});
     await batch.commit();
@@ -98,15 +99,16 @@ class _CommentsSheetState extends ConsumerState<CommentsSheet> {
   }
 
   Future<void> _deleteComment(String commentId) async {
-    final commentRef = FirebaseFirestore.instance
+    final firestore = ref.read(firestoreProvider);
+    final commentRef = firestore
         .collection('posts')
         .doc(widget.postId)
         .collection('comments')
         .doc(commentId);
 
-    final postRef = FirebaseFirestore.instance.collection('posts').doc(widget.postId);
+    final postRef = firestore.collection('posts').doc(widget.postId);
 
-    final batch = FirebaseFirestore.instance.batch();
+    final batch = firestore.batch();
     batch.delete(commentRef);
     batch.update(postRef, {'commentCount': FieldValue.increment(-1)});
     await batch.commit();
@@ -118,9 +120,9 @@ class _CommentsSheetState extends ConsumerState<CommentsSheet> {
     final authState = ref.watch(authStateProvider);
     final currentUser = authState.value;
 
-    final userModel = ref.watch(userModelProvider);
-    final username = userModel?.username ?? currentUser?.email?.split('@')[0] ?? 'Anonim';
-    final avatarUrl = userModel?.avatarUrl ?? 'https://api.dicebear.com/7.x/bottts/png?seed=$username';
+    final identity = resolveUserIdentity(ref.watch(userModelProvider), currentUser);
+    final username = identity.username;
+    final avatarUrl = identity.avatarUrl;
 
     return GlassContainer(
       borderRadius: 24,

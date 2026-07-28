@@ -58,7 +58,10 @@ void main() {
     expect(find.text('Günlüğe Ekle'), findsOneWidget);
     expect(find.text('Listeye Ekle'), findsOneWidget);
     expect(find.text('Paylaş'), findsOneWidget);
-    expect(find.text('Yeni İzleme Kaydı Ekle'), findsOneWidget);
+    // Sticky bottom CTA (MovieDetailStickyCta) — relabelled from
+    // "Yeni İzleme Kaydı Ekle" when it moved into the Scaffold's
+    // bottomNavigationBar.
+    expect(find.text('Günlüğüme Ekle'), findsOneWidget);
   });
 
   testWidgets('shows latest watch rating and place when a record exists', (tester) async {

@@ -1,34 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/database/app_database.dart';
 import '../../../core/database/database_provider.dart';
 import '../domain/achievement_models.dart';
 import 'widgets/contribution_heatmap_utils.dart';
-
-extension WatchRecordSafeExtension on WatchRecord {
-  int get safeEpisodeCount {
-    try {
-      return (episodeCount as dynamic) ?? 1;
-    } catch (_) {
-      return 1;
-    }
-  }
-
-  int get safeWatchNumber {
-    try {
-      return (watchNumber as dynamic) ?? 1;
-    } catch (_) {
-      return 1;
-    }
-  }
-
-  double get safeRating {
-    try {
-      return (rating as dynamic)?.toDouble() ?? 0.0;
-    } catch (_) {
-      return 0.0;
-    }
-  }
-}
 
 // Legacy class kept for backward compatibility
 class BadgeState {
@@ -157,13 +130,13 @@ final insightsProvider = Provider<InsightsData?>((ref) {
 
   int totalDurationMinutes = 0;
   for (final r in list) {
-    totalDurationMinutes += (r.movie.runtime ?? 0) * r.record.safeEpisodeCount;
+    totalDurationMinutes += (r.movie.runtime ?? 0) * r.record.episodeCount;
   }
 
   double totalRating = 0;
   int ratingCount = 0;
   for (final r in list) {
-    totalRating += r.record.safeRating;
+    totalRating += r.record.rating;
     ratingCount++;
   }
   final averageRating = ratingCount > 0 ? (totalRating / ratingCount) : 0.0;
@@ -219,7 +192,7 @@ final insightsProvider = Provider<InsightsData?>((ref) {
   for (final r in list) {
     final date = r.record.watchDate;
     final dateKey = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-    final increment = r.movie.isTv ? r.record.safeEpisodeCount : 1;
+    final increment = r.movie.isTv ? r.record.episodeCount : 1;
     dailyWatchCounts[dateKey] = (dailyWatchCounts[dateKey] ?? 0) + increment;
 
     if (r.movie.isTv) {
@@ -281,7 +254,7 @@ final insightsProvider = Provider<InsightsData?>((ref) {
     ratingDistribution[i] = 0;
   }
   for (final r in list) {
-    final ratingInt = r.record.safeRating.round().clamp(1, 10);
+    final ratingInt = r.record.rating.round().clamp(1, 10);
     ratingDistribution[ratingInt] = (ratingDistribution[ratingInt] ?? 0) + 1;
   }
 
@@ -322,7 +295,11 @@ final insightsProvider = Provider<InsightsData?>((ref) {
     }
   }
 
-  final topTags = _countCommaSeparatedField(list, (r) => r.setting?.personalTags);
+  // WatchRecords.tags — the "#sinema, #gece" field the user fills in on each
+  // diary entry — not UserMovieSettings.personalTags, which no screen ever
+  // writes a value into (it only gets copied forward by settings merges), so
+  // reading it made "En Çok Kullanılan Etiketler" permanently empty.
+  final topTags = _countCommaSeparatedField(list, (r) => r.record.tags);
 
   final today = DateTime.now();
   final startOfWeek = today.subtract(Duration(days: today.weekday - 1));
@@ -809,7 +786,7 @@ List<AchievementBadge> _calculateAllTieredAchievements({
     ],
   ));
 
-  final perfectRaters = list.where((r) => r.record.safeRating >= 9.8).length;
+  final perfectRaters = list.where((r) => r.record.rating >= 9.8).length;
   badges.add(_buildTieredBadge(
     id: 'generous_series',
     defaultTitle: 'Cömert Puanlayıcı',
@@ -823,7 +800,7 @@ List<AchievementBadge> _calculateAllTieredAchievements({
     ],
   ));
 
-  final strictRaters = list.where((r) => r.record.safeRating < 5.0).length;
+  final strictRaters = list.where((r) => r.record.rating < 5.0).length;
   badges.add(_buildTieredBadge(
     id: 'strict_series',
     defaultTitle: 'Zor Beğenen',
@@ -837,7 +814,7 @@ List<AchievementBadge> _calculateAllTieredAchievements({
     ],
   ));
 
-  final rewatches = list.where((r) => r.record.safeWatchNumber > 1).length;
+  final rewatches = list.where((r) => r.record.watchNumber > 1).length;
   badges.add(_buildTieredBadge(
     id: 'rewatch_series',
     defaultTitle: 'Sadık İzleyici',
@@ -865,7 +842,7 @@ List<AchievementBadge> _calculateAllTieredAchievements({
   ));
 
   // --- 6. DİZİ & SEZON ---
-  final totalTvEpisodes = list.where((r) => r.movie.isTv).fold<int>(0, (prev, e) => prev + e.record.safeEpisodeCount);
+  final totalTvEpisodes = list.where((r) => r.movie.isTv).fold<int>(0, (prev, e) => prev + e.record.episodeCount);
   badges.add(_buildTieredBadge(
     id: 'tv_series',
     defaultTitle: 'Dizi Kolik Serisi',
@@ -879,7 +856,7 @@ List<AchievementBadge> _calculateAllTieredAchievements({
     ],
   ));
 
-  final finishedSeasons = list.where((r) => r.movie.isTv && r.record.safeEpisodeCount >= 8).length;
+  final finishedSeasons = list.where((r) => r.movie.isTv && r.record.episodeCount >= 8).length;
   badges.add(_buildTieredBadge(
     id: 'season_finisher_series',
     defaultTitle: 'Sezon Canavarı',

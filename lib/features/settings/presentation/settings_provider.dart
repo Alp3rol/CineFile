@@ -1,30 +1,60 @@
-import 'dart:convert';
-import 'dart:io';
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as p;
 import '../../../../core/constants/api_constants.dart';
-import '../../../../core/database/movie_repository.dart';
+import '../../../../core/services/app_settings_store.dart';
+
+// Re-exported so existing call sites (settings_backup_dialogs.dart) keep
+// importing BackupService from here, while the implementation lives next to
+// the data it backs up.
+export '../../../../core/database/backup_service.dart' show BackupService;
 
 const _secureStorage = FlutterSecureStorage();
 const _secureApiKeyStorageKey = 'tmdb_api_key';
 
+/// Shared owner of `app_settings.json` — see [AppSettingsStore] for why every
+/// preference goes through one instance instead of reading and rewriting the
+/// file independently.
+final appSettingsStoreProvider = Provider<AppSettingsStore>((ref) => AppSettingsStore());
+
+/// Base class for the file-backed preferences below. Each subclass only has to
+/// name its key and its default; loading, caching and serialised writing are
+/// handled once here rather than copy-pasted per preference.
+abstract class _StoredPreferenceNotifier<T> extends StateNotifier<T> {
+  _StoredPreferenceNotifier(this._store, this._key, T initial) : super(initial) {
+    unawaited(_load());
+  }
+
+  final AppSettingsStore _store;
+  final String _key;
+
+  Future<void> _load() async {
+    await _store.ensureLoaded();
+    final stored = _store.read<T>(_key);
+    if (stored != null) state = stored;
+  }
+
+  Future<void> _save(T value) async {
+    state = value;
+    await _store.write(_key, value);
+  }
+}
+
 final settingsKeyProvider = StateNotifierProvider<SettingsKeyNotifier, String>((ref) {
-  return SettingsKeyNotifier();
+  return SettingsKeyNotifier(ref.watch(appSettingsStoreProvider));
 });
 
+/// The TMDb API key. Unlike the other preferences this is a secret, so it
+/// lives in the platform keystore rather than in the plaintext settings file —
+/// the store is only consulted to migrate keys written by older versions.
 class SettingsKeyNotifier extends StateNotifier<String> {
-  SettingsKeyNotifier() : super(ApiConstants.tmdbApiKey) {
-    loadKey();
+  SettingsKeyNotifier(this._store) : super(ApiConstants.tmdbApiKey) {
+    unawaited(loadKey());
   }
 
-  Future<File?> get _settingsFile async {
-    if (kIsWeb) return null;
-    final dir = await getApplicationDocumentsDirectory();
-    return File(p.join(dir.path, 'app_settings.json'));
-  }
+  final AppSettingsStore _store;
 
   Future<void> loadKey() async {
     if (kIsWeb) return;
@@ -35,17 +65,12 @@ class SettingsKeyNotifier extends StateNotifier<String> {
       // inside app_settings.json. Move it into secure storage and scrub it
       // from the plaintext file.
       if (key == null || key.isEmpty) {
-        final file = await _settingsFile;
-        if (file != null && await file.exists()) {
-          final content = await file.readAsString();
-          final json = jsonDecode(content) as Map<String, dynamic>;
-          final legacyKey = json['tmdb_api_key'] as String?;
-          if (legacyKey != null && legacyKey.isNotEmpty) {
-            key = legacyKey;
-            await _secureStorage.write(key: _secureApiKeyStorageKey, value: legacyKey);
-            json.remove('tmdb_api_key');
-            await file.writeAsString(jsonEncode(json));
-          }
+        await _store.ensureLoaded();
+        final legacyKey = _store.read<String>(_secureApiKeyStorageKey);
+        if (legacyKey != null && legacyKey.isNotEmpty) {
+          key = legacyKey;
+          await _secureStorage.write(key: _secureApiKeyStorageKey, value: legacyKey);
+          await _store.remove(_secureApiKeyStorageKey);
         }
       }
 
@@ -71,272 +96,68 @@ class SettingsKeyNotifier extends StateNotifier<String> {
 }
 
 final settingsBaseUrlProvider = StateNotifierProvider<SettingsBaseUrlNotifier, String>((ref) {
-  return SettingsBaseUrlNotifier();
+  return SettingsBaseUrlNotifier(ref.watch(appSettingsStoreProvider));
 });
 
-class SettingsBaseUrlNotifier extends StateNotifier<String> {
-  SettingsBaseUrlNotifier() : super('https://api.themoviedb.org/3') {
-    loadBaseUrl();
-  }
+class SettingsBaseUrlNotifier extends _StoredPreferenceNotifier<String> {
+  SettingsBaseUrlNotifier(AppSettingsStore store)
+      : super(store, 'tmdb_base_url', ApiConstants.defaultBaseUrl);
 
-  Future<File?> get _settingsFile async {
-    if (kIsWeb) return null;
-    final dir = await getApplicationDocumentsDirectory();
-    return File(p.join(dir.path, 'app_settings.json'));
-  }
-
-  Future<void> loadBaseUrl() async {
-    if (kIsWeb) return;
-    try {
-      final file = await _settingsFile;
-      if (file != null && await file.exists()) {
-        final content = await file.readAsString();
-        final json = jsonDecode(content) as Map<String, dynamic>;
-        final url = json['tmdb_base_url'] as String?;
-        if (url != null && url.isNotEmpty) {
-          state = url;
-          ApiConstants.baseUrl = url;
-        }
-      }
-    } catch (e) {
-      debugPrint('loadBaseUrl failed: $e');
-    }
+  @override
+  Future<void> _load() async {
+    await super._load();
+    ApiConstants.baseUrl = state;
   }
 
   Future<void> saveBaseUrl(String url) async {
-    state = url;
     ApiConstants.baseUrl = url;
-    if (kIsWeb) return;
-    try {
-      final file = await _settingsFile;
-      if (file != null) {
-        Map<String, dynamic> json = {};
-        if (await file.exists()) {
-          final content = await file.readAsString();
-          json = jsonDecode(content) as Map<String, dynamic>;
-        }
-        json['tmdb_base_url'] = url;
-        await file.writeAsString(jsonEncode(json));
-      }
-    } catch (e) {
-      debugPrint('saveBaseUrl failed: $e');
-    }
+    await _save(url);
   }
 }
 
-final releaseRemindersEnabledProvider = StateNotifierProvider<ReleaseRemindersNotifier, bool>((ref) {
-  return ReleaseRemindersNotifier();
+final releaseRemindersEnabledProvider =
+    StateNotifierProvider<ReleaseRemindersNotifier, bool>((ref) {
+  return ReleaseRemindersNotifier(ref.watch(appSettingsStoreProvider));
 });
 
-class ReleaseRemindersNotifier extends StateNotifier<bool> {
-  ReleaseRemindersNotifier() : super(false) {
-    loadPreference();
-  }
+class ReleaseRemindersNotifier extends _StoredPreferenceNotifier<bool> {
+  ReleaseRemindersNotifier(AppSettingsStore store)
+      : super(store, 'release_reminders_enabled', false);
 
-  Future<File?> get _settingsFile async {
-    if (kIsWeb) return null;
-    final dir = await getApplicationDocumentsDirectory();
-    return File(p.join(dir.path, 'app_settings.json'));
-  }
-
-  Future<void> loadPreference() async {
-    if (kIsWeb) return;
-    try {
-      final file = await _settingsFile;
-      if (file != null && await file.exists()) {
-        final content = await file.readAsString();
-        final json = jsonDecode(content) as Map<String, dynamic>;
-        final enabled = json['release_reminders_enabled'] as bool?;
-        if (enabled != null) {
-          state = enabled;
-        }
-      }
-    } catch (e) {
-      debugPrint('loadPreference failed: $e');
-    }
-  }
-
-  Future<void> savePreference(bool enabled) async {
-    state = enabled;
-    if (kIsWeb) return;
-    try {
-      final file = await _settingsFile;
-      if (file != null) {
-        Map<String, dynamic> json = {};
-        if (await file.exists()) {
-          final content = await file.readAsString();
-          json = jsonDecode(content) as Map<String, dynamic>;
-        }
-        json['release_reminders_enabled'] = enabled;
-        await file.writeAsString(jsonEncode(json));
-      }
-    } catch (e) {
-      debugPrint('savePreference failed: $e');
-    }
-  }
-}
-
-// Backup & Restore Services — delegates the actual web-vs-native storage
-// work to MovieRepository (see movie_repository.dart's exportBackupData/
-// importBackupData) rather than branching on kIsWeb here.
-// `ref` stays `dynamic` (not WidgetRef) because tests call this with a bare
-// ProviderContainer, which also exposes a compatible `.read()`.
-class BackupService {
-  static Future<Map<String, dynamic>> exportData(dynamic ref) {
-    return ref.read(movieRepositoryProvider).exportBackupData();
-  }
-
-  static Future<void> importData(dynamic ref, Map<String, dynamic> json) {
-    return ref.read(movieRepositoryProvider).importBackupData(json);
-  }
+  Future<void> savePreference(bool enabled) => _save(enabled);
 }
 
 final weeklyGoalProvider = StateNotifierProvider<WeeklyGoalNotifier, int>((ref) {
-  return WeeklyGoalNotifier();
+  return WeeklyGoalNotifier(ref.watch(appSettingsStoreProvider));
 });
 
-class WeeklyGoalNotifier extends StateNotifier<int> {
-  WeeklyGoalNotifier() : super(3) {
-    loadGoal();
-  }
+class WeeklyGoalNotifier extends _StoredPreferenceNotifier<int> {
+  WeeklyGoalNotifier(AppSettingsStore store) : super(store, 'weekly_watch_goal', 3);
 
-  Future<File?> get _settingsFile async {
-    if (kIsWeb) return null;
-    final dir = await getApplicationDocumentsDirectory();
-    return File(p.join(dir.path, 'app_settings.json'));
-  }
-
-  Future<void> loadGoal() async {
-    if (kIsWeb) return;
-    try {
-      final file = await _settingsFile;
-      if (file != null && await file.exists()) {
-        final content = await file.readAsString();
-        final json = jsonDecode(content) as Map<String, dynamic>;
-        final goal = json['weekly_watch_goal'] as int? ?? 3;
-        state = goal;
-      }
-    } catch (e) {
-      debugPrint('loadGoal failed: $e');
-    }
-  }
-
-  Future<void> saveGoal(int goal) async {
-    state = goal;
-    if (kIsWeb) return;
-    try {
-      final file = await _settingsFile;
-      if (file != null) {
-        Map<String, dynamic> json = {};
-        if (await file.exists()) {
-          final content = await file.readAsString();
-          json = jsonDecode(content) as Map<String, dynamic>;
-        }
-        json['weekly_watch_goal'] = goal;
-        await file.writeAsString(jsonEncode(json));
-      }
-    } catch (e) {
-      debugPrint('saveGoal failed: $e');
-    }
-  }
+  Future<void> saveGoal(int goal) => _save(goal);
 }
 
-// Whether the Journal screen shows the sortable/drag-reorder table view
-// (true) or the month-grouped card view (false, default).
+/// Whether the Journal screen shows the sortable/drag-reorder table view
+/// (true) or the month-grouped card view (false, default).
 final journalViewModeProvider = StateNotifierProvider<JournalViewModeNotifier, bool>((ref) {
-  return JournalViewModeNotifier();
+  return JournalViewModeNotifier(ref.watch(appSettingsStoreProvider));
 });
 
-class JournalViewModeNotifier extends StateNotifier<bool> {
-  JournalViewModeNotifier() : super(false) {
-    _load();
-  }
+class JournalViewModeNotifier extends _StoredPreferenceNotifier<bool> {
+  JournalViewModeNotifier(AppSettingsStore store)
+      : super(store, 'journal_table_view', false);
 
-  Future<File?> get _settingsFile async {
-    if (kIsWeb) return null;
-    final dir = await getApplicationDocumentsDirectory();
-    return File(p.join(dir.path, 'app_settings.json'));
-  }
-
-  Future<void> _load() async {
-    if (kIsWeb) return;
-    try {
-      final file = await _settingsFile;
-      if (file != null && await file.exists()) {
-        final content = await file.readAsString();
-        final json = jsonDecode(content) as Map<String, dynamic>;
-        state = json['journal_table_view'] as bool? ?? false;
-      }
-    } catch (e) {
-      debugPrint('journal view mode load failed: $e');
-    }
-  }
-
-  Future<void> setTableView(bool isTableView) async {
-    state = isTableView;
-    if (kIsWeb) return;
-    try {
-      final file = await _settingsFile;
-      if (file != null) {
-        Map<String, dynamic> json = {};
-        if (await file.exists()) {
-          final content = await file.readAsString();
-          json = jsonDecode(content) as Map<String, dynamic>;
-        }
-        json['journal_table_view'] = isTableView;
-        await file.writeAsString(jsonEncode(json));
-      }
-    } catch (e) {
-      debugPrint('journal view mode save failed: $e');
-    }
-  }
+  Future<void> setTableView(bool isTableView) => _save(isTableView);
 }
 
-final dynamicBackgroundEnabledProvider = StateNotifierProvider<DynamicBackgroundEnabledNotifier, bool>((ref) {
-  return DynamicBackgroundEnabledNotifier();
+final dynamicBackgroundEnabledProvider =
+    StateNotifierProvider<DynamicBackgroundEnabledNotifier, bool>((ref) {
+  return DynamicBackgroundEnabledNotifier(ref.watch(appSettingsStoreProvider));
 });
 
-class DynamicBackgroundEnabledNotifier extends StateNotifier<bool> {
-  DynamicBackgroundEnabledNotifier() : super(true) {
-    _load();
-  }
+class DynamicBackgroundEnabledNotifier extends _StoredPreferenceNotifier<bool> {
+  DynamicBackgroundEnabledNotifier(AppSettingsStore store)
+      : super(store, 'dynamic_background_enabled', true);
 
-  Future<File?> get _settingsFile async {
-    if (kIsWeb) return null;
-    final dir = await getApplicationDocumentsDirectory();
-    return File(p.join(dir.path, 'app_settings.json'));
-  }
-
-  Future<void> _load() async {
-    if (kIsWeb) return;
-    try {
-      final file = await _settingsFile;
-      if (file != null && await file.exists()) {
-        final content = await file.readAsString();
-        final json = jsonDecode(content) as Map<String, dynamic>;
-        state = json['dynamic_background_enabled'] as bool? ?? true;
-      }
-    } catch (e) {
-      debugPrint('dynamic background load failed: $e');
-    }
-  }
-
-  Future<void> setEnabled(bool enabled) async {
-    state = enabled;
-    if (kIsWeb) return;
-    try {
-      final file = await _settingsFile;
-      if (file != null) {
-        Map<String, dynamic> json = {};
-        if (await file.exists()) {
-          final content = await file.readAsString();
-          json = jsonDecode(content) as Map<String, dynamic>;
-        }
-        json['dynamic_background_enabled'] = enabled;
-        await file.writeAsString(jsonEncode(json));
-      }
-    } catch (e) {
-      debugPrint('dynamic background save failed: $e');
-    }
-  }
+  Future<void> setEnabled(bool enabled) => _save(enabled);
 }

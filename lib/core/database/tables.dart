@@ -59,6 +59,20 @@ class WatchRecords extends Table {
   // Defaults to false (opt-in) so nothing is ever exposed without an
   // explicit choice.
   BoolColumn get isPublic => boolean().withDefault(const Constant(false))();
+  // The Firestore `logs` document id this record came from, when it came from
+  // Firestore (null for rows that only ever existed locally — guest mode, or
+  // a restored backup taken before this field existed).
+  //
+  // `id` above is an autoIncrement int because the UI keys rows by it, so
+  // records materialised from Firestore used to synthesise one as
+  // `docId.hashCode`. Edits and deletes then had to *search* for the document
+  // that hashed back to it, falling back to matching on
+  // (watchDate, watchNumber, episodeCount) when the hash didn't line up — and
+  // that tuple is not unique: two episodes logged in the same minute with the
+  // same episodeCount are indistinguishable, so a delete could remove the
+  // wrong one. Carrying the real document id makes the write path an exact
+  // `doc(remoteId)` reference instead of a guess.
+  TextColumn get remoteId => text().nullable()();
 }
 
 @DataClassName('UserMovieSetting')

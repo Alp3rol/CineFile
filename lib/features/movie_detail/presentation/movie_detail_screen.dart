@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/dynamic_background_wrapper.dart';
 import '../../../../core/database/database_provider.dart';
+import '../../../../core/database/movie_repository.dart';
 import '../../../../core/database/app_database.dart';
 import '../../../../core/theme/dynamic_background_provider.dart';
 import '../../main_shell.dart';
@@ -22,7 +23,6 @@ import 'widgets/rank_dialog.dart';
 import '../../journal/presentation/widgets/add_to_list_sheet.dart';
 import '../../auth/controllers/auth_controller.dart';
 import '../../../../core/services/notification_service.dart';
-import 'package:drift/drift.dart' show Value;
 import '../../settings/presentation/settings_provider.dart';
 
 class MovieDetailScreen extends ConsumerStatefulWidget {
@@ -72,15 +72,15 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
 
   // Toggle Favorite Status
   Future<void> _toggleFavorite(WidgetRef ref, Map<String, dynamic> movieData) async {
-    final authState = ref.read(authStateProvider);
-    final user = authState.value;
+    final user = ref.currentUser;
     if (user == null) return;
 
     final settings = ref.read(movieSettingsProvider((tmdbId: tmdbId, isTv: isTv))).value;
     final isFavorite = settings?.isFavorite ?? false;
 
     try {
-      final settingsRef = FirebaseFirestore.instance
+      final settingsRef = ref
+          .read(firestoreProvider)
           .collection('users')
           .doc(user.uid)
           .collection('movie_settings')
@@ -103,8 +103,7 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
   }
 
   Future<void> _toggleWatchlist(WidgetRef ref, Map<String, dynamic> movieData) async {
-    final authState = ref.read(authStateProvider);
-    final user = authState.value;
+    final user = ref.currentUser;
     if (user == null) return;
 
     final settings = ref.read(movieSettingsProvider((tmdbId: tmdbId, isTv: isTv))).value;
@@ -115,7 +114,8 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
         : movieData['release_date']) as String? ?? '';
 
     try {
-      final settingsRef = FirebaseFirestore.instance
+      final settingsRef = ref
+          .read(firestoreProvider)
           .collection('users')
           .doc(user.uid)
           .collection('movie_settings')
@@ -129,34 +129,21 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
         'updatedAt': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
 
-      // Ensure local movies table entry exists
-      final db = ref.read(databaseProvider);
-      final releaseYear = int.tryParse(releaseDateStr.split('-').first) ?? 0;
-      final genres = movieData['genres'] as List<dynamic>?;
-      final genresString = genres?.map((e) => e['name']).join(', ') ?? '';
-
-      final crew = movieData['credits']?['crew'] as List<dynamic>?;
-      final directorName = crew?.where((e) => e['job'] == 'Director').firstOrNull?['name'] as String? ?? 'Bilinmiyor';
-
-      final cast = movieData['credits']?['cast'] as List<dynamic>?;
-      final actorsString = cast?.take(5).map((e) => e['name']).join(', ') ?? '';
-
-      await db.into(db.movies).insertOnConflictUpdate(
-        MoviesCompanion.insert(
-          tmdbId: tmdbId,
-          title: (isTv ? (movieData['name'] ?? movieData['original_name']) : (movieData['title'] ?? movieData['original_title'])) as String? ?? 'Bilinmeyen Yapım',
-          originalTitle: Value(movieData['original_title'] as String? ?? movieData['original_name'] as String?),
-          posterPath: Value(movieData['poster_path'] as String?),
-          backdropPath: Value(movieData['backdrop_path'] as String?),
-          releaseYear: Value(releaseYear),
-          runtime: Value(movieData['runtime'] as int? ?? 0),
-          genres: Value(genresString),
-          director: Value(directorName),
-          actors: Value(actorsString),
-          overview: Value(movieData['overview'] as String?),
-          isTv: Value(isTv),
-        ),
-      );
+      // Cache the metadata locally so the title stays browsable offline. This
+      // is best-effort on purpose and deliberately outside the failure path of
+      // the toggle itself: the user's actual intent (the Firestore write) has
+      // already succeeded above, so a local-cache problem must not surface as
+      // "İzleme listesi güncellenemedi" — nor stop the reminder below from
+      // being scheduled, which is what used to happen on web.
+      try {
+        await ref.read(movieRepositoryProvider).cacheMovieMetadata(
+              tmdbId: tmdbId,
+              isTv: isTv,
+              movieData: movieData,
+            );
+      } catch (e) {
+        debugPrint('Yerel film metadata önbelleği yazılamadı: $e');
+      }
 
       // Trigger local notifications schedule/cancel
       final remindersEnabled = ref.read(releaseRemindersEnabledProvider);
@@ -188,25 +175,18 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
   }
 
   // Delete Watch Record
-  Future<void> _deleteRecord(BuildContext context, WidgetRef ref, int recordId) async {
-    final authState = ref.read(authStateProvider);
-    final user = authState.value;
+  // Delegates to the shared deleteWatchRecord (database_provider.dart) rather
+  // than re-implementing the lookup: that one addresses the record by its
+  // Firestore document id and also recomputes the show's episode-progress
+  // settings afterwards, which this screen's own copy never did — deleting a
+  // record from here used to leave "Aktif İzliyorum" pointing at an episode
+  // count that no longer had any logs behind it.
+  Future<void> _deleteRecord(BuildContext context, WidgetRef ref, WatchRecord record) async {
+    final user = ref.currentUser;
     if (user == null) return;
 
     try {
-      final snapshot = await FirebaseFirestore.instance
-          .collection('logs')
-          .where('userId', isEqualTo: user.uid)
-          .where('movieId', isEqualTo: tmdbId)
-          .where('isTv', isEqualTo: isTv)
-          .get();
-
-      for (final doc in snapshot.docs) {
-        if (doc.id.hashCode == recordId) {
-          await doc.reference.delete();
-          break;
-        }
-      }
+      await deleteWatchRecord(ref, record);
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -475,7 +455,7 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
 
                         MovieDetailTimelineSection(
                           watchRecordsAsync: watchRecordsAsync,
-                          onDelete: (recordId) => _deleteRecord(context, ref, recordId),
+                          onDelete: (record) => _deleteRecord(context, ref, record),
                         ),
 
                         // TMDB Atıf

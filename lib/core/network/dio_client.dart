@@ -34,13 +34,19 @@ class DioClient {
         ) {
     _dio.interceptors.add(FailoverInterceptor());
     _dio.interceptors.add(DioCacheInterceptor(options: cacheOptions));
-    _dio.interceptors.add(LogInterceptor(
-      requestHeader: false,
-      requestBody: false,
-      responseHeader: false,
-      responseBody: false,
-      error: true,
-    ));
+    // Debug builds only. TMDb takes the API key as a *query parameter*, so
+    // every logged request URI contains the key in plain text — which ended up
+    // in release console output and in CI test logs. `kDebugMode` keeps the
+    // diagnostics where they're useful without shipping the secret.
+    if (kDebugMode) {
+      _dio.interceptors.add(LogInterceptor(
+        requestHeader: false,
+        requestBody: false,
+        responseHeader: false,
+        responseBody: false,
+        error: true,
+      ));
+    }
 
     // Some routers/ISPs hijack plain DNS for specific domains (observed:
     // api.themoviedb.org resolving to 127.0.0.1). Web builds can't override

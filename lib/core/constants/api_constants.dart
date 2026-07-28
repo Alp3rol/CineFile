@@ -3,7 +3,8 @@ import 'api_key.dart';
 class ApiConstants {
   ApiConstants._();
 
-  static String baseUrl = 'https://api.themoviedb.org/3';
+  static const String defaultBaseUrl = 'https://api.themoviedb.org/3';
+  static String baseUrl = defaultBaseUrl;
   static const String imagePathOriginal = 'https://images.weserv.nl/?url=https://image.tmdb.org/t/p/original';
   // Backdrops are shown blurred/gradient-masked and full-bleed, never at
   // native detail — w780 looks identical in that context while being a

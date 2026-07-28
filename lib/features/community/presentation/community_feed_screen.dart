@@ -70,6 +70,22 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
         _showScrollToTop = show;
       });
     }
+
+    // Grow the feed window as the user approaches the end. Without this the
+    // query had no `limit` at all and every feed open streamed the entire
+    // `posts` collection.
+    if (!_scrollController.hasClients) return;
+    final position = _scrollController.position;
+    if (position.pixels >= position.maxScrollExtent - 600) {
+      final loaded = ref.read(communityFeedProvider).value?.length ?? 0;
+      final limit = ref.read(communityFeedLimitProvider);
+      // Only extend once the current window is actually full — otherwise
+      // every bounce at the bottom of a short feed would raise the limit
+      // forever without there being anything more to fetch.
+      if (loaded >= limit) {
+        ref.read(communityFeedLimitProvider.notifier).state = limit + kCommunityFeedPageSize;
+      }
+    }
   }
 
   Widget _buildTabButton(FeedTab tab, String label) {

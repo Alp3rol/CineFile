@@ -107,7 +107,8 @@ void showImportDialog(BuildContext context, WidgetRef ref) {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Daha önce kopyaladığınız JSON yedek kodunu aşağıdaki alana yapıştırın. Bu işlem mevcut yerel verilerinizin üzerine yazacaktır!',
+              'Daha önce kopyaladığınız JSON yedek kodunu aşağıdaki alana yapıştırın. '
+              'Bu işlem koleksiyonlarınızın VE hesabınızdaki tüm izleme geçmişinizin üzerine yazacaktır!',
               style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary, height: 1.4),
             ),
             const SizedBox(height: 12),

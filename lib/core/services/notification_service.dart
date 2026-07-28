@@ -4,7 +4,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timezone/data/latest_10y.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
-import '../../main.dart';
+import '../navigation/app_navigator.dart';
 import '../../features/movie_detail/presentation/movie_detail_screen.dart';
 import '../database/database_provider.dart';
 import '../../features/settings/presentation/settings_provider.dart';
@@ -293,8 +293,7 @@ class NotificationService {
       return;
     }
 
-    final authState = _ref.read(authStateProvider);
-    final user = authState.value;
+    final user = _ref.currentUser;
     if (user == null) return;
 
     // Cancel all existing scheduled notifications first to prevent

@@ -71,6 +71,79 @@ abstract class MovieRepository {
   // deletes that mirror doc (the local collection itself is untouched
   // either way — this only controls the Community feed's visibility).
   Future<void> setCollectionVisibility(int listId, bool isPublic);
+
+  /// Upserts the local metadata row for a TMDb payload so the title stays
+  /// openable offline (see movie_detail_provider.dart's fallback) and so
+  /// collections/rankings referencing it can render a poster and name.
+  ///
+  /// Every caller used to inline its own `db.into(db.movies)` block — one of
+  /// them (MovieDetailScreen's watchlist toggle) without a `kIsWeb` guard, so
+  /// on web it threw *after* the Firestore write had already succeeded: the
+  /// user saw "güncellenemedi" for an action that worked, and the release
+  /// reminder scheduled further down the same `try` never ran. Routing it
+  /// through the repository means the web implementation writes to the
+  /// in-memory map instead of a database that doesn't exist there.
+  Future<void> cacheMovieMetadata({
+    required int tmdbId,
+    required bool isTv,
+    required Map<String, dynamic> movieData,
+  });
+}
+
+/// Builds a [Movie] row from a raw TMDb detail payload.
+///
+/// Shared by every `cacheMovieMetadata` implementation and by
+/// `updatePersonalRankingLocal`, which previously each re-derived
+/// director/actors/genres/year from the same JSON shape with slightly
+/// different null handling.
+Movie movieFromTmdbPayload({
+  required int tmdbId,
+  required bool isTv,
+  required Map<String, dynamic> movieData,
+  DateTime? createdAt,
+}) {
+  final crew = movieData['credits']?['crew'] as List<dynamic>?;
+  final director = crew
+      ?.where((e) => e is Map && e['job'] == 'Director')
+      .firstOrNull?['name'] as String?;
+
+  final cast = movieData['credits']?['cast'] as List<dynamic>?;
+  final actors = cast
+      ?.take(5)
+      .map((e) => e is Map ? (e['name'] ?? '') : '')
+      .where((s) => s.toString().isNotEmpty)
+      .join(', ');
+
+  final genres = (movieData['genres'] as List<dynamic>?)
+      ?.map((e) => e is Map ? (e['name'] ?? '') : '')
+      .where((s) => s.toString().isNotEmpty)
+      .join(', ');
+
+  // TMDb names the date field differently for movies and shows, and the
+  // detail normalisation in TmdbService may have already copied one to the
+  // other — accept whichever is present.
+  final releaseDateStr =
+      (movieData['release_date'] ?? movieData['first_air_date'] ?? '').toString();
+  final releaseYear = DateTime.tryParse(releaseDateStr)?.year ??
+      int.tryParse(releaseDateStr.split('-').first);
+
+  return Movie(
+    tmdbId: tmdbId,
+    title: (movieData['title'] ?? movieData['name'] ?? 'Bilinmeyen Yapım') as String,
+    originalTitle:
+        (movieData['original_title'] ?? movieData['original_name']) as String?,
+    posterPath: movieData['poster_path'] as String?,
+    backdropPath: movieData['backdrop_path'] as String?,
+    releaseYear: releaseYear,
+    runtime: (movieData['runtime'] as num?)?.toInt(),
+    genres: genres,
+    director: director,
+    actors: actors,
+    overview: movieData['overview'] as String?,
+    isTv: isTv,
+    createdAt: createdAt ?? DateTime.now(),
+    totalEpisodes: (movieData['number_of_episodes'] as num?)?.toInt(),
+  );
 }
 
 final movieRepositoryProvider = Provider<MovieRepository>((ref) {
@@ -198,7 +271,7 @@ class NativeMovieRepository implements MovieRepository {
   }
 
   Future<void> _mirrorSharedCollection(int listId) async {
-    final user = _ref.read(authStateProvider).value;
+    final user = _ref.currentUser;
     if (user == null) return;
 
     final list = await (_db.select(_db.customLists)..where((t) => t.id.equals(listId))).getSingleOrNull();
@@ -232,14 +305,12 @@ class NativeMovieRepository implements MovieRepository {
     }
     movies.sort((a, b) => ((a['rankingOrder'] as num?)?.toInt() ?? 0).compareTo((b['rankingOrder'] as num?)?.toInt() ?? 0));
 
-    final userModel = _ref.read(userModelProvider);
-    final username = userModel?.username ?? user.email!.split('@')[0];
-    final avatarUrl = userModel?.avatarUrl ?? 'https://api.dicebear.com/7.x/bottts/png?seed=$username';
+    final identity = resolveUserIdentity(_ref.read(userModelProvider), user);
 
     unawaited(_ref.read(firestoreProvider).collection('shared_collections').doc('${user.uid}_$listId').set({
       'ownerId': user.uid,
-      'ownerUsername': username,
-      'ownerAvatarUrl': avatarUrl,
+      'ownerUsername': identity.username,
+      'ownerAvatarUrl': identity.avatarUrl,
       'name': list.name,
       'description': list.description,
       'movies': movies,
@@ -256,7 +327,7 @@ class NativeMovieRepository implements MovieRepository {
     } else {
       await (_db.update(_db.customLists)..where((t) => t.id.equals(listId)))
           .write(const CustomListsCompanion(isPublic: Value(false)));
-      final user = _ref.read(authStateProvider).value;
+      final user = _ref.currentUser;
       if (user != null) {
         unawaited(_ref.read(firestoreProvider).collection('shared_collections').doc('${user.uid}_$listId').delete());
       }
@@ -266,8 +337,7 @@ class NativeMovieRepository implements MovieRepository {
   @override
   Future<void> updateWatchRecordRankings(Map<MovieKey, int?> rankings) async {
     try {
-      final authState = _ref.read(authStateProvider);
-      final user = authState.value;
+      final user = _ref.currentUser;
       if (user == null) return;
 
       for (final entry in rankings.entries) {
@@ -363,6 +433,35 @@ class NativeMovieRepository implements MovieRepository {
   }
 
   @override
+  Future<void> cacheMovieMetadata({
+    required int tmdbId,
+    required bool isTv,
+    required Map<String, dynamic> movieData,
+  }) async {
+    final movie = movieFromTmdbPayload(tmdbId: tmdbId, isTv: isTv, movieData: movieData);
+    // createdAt is intentionally left absent so re-caching an already-known
+    // title doesn't bump its original "added at" timestamp to now (which the
+    // Home screen's "Son Eklediklerim" ordering depends on).
+    await _db.into(_db.movies).insertOnConflictUpdate(
+          MoviesCompanion.insert(
+            tmdbId: movie.tmdbId,
+            title: movie.title,
+            originalTitle: Value(movie.originalTitle),
+            posterPath: Value(movie.posterPath),
+            backdropPath: Value(movie.backdropPath),
+            releaseYear: Value(movie.releaseYear),
+            runtime: Value(movie.runtime),
+            genres: Value(movie.genres),
+            director: Value(movie.director),
+            actors: Value(movie.actors),
+            overview: Value(movie.overview),
+            isTv: Value(movie.isTv),
+            totalEpisodes: Value(movie.totalEpisodes),
+          ),
+        );
+  }
+
+  @override
   Future<void> updatePersonalRankingLocal({
     required int tmdbId,
     required bool isTv,
@@ -370,36 +469,8 @@ class NativeMovieRepository implements MovieRepository {
     required UserMovieSetting? settings,
     required int? rank,
   }) async {
-    final crew = movieData['credits']?['crew'] as List<dynamic>?;
-    final directorName = crew?.where((e) => e['job'] == 'Director').firstOrNull?['name'] as String?;
-
-    final cast = movieData['credits']?['cast'] as List<dynamic>?;
-    final actorsString = cast?.take(5).map((e) => e['name']).join(', ');
-
-    final genresData = movieData['genres'] as List<dynamic>?;
-    final genresString = genresData?.map((e) => e['name']).join(', ');
-
-    final releaseDateStr = movieData['release_date'] as String? ?? '';
-    final releaseYear = DateTime.tryParse(releaseDateStr)?.year;
-
     try {
-      // createdAt intentionally absent, see MovieDetailScreen._toggleFavorite for why.
-      await _db.into(_db.movies).insertOnConflictUpdate(
-            MoviesCompanion.insert(
-              tmdbId: tmdbId,
-              title: movieData['title'] as String,
-              originalTitle: Value(movieData['original_title'] as String?),
-              posterPath: Value(movieData['poster_path'] as String?),
-              backdropPath: Value(movieData['backdrop_path'] as String?),
-              releaseYear: Value(releaseYear),
-              runtime: Value((movieData['runtime'] as num?)?.toInt()),
-              genres: Value(genresString),
-              director: Value(directorName),
-              actors: Value(actorsString),
-              overview: Value(movieData['overview'] as String?),
-              isTv: Value(isTv),
-            ),
-          );
+      await cacheMovieMetadata(tmdbId: tmdbId, isTv: isTv, movieData: movieData);
 
       await _db.into(_db.userMovieSettings).insertOnConflictUpdate(
             UserMovieSetting(
@@ -619,8 +690,7 @@ class WebMovieRepository implements MovieRepository {
   @override
   Future<void> updateWatchRecordRankings(Map<MovieKey, int?> rankings) async {
     try {
-      final authState = _ref.read(authStateProvider);
-      final user = authState.value;
+      final user = _ref.currentUser;
       if (user == null) return;
 
       for (final entry in rankings.entries) {
@@ -699,6 +769,29 @@ class WebMovieRepository implements MovieRepository {
     }).toList();
   }
 
+  // Web has no SQLite database, so "caching metadata" means seeding the
+  // in-memory movies map that webMoviesProvider serves — which is what the
+  // offline detail-screen fallback and the collections UI read from.
+  @override
+  Future<void> cacheMovieMetadata({
+    required int tmdbId,
+    required bool isTv,
+    required Map<String, dynamic> movieData,
+  }) async {
+    final key = (tmdbId: tmdbId, isTv: isTv);
+    final current = _ref.read(webMoviesProvider);
+    final updated = Map<MovieKey, Movie>.from(current);
+    updated[key] = movieFromTmdbPayload(
+      tmdbId: tmdbId,
+      isTv: isTv,
+      movieData: movieData,
+      // Preserve the original "added at" for the same reason the native path
+      // omits createdAt on conflict.
+      createdAt: current[key]?.createdAt,
+    );
+    _ref.read(webMoviesProvider.notifier).state = updated;
+  }
+
   @override
   Future<void> updatePersonalRankingLocal({
     required int tmdbId,
@@ -707,6 +800,7 @@ class WebMovieRepository implements MovieRepository {
     required UserMovieSetting? settings,
     required int? rank,
   }) async {
+    await cacheMovieMetadata(tmdbId: tmdbId, isTv: isTv, movieData: movieData);
     final notifier = _ref.read(webMovieSettingsProvider.notifier);
     final currentMap = _ref.read(webMovieSettingsProvider);
     final updatedMap = Map<MovieKey, UserMovieSetting>.from(currentMap);

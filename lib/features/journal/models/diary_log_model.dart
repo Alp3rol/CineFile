@@ -142,7 +142,11 @@ class DiaryLogModel {
 
   WatchRecordWithMovie toWatchRecordWithMovie() {
     final record = WatchRecord(
-      id: id.hashCode, // Convert String ID to int ID for UI compatibility
+      // A synthetic int key so list widgets (which expect WatchRecord.id) keep
+      // working. It is NOT an identity anyone may write through — remoteId
+      // below is the real handle on the Firestore document.
+      id: id.hashCode,
+      remoteId: id,
       movieId: movieId,
       isTv: isTv,
       watchDate: watchDate,
