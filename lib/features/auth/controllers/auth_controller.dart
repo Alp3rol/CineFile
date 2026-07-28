@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -121,11 +123,43 @@ class AuthController {
     }
   }
 
+  /// Registers a claim for a username the user already holds, if one isn't
+  /// recorded yet.
+  ///
+  /// The `usernames` registry was introduced after accounts already existed,
+  /// so every pre-existing user's name is unreserved until something claims
+  /// it — meaning someone else could sign up and take it. Backfilling this
+  /// from a script would need admin credentials; doing it here instead means
+  /// each account reserves its own name the next time its owner signs in,
+  /// which is exactly what the security rules permit and needs no service
+  /// account anywhere.
+  ///
+  /// Never fatal: if the name has already been taken by someone else in the
+  /// meantime, that conflict predates this call and the user keeps their
+  /// current username either way.
+  Future<void> _backfillUsernameClaim(String uid, String username) async {
+    final lower = username.trim().toLowerCase();
+    if (lower.isEmpty) return;
+    try {
+      final claimed = await _claimUsername(uid: uid, usernameLower: lower);
+      if (!claimed) {
+        debugPrint('Username "$lower" is already claimed by another account; '
+            'leaving $uid\'s profile as-is.');
+      }
+    } catch (e) {
+      debugPrint('Username claim backfill failed for $uid: $e');
+    }
+  }
+
   Future<void> initUser(User user) async {
     try {
       final doc = await _firestore.collection('users').doc(user.uid).get();
       if (doc.exists) {
-        _ref.read(userModelProvider.notifier).state = UserModel.fromMap(doc.data()!, user.uid);
+        final model = UserModel.fromMap(doc.data()!, user.uid);
+        _ref.read(userModelProvider.notifier).state = model;
+        // Fire-and-forget: sign-in must not wait on (or fail because of) a
+        // registry write for a name the user already has.
+        unawaited(_backfillUsernameClaim(user.uid, model.username));
         return;
       }
 

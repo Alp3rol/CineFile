@@ -95,6 +95,35 @@ void main() {
       expect(doc.data()!['username'], 'tester'); // Stays 'tester'
     });
 
+    // The registry was added after accounts already existed, so pre-existing
+    // users have no claim on the name they are already using — anyone could
+    // sign up and take it. Signing in reserves it.
+    test('Signing in backfills a missing claim for the name the user already has',
+        () async {
+      await firestore.collection('usernames').doc('tester').delete();
+
+      await container.read(authControllerProvider).initUser(mockAuth.currentUser!);
+      // The backfill is deliberately not awaited by initUser.
+      await Future<void>.delayed(Duration.zero);
+
+      final claim = await firestore.collection('usernames').doc('tester').get();
+      expect(claim.exists, isTrue);
+      expect(claim.data()!['uid'], uid);
+    });
+
+    test('Backfill leaves a name already claimed by someone else alone', () async {
+      await firestore.collection('usernames').doc('tester').set({'uid': 'someone-else'});
+
+      await container.read(authControllerProvider).initUser(mockAuth.currentUser!);
+      await Future<void>.delayed(Duration.zero);
+
+      // The pre-existing conflict is not "resolved" by stealing the claim, and
+      // sign-in still succeeds with the user's profile loaded.
+      final claim = await firestore.collection('usernames').doc('tester').get();
+      expect(claim.data()!['uid'], 'someone-else');
+      expect(container.read(userModelProvider)!.username, 'tester');
+    });
+
     // The registry, not a check-then-write query, is what makes names unique:
     // a claim is a document create, which Firestore refuses if the document
     // already exists. Renaming has to hand the old name back at the same time,
