@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 // Collapsible search field shown under JournalScreen's tab bar when the
@@ -31,7 +32,7 @@ class JournalSearchField extends StatelessWidget {
           style: GoogleFonts.inter(fontSize: 13, color: Colors.white),
           onChanged: onChanged,
           decoration: InputDecoration(
-            hintText: 'Film, yönetmen, not, mekan...',
+            hintText: AppLocalizations.of(context).journalSearchHint,
             hintStyle: GoogleFonts.inter(color: Colors.grey.shade600, fontSize: 12),
             prefixIcon: const Icon(Icons.search_rounded, color: Colors.grey, size: 20),
             suffixIcon: query.isNotEmpty

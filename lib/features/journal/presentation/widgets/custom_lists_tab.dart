@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/widgets/app_network_image.dart';
@@ -32,7 +33,7 @@ class _CustomListsTabState extends ConsumerState<CustomListsTab>
       backgroundColor: Colors.transparent,
       body: customListsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.accentColor)),
-        error: (err, stack) => Center(child: Text('Hata: $err', style: const TextStyle(color: Colors.white))),
+        error: (err, stack) => Center(child: Text(AppLocalizations.of(context).collectionsLoadFailed, style: const TextStyle(color: Colors.white))),
         data: (lists) {
           if (lists.isEmpty) {
             return _buildEmptyState(context, ref);
@@ -51,7 +52,7 @@ class _CustomListsTabState extends ConsumerState<CustomListsTab>
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Koleksiyonlarım',
+                      AppLocalizations.of(context).collectionsTitle,
                       style: GoogleFonts.outfit(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
@@ -205,7 +206,7 @@ class _CustomListsTabState extends ConsumerState<CustomListsTab>
                             style: GoogleFonts.inter(fontSize: 10, color: AppTheme.textSecondary, fontWeight: FontWeight.bold),
                           ),
                           Text(
-                            '%${(progress * 100).toInt()} İzlendi',
+                            AppLocalizations.of(context).collectionProgressPercent((progress * 100).toInt()),
                             style: GoogleFonts.inter(
                               fontSize: 10,
                               color: progress == 1.0 ? Colors.greenAccent : AppTheme.accentColor,
@@ -262,7 +263,7 @@ class _CustomListsTabState extends ConsumerState<CustomListsTab>
             ),
             const SizedBox(height: 16),
             Text(
-              'Hiç Koleksiyonunuz Yok',
+              AppLocalizations.of(context).collectionsEmptyTitle,
               style: GoogleFonts.outfit(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -271,7 +272,7 @@ class _CustomListsTabState extends ConsumerState<CustomListsTab>
             ),
             const SizedBox(height: 8),
             Text(
-              'Kendinize özel film listeleri oluşturarak (Örn: En İyi Nolan Filmleri, İzlenecek Animeler) sinema keyfinizi kişiselleştirebilirsiniz.',
+              AppLocalizations.of(context).collectionsEmptyHint,
               style: GoogleFonts.inter(
                 fontSize: 12,
                 color: AppTheme.textSecondary,
@@ -288,7 +289,7 @@ class _CustomListsTabState extends ConsumerState<CustomListsTab>
               ),
               icon: const Icon(Icons.add_rounded, color: Colors.black),
               label: Text(
-                'Koleksiyon Oluştur',
+                AppLocalizations.of(context).collectionsCreate,
                 style: GoogleFonts.outfit(color: Colors.black, fontWeight: FontWeight.bold),
               ),
               onPressed: () => _showCreateListDialog(context, ref),

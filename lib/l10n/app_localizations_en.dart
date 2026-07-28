@@ -868,6 +868,335 @@ class AppLocalizationsEn extends AppLocalizations {
       'A connection problem meant the details couldn\'t be fully loaded. You can still add this to your diary or lists.';
 
   @override
+  String get journalTitle => 'My Diary';
+
+  @override
+  String get journalTabDiary => 'Diary';
+
+  @override
+  String get journalTabLists => 'Lists';
+
+  @override
+  String get journalTabInsights => 'Insights';
+
+  @override
+  String get journalSearchHint => 'Title, director, note, place...';
+
+  @override
+  String get journalFilterAll => 'All';
+
+  @override
+  String get journalFilterFavorites => 'Favourites';
+
+  @override
+  String get journalFilterCinema => 'At the cinema';
+
+  @override
+  String get journalFilterWithNotes => 'With notes';
+
+  @override
+  String get journalStatThisMonth => 'This Month';
+
+  @override
+  String get journalStatAvgRating => 'Avg. Rating';
+
+  @override
+  String get journalStatFavoriteGenre => 'Top Genre';
+
+  @override
+  String get journalStatTotalTime => 'Total Time';
+
+  @override
+  String get journalStatUndetermined => '—';
+
+  @override
+  String get journalEmptyTitle => 'No Records';
+
+  @override
+  String get journalEmptyFiltered =>
+      'No diary entries match your search or filters.';
+
+  @override
+  String get journalEmptyNoRecords =>
+      'Your diary is empty. Add watch records from the Discover tab.';
+
+  @override
+  String get journalLoadFailed =>
+      'Couldn\'t load your diary. Please try again.';
+
+  @override
+  String get journalReorderFailed =>
+      'Couldn\'t save the new order. Please try again.';
+
+  @override
+  String get journalColumnRank => 'Rank';
+
+  @override
+  String get journalColumnTitle => 'Title';
+
+  @override
+  String get journalColumnWatchDate => 'Watched On';
+
+  @override
+  String get journalColumnWatch => 'Watch';
+
+  @override
+  String get journalColumnWatchOrder => 'Watch No.';
+
+  @override
+  String get collectionsTitle => 'My Collections';
+
+  @override
+  String get collectionsEmptyTitle => 'No Collections Yet';
+
+  @override
+  String get collectionsCreate => 'Create a Collection';
+
+  @override
+  String get collectionsLoadFailed => 'Couldn\'t load your collections.';
+
+  @override
+  String get collectionAddTo => 'Add to Collection';
+
+  @override
+  String get collectionNewList => 'New List';
+
+  @override
+  String get collectionNoneYet => 'You have no collections.';
+
+  @override
+  String get collectionNoneYetHint =>
+      'Tap \"+ New List\" in the top right to make one.';
+
+  @override
+  String get collectionUpdateFailed =>
+      'Couldn\'t update the list. Please try again.';
+
+  @override
+  String get commonOk => 'OK';
+
+  @override
+  String get collectionEditTitle => 'Edit Collection';
+
+  @override
+  String get collectionCreateTitle => 'New Collection';
+
+  @override
+  String get collectionEditExplain =>
+      'Update the name, description and marathon date of your collection.';
+
+  @override
+  String get collectionCreateExplain =>
+      'Fill these in to track a film marathon or build a themed list.';
+
+  @override
+  String get collectionNameLabel => 'Collection Name';
+
+  @override
+  String get collectionNameHint => 'e.g. Marvel Marathon, Masterpieces...';
+
+  @override
+  String get collectionDescriptionLabel => 'Description (optional)';
+
+  @override
+  String get collectionDescriptionHint =>
+      'A short description of this collection...';
+
+  @override
+  String get collectionTargetDateLabel => 'Marathon Target Date';
+
+  @override
+  String get collectionTargetDatePick => 'Pick a target date (optional)';
+
+  @override
+  String get commonCreate => 'Create';
+
+  @override
+  String get collectionEmptyTitle => 'This Collection Is Empty';
+
+  @override
+  String get collectionEmptyHint =>
+      'Search from the Discover tab, or add titles to this collection from their detail pages.';
+
+  @override
+  String get collectionRemovedMovie => 'Removed from the collection.';
+
+  @override
+  String get collectionDeleteTitle => 'Delete Collection?';
+
+  @override
+  String get collectionShared => 'Shared with the community';
+
+  @override
+  String get collectionStopSharing => 'Stop Sharing';
+
+  @override
+  String get collectionStopSharingFailed =>
+      'Couldn\'t stop sharing. Please try again.';
+
+  @override
+  String get collectionReorderFailed =>
+      'Couldn\'t save the new order. Please try again.';
+
+  @override
+  String get marathonExpired => 'Time\'s Up! ⚠️';
+
+  @override
+  String marathonDaysLeft(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days left to hit your target.',
+      one: '1 day left to hit your target.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get marathonCompleted => 'Marathon complete. Nice one! 🎉';
+
+  @override
+  String marathonRemaining(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count titles left.',
+      one: '1 title left.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String recordMood(String mood) {
+    return 'Mood: $mood';
+  }
+
+  @override
+  String get recordWatchDate => 'Watched On';
+
+  @override
+  String get recordEpisodesWatched => 'Episodes Watched';
+
+  @override
+  String get recordEpisodeCount => 'Episode Count';
+
+  @override
+  String get recordEpisodeCountHint => 'How many episodes?';
+
+  @override
+  String get recordWatchPlace => 'Where';
+
+  @override
+  String get recordCompanions => 'With';
+
+  @override
+  String get recordVisibilityFailed => 'Couldn\'t update the sharing setting.';
+
+  @override
+  String get recordMyRank => 'My rank: ';
+
+  @override
+  String get recordRemoveRank => 'Remove Rank';
+
+  @override
+  String get recordMyNotes => 'My notes:';
+
+  @override
+  String get recordNoNotes => 'No notes were written for this record.';
+
+  @override
+  String get recordDeleteConfirmTitle => 'Are you sure?';
+
+  @override
+  String get recordDeleteConfirmBody => 'This watch record will be deleted.';
+
+  @override
+  String get recordDeleteFailed =>
+      'Couldn\'t delete the record. Please try again.';
+
+  @override
+  String get recordDelete => 'Delete Record';
+
+  @override
+  String recordEpisodesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count episodes',
+      one: '1 episode',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String recordYearDirector(String year, String director) {
+    return '$year • $director';
+  }
+
+  @override
+  String get yearUnknown => 'Unknown Year';
+
+  @override
+  String get directorMissing => 'No Director';
+
+  @override
+  String watchNumber(int number) {
+    return 'Watch #$number';
+  }
+
+  @override
+  String journalMoviesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count titles',
+      one: '1 title',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String durationDays(int days) {
+    return '${days}d';
+  }
+
+  @override
+  String durationHours(int hours) {
+    return '${hours}h';
+  }
+
+  @override
+  String durationMinutes(int minutes) {
+    return '${minutes}m';
+  }
+
+  @override
+  String collectionTotalWatched(int total, int watched) {
+    return '$total titles • $watched watched';
+  }
+
+  @override
+  String collectionProgressPercent(int percent) {
+    return '$percent% watched';
+  }
+
+  @override
+  String get collectionsEmptyHint =>
+      'Build your own lists (Best Nolan Films, Anime To Watch) to make the app yours.';
+
+  @override
+  String get collectionDeleteConfirm =>
+      'Delete this collection? Its titles and your ordering will be removed. (The titles themselves stay in your library.)';
+
+  @override
+  String get marathonTitle => '🏁 Marathon Challenge';
+
+  @override
+  String journalTotalTimeSpent(int hours, int minutes) {
+    return 'You have spent ${hours}h ${minutes}m watching the titles in this list.';
+  }
+
+  @override
   String addRecordSuccess(String title) {
     return '$title was added to your diary.';
   }

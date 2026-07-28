@@ -1622,6 +1622,534 @@ abstract class AppLocalizations {
   /// **'Bağlantı sorunu nedeniyle film detayları tam yüklenemedi. Ancak bu içeriği hala günlüğünüze veya listelerinize ekleyebilirsiniz.'**
   String get offlineFallbackOverview;
 
+  /// No description provided for @journalTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Günlüğüm'**
+  String get journalTitle;
+
+  /// No description provided for @journalTabDiary.
+  ///
+  /// In tr, this message translates to:
+  /// **'Günlük'**
+  String get journalTabDiary;
+
+  /// No description provided for @journalTabLists.
+  ///
+  /// In tr, this message translates to:
+  /// **'Listeler'**
+  String get journalTabLists;
+
+  /// No description provided for @journalTabInsights.
+  ///
+  /// In tr, this message translates to:
+  /// **'Analiz'**
+  String get journalTabInsights;
+
+  /// No description provided for @journalSearchHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Film, yönetmen, not, mekan...'**
+  String get journalSearchHint;
+
+  /// No description provided for @journalFilterAll.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tümü'**
+  String get journalFilterAll;
+
+  /// No description provided for @journalFilterFavorites.
+  ///
+  /// In tr, this message translates to:
+  /// **'Favoriler'**
+  String get journalFilterFavorites;
+
+  /// No description provided for @journalFilterCinema.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sinemada'**
+  String get journalFilterCinema;
+
+  /// No description provided for @journalFilterWithNotes.
+  ///
+  /// In tr, this message translates to:
+  /// **'Notlu Olanlar'**
+  String get journalFilterWithNotes;
+
+  /// No description provided for @journalStatThisMonth.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu Ay'**
+  String get journalStatThisMonth;
+
+  /// No description provided for @journalStatAvgRating.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ort. Puan'**
+  String get journalStatAvgRating;
+
+  /// No description provided for @journalStatFavoriteGenre.
+  ///
+  /// In tr, this message translates to:
+  /// **'Favori Tür'**
+  String get journalStatFavoriteGenre;
+
+  /// No description provided for @journalStatTotalTime.
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplam Süre'**
+  String get journalStatTotalTime;
+
+  /// No description provided for @journalStatUndetermined.
+  ///
+  /// In tr, this message translates to:
+  /// **'Belirsiz'**
+  String get journalStatUndetermined;
+
+  /// No description provided for @journalEmptyTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kayıt Bulunamadı'**
+  String get journalEmptyTitle;
+
+  /// No description provided for @journalEmptyFiltered.
+  ///
+  /// In tr, this message translates to:
+  /// **'Arama kriterlerinize veya filtrelere uyan bir günlük kaydı bulunmamaktadır.'**
+  String get journalEmptyFiltered;
+
+  /// No description provided for @journalEmptyNoRecords.
+  ///
+  /// In tr, this message translates to:
+  /// **'Günlüğünüz henüz boş. Keşfet sekmesinden yeni izleme kayıtları ekleyebilirsiniz.'**
+  String get journalEmptyNoRecords;
+
+  /// No description provided for @journalLoadFailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Günlük yüklenemedi. Lütfen tekrar deneyin.'**
+  String get journalLoadFailed;
+
+  /// No description provided for @journalReorderFailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sıralama kaydedilemedi. Lütfen tekrar deneyin.'**
+  String get journalReorderFailed;
+
+  /// No description provided for @journalColumnRank.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sıra'**
+  String get journalColumnRank;
+
+  /// No description provided for @journalColumnTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Film Adı'**
+  String get journalColumnTitle;
+
+  /// No description provided for @journalColumnWatchDate.
+  ///
+  /// In tr, this message translates to:
+  /// **'İzleme Tarihi'**
+  String get journalColumnWatchDate;
+
+  /// No description provided for @journalColumnWatch.
+  ///
+  /// In tr, this message translates to:
+  /// **'İzleme'**
+  String get journalColumnWatch;
+
+  /// No description provided for @journalColumnWatchOrder.
+  ///
+  /// In tr, this message translates to:
+  /// **'İzleme Sırası'**
+  String get journalColumnWatchOrder;
+
+  /// No description provided for @collectionsTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Koleksiyonlarım'**
+  String get collectionsTitle;
+
+  /// No description provided for @collectionsEmptyTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hiç Koleksiyonunuz Yok'**
+  String get collectionsEmptyTitle;
+
+  /// No description provided for @collectionsCreate.
+  ///
+  /// In tr, this message translates to:
+  /// **'Koleksiyon Oluştur'**
+  String get collectionsCreate;
+
+  /// No description provided for @collectionsLoadFailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Koleksiyonlar yüklenemedi.'**
+  String get collectionsLoadFailed;
+
+  /// No description provided for @collectionAddTo.
+  ///
+  /// In tr, this message translates to:
+  /// **'Koleksiyona Ekle'**
+  String get collectionAddTo;
+
+  /// No description provided for @collectionNewList.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni Liste'**
+  String get collectionNewList;
+
+  /// No description provided for @collectionNoneYet.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hiç koleksiyonunuz yok.'**
+  String get collectionNoneYet;
+
+  /// No description provided for @collectionNoneYetHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Eklemek için sağ üstteki \"+ Yeni Liste\" butonuna basın.'**
+  String get collectionNoneYetHint;
+
+  /// No description provided for @collectionUpdateFailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Liste güncellenemedi, tekrar deneyin.'**
+  String get collectionUpdateFailed;
+
+  /// No description provided for @commonOk.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tamam'**
+  String get commonOk;
+
+  /// No description provided for @collectionEditTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Koleksiyonu Düzenle'**
+  String get collectionEditTitle;
+
+  /// No description provided for @collectionCreateTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni Koleksiyon Oluştur'**
+  String get collectionCreateTitle;
+
+  /// No description provided for @collectionEditExplain.
+  ///
+  /// In tr, this message translates to:
+  /// **'Koleksiyonunuzun adı, açıklaması ve maraton tarihini güncelleyin.'**
+  String get collectionEditExplain;
+
+  /// No description provided for @collectionCreateExplain.
+  ///
+  /// In tr, this message translates to:
+  /// **'Film maratonlarınızı takip etmek veya tematik listeler oluşturmak için bilgileri girin.'**
+  String get collectionCreateExplain;
+
+  /// No description provided for @collectionNameLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Koleksiyon Adı'**
+  String get collectionNameLabel;
+
+  /// No description provided for @collectionNameHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Örn: Marvel Maratonu, Başyapıtlar...'**
+  String get collectionNameHint;
+
+  /// No description provided for @collectionDescriptionLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Açıklama (İsteğe Bağlı)'**
+  String get collectionDescriptionLabel;
+
+  /// No description provided for @collectionDescriptionHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Koleksiyonunuza dair kısa bir açıklama yazın...'**
+  String get collectionDescriptionHint;
+
+  /// No description provided for @collectionTargetDateLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Maraton Hedef Tarihi'**
+  String get collectionTargetDateLabel;
+
+  /// No description provided for @collectionTargetDatePick.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hedef Tarih Seçin (İsteğe Bağlı)'**
+  String get collectionTargetDatePick;
+
+  /// No description provided for @commonCreate.
+  ///
+  /// In tr, this message translates to:
+  /// **'Oluştur'**
+  String get commonCreate;
+
+  /// No description provided for @collectionEmptyTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu Koleksiyon Boş'**
+  String get collectionEmptyTitle;
+
+  /// No description provided for @collectionEmptyHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Keşfet sekmesinden filmler arayarak veya detay sayfalarından bu koleksiyona filmler ekleyebilirsiniz.'**
+  String get collectionEmptyHint;
+
+  /// No description provided for @collectionRemovedMovie.
+  ///
+  /// In tr, this message translates to:
+  /// **'Film koleksiyondan çıkarıldı.'**
+  String get collectionRemovedMovie;
+
+  /// No description provided for @collectionDeleteTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Koleksiyonu Sil?'**
+  String get collectionDeleteTitle;
+
+  /// No description provided for @collectionShared.
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplulukla paylaşılıyor'**
+  String get collectionShared;
+
+  /// No description provided for @collectionStopSharing.
+  ///
+  /// In tr, this message translates to:
+  /// **'Paylaşımı Durdur'**
+  String get collectionStopSharing;
+
+  /// No description provided for @collectionStopSharingFailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Paylaşım durdurulamadı, tekrar deneyin.'**
+  String get collectionStopSharingFailed;
+
+  /// No description provided for @collectionReorderFailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sıralama kaydedilemedi, tekrar deneyin.'**
+  String get collectionReorderFailed;
+
+  /// No description provided for @marathonExpired.
+  ///
+  /// In tr, this message translates to:
+  /// **'Süre Doldu! ⚠️'**
+  String get marathonExpired;
+
+  /// No description provided for @marathonDaysLeft.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hedefe ulaşmak için {days} gün kaldı.'**
+  String marathonDaysLeft(int days);
+
+  /// No description provided for @marathonCompleted.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tebrikler, maratonu tamamladınız! 🎉'**
+  String get marathonCompleted;
+
+  /// No description provided for @marathonRemaining.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kalan: {count} film.'**
+  String marathonRemaining(int count);
+
+  /// No description provided for @recordMood.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ruh Hali: {mood}'**
+  String recordMood(String mood);
+
+  /// No description provided for @recordWatchDate.
+  ///
+  /// In tr, this message translates to:
+  /// **'İzleme Tarihi'**
+  String get recordWatchDate;
+
+  /// No description provided for @recordEpisodesWatched.
+  ///
+  /// In tr, this message translates to:
+  /// **'İzlenen Bölüm Sayısı'**
+  String get recordEpisodesWatched;
+
+  /// No description provided for @recordEpisodeCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bölüm Sayısı'**
+  String get recordEpisodeCount;
+
+  /// No description provided for @recordEpisodeCountHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kaç bölüm izlendi?'**
+  String get recordEpisodeCountHint;
+
+  /// No description provided for @recordWatchPlace.
+  ///
+  /// In tr, this message translates to:
+  /// **'İzleme Mekanı'**
+  String get recordWatchPlace;
+
+  /// No description provided for @recordCompanions.
+  ///
+  /// In tr, this message translates to:
+  /// **'Eşlik Edenler'**
+  String get recordCompanions;
+
+  /// No description provided for @recordVisibilityFailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Paylaşım durumu güncellenemedi.'**
+  String get recordVisibilityFailed;
+
+  /// No description provided for @recordMyRank.
+  ///
+  /// In tr, this message translates to:
+  /// **'Favori Sıram: '**
+  String get recordMyRank;
+
+  /// No description provided for @recordRemoveRank.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sıradan Çıkar'**
+  String get recordRemoveRank;
+
+  /// No description provided for @recordMyNotes.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kişisel Notlarım:'**
+  String get recordMyNotes;
+
+  /// No description provided for @recordNoNotes.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kayıt eklenirken not yazılmamış.'**
+  String get recordNoNotes;
+
+  /// No description provided for @recordDeleteConfirmTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Emin misiniz?'**
+  String get recordDeleteConfirmTitle;
+
+  /// No description provided for @recordDeleteConfirmBody.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu izleme kaydı silinecek.'**
+  String get recordDeleteConfirmBody;
+
+  /// No description provided for @recordDeleteFailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kayıt silinemedi. Lütfen tekrar deneyin.'**
+  String get recordDeleteFailed;
+
+  /// No description provided for @recordDelete.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kaydı Sil'**
+  String get recordDelete;
+
+  /// No description provided for @recordEpisodesCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} Bölüm'**
+  String recordEpisodesCount(int count);
+
+  /// No description provided for @recordYearDirector.
+  ///
+  /// In tr, this message translates to:
+  /// **'{year} • {director}'**
+  String recordYearDirector(String year, String director);
+
+  /// No description provided for @yearUnknown.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bilinmeyen Yıl'**
+  String get yearUnknown;
+
+  /// No description provided for @directorMissing.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yönetmen Yok'**
+  String get directorMissing;
+
+  /// No description provided for @watchNumber.
+  ///
+  /// In tr, this message translates to:
+  /// **'{number}. İzleme'**
+  String watchNumber(int number);
+
+  /// No description provided for @journalMoviesCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} Film'**
+  String journalMoviesCount(int count);
+
+  /// No description provided for @durationDays.
+  ///
+  /// In tr, this message translates to:
+  /// **'{days}g'**
+  String durationDays(int days);
+
+  /// No description provided for @durationHours.
+  ///
+  /// In tr, this message translates to:
+  /// **'{hours}s'**
+  String durationHours(int hours);
+
+  /// No description provided for @durationMinutes.
+  ///
+  /// In tr, this message translates to:
+  /// **'{minutes}dk'**
+  String durationMinutes(int minutes);
+
+  /// No description provided for @collectionTotalWatched.
+  ///
+  /// In tr, this message translates to:
+  /// **'{total} Film • {watched} İzlenen'**
+  String collectionTotalWatched(int total, int watched);
+
+  /// No description provided for @collectionProgressPercent.
+  ///
+  /// In tr, this message translates to:
+  /// **'%{percent} İzlendi'**
+  String collectionProgressPercent(int percent);
+
+  /// No description provided for @collectionsEmptyHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kendinize özel film listeleri oluşturarak (Örn: En İyi Nolan Filmleri, İzlenecek Animeler) sinema keyfinizi kişiselleştirebilirsiniz.'**
+  String get collectionsEmptyHint;
+
+  /// No description provided for @collectionDeleteConfirm.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu koleksiyonu silmek istediğinize emin misiniz? İçindeki filmler ve sıralamanız tamamen silinecektir. (Veritabanındaki filmleriniz kaybolmaz).'**
+  String get collectionDeleteConfirm;
+
+  /// No description provided for @marathonTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'🏁 Maraton Mücadelesi'**
+  String get marathonTitle;
+
+  /// No description provided for @journalTotalTimeSpent.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu listedeki filmleri izlemek için toplam {hours} Saat {minutes} Dakika harcadınız.'**
+  String journalTotalTimeSpent(int hours, int minutes);
+
   /// No description provided for @addRecordSuccess.
   ///
   /// In tr, this message translates to:

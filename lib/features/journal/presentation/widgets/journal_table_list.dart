@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:intl/intl.dart';
+import '../../../../core/l10n/date_text.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/database/database_provider.dart';
@@ -128,7 +129,7 @@ class JournalRecordsTable extends ConsumerWidget {
         final record = item.record;
         final movie = item.movie;
 
-        final dateStr = DateFormat('dd.MM.yyyy').format(record.watchDate);
+        final dateStr = formatShortDate(context, record.watchDate);
         final year = movie.releaseYear?.toString() ?? '';
 
         final isLatestWatch = latestWatchIds[(tmdbId: movie.tmdbId, isTv: movie.isTv)] == record.id;
@@ -221,7 +222,7 @@ class JournalRecordsTable extends ConsumerWidget {
                               ),
                               const SizedBox(height: 3),
                               Text(
-                                '${year.isNotEmpty ? "$year • " : ""}${movie.director ?? "Yönetmen Yok"}',
+                                AppLocalizations.of(context).recordYearDirector(year.isNotEmpty ? year : AppLocalizations.of(context).yearUnknown, movie.director ?? AppLocalizations.of(context).directorMissing),
                                 style: GoogleFonts.inter(fontSize: 11, color: AppTheme.textSecondary),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -271,7 +272,7 @@ class JournalRecordsTable extends ConsumerWidget {
                             Flexible(
                               child: Text(
                                 isMobile
-                                    ? '${record.watchNumber}. İzleme'
+                                    ? AppLocalizations.of(context).watchNumber(record.watchNumber)
                                     : (record.watchPlace ?? ''),
                                 style: GoogleFonts.inter(fontSize: 10, color: AppTheme.textSecondary),
                                 overflow: TextOverflow.ellipsis,
@@ -309,7 +310,7 @@ class JournalRecordsTable extends ConsumerWidget {
                             children: [
                               Flexible(
                                 child: Text(
-                                  '${record.watchNumber}. İzleme',
+                                  AppLocalizations.of(context).watchNumber(record.watchNumber),
                                   style: GoogleFonts.inter(fontSize: 10, color: AppTheme.textSecondary),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -32,7 +33,7 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Paylaşım durdurulamadı, tekrar deneyin.')),
+          SnackBar(content: Text(AppLocalizations.of(context).collectionStopSharingFailed)),
         );
       }
     }
@@ -57,7 +58,7 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Sıralama kaydedilemedi, tekrar deneyin.')),
+          SnackBar(content: Text(AppLocalizations.of(context).collectionReorderFailed)),
         );
       }
     }
@@ -111,7 +112,7 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
 
             moviesAsync.when(
               loading: () => const Expanded(child: Center(child: CircularProgressIndicator(color: AppTheme.accentColor))),
-              error: (err, _) => Expanded(child: Center(child: Text('Hata: $err', style: const TextStyle(color: Colors.white)))),
+              error: (err, _) => Expanded(child: Center(child: Text(AppLocalizations.of(context).collectionsLoadFailed, style: const TextStyle(color: Colors.white)))),
               data: (movies) {
                 final totalCount = movies.length;
                 final watchedCount =
@@ -185,7 +186,7 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
     await removeMovieFromCustomList(ref, widget.list.id, tmdbId, isTv);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Film koleksiyondan çıkarıldı.')),
+        SnackBar(content: Text(AppLocalizations.of(context).collectionRemovedMovie)),
       );
     }
   }
@@ -205,15 +206,15 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
       builder: (context) {
         return AlertDialog(
           backgroundColor: AppTheme.surfaceColor,
-          title: Text('Koleksiyonu Sil?', style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold)),
-          content: const Text(
-            'Bu koleksiyonu silmek istediğinize emin misiniz? İçindeki filmler ve sıralamanız tamamen silinecektir. (Veritabanındaki filmleriniz kaybolmaz).',
-            style: TextStyle(color: Colors.white70, fontSize: 13, height: 1.4),
+          title: Text(AppLocalizations.of(context).collectionDeleteTitle, style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold)),
+          content: Text(
+            AppLocalizations.of(context).collectionDeleteConfirm,
+            style: const TextStyle(color: Colors.white70, fontSize: 13, height: 1.4),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('İptal', style: TextStyle(color: Colors.white70)),
+              child: Text(AppLocalizations.of(context).commonCancel, style: const TextStyle(color: Colors.white70)),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
@@ -224,7 +225,7 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
                   Navigator.pop(context); // Go back to collections grid
                 }
               },
-              child: const Text('Sil', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              child: Text(AppLocalizations.of(context).commonDelete, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
             ),
           ],
         );

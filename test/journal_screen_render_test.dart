@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'support/localized_app.dart';
 import 'package:cinefile/core/database/app_database.dart';
 import 'package:cinefile/core/database/database_provider.dart';
 import 'package:cinefile/features/journal/presentation/journal_screen.dart';
@@ -58,7 +59,7 @@ void main() {
           favoriteMovieIdsProvider.overrideWith((ref) => Stream.value(<MovieKey>{})),
           customListsProvider.overrideWith((ref) => Stream.value(const [])),
         ],
-        child: const MaterialApp(home: JournalScreen()),
+        child: const LocalizedTestApp(locale: Locale('tr'), home: JournalScreen()),
       ),
     );
     await tester.pumpAndSettle();

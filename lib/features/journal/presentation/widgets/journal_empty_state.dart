@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
 
@@ -20,7 +21,7 @@ class JournalEmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'Kayıt Bulunamadı',
+            AppLocalizations.of(context).journalEmptyTitle,
             style: GoogleFonts.outfit(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -32,8 +33,8 @@ class JournalEmptyState extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 42),
             child: Text(
               activeFilter != 'all' || searchQuery.isNotEmpty
-                  ? 'Arama kriterlerinize veya filtrelere uyan bir günlük kaydı bulunmamaktadır.'
-                  : 'Günlüğünüz henüz boş. Keşfet sekmesinden yeni izleme kayıtları ekleyebilirsiniz.',
+                  ? AppLocalizations.of(context).journalEmptyFiltered
+                  : AppLocalizations.of(context).journalEmptyNoRecords,
               style: GoogleFonts.inter(
                 fontSize: 12,
                 color: AppTheme.textSecondary,

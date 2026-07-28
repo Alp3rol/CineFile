@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/app_network_image.dart';
@@ -89,7 +90,7 @@ class CustomListSummaryHeader extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            '$totalCount Film • $watchedCount İzlenen',
+                            AppLocalizations.of(context).collectionTotalWatched(totalCount, watchedCount),
                             style: GoogleFonts.inter(fontSize: 10, color: Colors.white70, fontWeight: FontWeight.bold),
                           ),
                           Text(
@@ -134,7 +135,7 @@ class CustomListSummaryHeader extends StatelessWidget {
                 Icon(Icons.public_rounded, color: AppTheme.accentColor, size: 14),
                 const SizedBox(width: 6),
                 Text(
-                  'Toplulukla paylaşılıyor',
+                  AppLocalizations.of(context).collectionShared,
                   style: GoogleFonts.inter(fontSize: 11, color: AppTheme.accentColor, fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
@@ -142,7 +143,7 @@ class CustomListSummaryHeader extends StatelessWidget {
                   onPressed: onStopSharing,
                   style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero),
                   child: Text(
-                    'Paylaşımı Durdur',
+                    AppLocalizations.of(context).collectionStopSharing,
                     style: GoogleFonts.inter(fontSize: 11, color: AppTheme.textSecondary, decoration: TextDecoration.underline),
                   ),
                 ),

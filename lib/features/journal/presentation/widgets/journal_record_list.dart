@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/quick_advance_tag.dart';
 import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/constants/api_constants.dart';
+import '../../../../core/l10n/date_text.dart';
 import '../../../../core/database/database_provider.dart';
 import '../../../movie_detail/presentation/movie_detail_screen.dart';
 import 'watch_record_preview_dialog.dart';
 
-String _formatDayMonthYear(DateTime date) {
-  return DateFormat('d MMMM y', 'tr_TR').format(date);
+String _formatDayMonthYear(BuildContext context, DateTime date) {
+  return formatLongDate(context, date);
 }
 
 bool _isShowCompleted(WatchRecordWithMovie item) {
@@ -46,7 +46,7 @@ class JournalRecordsList extends ConsumerWidget {
     final groupOrder = <String>[];
     for (final item in sorted) {
       final date = item.record.watchDate;
-      final key = DateFormat('MMMM yyyy', 'tr_TR').format(date).toUpperCase();
+      final key = formatMonthHeading(context, date);
       if (!groups.containsKey(key)) {
         groups[key] = [];
         groupOrder.add(key);
@@ -124,7 +124,7 @@ class _JournalRecordCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final movie = item.movie;
     final record = item.record;
-    final dateStr = _formatDayMonthYear(record.watchDate);
+    final dateStr = _formatDayMonthYear(context, record.watchDate);
 
     return Material(
       color: Colors.transparent,

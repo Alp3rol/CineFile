@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -149,7 +150,7 @@ class _JournalScreenState extends ConsumerState<JournalScreen>
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Sıralama kaydedilemedi: $e')),
+          SnackBar(content: Text(AppLocalizations.of(context).journalReorderFailed)),
         );
       }
     }
@@ -205,10 +206,10 @@ class _JournalScreenState extends ConsumerState<JournalScreen>
                 unselectedLabelColor: Colors.white70,
                 labelStyle: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 15),
                 unselectedLabelStyle: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 15),
-                tabs: const [
-                  Tab(text: 'Günlük'),
-                  Tab(text: 'Listeler'),
-                  Tab(text: 'Analiz'),
+                tabs: [
+                  Tab(text: AppLocalizations.of(context).journalTabDiary),
+                  Tab(text: AppLocalizations.of(context).journalTabLists),
+                  Tab(text: AppLocalizations.of(context).journalTabInsights),
                 ],
               ),
             ),
@@ -236,7 +237,7 @@ class _JournalScreenState extends ConsumerState<JournalScreen>
                       Expanded(
                         child: watchRecordsAsync.when(
                           loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.accentColor)),
-                          error: (err, stack) => Center(child: Text('Hata: $err', style: const TextStyle(color: Colors.white))),
+                          error: (err, stack) => Center(child: Text(AppLocalizations.of(context).journalLoadFailed, style: const TextStyle(color: Colors.white))),
                           data: (records) {
                             if (records.isEmpty) {
                               return JournalEmptyState(activeFilter: _activeFilter, searchQuery: _searchQuery);
@@ -280,12 +281,12 @@ class _JournalScreenState extends ConsumerState<JournalScreen>
                                         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
                                         child: Row(
                                           children: [
-                                            JournalHeaderCell(label: 'Sıra', columnKey: 'personal_ranking', flex: null, width: 24, activeSortColumn: _sortColumn, sortAscending: _sortAscending, onSort: _onSort),
-                                            JournalHeaderCell(label: 'Film Adı', columnKey: 'title', flex: 1, activeSortColumn: _sortColumn, sortAscending: _sortAscending, onSort: _onSort),
-                                            JournalHeaderCell(label: isMobile ? 'İzleme' : 'İzleme Tarihi', columnKey: 'date', flex: null, width: isMobile ? 80 : 100, activeSortColumn: _sortColumn, sortAscending: _sortAscending, onSort: _onSort),
+                                            JournalHeaderCell(label: AppLocalizations.of(context).journalColumnRank, columnKey: 'personal_ranking', flex: null, width: 24, activeSortColumn: _sortColumn, sortAscending: _sortAscending, onSort: _onSort),
+                                            JournalHeaderCell(label: AppLocalizations.of(context).journalColumnTitle, columnKey: 'title', flex: 1, activeSortColumn: _sortColumn, sortAscending: _sortAscending, onSort: _onSort),
+                                            JournalHeaderCell(label: isMobile ? AppLocalizations.of(context).journalColumnWatch : AppLocalizations.of(context).journalColumnWatchDate, columnKey: 'date', flex: null, width: isMobile ? 80 : 100, activeSortColumn: _sortColumn, sortAscending: _sortAscending, onSort: _onSort),
                                             if (!isMobile)
-                                              JournalHeaderCell(label: 'İzleme Sırası', columnKey: 'watch_count', flex: null, width: 80, sortable: false, activeSortColumn: _sortColumn, sortAscending: _sortAscending, onSort: _onSort),
-                                            JournalHeaderCell(label: 'Puanım', columnKey: 'rating', flex: null, width: isMobile ? 65 : 70, activeSortColumn: _sortColumn, sortAscending: _sortAscending, onSort: _onSort),
+                                              JournalHeaderCell(label: AppLocalizations.of(context).journalColumnWatchOrder, columnKey: 'watch_count', flex: null, width: 80, sortable: false, activeSortColumn: _sortColumn, sortAscending: _sortAscending, onSort: _onSort),
+                                            JournalHeaderCell(label: AppLocalizations.of(context).detailMyRating, columnKey: 'rating', flex: null, width: isMobile ? 65 : 70, activeSortColumn: _sortColumn, sortAscending: _sortAscending, onSort: _onSort),
                                           ],
                                         ),
                                       );
@@ -324,7 +325,7 @@ class _JournalScreenState extends ConsumerState<JournalScreen>
                                           const SizedBox(width: 8),
                                           Expanded(
                                             child: Text(
-                                              'Bu listedeki filmleri izlemek için toplam ${stats.totalHours} Saat ${stats.totalRemainingMinutes} Dakika harcadınız.',
+                                              AppLocalizations.of(context).journalTotalTimeSpent(stats.totalHours, stats.totalRemainingMinutes),
                                               style: GoogleFonts.inter(
                                                 fontSize: 11,
                                                 fontWeight: FontWeight.bold,

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
+import '../../../../core/l10n/date_text.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/database/database_provider.dart';
@@ -139,7 +140,7 @@ class _CreateCollectionDialogState extends ConsumerState<CreateCollectionDialog>
 
             // Title
             Text(
-              isEditMode ? 'Koleksiyonu Düzenle' : 'Yeni Koleksiyon Oluştur',
+              isEditMode ? AppLocalizations.of(context).collectionEditTitle : AppLocalizations.of(context).collectionCreateTitle,
               textAlign: TextAlign.center,
               style: GoogleFonts.outfit(
                 fontSize: 20,
@@ -151,8 +152,8 @@ class _CreateCollectionDialogState extends ConsumerState<CreateCollectionDialog>
             const SizedBox(height: 6),
             Text(
               isEditMode 
-                  ? 'Koleksiyonunuzun adı, açıklaması ve maraton tarihini güncelleyin.'
-                  : 'Film maratonlarınızı takip etmek veya tematik listeler oluşturmak için bilgileri girin.',
+                  ? AppLocalizations.of(context).collectionEditExplain
+                  : AppLocalizations.of(context).collectionCreateExplain,
               textAlign: TextAlign.center,
               style: GoogleFonts.inter(
                 fontSize: 12,
@@ -169,8 +170,8 @@ class _CreateCollectionDialogState extends ConsumerState<CreateCollectionDialog>
               style: GoogleFonts.inter(color: Colors.white, fontSize: 14),
               decoration: InputDecoration(
                 prefixIcon: const Icon(Icons.bookmark_border_rounded, color: Colors.white54, size: 20),
-                hintText: 'Örn: Marvel Maratonu, Başyapıtlar...',
-                labelText: 'Koleksiyon Adı',
+                hintText: AppLocalizations.of(context).collectionNameHint,
+                labelText: AppLocalizations.of(context).collectionNameLabel,
                 labelStyle: GoogleFonts.inter(color: Colors.white54),
               ),
             ),
@@ -183,8 +184,8 @@ class _CreateCollectionDialogState extends ConsumerState<CreateCollectionDialog>
               maxLines: 2,
               decoration: InputDecoration(
                 prefixIcon: const Icon(Icons.notes_rounded, color: Colors.white54, size: 20),
-                hintText: 'Koleksiyonunuza dair kısa bir açıklama yazın...',
-                labelText: 'Açıklama (İsteğe Bağlı)',
+                hintText: AppLocalizations.of(context).collectionDescriptionHint,
+                labelText: AppLocalizations.of(context).collectionDescriptionLabel,
                 labelStyle: GoogleFonts.inter(color: Colors.white54),
               ),
             ),
@@ -196,7 +197,7 @@ class _CreateCollectionDialogState extends ConsumerState<CreateCollectionDialog>
                 const Icon(Icons.flag_rounded, color: AppTheme.ratingColor, size: 18),
                 const SizedBox(width: 6),
                 Text(
-                  'Maraton Hedef Tarihi',
+                  AppLocalizations.of(context).collectionTargetDateLabel,
                   style: GoogleFonts.outfit(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
@@ -232,8 +233,8 @@ class _CreateCollectionDialogState extends ConsumerState<CreateCollectionDialog>
                     Expanded(
                       child: Text(
                         _selectedTargetDate == null
-                            ? 'Hedef Tarih Seçin (İsteğe Bağlı)'
-                            : DateFormat('dd.MM.yyyy').format(_selectedTargetDate!),
+                            ? AppLocalizations.of(context).collectionTargetDatePick
+                            : formatShortDate(context, _selectedTargetDate!),
                         style: GoogleFonts.inter(
                           fontSize: 13,
                           color: _selectedTargetDate != null ? Colors.white : Colors.white30,
@@ -275,7 +276,7 @@ class _CreateCollectionDialogState extends ConsumerState<CreateCollectionDialog>
                       ),
                     ),
                     child: Text(
-                      'İptal',
+                      AppLocalizations.of(context).commonCancel,
                       style: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 14),
                     ),
                   ),
@@ -311,7 +312,7 @@ class _CreateCollectionDialogState extends ConsumerState<CreateCollectionDialog>
                         ),
                       ),
                       child: Text(
-                        isEditMode ? 'Kaydet' : 'Oluştur',
+                        isEditMode ? AppLocalizations.of(context).commonSave : AppLocalizations.of(context).commonCreate,
                         style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 14),
                       ),
                     ),

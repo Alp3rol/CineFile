@@ -58,13 +58,13 @@ class JournalFiltersBar extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: Row(
         children: [
-          _buildFilterChip('Tümü', 'all', Icons.format_list_bulleted_rounded),
+          _buildFilterChip(AppLocalizations.of(context).journalFilterAll, 'all', Icons.format_list_bulleted_rounded),
           const SizedBox(width: 6),
-          _buildFilterChip('Favoriler', 'favorites', Icons.favorite_rounded),
+          _buildFilterChip(AppLocalizations.of(context).journalFilterFavorites, 'favorites', Icons.favorite_rounded),
           const SizedBox(width: 6),
-          _buildFilterChip('Sinemada', 'cinema', Icons.local_movies_rounded),
+          _buildFilterChip(AppLocalizations.of(context).journalFilterCinema, 'cinema', Icons.local_movies_rounded),
           const SizedBox(width: 6),
-          _buildFilterChip('Notlu Olanlar', 'notes', Icons.rate_review_rounded),
+          _buildFilterChip(AppLocalizations.of(context).journalFilterWithNotes, 'notes', Icons.rate_review_rounded),
         ],
       ),
     );
@@ -141,9 +141,9 @@ class JournalMiniInsightsBar extends StatelessWidget {
     final days = totalHours ~/ 24;
     final hours = totalHours % 24;
     final durationParts = <String>[];
-    if (days > 0) durationParts.add('${days}g');
-    if (hours > 0 || days == 0) durationParts.add('${hours}s');
-    if (totalMinutes > 0) durationParts.add('${totalMinutes}dk');
+    if (days > 0) durationParts.add(AppLocalizations.of(context).durationDays(days));
+    if (hours > 0 || days == 0) durationParts.add(AppLocalizations.of(context).durationHours(hours));
+    if (totalMinutes > 0) durationParts.add(AppLocalizations.of(context).durationMinutes(totalMinutes));
     final durationStr = durationParts.join('');
 
     return Padding(
@@ -155,9 +155,9 @@ class JournalMiniInsightsBar extends StatelessWidget {
           children: [
             Row(
               children: [
-                _buildStat(context, 'Bu Ay', '$thisMonthCount Film', Icons.calendar_month_rounded, AppTheme.accentColor),
+                _buildStat(context, AppLocalizations.of(context).journalStatThisMonth, AppLocalizations.of(context).journalMoviesCount(thisMonthCount), Icons.calendar_month_rounded, AppTheme.accentColor),
                 _divider(),
-                _buildStat(context, 'Ort. Puan', '${avgRating.toStringAsFixed(1)} ★', Icons.star_rounded, AppTheme.ratingColor),
+                _buildStat(context, AppLocalizations.of(context).journalStatAvgRating, '${avgRating.toStringAsFixed(1)} ★', Icons.star_rounded, AppTheme.ratingColor),
               ],
             ),
             const SizedBox(height: 12),
@@ -167,15 +167,15 @@ class JournalMiniInsightsBar extends StatelessWidget {
               children: [
                 _buildStat(
                   context,
-                  'Favori Tür',
+                  AppLocalizations.of(context).journalStatFavoriteGenre,
                   favoriteGenreId == null
-                      ? 'Belirsiz'
+                      ? AppLocalizations.of(context).journalStatUndetermined
                       : genreName(AppLocalizations.of(context), favoriteGenreId!),
                   Icons.movie_filter_rounded,
                   AppTheme.accentColor,
                 ),
                 _divider(),
-                _buildStat(context, 'Toplam Süre', durationStr, Icons.hourglass_bottom_rounded, AppTheme.ratingColor),
+                _buildStat(context, AppLocalizations.of(context).journalStatTotalTime, durationStr, Icons.hourglass_bottom_rounded, AppTheme.ratingColor),
               ],
             ),
           ],

@@ -424,6 +424,146 @@
   "offlineContentTitle": "Çevrimdışı İçerik",
   "offlineFallbackOverview": "Bağlantı sorunu nedeniyle film detayları tam yüklenemedi. Ancak bu içeriği hala günlüğünüze veya listelerinize ekleyebilirsiniz.",
 
+  "@_journal": {
+    "description": "Diary tab: record list, filters, collections."
+  },
+  "journalTitle": "Günlüğüm",
+  "journalTabDiary": "Günlük",
+  "journalTabLists": "Listeler",
+  "journalTabInsights": "Analiz",
+  "journalSearchHint": "Film, yönetmen, not, mekan...",
+  "journalFilterAll": "Tümü",
+  "journalFilterFavorites": "Favoriler",
+  "journalFilterCinema": "Sinemada",
+  "journalFilterWithNotes": "Notlu Olanlar",
+  "journalStatThisMonth": "Bu Ay",
+  "journalStatAvgRating": "Ort. Puan",
+  "journalStatFavoriteGenre": "Favori Tür",
+  "journalStatTotalTime": "Toplam Süre",
+  "journalStatUndetermined": "Belirsiz",
+  "journalEmptyTitle": "Kayıt Bulunamadı",
+  "journalEmptyFiltered": "Arama kriterlerinize veya filtrelere uyan bir günlük kaydı bulunmamaktadır.",
+  "journalEmptyNoRecords": "Günlüğünüz henüz boş. Keşfet sekmesinden yeni izleme kayıtları ekleyebilirsiniz.",
+  "journalLoadFailed": "Günlük yüklenemedi. Lütfen tekrar deneyin.",
+  "journalReorderFailed": "Sıralama kaydedilemedi. Lütfen tekrar deneyin.",
+  "journalColumnRank": "Sıra",
+  "journalColumnTitle": "Film Adı",
+  "journalColumnWatchDate": "İzleme Tarihi",
+  "journalColumnWatch": "İzleme",
+  "journalColumnWatchOrder": "İzleme Sırası",
+
+  "collectionsTitle": "Koleksiyonlarım",
+  "collectionsEmptyTitle": "Hiç Koleksiyonunuz Yok",
+  "collectionsCreate": "Koleksiyon Oluştur",
+  "collectionsLoadFailed": "Koleksiyonlar yüklenemedi.",
+  "collectionAddTo": "Koleksiyona Ekle",
+  "collectionNewList": "Yeni Liste",
+  "collectionNoneYet": "Hiç koleksiyonunuz yok.",
+  "collectionNoneYetHint": "Eklemek için sağ üstteki \"+ Yeni Liste\" butonuna basın.",
+  "collectionUpdateFailed": "Liste güncellenemedi, tekrar deneyin.",
+  "commonOk": "Tamam",
+  "collectionEditTitle": "Koleksiyonu Düzenle",
+  "collectionCreateTitle": "Yeni Koleksiyon Oluştur",
+  "collectionEditExplain": "Koleksiyonunuzun adı, açıklaması ve maraton tarihini güncelleyin.",
+  "collectionCreateExplain": "Film maratonlarınızı takip etmek veya tematik listeler oluşturmak için bilgileri girin.",
+  "collectionNameLabel": "Koleksiyon Adı",
+  "collectionNameHint": "Örn: Marvel Maratonu, Başyapıtlar...",
+  "collectionDescriptionLabel": "Açıklama (İsteğe Bağlı)",
+  "collectionDescriptionHint": "Koleksiyonunuza dair kısa bir açıklama yazın...",
+  "collectionTargetDateLabel": "Maraton Hedef Tarihi",
+  "collectionTargetDatePick": "Hedef Tarih Seçin (İsteğe Bağlı)",
+  "commonCreate": "Oluştur",
+  "collectionEmptyTitle": "Bu Koleksiyon Boş",
+  "collectionEmptyHint": "Keşfet sekmesinden filmler arayarak veya detay sayfalarından bu koleksiyona filmler ekleyebilirsiniz.",
+  "collectionRemovedMovie": "Film koleksiyondan çıkarıldı.",
+  "collectionDeleteTitle": "Koleksiyonu Sil?",
+  "collectionShared": "Toplulukla paylaşılıyor",
+  "collectionStopSharing": "Paylaşımı Durdur",
+  "collectionStopSharingFailed": "Paylaşım durdurulamadı, tekrar deneyin.",
+  "collectionReorderFailed": "Sıralama kaydedilemedi, tekrar deneyin.",
+
+  "marathonExpired": "Süre Doldu! ⚠️",
+  "marathonDaysLeft": "Hedefe ulaşmak için {days} gün kaldı.",
+  "@marathonDaysLeft": {
+    "placeholders": { "days": { "type": "int" } }
+  },
+  "marathonCompleted": "Tebrikler, maratonu tamamladınız! 🎉",
+  "marathonRemaining": "Kalan: {count} film.",
+  "@marathonRemaining": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "recordMood": "Ruh Hali: {mood}",
+  "@recordMood": {
+    "placeholders": { "mood": { "type": "String" } }
+  },
+  "recordWatchDate": "İzleme Tarihi",
+  "recordEpisodesWatched": "İzlenen Bölüm Sayısı",
+  "recordEpisodeCount": "Bölüm Sayısı",
+  "recordEpisodeCountHint": "Kaç bölüm izlendi?",
+  "recordWatchPlace": "İzleme Mekanı",
+  "recordCompanions": "Eşlik Edenler",
+  "recordVisibilityFailed": "Paylaşım durumu güncellenemedi.",
+  "recordMyRank": "Favori Sıram: ",
+  "recordRemoveRank": "Sıradan Çıkar",
+  "recordMyNotes": "Kişisel Notlarım:",
+  "recordNoNotes": "Kayıt eklenirken not yazılmamış.",
+  "recordDeleteConfirmTitle": "Emin misiniz?",
+  "recordDeleteConfirmBody": "Bu izleme kaydı silinecek.",
+  "recordDeleteFailed": "Kayıt silinemedi. Lütfen tekrar deneyin.",
+  "recordDelete": "Kaydı Sil",
+
+  "recordEpisodesCount": "{count} Bölüm",
+  "@recordEpisodesCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "recordYearDirector": "{year} • {director}",
+  "@recordYearDirector": {
+    "placeholders": { "year": { "type": "String" }, "director": { "type": "String" } }
+  },
+  "yearUnknown": "Bilinmeyen Yıl",
+  "directorMissing": "Yönetmen Yok",
+  "watchNumber": "{number}. İzleme",
+  "@watchNumber": {
+    "placeholders": { "number": { "type": "int" } }
+  },
+  "journalMoviesCount": "{count} Film",
+  "@journalMoviesCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "@_durationUnits": {
+    "description": "Compact duration suffixes, kept as separate messages because the abbreviations are language-specific (g/s/dk in Turkish, d/h/m in English) and are concatenated into one run."
+  },
+  "durationDays": "{days}g",
+  "@durationDays": {
+    "placeholders": { "days": { "type": "int" } }
+  },
+  "durationHours": "{hours}s",
+  "@durationHours": {
+    "placeholders": { "hours": { "type": "int" } }
+  },
+  "durationMinutes": "{minutes}dk",
+  "@durationMinutes": {
+    "placeholders": { "minutes": { "type": "int" } }
+  },
+
+  "collectionTotalWatched": "{total} Film • {watched} İzlenen",
+  "@collectionTotalWatched": {
+    "placeholders": { "total": { "type": "int" }, "watched": { "type": "int" } }
+  },
+  "collectionProgressPercent": "%{percent} İzlendi",
+  "@collectionProgressPercent": {
+    "placeholders": { "percent": { "type": "int" } }
+  },
+  "collectionsEmptyHint": "Kendinize özel film listeleri oluşturarak (Örn: En İyi Nolan Filmleri, İzlenecek Animeler) sinema keyfinizi kişiselleştirebilirsiniz.",
+  "collectionDeleteConfirm": "Bu koleksiyonu silmek istediğinize emin misiniz? İçindeki filmler ve sıralamanız tamamen silinecektir. (Veritabanındaki filmleriniz kaybolmaz).",
+  "marathonTitle": "🏁 Maraton Mücadelesi",
+  "journalTotalTimeSpent": "Bu listedeki filmleri izlemek için toplam {hours} Saat {minutes} Dakika harcadınız.",
+  "@journalTotalTimeSpent": {
+    "placeholders": { "hours": { "type": "int" }, "minutes": { "type": "int" } }
+  },
+
   "addRecordSuccess": "{title} günlüğünüze başarıyla eklendi!",
   "@addRecordSuccess": {
     "placeholders": { "title": { "type": "String" } }

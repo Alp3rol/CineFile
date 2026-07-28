@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:intl/intl.dart';
+import '../../../../core/l10n/date_text.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/constants/api_constants.dart';
@@ -61,7 +62,7 @@ void showWatchRecordPreviewDialog(
     builder: (context) {
       return StatefulBuilder(
         builder: (context, setState) {
-          final dateStr = DateFormat('dd.MM.yyyy').format(currentDate);
+          final dateStr = formatShortDate(context, currentDate);
 
       return Dialog(
         backgroundColor: Colors.transparent,
@@ -104,7 +105,7 @@ void showWatchRecordPreviewDialog(
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '${movie.releaseYear ?? "Bilinmeyen Yıl"} • ${movie.director ?? "Yönetmen Bilinmiyor"}',
+                          AppLocalizations.of(context).recordYearDirector(movie.releaseYear?.toString() ?? AppLocalizations.of(context).yearUnknown, movie.director ?? AppLocalizations.of(context).directorMissing),
                           style: GoogleFonts.inter(fontSize: 11, color: AppTheme.textSecondary),
                         ),
                         const SizedBox(height: 4),
@@ -122,7 +123,7 @@ void showWatchRecordPreviewDialog(
                             ),
                             const SizedBox(width: 12),
                             Text(
-                              'Ruh Hali: ${record.mood ?? "🍿"}',
+                              AppLocalizations.of(context).recordMood(record.mood ?? '🍿'),
                               style: GoogleFonts.inter(fontSize: 11, color: Colors.white70),
                             ),
                           ],
@@ -139,7 +140,7 @@ void showWatchRecordPreviewDialog(
               // Details Grid
               _buildPreviewDetailRow(
                 Icons.calendar_today_rounded, 
-                'İzleme Tarihi', 
+                AppLocalizations.of(context).journalColumnWatchDate, 
                 dateStr,
                 onEdit: () async {
                   final pickedDate = await PremiumDatePicker.show(
@@ -167,27 +168,27 @@ void showWatchRecordPreviewDialog(
                 const SizedBox(height: 10),
                 _buildPreviewDetailRow(
                   Icons.ondemand_video_rounded,
-                  'İzlenen Bölüm Sayısı',
-                  '$currentEpisodeCount Bölüm',
+                  AppLocalizations.of(context).recordEpisodesWatched,
+                  AppLocalizations.of(context).recordEpisodesCount(currentEpisodeCount),
                   onEdit: () async {
                     final ctrl = TextEditingController(text: currentEpisodeCount.toString());
                     final newCount = await showDialog<int>(
                       context: context,
                       builder: (context) => AlertDialog(
                         backgroundColor: AppTheme.backgroundColor,
-                        title: Text('Bölüm Sayısı', style: GoogleFonts.outfit(color: Colors.white)),
+                        title: Text(AppLocalizations.of(context).recordEpisodeCount, style: GoogleFonts.outfit(color: Colors.white)),
                         content: TextField(
                           controller: ctrl,
                           keyboardType: TextInputType.number,
                           style: const TextStyle(color: Colors.white),
-                          decoration: const InputDecoration(
-                            hintText: 'Kaç bölüm izlendi?',
+                          decoration: InputDecoration(
+                            hintText: AppLocalizations.of(context).recordEpisodeCountHint,
                           ),
                         ),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.pop(context),
-                            child: const Text('İptal', style: TextStyle(color: Colors.white70)),
+                            child: Text(AppLocalizations.of(context).commonCancel, style: const TextStyle(color: Colors.white70)),
                           ),
                           TextButton(
                             onPressed: () {
@@ -196,7 +197,7 @@ void showWatchRecordPreviewDialog(
                                 Navigator.pop(context, val);
                               }
                             },
-                            child: const Text('Kaydet', style: TextStyle(color: AppTheme.accentColor)),
+                            child: Text(AppLocalizations.of(context).commonSave, style: const TextStyle(color: AppTheme.accentColor)),
                           ),
                         ],
                       ),
@@ -212,11 +213,11 @@ void showWatchRecordPreviewDialog(
               ],
               if (record.watchPlace != null) ...[
                 const SizedBox(height: 10),
-                _buildPreviewDetailRow(Icons.location_on_outlined, 'İzleme Mekanı', record.watchPlace!),
+                _buildPreviewDetailRow(Icons.location_on_outlined, AppLocalizations.of(context).recordWatchPlace, record.watchPlace!),
               ],
               if (record.watchCompanion != null) ...[
                 const SizedBox(height: 10),
-                _buildPreviewDetailRow(Icons.people_outline_rounded, 'Eşlik Edenler', record.watchCompanion!),
+                _buildPreviewDetailRow(Icons.people_outline_rounded, AppLocalizations.of(context).recordCompanions, record.watchCompanion!),
               ],
 
               // Controls ONLY the "Son İzlediklerim" section on the user's
@@ -232,7 +233,7 @@ void showWatchRecordPreviewDialog(
                       const Icon(Icons.public_rounded, color: AppTheme.accentColor, size: 14),
                       const SizedBox(width: 8),
                       Text(
-                        'Profilimde Göster',
+                        AppLocalizations.of(context).addRecordVisibilityLabel,
                         style: GoogleFonts.inter(fontSize: 11, color: AppTheme.textSecondary, fontWeight: FontWeight.bold),
                       ),
                     ],
@@ -248,7 +249,7 @@ void showWatchRecordPreviewDialog(
                         });
                       } catch (e) {
                         if (context.mounted) {
-                          showPremiumToast(context, 'Paylaşım durumu güncellenemedi: $e', isError: true);
+                          showPremiumToast(context, AppLocalizations.of(context).recordVisibilityFailed, isError: true);
                         }
                       }
                     },
@@ -263,7 +264,7 @@ void showWatchRecordPreviewDialog(
                   const Icon(Icons.format_list_numbered_rounded, color: AppTheme.accentColor, size: 14),
                   const SizedBox(width: 8),
                   Text(
-                    'Favori Sıram: ',
+                    AppLocalizations.of(context).recordMyRank,
                     style: GoogleFonts.inter(fontSize: 11, color: AppTheme.textSecondary, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(width: 8),
@@ -290,7 +291,7 @@ void showWatchRecordPreviewDialog(
                           if (context.mounted) Navigator.pop(context);
                         } catch (e) {
                           if (context.mounted) {
-                            showPremiumToast(context, 'Sıralama kaydedilemedi: $e', isError: true);
+                            showPremiumToast(context, AppLocalizations.of(context).journalReorderFailed, isError: true);
                           }
                         }
                       },
@@ -305,13 +306,13 @@ void showWatchRecordPreviewDialog(
                           if (context.mounted) Navigator.pop(context);
                         } catch (e) {
                           if (context.mounted) {
-                            showPremiumToast(context, 'Sıralama kaydedilemedi: $e', isError: true);
+                            showPremiumToast(context, AppLocalizations.of(context).journalReorderFailed, isError: true);
                           }
                         }
                       },
                       style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero),
                       child: Text(
-                        'Sıradan Çıkar',
+                        AppLocalizations.of(context).recordRemoveRank,
                         style: GoogleFonts.inter(fontSize: 10, color: Colors.redAccent),
                       ),
                     ),
@@ -321,7 +322,7 @@ void showWatchRecordPreviewDialog(
               // Notes section
               const SizedBox(height: 16),
               Text(
-                'Kişisel Notlarım:',
+                AppLocalizations.of(context).recordMyNotes,
                 style: GoogleFonts.outfit(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
@@ -341,7 +342,7 @@ void showWatchRecordPreviewDialog(
                   child: Text(
                     record.notes != null && record.notes!.trim().isNotEmpty
                         ? record.notes!
-                        : 'Kayıt eklenirken not yazılmamış.',
+                        : AppLocalizations.of(context).recordNoNotes,
                     style: GoogleFonts.inter(
                       fontSize: 11,
                       color: Colors.white.withValues(alpha: 0.8),
@@ -361,16 +362,16 @@ void showWatchRecordPreviewDialog(
                         context: context,
                         builder: (context) => AlertDialog(
                           backgroundColor: AppTheme.backgroundColor,
-                          title: Text('Emin misiniz?', style: GoogleFonts.outfit(color: Colors.white)),
-                          content: const Text('Bu izleme kaydı silinecek.', style: TextStyle(color: Colors.white70)),
+                          title: Text(AppLocalizations.of(context).recordDeleteConfirmTitle, style: GoogleFonts.outfit(color: Colors.white)),
+                          content: Text(AppLocalizations.of(context).recordDeleteConfirmBody, style: const TextStyle(color: Colors.white70)),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(context, false),
-                              child: const Text('İptal', style: TextStyle(color: Colors.white70)),
+                              child: Text(AppLocalizations.of(context).commonCancel, style: const TextStyle(color: Colors.white70)),
                             ),
                             TextButton(
                               onPressed: () => Navigator.pop(context, true),
-                              child: const Text('Sil', style: TextStyle(color: Colors.redAccent)),
+                              child: Text(AppLocalizations.of(context).commonDelete, style: const TextStyle(color: Colors.redAccent)),
                             ),
                           ],
                         ),
@@ -381,13 +382,13 @@ void showWatchRecordPreviewDialog(
                           if (context.mounted) Navigator.pop(context);
                         } catch (e) {
                           if (context.mounted) {
-                            showPremiumToast(context, 'Silme başarısız: $e', isError: true);
+                            showPremiumToast(context, AppLocalizations.of(context).recordDeleteFailed, isError: true);
                           }
                         }
                       }
                     },
                     child: Text(
-                      'Kaydı Sil',
+                      AppLocalizations.of(context).recordDelete,
                       style: GoogleFonts.outfit(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
@@ -398,7 +399,7 @@ void showWatchRecordPreviewDialog(
                   TextButton(
                     onPressed: () => Navigator.pop(context),
                     child: Text(
-                      'Kapat',
+                      AppLocalizations.of(context).commonClose,
                       style: GoogleFonts.outfit(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,

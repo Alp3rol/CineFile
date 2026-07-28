@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/app_network_image.dart';
@@ -81,7 +82,7 @@ class CustomListMovieTile extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    '${movie.releaseYear != null ? "${movie.releaseYear} • " : ""}${movie.director ?? "Yönetmen Yok"}',
+                    AppLocalizations.of(context).recordYearDirector(movie.releaseYear?.toString() ?? AppLocalizations.of(context).yearUnknown, movie.director ?? AppLocalizations.of(context).directorMissing),
                     style: GoogleFonts.inter(fontSize: 11, color: AppTheme.textSecondary),
                   ),
                 ],

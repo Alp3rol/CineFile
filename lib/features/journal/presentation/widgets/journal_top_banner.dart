@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../auth/presentation/widgets/user_profile_avatar_button.dart';
 import 'journal_view_mode_toggle.dart';
@@ -24,7 +25,7 @@ class JournalTopBanner extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            'Günlüğüm',
+            AppLocalizations.of(context).journalTitle,
             style: Theme.of(context).textTheme.displayLarge,
           ),
           Row(

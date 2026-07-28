@@ -861,6 +861,308 @@ class AppLocalizationsTr extends AppLocalizations {
       'Bağlantı sorunu nedeniyle film detayları tam yüklenemedi. Ancak bu içeriği hala günlüğünüze veya listelerinize ekleyebilirsiniz.';
 
   @override
+  String get journalTitle => 'Günlüğüm';
+
+  @override
+  String get journalTabDiary => 'Günlük';
+
+  @override
+  String get journalTabLists => 'Listeler';
+
+  @override
+  String get journalTabInsights => 'Analiz';
+
+  @override
+  String get journalSearchHint => 'Film, yönetmen, not, mekan...';
+
+  @override
+  String get journalFilterAll => 'Tümü';
+
+  @override
+  String get journalFilterFavorites => 'Favoriler';
+
+  @override
+  String get journalFilterCinema => 'Sinemada';
+
+  @override
+  String get journalFilterWithNotes => 'Notlu Olanlar';
+
+  @override
+  String get journalStatThisMonth => 'Bu Ay';
+
+  @override
+  String get journalStatAvgRating => 'Ort. Puan';
+
+  @override
+  String get journalStatFavoriteGenre => 'Favori Tür';
+
+  @override
+  String get journalStatTotalTime => 'Toplam Süre';
+
+  @override
+  String get journalStatUndetermined => 'Belirsiz';
+
+  @override
+  String get journalEmptyTitle => 'Kayıt Bulunamadı';
+
+  @override
+  String get journalEmptyFiltered =>
+      'Arama kriterlerinize veya filtrelere uyan bir günlük kaydı bulunmamaktadır.';
+
+  @override
+  String get journalEmptyNoRecords =>
+      'Günlüğünüz henüz boş. Keşfet sekmesinden yeni izleme kayıtları ekleyebilirsiniz.';
+
+  @override
+  String get journalLoadFailed => 'Günlük yüklenemedi. Lütfen tekrar deneyin.';
+
+  @override
+  String get journalReorderFailed =>
+      'Sıralama kaydedilemedi. Lütfen tekrar deneyin.';
+
+  @override
+  String get journalColumnRank => 'Sıra';
+
+  @override
+  String get journalColumnTitle => 'Film Adı';
+
+  @override
+  String get journalColumnWatchDate => 'İzleme Tarihi';
+
+  @override
+  String get journalColumnWatch => 'İzleme';
+
+  @override
+  String get journalColumnWatchOrder => 'İzleme Sırası';
+
+  @override
+  String get collectionsTitle => 'Koleksiyonlarım';
+
+  @override
+  String get collectionsEmptyTitle => 'Hiç Koleksiyonunuz Yok';
+
+  @override
+  String get collectionsCreate => 'Koleksiyon Oluştur';
+
+  @override
+  String get collectionsLoadFailed => 'Koleksiyonlar yüklenemedi.';
+
+  @override
+  String get collectionAddTo => 'Koleksiyona Ekle';
+
+  @override
+  String get collectionNewList => 'Yeni Liste';
+
+  @override
+  String get collectionNoneYet => 'Hiç koleksiyonunuz yok.';
+
+  @override
+  String get collectionNoneYetHint =>
+      'Eklemek için sağ üstteki \"+ Yeni Liste\" butonuna basın.';
+
+  @override
+  String get collectionUpdateFailed => 'Liste güncellenemedi, tekrar deneyin.';
+
+  @override
+  String get commonOk => 'Tamam';
+
+  @override
+  String get collectionEditTitle => 'Koleksiyonu Düzenle';
+
+  @override
+  String get collectionCreateTitle => 'Yeni Koleksiyon Oluştur';
+
+  @override
+  String get collectionEditExplain =>
+      'Koleksiyonunuzun adı, açıklaması ve maraton tarihini güncelleyin.';
+
+  @override
+  String get collectionCreateExplain =>
+      'Film maratonlarınızı takip etmek veya tematik listeler oluşturmak için bilgileri girin.';
+
+  @override
+  String get collectionNameLabel => 'Koleksiyon Adı';
+
+  @override
+  String get collectionNameHint => 'Örn: Marvel Maratonu, Başyapıtlar...';
+
+  @override
+  String get collectionDescriptionLabel => 'Açıklama (İsteğe Bağlı)';
+
+  @override
+  String get collectionDescriptionHint =>
+      'Koleksiyonunuza dair kısa bir açıklama yazın...';
+
+  @override
+  String get collectionTargetDateLabel => 'Maraton Hedef Tarihi';
+
+  @override
+  String get collectionTargetDatePick => 'Hedef Tarih Seçin (İsteğe Bağlı)';
+
+  @override
+  String get commonCreate => 'Oluştur';
+
+  @override
+  String get collectionEmptyTitle => 'Bu Koleksiyon Boş';
+
+  @override
+  String get collectionEmptyHint =>
+      'Keşfet sekmesinden filmler arayarak veya detay sayfalarından bu koleksiyona filmler ekleyebilirsiniz.';
+
+  @override
+  String get collectionRemovedMovie => 'Film koleksiyondan çıkarıldı.';
+
+  @override
+  String get collectionDeleteTitle => 'Koleksiyonu Sil?';
+
+  @override
+  String get collectionShared => 'Toplulukla paylaşılıyor';
+
+  @override
+  String get collectionStopSharing => 'Paylaşımı Durdur';
+
+  @override
+  String get collectionStopSharingFailed =>
+      'Paylaşım durdurulamadı, tekrar deneyin.';
+
+  @override
+  String get collectionReorderFailed =>
+      'Sıralama kaydedilemedi, tekrar deneyin.';
+
+  @override
+  String get marathonExpired => 'Süre Doldu! ⚠️';
+
+  @override
+  String marathonDaysLeft(int days) {
+    return 'Hedefe ulaşmak için $days gün kaldı.';
+  }
+
+  @override
+  String get marathonCompleted => 'Tebrikler, maratonu tamamladınız! 🎉';
+
+  @override
+  String marathonRemaining(int count) {
+    return 'Kalan: $count film.';
+  }
+
+  @override
+  String recordMood(String mood) {
+    return 'Ruh Hali: $mood';
+  }
+
+  @override
+  String get recordWatchDate => 'İzleme Tarihi';
+
+  @override
+  String get recordEpisodesWatched => 'İzlenen Bölüm Sayısı';
+
+  @override
+  String get recordEpisodeCount => 'Bölüm Sayısı';
+
+  @override
+  String get recordEpisodeCountHint => 'Kaç bölüm izlendi?';
+
+  @override
+  String get recordWatchPlace => 'İzleme Mekanı';
+
+  @override
+  String get recordCompanions => 'Eşlik Edenler';
+
+  @override
+  String get recordVisibilityFailed => 'Paylaşım durumu güncellenemedi.';
+
+  @override
+  String get recordMyRank => 'Favori Sıram: ';
+
+  @override
+  String get recordRemoveRank => 'Sıradan Çıkar';
+
+  @override
+  String get recordMyNotes => 'Kişisel Notlarım:';
+
+  @override
+  String get recordNoNotes => 'Kayıt eklenirken not yazılmamış.';
+
+  @override
+  String get recordDeleteConfirmTitle => 'Emin misiniz?';
+
+  @override
+  String get recordDeleteConfirmBody => 'Bu izleme kaydı silinecek.';
+
+  @override
+  String get recordDeleteFailed => 'Kayıt silinemedi. Lütfen tekrar deneyin.';
+
+  @override
+  String get recordDelete => 'Kaydı Sil';
+
+  @override
+  String recordEpisodesCount(int count) {
+    return '$count Bölüm';
+  }
+
+  @override
+  String recordYearDirector(String year, String director) {
+    return '$year • $director';
+  }
+
+  @override
+  String get yearUnknown => 'Bilinmeyen Yıl';
+
+  @override
+  String get directorMissing => 'Yönetmen Yok';
+
+  @override
+  String watchNumber(int number) {
+    return '$number. İzleme';
+  }
+
+  @override
+  String journalMoviesCount(int count) {
+    return '$count Film';
+  }
+
+  @override
+  String durationDays(int days) {
+    return '${days}g';
+  }
+
+  @override
+  String durationHours(int hours) {
+    return '${hours}s';
+  }
+
+  @override
+  String durationMinutes(int minutes) {
+    return '${minutes}dk';
+  }
+
+  @override
+  String collectionTotalWatched(int total, int watched) {
+    return '$total Film • $watched İzlenen';
+  }
+
+  @override
+  String collectionProgressPercent(int percent) {
+    return '%$percent İzlendi';
+  }
+
+  @override
+  String get collectionsEmptyHint =>
+      'Kendinize özel film listeleri oluşturarak (Örn: En İyi Nolan Filmleri, İzlenecek Animeler) sinema keyfinizi kişiselleştirebilirsiniz.';
+
+  @override
+  String get collectionDeleteConfirm =>
+      'Bu koleksiyonu silmek istediğinize emin misiniz? İçindeki filmler ve sıralamanız tamamen silinecektir. (Veritabanındaki filmleriniz kaybolmaz).';
+
+  @override
+  String get marathonTitle => '🏁 Maraton Mücadelesi';
+
+  @override
+  String journalTotalTimeSpent(int hours, int minutes) {
+    return 'Bu listedeki filmleri izlemek için toplam $hours Saat $minutes Dakika harcadınız.';
+  }
+
+  @override
   String addRecordSuccess(String title) {
     return '$title günlüğünüze başarıyla eklendi!';
   }

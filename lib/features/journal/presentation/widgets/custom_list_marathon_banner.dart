@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
+import '../../../../core/l10n/date_text.dart';
 import '../../../../core/theme/app_theme.dart';
 
 // "Maraton Mücadelesi" banner shown when the collection has a targetDate
@@ -53,7 +54,7 @@ class CustomListMarathonBanner extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      '🏁 Maraton Mücadelesi',
+                      AppLocalizations.of(context).marathonTitle,
                       style: GoogleFonts.outfit(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
@@ -61,7 +62,7 @@ class CustomListMarathonBanner extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      DateFormat('dd.MM.yyyy').format(targetDate),
+                      formatShortDate(context, targetDate),
                       style: GoogleFonts.inter(
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
@@ -73,8 +74,8 @@ class CustomListMarathonBanner extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   targetDate.isBefore(DateTime.now())
-                      ? 'Süre Doldu! ⚠️'
-                      : 'Hedefe ulaşmak için ${targetDate.difference(DateTime.now()).inDays + 1} gün kaldı.',
+                      ? AppLocalizations.of(context).marathonExpired
+                      : AppLocalizations.of(context).marathonDaysLeft(targetDate.difference(DateTime.now()).inDays + 1),
                   style: GoogleFonts.inter(
                     fontSize: 11,
                     color: Colors.white70,
@@ -82,7 +83,7 @@ class CustomListMarathonBanner extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  progress == 1.0 ? 'Tebrikler, maratonu tamamladınız! 🎉' : 'Kalan: $remainingCount film.',
+                  progress == 1.0 ? AppLocalizations.of(context).marathonCompleted : AppLocalizations.of(context).marathonRemaining(remainingCount),
                   style: GoogleFonts.inter(
                     fontSize: 9.5,
                     fontWeight: FontWeight.w600,

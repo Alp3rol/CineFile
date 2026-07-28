@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -61,7 +62,7 @@ class AddToListSheet extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Koleksiyona Ekle',
+                    AppLocalizations.of(context).collectionAddTo,
                     style: GoogleFonts.outfit(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -83,7 +84,7 @@ class AddToListSheet extends ConsumerWidget {
               TextButton.icon(
                 icon: const Icon(Icons.add_rounded, size: 16, color: AppTheme.accentColor),
                 label: Text(
-                  'Yeni Liste',
+                  AppLocalizations.of(context).collectionNewList,
                   style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.accentColor),
                 ),
                 onPressed: () => _showCreateListDialog(context, ref),
@@ -97,7 +98,7 @@ class AddToListSheet extends ConsumerWidget {
           // Lists items Grid/ListView
           listsAsync.when(
             loading: () => const Center(child: Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator())),
-            error: (err, _) => Center(child: Text('Hata: $err', style: const TextStyle(color: Colors.white))),
+            error: (err, _) => Center(child: Text(AppLocalizations.of(context).collectionsLoadFailed, style: const TextStyle(color: Colors.white))),
             data: (lists) {
               if (lists.isEmpty) {
                 return _buildEmptyState(context, ref);
@@ -140,7 +141,7 @@ class AddToListSheet extends ConsumerWidget {
                         } catch (_) {
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Liste güncellenemedi, tekrar deneyin.')),
+                              SnackBar(content: Text(AppLocalizations.of(context).collectionUpdateFailed)),
                             );
                           }
                         }
@@ -158,7 +159,7 @@ class AddToListSheet extends ConsumerWidget {
             child: TextButton(
               onPressed: () => Navigator.pop(context),
               child: Text(
-                'Tamam',
+                AppLocalizations.of(context).commonOk,
                 style: GoogleFonts.outfit(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
@@ -187,12 +188,12 @@ class AddToListSheet extends ConsumerWidget {
         child: Column(
           children: [
             Text(
-              'Hiç koleksiyonunuz yok.',
+              AppLocalizations.of(context).collectionNoneYet,
               style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary),
             ),
             const SizedBox(height: 8),
             Text(
-              'Eklemek için sağ üstteki "+ Yeni Liste" butonuna basın.',
+              AppLocalizations.of(context).collectionNoneYetHint,
               style: GoogleFonts.inter(fontSize: 10, color: Colors.white54),
             ),
           ],

@@ -16,6 +16,7 @@ import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'support/localized_app.dart';
 import 'package:cinefile/features/auth/controllers/auth_controller.dart';
 import 'package:cinefile/features/journal/presentation/widgets/journal_table_list.dart';
 import 'package:cinefile/core/database/database_provider.dart';
@@ -78,7 +79,8 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: MaterialApp(
+        child: LocalizedTestApp(
+          locale: const Locale('tr'),
           home: Scaffold(
             body: Consumer(builder: (context, ref, _) {
               final items = ref.watch(allWatchRecordsProvider).value ?? const [];
