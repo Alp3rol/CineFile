@@ -8,11 +8,11 @@ import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:filmdizi/core/database/app_database.dart';
-import 'package:filmdizi/core/database/database_provider.dart';
-import 'package:filmdizi/core/database/movie_repository.dart';
-import 'package:filmdizi/features/auth/controllers/auth_controller.dart';
-import 'package:filmdizi/features/community/presentation/widgets/share_collection_picker_sheet.dart';
+import 'package:cinefile/core/database/app_database.dart';
+import 'package:cinefile/core/database/database_provider.dart';
+import 'package:cinefile/core/database/movie_repository.dart';
+import 'package:cinefile/features/auth/controllers/auth_controller.dart';
+import 'package:cinefile/features/community/presentation/widgets/share_collection_picker_sheet.dart';
 
 void main() {
   testWidgets('picking a collection and submitting a caption shares it live and creates a post', (tester) async {

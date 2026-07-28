@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:filmdizi/core/database/app_database.dart';
-import 'package:filmdizi/core/database/database_provider.dart';
-import 'package:filmdizi/features/journal/presentation/journal_screen.dart';
+import 'package:cinefile/core/database/app_database.dart';
+import 'package:cinefile/core/database/database_provider.dart';
+import 'package:cinefile/features/journal/presentation/journal_screen.dart';
 
 WatchRecordWithMovie _record(int id, {String watchPlace = 'Sinema', DateTime? watchDate}) {
   final movie = Movie(

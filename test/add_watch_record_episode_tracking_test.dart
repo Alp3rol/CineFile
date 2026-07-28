@@ -17,13 +17,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:filmdizi/core/database/app_database.dart';
-import 'package:filmdizi/core/database/database_provider.dart';
-import 'package:filmdizi/features/auth/controllers/auth_controller.dart';
-import 'package:filmdizi/features/journal/models/diary_log_model.dart';
-import 'package:filmdizi/features/movie_detail/presentation/add_watch_record_sheet.dart';
-import 'package:filmdizi/features/journal/presentation/widgets/journal_table_list.dart';
-import 'package:filmdizi/features/journal/presentation/widgets/journal_record_list.dart';
+import 'package:cinefile/core/database/app_database.dart';
+import 'package:cinefile/core/database/database_provider.dart';
+import 'package:cinefile/features/auth/controllers/auth_controller.dart';
+import 'package:cinefile/features/journal/models/diary_log_model.dart';
+import 'package:cinefile/features/movie_detail/presentation/add_watch_record_sheet.dart';
+import 'package:cinefile/features/journal/presentation/widgets/journal_table_list.dart';
+import 'package:cinefile/features/journal/presentation/widgets/journal_record_list.dart';
 
 const _tvMovieData = {
   'id': 900,

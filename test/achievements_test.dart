@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:filmdizi/features/insights/domain/achievement_models.dart';
+import 'package:cinefile/features/insights/domain/achievement_models.dart';
 
 void main() {
   group('Tiered Achievement Models & Enum Tests', () {

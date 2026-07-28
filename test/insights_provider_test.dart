@@ -2,9 +2,9 @@
 // the shared _countCommaSeparatedField helper in insights_provider.dart.
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:filmdizi/core/database/app_database.dart';
-import 'package:filmdizi/core/database/database_provider.dart';
-import 'package:filmdizi/features/insights/presentation/insights_provider.dart';
+import 'package:cinefile/core/database/app_database.dart';
+import 'package:cinefile/core/database/database_provider.dart';
+import 'package:cinefile/features/insights/presentation/insights_provider.dart';
 
 WatchRecordWithMovie _record({
   required int id,

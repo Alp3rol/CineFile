@@ -1,10 +1,10 @@
 // Unit tests for the clustered map builder (v2.0): title↔title links, isolated
 // titles retained, deterministic clustering, cluster labels, insights.
 import 'package:flutter_test/flutter_test.dart';
-import 'package:filmdizi/core/database/app_database.dart';
-import 'package:filmdizi/features/relationship_graph/domain/graph_models.dart';
-import 'package:filmdizi/features/relationship_graph/domain/graph_overrides.dart';
-import 'package:filmdizi/features/relationship_graph/domain/map_graph_builder.dart';
+import 'package:cinefile/core/database/app_database.dart';
+import 'package:cinefile/features/relationship_graph/domain/graph_models.dart';
+import 'package:cinefile/features/relationship_graph/domain/graph_overrides.dart';
+import 'package:cinefile/features/relationship_graph/domain/map_graph_builder.dart';
 
 Movie _mv(int id, String title, {bool isTv = false, String? genres}) => Movie(
       tmdbId: id,

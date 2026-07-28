@@ -4,7 +4,7 @@
 // a watch date from years ago was "nearly impossible").
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:filmdizi/core/widgets/premium_date_picker.dart';
+import 'package:cinefile/core/widgets/premium_date_picker.dart';
 
 void main() {
   testWidgets('tapping the header opens a year grid, and picking a year jumps the calendar there', (tester) async {

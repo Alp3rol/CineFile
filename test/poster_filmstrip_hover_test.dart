@@ -11,12 +11,12 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:filmdizi/features/auth/controllers/auth_controller.dart';
-import 'package:filmdizi/features/community/models/community_post_model.dart';
-import 'package:filmdizi/features/community/presentation/community_feed_provider.dart';
-import 'package:filmdizi/features/community/presentation/community_feed_screen.dart';
-import 'package:filmdizi/features/community/presentation/user_public_diary_screen.dart';
-import 'package:filmdizi/core/database/database_provider.dart';
+import 'package:cinefile/features/auth/controllers/auth_controller.dart';
+import 'package:cinefile/features/community/models/community_post_model.dart';
+import 'package:cinefile/features/community/presentation/community_feed_provider.dart';
+import 'package:cinefile/features/community/presentation/community_feed_screen.dart';
+import 'package:cinefile/features/community/presentation/user_public_diary_screen.dart';
+import 'package:cinefile/core/database/database_provider.dart';
 import 'support/network_image_mock.dart';
 
 CommunityPost _diarySnapshotPost() {

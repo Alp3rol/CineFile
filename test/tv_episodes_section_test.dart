@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:filmdizi/core/database/app_database.dart';
-import 'package:filmdizi/features/auth/controllers/auth_controller.dart';
-import 'package:filmdizi/features/movie_detail/presentation/widgets/tv_episodes_section.dart';
-import 'package:filmdizi/features/movie_detail/presentation/tv_season_provider.dart';
+import 'package:cinefile/core/database/app_database.dart';
+import 'package:cinefile/features/auth/controllers/auth_controller.dart';
+import 'package:cinefile/features/movie_detail/presentation/widgets/tv_episodes_section.dart';
+import 'package:cinefile/features/movie_detail/presentation/tv_season_provider.dart';
 
 const _seasonsData = [
   {

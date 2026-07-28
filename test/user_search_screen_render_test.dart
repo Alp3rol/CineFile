@@ -8,8 +8,8 @@ import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:filmdizi/features/auth/controllers/auth_controller.dart';
-import 'package:filmdizi/features/community/presentation/user_search_screen.dart';
+import 'package:cinefile/features/auth/controllers/auth_controller.dart';
+import 'package:cinefile/features/community/presentation/user_search_screen.dart';
 import 'support/network_image_mock.dart';
 
 Future<void> _seedUsers(FakeFirebaseFirestore firestore) async {

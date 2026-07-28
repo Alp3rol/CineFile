@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:filmdizi/features/relationship_graph/domain/cine_twin_calculator.dart';
+import 'package:cinefile/features/relationship_graph/domain/cine_twin_calculator.dart';
 
 void main() {
   group('CineTwinCalculator Tests', () {

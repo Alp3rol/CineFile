@@ -5,10 +5,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:filmdizi/core/database/app_database.dart';
-import 'package:filmdizi/core/database/database_provider.dart';
-import 'package:filmdizi/features/insights/presentation/insights_provider.dart';
-import 'package:filmdizi/features/insights/presentation/widgets/contribution_heatmap.dart';
+import 'package:cinefile/core/database/app_database.dart';
+import 'package:cinefile/core/database/database_provider.dart';
+import 'package:cinefile/features/insights/presentation/insights_provider.dart';
+import 'package:cinefile/features/insights/presentation/widgets/contribution_heatmap.dart';
 
 Movie _movie(int id) {
   return Movie(tmdbId: id, title: 'Movie $id', isTv: false, createdAt: DateTime.now());

@@ -12,10 +12,10 @@ import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:filmdizi/features/auth/controllers/auth_controller.dart';
-import 'package:filmdizi/features/community/models/community_post_model.dart';
-import 'package:filmdizi/features/community/presentation/user_public_diary_screen.dart';
-import 'package:filmdizi/features/community/presentation/widgets/share_movie_picker_sheet.dart';
+import 'package:cinefile/features/auth/controllers/auth_controller.dart';
+import 'package:cinefile/features/community/models/community_post_model.dart';
+import 'package:cinefile/features/community/presentation/user_public_diary_screen.dart';
+import 'package:cinefile/features/community/presentation/widgets/share_movie_picker_sheet.dart';
 
 void main() {
   testWidgets('a diary_snapshot post does not show a movie added to the diary after it was published', (tester) async {

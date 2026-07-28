@@ -7,10 +7,10 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:filmdizi/core/network/tmdb_service.dart';
-import 'package:filmdizi/features/search/presentation/search_provider.dart';
-import 'package:filmdizi/features/search/presentation/trending_provider.dart';
-import 'package:filmdizi/features/search/presentation/widgets/search_results_view.dart';
+import 'package:cinefile/core/network/tmdb_service.dart';
+import 'package:cinefile/features/search/presentation/search_provider.dart';
+import 'package:cinefile/features/search/presentation/trending_provider.dart';
+import 'package:cinefile/features/search/presentation/widgets/search_results_view.dart';
 
 Map<String, dynamic> _movie(int id, String title) => {
       'id': id,

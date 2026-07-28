@@ -10,8 +10,8 @@ import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:filmdizi/features/auth/controllers/auth_controller.dart';
-import 'package:filmdizi/features/community/presentation/widgets/share_movie_picker_sheet.dart';
+import 'package:cinefile/features/auth/controllers/auth_controller.dart';
+import 'package:cinefile/features/community/presentation/widgets/share_movie_picker_sheet.dart';
 
 Future<void> _seedLogs(FakeFirebaseFirestore firestore) async {
   await firestore.collection('logs').doc('log1').set({

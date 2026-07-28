@@ -3,13 +3,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:filmdizi/core/database/app_database.dart';
-import 'package:filmdizi/core/database/database_provider.dart';
-import 'package:filmdizi/features/relationship_graph/domain/graph_models.dart';
-import 'package:filmdizi/features/relationship_graph/domain/graph_overrides.dart';
-import 'package:filmdizi/features/relationship_graph/presentation/graph_overrides_provider.dart';
-import 'package:filmdizi/features/relationship_graph/presentation/relationship_graph_provider.dart';
-import 'package:filmdizi/features/relationship_graph/presentation/relationship_graph_screen.dart';
+import 'package:cinefile/core/database/app_database.dart';
+import 'package:cinefile/core/database/database_provider.dart';
+import 'package:cinefile/features/relationship_graph/domain/graph_models.dart';
+import 'package:cinefile/features/relationship_graph/domain/graph_overrides.dart';
+import 'package:cinefile/features/relationship_graph/presentation/graph_overrides_provider.dart';
+import 'package:cinefile/features/relationship_graph/presentation/relationship_graph_provider.dart';
+import 'package:cinefile/features/relationship_graph/presentation/relationship_graph_screen.dart';
 
 WatchRecordWithMovie _rec(int id, String title, {String? actors}) {
   final movie = Movie(

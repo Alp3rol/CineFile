@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:filmdizi/features/relationship_graph/domain/graph_models.dart';
-import 'package:filmdizi/features/relationship_graph/domain/graph_path_finder.dart';
+import 'package:cinefile/features/relationship_graph/domain/graph_models.dart';
+import 'package:cinefile/features/relationship_graph/domain/graph_path_finder.dart';
 
 void main() {
   group('findShortestPath BFS', () {

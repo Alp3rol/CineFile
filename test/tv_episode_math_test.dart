@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:filmdizi/core/utils/tv_episode_math.dart';
+import 'package:cinefile/core/utils/tv_episode_math.dart';
 
 const _seasons = [
   {'season_number': 0, 'episode_count': 3, 'name': 'Özel Bölümler'}, // Specials, excluded

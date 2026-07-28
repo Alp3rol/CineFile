@@ -4,9 +4,9 @@
 // which diary entries the Settings cleanup tool will delete, so it needs
 // direct coverage.
 import 'package:flutter_test/flutter_test.dart';
-import 'package:filmdizi/core/database/app_database.dart';
-import 'package:filmdizi/core/database/database_provider.dart';
-import 'package:filmdizi/core/database/duplicate_cleanup.dart';
+import 'package:cinefile/core/database/app_database.dart';
+import 'package:cinefile/core/database/database_provider.dart';
+import 'package:cinefile/core/database/duplicate_cleanup.dart';
 
 Movie _movie(int id, String title) {
   return Movie(tmdbId: id, title: title, isTv: true, createdAt: DateTime(2026, 1, id));

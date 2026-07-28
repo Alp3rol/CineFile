@@ -16,9 +16,9 @@ import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:filmdizi/features/auth/controllers/auth_controller.dart';
-import 'package:filmdizi/features/journal/presentation/widgets/journal_table_list.dart';
-import 'package:filmdizi/core/database/database_provider.dart';
+import 'package:cinefile/features/auth/controllers/auth_controller.dart';
+import 'package:cinefile/features/journal/presentation/widgets/journal_table_list.dart';
+import 'package:cinefile/core/database/database_provider.dart';
 
 void main() {
   late FakeFirebaseFirestore firestore;

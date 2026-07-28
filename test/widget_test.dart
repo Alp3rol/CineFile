@@ -7,9 +7,9 @@ import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:filmdizi/features/auth/controllers/auth_controller.dart';
-import 'package:filmdizi/features/recommendations/presentation/recommendations_provider.dart';
-import 'package:filmdizi/main.dart';
+import 'package:cinefile/features/auth/controllers/auth_controller.dart';
+import 'package:cinefile/features/recommendations/presentation/recommendations_provider.dart';
+import 'package:cinefile/main.dart';
 
 void main() {
   testWidgets('App boots and shows bottom navigation tabs', (WidgetTester tester) async {

@@ -13,6 +13,9 @@ import 'package:drift/web.dart';
 ///
 /// `logStatements` was previously left on here, which spammed the release
 /// console with every query.
+///
+/// The store name keeps the old `filmdizi` project name for the same reason
+/// the native path does — see connection_native.dart.
 QueryExecutor createConnection() {
   return WebDatabase('filmdizi_journal');
 }
