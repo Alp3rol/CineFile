@@ -1,0 +1,12 @@
+{
+  "@@locale": "en",
+
+  "appTitle": "CineFile",
+  "firebaseInitErrorTitle": "Starting Connection",
+  "firebaseInitErrorMessage": "Connecting to Firebase services. Please try again.",
+  "commonRetry": "Try Again",
+  "settingsLanguageLabel": "Language",
+  "settingsLanguageSystem": "System",
+  "settingsLanguageTitle": "Choose Language",
+  "commonCancel": "Cancel"
+}

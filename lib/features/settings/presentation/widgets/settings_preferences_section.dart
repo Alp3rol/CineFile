@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/services/notification_service.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../settings_provider.dart';
 import 'settings_section_header.dart';
 
@@ -75,8 +76,63 @@ class SettingsPreferencesSection extends ConsumerWidget {
     );
   }
 
+  /// Each language is named in itself ("Türkçe", not "Turkish") so a user who
+  /// opened the app in a language they can't read can still find their own.
+  /// Only "System" is translated, since it describes a behaviour rather than a
+  /// language.
+  static String _languageLabel(AppLocalizations l10n, Locale? locale) {
+    switch (locale?.languageCode) {
+      case 'tr':
+        return 'Türkçe';
+      case 'en':
+        return 'English';
+      default:
+        return l10n.settingsLanguageSystem;
+    }
+  }
+
+  Future<void> _showLanguagePicker(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
+    final current = ref.read(localeProvider);
+
+    // "System" is the null locale, and `showDialog` also completes with null
+    // when the user dismisses it — so results are popped wrapped in a
+    // single-element list. An unwrapped null then unambiguously means
+    // "dismissed, change nothing".
+    final options = <Locale?>[null, ...supportedLanguageCodes.map(Locale.new)];
+
+    final selection = await showDialog<List<Locale?>>(
+      context: context,
+      builder: (context) => SimpleDialog(
+        backgroundColor: AppTheme.surfaceColor,
+        title: Text(
+          l10n.settingsLanguageTitle,
+          style: GoogleFonts.outfit(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.white),
+        ),
+        children: [
+          for (final option in options)
+            ListTile(
+              onTap: () => Navigator.of(context).pop([option]),
+              title: Text(
+                _languageLabel(l10n, option),
+                style: GoogleFonts.inter(fontSize: 14, color: Colors.white),
+              ),
+              trailing: option?.languageCode == current?.languageCode
+                  ? const Icon(Icons.check_rounded, size: 20, color: AppTheme.accentColor)
+                  : null,
+            ),
+        ],
+      ),
+    );
+
+    if (selection == null) return;
+    await ref.read(localeProvider.notifier).setLocale(selection.single);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -120,13 +176,9 @@ class SettingsPreferencesSection extends ConsumerWidget {
               _divider(),
               _navRow(
                 icon: Icons.language_rounded,
-                label: 'Dil',
-                trailingText: 'Türkçe',
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Diğer diller yakında eklenecek.')),
-                  );
-                },
+                label: l10n.settingsLanguageLabel,
+                trailingText: _languageLabel(l10n, ref.watch(localeProvider)),
+                onTap: () => _showLanguagePicker(context, ref),
               ),
             ],
           ),

@@ -1,0 +1,23 @@
+# Localization codegen config (`flutter gen-l10n`, also run automatically by
+# `flutter run`/`build`/`test` because pubspec sets `flutter: generate: true`).
+#
+# Turkish is the template rather than English: it is the language every string
+# in this app was originally written in, so keeping it as the source of truth
+# means translations are reviewed against the wording the UI was designed for
+# instead of a round-trip through English.
+#
+# Output lands next to the .arb files (the default since the synthetic
+# `package:flutter_gen` was removed) and is committed, matching how the other
+# generated code in this repo (app_database.g.dart) is handled.
+arb-dir: lib/l10n
+template-arb-file: app_tr.arb
+output-localization-file: app_localizations.dart
+output-class: AppLocalizations
+
+# Makes `AppLocalizations.of(context)` non-nullable — every call site is under
+# a MaterialApp that declares the delegate, so the null case is unreachable.
+nullable-getter: false
+
+# CI fails when this file is non-empty, so a string can never ship translated
+# in one language only.
+untranslated-messages-file: l10n_missing.json

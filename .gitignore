@@ -52,6 +52,12 @@ app.*.map.json
 # Private TMDb API Key configuration
 lib/core/constants/api_key.dart
 
+# Report written by `flutter gen-l10n` listing keys present in the template
+# .arb but missing from a translation. Regenerated on every build and checked
+# by CI — never committed. The generated app_localizations*.dart files next to
+# the .arb files ARE committed, like the other generated code in this repo.
+l10n_missing.json
+
 # Raw app-icon/splash design source dump (see assets/icon/ for the
 # actually-used, already-cropped derived assets committed to the repo).
 /CineFileLOGO/

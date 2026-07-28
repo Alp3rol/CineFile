@@ -30,6 +30,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   flutter_web_plugins:
     sdk: flutter
 
@@ -45,7 +47,10 @@ dependencies:
   dio_cache_interceptor: ^3.5.0
   google_fonts: ^8.1.0
   cached_network_image: ^3.4.1
-  intl: ^0.20.3
+  # Loosened from ^0.20.3: flutter_localizations pins intl to exactly the
+  # version bundled with the SDK (0.20.2 as of Flutter 3.44), so anything
+  # stricter makes dependency resolution fail.
+  intl: ^0.20.2
   fl_chart: ^1.2.0
   flutter_secure_storage: ^10.3.1
   share_plus: ^13.2.0
@@ -129,6 +134,10 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  # Runs `flutter gen-l10n` (configured by l10n.yaml) as part of run/build/test
+  # so the generated AppLocalizations always matches the .arb files.
+  generate: true
 
   assets:
     - assets/images/tmdb_logo.png

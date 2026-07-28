@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' show Locale;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -149,6 +150,48 @@ class JournalViewModeNotifier extends _StoredPreferenceNotifier<bool> {
       : super(store, 'journal_table_view', false);
 
   Future<void> setTableView(bool isTableView) => _save(isTableView);
+}
+
+/// The language the UI is rendered in, as a bare language code (`'tr'`, `'en'`)
+/// or `null` to follow the device's own setting.
+///
+/// `null` is both the default and a value the user can explicitly choose, so
+/// "System" survives a restart the same way an explicit language does: writing
+/// `null` stores a null under the key rather than removing it.
+final localeProvider = StateNotifierProvider<LocaleNotifier, Locale?>((ref) {
+  return LocaleNotifier(ref.watch(appSettingsStoreProvider));
+});
+
+/// Every language the app ships translations for. Order is the order the
+/// picker lists them in; [supportedLocales] is derived from this so adding a
+/// language means adding one entry here plus one `.arb` file.
+const supportedLanguageCodes = <String>['tr', 'en'];
+
+class LocaleNotifier extends StateNotifier<Locale?> {
+  LocaleNotifier(this._store) : super(null) {
+    unawaited(_load());
+  }
+
+  final AppSettingsStore _store;
+
+  static const _key = 'app_language';
+
+  /// Not a [_StoredPreferenceNotifier] subclass: that base class treats a
+  /// stored `null` as "nothing saved, keep the default", which is exactly the
+  /// value this preference needs to be able to persist.
+  Future<void> _load() async {
+    await _store.ensureLoaded();
+    final code = _store.read<String>(_key);
+    if (code != null && supportedLanguageCodes.contains(code)) {
+      state = Locale(code);
+    }
+  }
+
+  /// [locale] of `null` means "follow the system language".
+  Future<void> setLocale(Locale? locale) async {
+    state = locale;
+    await _store.write(_key, locale?.languageCode);
+  }
 }
 
 final dynamicBackgroundEnabledProvider =

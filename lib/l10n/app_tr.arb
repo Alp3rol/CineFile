@@ -1,0 +1,43 @@
+{
+  "@@locale": "tr",
+
+  "appTitle": "CineFile",
+  "@appTitle": {
+    "description": "The application name, shown in the OS task switcher."
+  },
+
+  "firebaseInitErrorTitle": "Bağlantı Başlatılıyor",
+  "@firebaseInitErrorTitle": {
+    "description": "Title of the screen shown when Firebase fails to initialize at startup."
+  },
+
+  "firebaseInitErrorMessage": "Firebase servislerine erişim sağlanıyor. Lütfen tekrar deneyin.",
+  "@firebaseInitErrorMessage": {
+    "description": "Body text of the Firebase initialization failure screen."
+  },
+
+  "commonRetry": "Tekrar Deneyin",
+  "@commonRetry": {
+    "description": "Generic retry button label."
+  },
+
+  "settingsLanguageLabel": "Dil",
+  "@settingsLanguageLabel": {
+    "description": "Label of the language row in Settings > Preferences."
+  },
+
+  "settingsLanguageSystem": "Sistem",
+  "@settingsLanguageSystem": {
+    "description": "Language option that follows the device's own language setting."
+  },
+
+  "settingsLanguageTitle": "Dil Seçin",
+  "@settingsLanguageTitle": {
+    "description": "Title of the language picker dialog."
+  },
+
+  "commonCancel": "İptal",
+  "@commonCancel": {
+    "description": "Generic cancel button label."
+  }
+}
