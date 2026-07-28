@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -17,7 +18,7 @@ class SettingsBackupSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SettingsSectionHeader(title: 'Veri Yönetimi & Yedekleme'),
+        SettingsSectionHeader(title: AppLocalizations.of(context).settingsDataSection),
         const SizedBox(height: 10),
         GlassContainer(
           padding: const EdgeInsets.all(16),
@@ -27,7 +28,7 @@ class SettingsBackupSection extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Günlük Yedekleme',
+                AppLocalizations.of(context).settingsBackupTitle,
                 style: GoogleFonts.inter(
                   fontSize: 13,
                   fontWeight: FontWeight.bold,
@@ -36,7 +37,7 @@ class SettingsBackupSection extends ConsumerWidget {
               ),
               const SizedBox(height: 6),
               Text(
-                'Tüm izleme geçmişinizi, koleksiyonlarınızı, favorilerinizi ve notlarınızı JSON formatında yedekleyebilir ve istediğiniz cihazda geri yükleyebilirsiniz. Geri yükleme mevcut verilerin üzerine yazar.',
+                AppLocalizations.of(context).settingsBackupDescription,
                 style: GoogleFonts.inter(
                   fontSize: 11,
                   color: AppTheme.textSecondary,
@@ -59,7 +60,7 @@ class SettingsBackupSection extends ConsumerWidget {
                       ),
                       icon: const Icon(Icons.download_rounded, size: 18),
                       label: Text(
-                        'Dışa Aktar',
+                        AppLocalizations.of(context).settingsExport,
                         style: GoogleFonts.outfit(
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
@@ -83,7 +84,7 @@ class SettingsBackupSection extends ConsumerWidget {
                       ),
                       icon: const Icon(Icons.upload_rounded, size: 18),
                       label: Text(
-                        'Geri Yükle',
+                        AppLocalizations.of(context).settingsRestore,
                         style: GoogleFonts.outfit(
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
@@ -108,7 +109,7 @@ class SettingsBackupSection extends ConsumerWidget {
                   ),
                   icon: const Icon(Icons.cleaning_services_outlined, size: 18),
                   label: Text(
-                    'Mükerrer Kayıtları Temizle',
+                    AppLocalizations.of(context).settingsCleanDuplicates,
                     style: GoogleFonts.outfit(
                       fontSize: 13,
                       fontWeight: FontWeight.bold,

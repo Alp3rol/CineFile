@@ -17,11 +17,18 @@ class RecommendationItem {
     required this.reason,
   });
 
-  factory RecommendationItem.fromJson(Map<String, dynamic> json, {required String reason, bool? isTvOverride}) {
+  /// [fallbackTitle] is supplied by the caller rather than defaulted here so
+  /// this data class stays free of user-facing text.
+  factory RecommendationItem.fromJson(
+    Map<String, dynamic> json, {
+    required String reason,
+    required String fallbackTitle,
+    bool? isTvOverride,
+  }) {
     final isTv = isTvOverride ?? (json['media_type'] == 'tv');
     return RecommendationItem(
       tmdbId: (json['id'] as num).toInt(),
-      title: (isTv ? (json['name'] ?? json['original_name']) : (json['title'] ?? json['original_title'])) as String? ?? 'Bilinmeyen Yapım',
+      title: (isTv ? (json['name'] ?? json['original_name']) : (json['title'] ?? json['original_title'])) as String? ?? fallbackTitle,
       posterPath: json['poster_path'] as String?,
       backdropPath: json['backdrop_path'] as String?,
       voteAverage: (json['vote_average'] as num?)?.toDouble() ?? 0.0,

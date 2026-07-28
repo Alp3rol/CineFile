@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -34,7 +35,7 @@ class SettingsScreen extends ConsumerWidget {
                     const SizedBox(width: 4),
                   ],
                   Text(
-                    'Ayarlar',
+                    AppLocalizations.of(context).settingsTitle,
                     style: Theme.of(context).textTheme.displayLarge,
                   ),
                   const Spacer(),
@@ -75,7 +76,7 @@ class SettingsScreen extends ConsumerWidget {
                         ),
                         icon: const Icon(Icons.logout_rounded, size: 20),
                         label: Text(
-                          'Çıkış Yap',
+                          AppLocalizations.of(context).profileSignOut,
                           style: GoogleFonts.outfit(
                             fontSize: 15,
                             fontWeight: FontWeight.bold,
@@ -86,19 +87,19 @@ class SettingsScreen extends ConsumerWidget {
                             context: context,
                             builder: (context) => AlertDialog(
                               backgroundColor: AppTheme.surfaceColor,
-                              title: const Text('Çıkış Yap', style: TextStyle(color: Colors.white)),
-                              content: const Text(
-                                'Hesabınızdan çıkış yapmak istediğinize emin misiniz?',
-                                style: TextStyle(color: Colors.white70),
+                              title: Text(AppLocalizations.of(context).profileSignOut, style: const TextStyle(color: Colors.white)),
+                              content: Text(
+                                AppLocalizations.of(context).profileSignOutConfirm,
+                                style: const TextStyle(color: Colors.white70),
                               ),
                               actions: [
                                 TextButton(
                                   onPressed: () => Navigator.of(context).pop(false),
-                                  child: const Text('İptal', style: TextStyle(color: Colors.white70)),
+                                  child: Text(AppLocalizations.of(context).commonCancel, style: const TextStyle(color: Colors.white70)),
                                 ),
                                 TextButton(
                                   onPressed: () => Navigator.of(context).pop(true),
-                                  child: const Text('Çıkış Yap', style: TextStyle(color: Colors.redAccent)),
+                                  child: Text(AppLocalizations.of(context).profileSignOut, style: const TextStyle(color: Colors.redAccent)),
                                 ),
                               ],
                             ),

@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/poster_grid.dart';
+import '../../../../core/network/tmdb_exception.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../search_provider.dart';
 import '../trending_provider.dart';
 
@@ -24,18 +26,25 @@ class SearchResultsView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+
     if (state.isLoading) {
       return const Center(
         child: CircularProgressIndicator(color: AppTheme.accentColor),
       );
     }
 
-    if (state.errorMessage != null) {
+    final failure = state.failure;
+    if (failure != null) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32),
           child: Text(
-            'Hata oluştu: ${state.errorMessage}',
+            switch (failure) {
+              TmdbFailure.network => l10n.searchErrorNetwork,
+              TmdbFailure.invalidApiKey => l10n.searchErrorInvalidApiKey,
+              TmdbFailure.unknown => l10n.searchErrorUnknown,
+            },
             style: GoogleFonts.inter(color: Colors.redAccent),
             textAlign: TextAlign.center,
           ),
@@ -50,7 +59,7 @@ class SearchResultsView extends ConsumerWidget {
       final timeWindow = ref.watch(discoverTimeWindowProvider);
       return trendingAsync.when(
         data: (items) {
-          if (items.isEmpty) return _buildStaticEmptyState();
+          if (items.isEmpty) return _buildStaticEmptyState(l10n);
 
           final mediaFilter = ref.watch(discoverMediaFilterProvider);
           final filtered = switch (mediaFilter) {
@@ -61,16 +70,16 @@ class SearchResultsView extends ConsumerWidget {
 
           return Column(
             children: [
-              _buildCategoryTimeRow(ref, category, timeWindow),
+              _buildCategoryTimeRow(l10n, ref, category, timeWindow),
               const SizedBox(height: 8),
-              _buildMediaFilterRow(ref, mediaFilter),
+              _buildMediaFilterRow(l10n, ref, mediaFilter),
               const SizedBox(height: 8),
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    _headingFor(category, timeWindow),
+                    _headingFor(l10n, category, timeWindow),
                     style: GoogleFonts.outfit(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -81,7 +90,7 @@ class SearchResultsView extends ConsumerWidget {
               ),
               Expanded(
                 child: filtered.isEmpty
-                    ? _buildFilteredEmptyState(mediaFilter)
+                    ? _buildFilteredEmptyState(l10n)
                     : PosterGrid(
                         items: filtered,
                         scrollController: scrollController,
@@ -93,7 +102,7 @@ class SearchResultsView extends ConsumerWidget {
         loading: () => const Center(
           child: CircularProgressIndicator(color: AppTheme.accentColor),
         ),
-        error: (e, st) => _buildStaticEmptyState(),
+        error: (e, st) => _buildStaticEmptyState(l10n),
       );
     }
 
@@ -109,7 +118,7 @@ class SearchResultsView extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              'Sonuç Bulunamadı',
+              l10n.searchNoResultsTitle,
               style: GoogleFonts.outfit(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -118,7 +127,7 @@ class SearchResultsView extends ConsumerWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              'Farklı bir kelime aramayı deneyin.',
+              l10n.searchNoResultsHint,
               style: GoogleFonts.inter(
                 fontSize: 13,
                 color: AppTheme.textSecondary,
@@ -136,14 +145,14 @@ class SearchResultsView extends ConsumerWidget {
     );
   }
 
-  String _headingFor(DiscoverCategory category, DiscoverTimeWindow timeWindow) {
+  String _headingFor(AppLocalizations l10n, DiscoverCategory category, DiscoverTimeWindow timeWindow) {
     switch (category) {
       case DiscoverCategory.trend:
-        return timeWindow == DiscoverTimeWindow.today ? 'Bugün Trend Film/Dizileri' : 'Bu Hafta Trend Film/Dizileri';
+        return timeWindow == DiscoverTimeWindow.today ? l10n.discoverHeadingTrendToday : l10n.discoverHeadingTrendThisWeek;
       case DiscoverCategory.popular:
-        return 'Popüler Film/Dizileri';
+        return l10n.discoverHeadingPopular;
       case DiscoverCategory.topRated:
-        return 'En Çok Oy Alan Film/Dizileri';
+        return l10n.discoverHeadingTopRated;
     }
   }
 
@@ -177,7 +186,7 @@ class SearchResultsView extends ConsumerWidget {
     return Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: chip);
   }
 
-  Widget _buildCategoryTimeRow(WidgetRef ref, DiscoverCategory category, DiscoverTimeWindow timeWindow) {
+  Widget _buildCategoryTimeRow(AppLocalizations l10n, WidgetRef ref, DiscoverCategory category, DiscoverTimeWindow timeWindow) {
     return SizedBox(
       height: 40,
       child: ListView(
@@ -185,7 +194,7 @@ class SearchResultsView extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         children: [
           _chipPadded(_chip(
-            label: 'Trend',
+            label: l10n.discoverCategoryTrend,
             isSelected: category == DiscoverCategory.trend,
             onSelected: (selected) {
               if (selected) ref.read(discoverCategoryProvider.notifier).state = DiscoverCategory.trend;
@@ -193,14 +202,14 @@ class SearchResultsView extends ConsumerWidget {
           )),
           if (category == DiscoverCategory.trend) ...[
             _chipPadded(_chip(
-              label: 'Bu Hafta',
+              label: l10n.discoverWindowThisWeek,
               isSelected: timeWindow == DiscoverTimeWindow.week,
               onSelected: (selected) {
                 if (selected) ref.read(discoverTimeWindowProvider.notifier).state = DiscoverTimeWindow.week;
               },
             )),
             _chipPadded(_chip(
-              label: 'Bugün',
+              label: l10n.discoverWindowToday,
               isSelected: timeWindow == DiscoverTimeWindow.today,
               onSelected: (selected) {
                 if (selected) ref.read(discoverTimeWindowProvider.notifier).state = DiscoverTimeWindow.today;
@@ -208,14 +217,14 @@ class SearchResultsView extends ConsumerWidget {
             )),
           ],
           _chipPadded(_chip(
-            label: 'Popüler',
+            label: l10n.discoverCategoryPopular,
             isSelected: category == DiscoverCategory.popular,
             onSelected: (selected) {
               if (selected) ref.read(discoverCategoryProvider.notifier).state = DiscoverCategory.popular;
             },
           )),
           _chipPadded(_chip(
-            label: 'En Çok Oy Alan',
+            label: l10n.discoverCategoryTopRated,
             isSelected: category == DiscoverCategory.topRated,
             onSelected: (selected) {
               if (selected) ref.read(discoverCategoryProvider.notifier).state = DiscoverCategory.topRated;
@@ -226,7 +235,7 @@ class SearchResultsView extends ConsumerWidget {
     );
   }
 
-  Widget _buildMediaFilterRow(WidgetRef ref, DiscoverMediaFilter mediaFilter) {
+  Widget _buildMediaFilterRow(AppLocalizations l10n, WidgetRef ref, DiscoverMediaFilter mediaFilter) {
     return SizedBox(
       height: 40,
       child: ListView(
@@ -234,21 +243,21 @@ class SearchResultsView extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         children: [
           _chipPadded(_chip(
-            label: 'Hepsi',
+            label: l10n.discoverFilterAll,
             isSelected: mediaFilter == DiscoverMediaFilter.all,
             onSelected: (selected) {
               if (selected) ref.read(discoverMediaFilterProvider.notifier).state = DiscoverMediaFilter.all;
             },
           )),
           _chipPadded(_chip(
-            label: 'Film',
+            label: l10n.discoverFilterMovies,
             isSelected: mediaFilter == DiscoverMediaFilter.movie,
             onSelected: (selected) {
               if (selected) ref.read(discoverMediaFilterProvider.notifier).state = DiscoverMediaFilter.movie;
             },
           )),
           _chipPadded(_chip(
-            label: 'Dizi',
+            label: l10n.discoverFilterShows,
             isSelected: mediaFilter == DiscoverMediaFilter.tv,
             onSelected: (selected) {
               if (selected) ref.read(discoverMediaFilterProvider.notifier).state = DiscoverMediaFilter.tv;
@@ -259,8 +268,8 @@ class SearchResultsView extends ConsumerWidget {
     );
   }
 
-  Widget _buildFilteredEmptyState(DiscoverMediaFilter filter) {
-    final label = filter == DiscoverMediaFilter.movie ? 'film' : 'dizi';
+  Widget _buildFilteredEmptyState(AppLocalizations l10n) {
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -274,7 +283,7 @@ class SearchResultsView extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              'Bu kategoride $label bulunamadı',
+              l10n.discoverFilterEmpty,
               style: GoogleFonts.inter(fontSize: 13, color: AppTheme.textSecondary),
               textAlign: TextAlign.center,
             ),
@@ -284,7 +293,7 @@ class SearchResultsView extends ConsumerWidget {
     );
   }
 
-  Widget _buildStaticEmptyState() {
+  Widget _buildStaticEmptyState(AppLocalizations l10n) {
     return SizedBox(
       width: double.infinity,
       child: Column(
@@ -298,7 +307,7 @@ class SearchResultsView extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'Keşfetmeye Başlayın',
+            l10n.searchStartTitle,
             style: GoogleFonts.outfit(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -307,7 +316,7 @@ class SearchResultsView extends ConsumerWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            'Milyonlarca film arasından arama yapın.',
+            l10n.searchStartHint,
             style: GoogleFonts.inter(
               fontSize: 13,
               color: AppTheme.textSecondary,
@@ -317,24 +326,22 @@ class SearchResultsView extends ConsumerWidget {
           // TMDB Attribution
           Padding(
             padding: const EdgeInsets.only(bottom: 24),
-            child: Wrap(
-              alignment: WrapAlignment.center,
-              crossAxisAlignment: WrapCrossAlignment.center,
+            // The sentence used to be split into two Text widgets either side
+            // of the logo. Word order around the brand name differs by
+            // language, so the logo now sits above one whole sentence instead
+            // of inside it.
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  'Veriler ',
-                  style: GoogleFonts.inter(
-                    fontSize: 10,
-                    color: AppTheme.textSecondary,
-                  ),
-                ),
                 Image.asset(
                   'assets/images/tmdb_logo.png',
                   height: 10,
                   fit: BoxFit.contain,
                 ),
+                const SizedBox(height: 4),
                 Text(
-                  ' tarafından sağlanmaktadır.',
+                  l10n.searchTmdbAttribution,
+                  textAlign: TextAlign.center,
                   style: GoogleFonts.inter(
                     fontSize: 10,
                     color: AppTheme.textSecondary,

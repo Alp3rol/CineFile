@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:flutter/foundation.dart';
+import '../../../core/network/tmdb_exception.dart';
 import '../../../core/network/tmdb_service.dart';
 
 const Object _sentinel = Object();
@@ -9,7 +11,9 @@ class SearchState {
   final String query;
   final List<Map<String, dynamic>> results;
   final bool isLoading;
-  final String? errorMessage;
+  /// Why the last search failed, or null if it didn't. A reason rather than
+  /// a message so the UI can render it in the user's language.
+  final TmdbFailure? failure;
   final int? selectedGenreId;
   final int? selectedYear;
 
@@ -17,7 +21,7 @@ class SearchState {
     required this.query,
     required this.results,
     required this.isLoading,
-    this.errorMessage,
+    this.failure,
     this.selectedGenreId,
     this.selectedYear,
   });
@@ -26,7 +30,7 @@ class SearchState {
       : query = '',
         results = const [],
         isLoading = false,
-        errorMessage = null,
+        failure = null,
         selectedGenreId = null,
         selectedYear = null;
 
@@ -34,7 +38,7 @@ class SearchState {
     String? query,
     List<Map<String, dynamic>>? results,
     bool? isLoading,
-    Object? errorMessage = _sentinel,
+    Object? failure = _sentinel,
     Object? selectedGenreId = _sentinel,
     Object? selectedYear = _sentinel,
   }) {
@@ -42,7 +46,7 @@ class SearchState {
       query: query ?? this.query,
       results: results ?? this.results,
       isLoading: isLoading ?? this.isLoading,
-      errorMessage: errorMessage == _sentinel ? this.errorMessage : (errorMessage as String?),
+      failure: failure == _sentinel ? this.failure : (failure as TmdbFailure?),
       selectedGenreId: selectedGenreId == _sentinel ? this.selectedGenreId : (selectedGenreId as int?),
       selectedYear: selectedYear == _sentinel ? this.selectedYear : (selectedYear as int?),
     );
@@ -59,12 +63,12 @@ class SearchNotifier extends StateNotifier<SearchState> {
     _debounceTimer?.cancel();
 
     if (query.trim().isEmpty) {
-      state = state.copyWith(query: query, results: const [], isLoading: false, errorMessage: null);
+      state = state.copyWith(query: query, results: const [], isLoading: false, failure: null);
       return;
     }
 
     // Update query instantly, but don't show loading spinner yet to prevent flashing
-    state = state.copyWith(query: query, errorMessage: null);
+    state = state.copyWith(query: query, failure: null);
 
     _debounceTimer = Timer(const Duration(milliseconds: 350), () async {
       final searchTargetQuery = query;
@@ -76,15 +80,22 @@ class SearchNotifier extends StateNotifier<SearchState> {
         // Race condition guard: ignore if user has changed the query since request started
         if (state.query != searchTargetQuery) return;
         
-        state = state.copyWith(results: results, isLoading: false);
+        state = state.copyWith(results: results, isLoading: false, failure: null);
       } catch (e) {
         // Race condition guard: ignore if user has changed the query since request started
         if (state.query != searchTargetQuery) return;
 
+        // The failure used to be discarded here — results were cleared and the
+        // error left null, so a DNS block, a timeout or a bad API key rendered
+        // identically to "your search matched nothing". That is the failure
+        // this app is most likely to hit, given the DoH workaround it ships to
+        // get around TMDb being intercepted.
+        final failure = e is TmdbException ? e.failure : TmdbFailure.unknown;
+        debugPrint('Search failed: $e');
         state = state.copyWith(
           isLoading: false,
           results: const [],
-          errorMessage: null,
+          failure: failure,
         );
       }
     });

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
@@ -88,7 +89,7 @@ class MovieDetailFloatingHeader extends StatelessWidget {
                         const Icon(Icons.format_list_numbered_rounded, color: AppTheme.accentColor, size: 16),
                         const SizedBox(width: 4),
                         Text(
-                          personalRanking != null ? '#$personalRanking' : 'Sıra Belirle',
+                          personalRanking != null ? '#$personalRanking' : AppLocalizations.of(context).detailSetRank,
                           style: GoogleFonts.outfit(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,

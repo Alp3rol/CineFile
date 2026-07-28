@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -29,8 +30,8 @@ class TvEpisodeListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final epName = episode['name'] as String? ?? '$episodeNumber. Bölüm';
-    final overview = episode['overview'] as String? ?? 'Bölüm özeti bulunmuyor.';
+    final epName = episode['name'] as String? ?? AppLocalizations.of(context).episodeNumbered(episodeNumber);
+    final overview = episode['overview'] as String? ?? AppLocalizations.of(context).episodeNoOverview;
     final stillPath = episode['still_path'] as String?;
     final airDateStr = episode['air_date'] as String? ?? '';
 
@@ -84,7 +85,7 @@ class TvEpisodeListItem extends StatelessWidget {
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
-                        '▶ SIRADAKİ',
+                        AppLocalizations.of(context).episodeUpNext,
                         style: GoogleFonts.inter(
                           fontSize: 9,
                           fontWeight: FontWeight.bold,

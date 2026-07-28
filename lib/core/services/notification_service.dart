@@ -11,6 +11,8 @@ import '../../features/settings/presentation/settings_provider.dart';
 import '../../features/auth/controllers/auth_controller.dart';
 import '../network/tmdb_service.dart';
 import '../utils/tv_episode_math.dart';
+import '../l10n/l10n_lookup.dart';
+import '../../l10n/app_localizations.dart';
 
 final notificationServiceProvider = Provider<NotificationService>((ref) {
   return NotificationService(ref);
@@ -21,6 +23,27 @@ class NotificationService {
   final FlutterLocalNotificationsPlugin _notificationsPlugin = FlutterLocalNotificationsPlugin();
 
   NotificationService(this._ref);
+
+  /// Notification copy in the user's chosen language.
+  ///
+  /// This service runs outside the widget tree — scheduling happens from
+  /// MainShell.initState and from settings toggles — so there is no
+  /// BuildContext to read AppLocalizations from.
+  AppLocalizations get _l10n => lookupL10n(_ref.read(localeProvider));
+
+  /// Android channel metadata. Note that Android only reads the name and
+  /// description when the channel is first created: an install that already
+  /// registered this channel in Turkish keeps showing it in Turkish in system
+  /// settings even after switching to English. Re-creating the channel to
+  /// rename it would reset the user's per-channel notification preferences,
+  /// which is a worse trade.
+  AndroidNotificationDetails get _androidDetails => AndroidNotificationDetails(
+        'release_reminders',
+        _l10n.notificationChannelName,
+        channelDescription: _l10n.notificationChannelDescription,
+        importance: Importance.max,
+        priority: Priority.high,
+      );
 
   // flutter_local_notifications' native implementations reach for
   // platform-channel-backed singletons that are never initialized under
@@ -63,10 +86,10 @@ class NotificationService {
       );
 
       // Create high-importance Android channel
-      const AndroidNotificationChannel channel = AndroidNotificationChannel(
+      final AndroidNotificationChannel channel = AndroidNotificationChannel(
         'release_reminders',
-        'Çıkış Hatırlatıcıları',
-        description: 'İzleme listendeki film ve dizilerin çıkış günü hatırlatıcıları.',
+        _l10n.notificationChannelName,
+        description: _l10n.notificationChannelDescription,
         importance: Importance.max,
       );
 
@@ -138,31 +161,29 @@ class NotificationService {
 
       final payload = '$id:$isTv';
 
-      const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-        'release_reminders',
-        'Çıkış Hatırlatıcıları',
-        channelDescription: 'İzleme listendeki film ve dizilerin çıkış günü hatırlatıcıları.',
-        importance: Importance.max,
-        priority: Priority.high,
-      );
-
       const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
         presentAlert: true,
         presentBadge: true,
         presentSound: true,
       );
 
-      const NotificationDetails details = NotificationDetails(
-        android: androidDetails,
+      final NotificationDetails details = NotificationDetails(
+        android: _androidDetails,
         iOS: iosDetails,
       );
 
-      final String typeText = isTv ? 'yeni bölümü' : 'filmi';
-      
+      final l10n = _l10n;
+      // Two whole messages rather than one sentence with a swapped-in noun:
+      // "film" and "new episode" don't slot into the same sentence shape in
+      // every language.
+      final body = isTv
+          ? l10n.notificationReleaseBodyShow(title)
+          : l10n.notificationReleaseBodyMovie(title);
+
       await _notificationsPlugin.zonedSchedule(
         id: id.hashCode,
-        title: 'Bugün Çıkıyor! 🎬',
-        body: 'İzleme listendeki "$title" $typeText bugün yayınlanıyor.',
+        title: l10n.notificationReleaseTitle,
+        body: body,
         scheduledDate: scheduleTime,
         notificationDetails: details,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
@@ -220,29 +241,23 @@ class NotificationService {
 
       final payload = 'episode:$tmdbId:true:$seasonNumber:$episodeNumber';
 
-      const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-        'release_reminders',
-        'Çıkış Hatırlatıcıları',
-        channelDescription: 'İzleme listendeki film ve dizilerin çıkış günü hatırlatıcıları.',
-        importance: Importance.max,
-        priority: Priority.high,
-      );
-
       const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
         presentAlert: true,
         presentBadge: true,
         presentSound: true,
       );
 
-      const NotificationDetails details = NotificationDetails(
-        android: androidDetails,
+      final NotificationDetails details = NotificationDetails(
+        android: _androidDetails,
         iOS: iosDetails,
       );
 
+      final l10n = _l10n;
+
       await _notificationsPlugin.zonedSchedule(
         id: 'ep_$tmdbId'.hashCode,
-        title: 'Yeni Bölüm! 🎬',
-        body: '"$showTitle" dizisinin $seasonNumber. sezon $episodeNumber. bölümü bugün yayınlanıyor.',
+        title: l10n.notificationEpisodeTitle,
+        body: l10n.notificationEpisodeBody(showTitle, seasonNumber, episodeNumber),
         scheduledDate: scheduleTime,
         notificationDetails: details,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
@@ -335,7 +350,7 @@ class NotificationService {
             if (parsedDate != null && parsedDate.isAfter(DateTime.now())) {
               // Find local movie title or fetch basic title from cache
               final localMovie = localMoviesByKey[(tmdbId: tmdbId, isTv: isTv)];
-              final title = localMovie?.title ?? 'İzleme Listendeki Yapım';
+              final title = localMovie?.title ?? _l10n.notificationWatchlistFallbackTitle;
 
               await scheduleReleaseReminder(
                 id: tmdbId,
@@ -376,7 +391,7 @@ class NotificationService {
           final airDate = DateTime.tryParse(airDateStr);
           if (airDate == null || !airDate.isAfter(DateTime.now())) continue;
 
-          final title = (showDetails?['name'] ?? showDetails?['original_name']) as String? ?? 'Takip Ettiğin Dizi';
+          final title = (showDetails?['name'] ?? showDetails?['original_name']) as String? ?? _l10n.notificationShowFallbackTitle;
 
           await scheduleNextEpisodeReminder(
             tmdbId: tmdbId,

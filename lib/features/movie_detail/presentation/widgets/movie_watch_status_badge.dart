@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/database/app_database.dart';
@@ -23,9 +24,11 @@ class MovieWatchStatusBadge extends StatelessWidget {
 
     if (setting.isActivelyWatching) {
       final last = setting.lastWatchedEpisode ?? 0;
-      label = totalEpisodes != null ? 'İzleniyor ($last/$totalEpisodes)' : 'İzleniyor (Bölüm $last)';
+      label = totalEpisodes != null
+          ? AppLocalizations.of(context).watchStatusWatchingOf(last, totalEpisodes)
+          : AppLocalizations.of(context).watchStatusWatchingEpisode(last);
     } else if (totalEpisodes != null && setting.lastWatchedEpisode != null && setting.lastWatchedEpisode! >= totalEpisodes) {
-      label = 'Tamamlandı';
+      label = AppLocalizations.of(context).watchStatusCompleted;
       icon = Icons.check_circle_rounded;
       color = Colors.greenAccent;
     }

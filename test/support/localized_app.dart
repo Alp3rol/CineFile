@@ -15,11 +15,13 @@ class LocalizedTestApp extends StatelessWidget {
     super.key,
     required this.home,
     this.locale,
+    this.navigatorKey,
     this.navigatorObservers = const [],
   });
 
   final Widget home;
   final Locale? locale;
+  final GlobalKey<NavigatorState>? navigatorKey;
   final List<NavigatorObserver> navigatorObservers;
 
   @override
@@ -28,6 +30,7 @@ class LocalizedTestApp extends StatelessWidget {
       locale: locale,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
+      navigatorKey: navigatorKey,
       navigatorObservers: navigatorObservers,
       home: home,
     );

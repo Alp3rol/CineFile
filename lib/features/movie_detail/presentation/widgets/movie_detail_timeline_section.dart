@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -25,13 +26,13 @@ class MovieDetailTimelineSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'İzleme Geçmişim',
+          AppLocalizations.of(context).timelineTitle,
           style: Theme.of(context).textTheme.titleLarge,
         ),
         const SizedBox(height: 12),
         watchRecordsAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (err, stack) => Text('İzleme geçmişi hatası: $err'),
+          error: (err, stack) => Text(AppLocalizations.of(context).timelineLoadFailed),
           data: (records) {
             if (records.isEmpty) {
               return Padding(
@@ -42,7 +43,7 @@ class MovieDetailTimelineSection extends StatelessWidget {
                       Icon(Icons.history_rounded, color: AppTheme.textSecondary.withValues(alpha: 0.4), size: 40),
                       const SizedBox(height: 8),
                       Text(
-                        'Bu filmi henüz izlemediniz.',
+                        AppLocalizations.of(context).timelineEmpty,
                         style: GoogleFonts.inter(color: AppTheme.textSecondary, fontSize: 13),
                       ),
                     ],

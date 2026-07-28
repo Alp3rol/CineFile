@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -62,18 +63,27 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
     '😂', '🤯', '😭', '🥹', '🤔', '😍', '🥱', '😤', '🤩',
   ];
 
-  final List<String> _placeSuggestions = [
-    'Ev', 'Sinema', 'Arkadaşın Evi', 'Yolculukta',
-    'Otelde', 'Uçakta', 'Bahçede', 'Kampta', 'İş Yerinde',
-  ];
-  final List<String> _companionSuggestions = [
-    'Tek Başına', 'Arkadaşlarla', 'Ailemle', 'Sevgilimle',
-    'Eşimle', 'Kardeşimle', 'Çocuklarla', 'İş Arkadaşlarımla',
-  ];
-  final List<String> _tagSuggestions = [
-    '#nostalji', '#sinemada', '#yalnız', '#aksiyon', '#romantizm',
-    '#gerilim', '#komedi', '#drama', '#bilimkurgu', '#korku', '#klasik', '#yenikesif',
-  ];
+  // Built per-render rather than as fields: these are localized, and a field
+  // initializer has no BuildContext to resolve them from.
+  //
+  // Whatever the user ends up with is stored as their own free text and shown
+  // back verbatim — these chips only save typing. A user who switches language
+  // mid-history will therefore have entries in both, which is the same as if
+  // they had typed them; the one place it matters semantically is the Journal's
+  // "cinema" filter, which matches the word in either language.
+  List<String> _placeSuggestions(AppLocalizations l10n) => [
+        l10n.placeHome, l10n.placeCinema, l10n.placeFriendsHouse, l10n.placeTravelling,
+        l10n.placeHotel, l10n.placePlane, l10n.placeGarden, l10n.placeCamping, l10n.placeWork,
+      ];
+  List<String> _companionSuggestions(AppLocalizations l10n) => [
+        l10n.companionAlone, l10n.companionFriends, l10n.companionFamily, l10n.companionPartner,
+        l10n.companionSpouse, l10n.companionSibling, l10n.companionKids, l10n.companionColleagues,
+      ];
+  List<String> _tagSuggestions(AppLocalizations l10n) => [
+        l10n.tagNostalgia, l10n.tagAtTheCinema, l10n.tagAlone, l10n.tagAction, l10n.tagRomance,
+        l10n.tagThriller, l10n.tagComedy, l10n.tagDrama, l10n.tagSciFi, l10n.tagHorror,
+        l10n.tagClassic, l10n.tagNewDiscovery,
+      ];
 
   @override
   void initState() {
@@ -189,9 +199,12 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
   }
 
   Future<void> _saveRecord() async {
+    // Resolved up front: everything below runs after awaits, where reading
+    // from context is no longer safe.
+    final l10n = AppLocalizations.of(context);
     final user = ref.currentUser;
     if (user == null) {
-      showPremiumToast(context, 'Lütfen önce giriş yapın.', isError: true);
+      showPremiumToast(context, AppLocalizations.of(context).addRecordSignInRequired, isError: true);
       return;
     }
 
@@ -250,7 +263,7 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
           .get();
       final watchNumber = existingRecordsQuery.docs.length + 1;
 
-      final movieTitle = (widget.movieData['title'] ?? widget.movieData['name'] ?? 'Bilinmeyen Yapım').toString();
+      final movieTitle = (widget.movieData['title'] ?? widget.movieData['name'] ?? l10n.titleUnknown).toString();
 
       // 2. Generate a new log document
       final logRef = ref.read(firestoreProvider).collection('logs').doc();
@@ -314,11 +327,12 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
 
       if (mounted) {
         Navigator.pop(context);
-        showPremiumToast(context, '${widget.movieData['title'] ?? widget.movieData['name'] ?? 'İçerik'} günlüğünüze başarıyla eklendi!');
+        showPremiumToast(context, AppLocalizations.of(context).addRecordSuccess(widget.movieData['title'] ?? widget.movieData['name'] ?? AppLocalizations.of(context).titleUnknown));
       }
     } catch (e) {
       if (mounted) {
-        showPremiumToast(context, 'Kayıt kaydedilirken hata oluştu: $e', isError: true);
+        debugPrint('Saving the watch record failed: $e');
+        showPremiumToast(context, AppLocalizations.of(context).addRecordSaveFailed, isError: true);
       }
     }
   }
@@ -457,7 +471,7 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
             // Watch Place Input & Chips
             WatchPlaceField(
               controller: _placeController,
-              suggestions: _placeSuggestions,
+              suggestions: _placeSuggestions(AppLocalizations.of(context)),
               onSuggestionTap: (place) {
                 setState(() {
                   _placeController.text = place;
@@ -469,7 +483,7 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
             // Companions Input & Chips
             WatchCompanionField(
               controller: _companionController,
-              suggestions: _companionSuggestions,
+              suggestions: _companionSuggestions(AppLocalizations.of(context)),
               onSuggestionTap: (companion) {
                 setState(() {
                   _companionController.text = companion;
@@ -483,7 +497,7 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
             const SizedBox(height: 14),
 
             // Özel Etiketler (Tags)
-            WatchTagsField(controller: _tagsController, suggestions: _tagSuggestions),
+            WatchTagsField(controller: _tagsController, suggestions: _tagSuggestions(AppLocalizations.of(context))),
                   ],
                 ),
               ),
@@ -507,7 +521,7 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
                   ),
                 ),
                 child: Text(
-                  'Kaydı Günlüğe Ekle',
+                  AppLocalizations.of(context).addRecordSubmit,
                   style: GoogleFonts.outfit(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,

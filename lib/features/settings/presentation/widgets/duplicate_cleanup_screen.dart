@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/database/database_provider.dart';
@@ -35,19 +36,19 @@ class _DuplicateCleanupScreenState extends ConsumerState<DuplicateCleanupScreen>
       context: context,
       builder: (dialogContext) => AlertDialog(
         backgroundColor: AppTheme.surfaceColor,
-        title: const Text('Mükerrer Kayıtları Sil', style: TextStyle(color: Colors.white)),
+        title: Text(AppLocalizations.of(context).duplicateCleanupConfirmTitle, style: const TextStyle(color: Colors.white)),
         content: Text(
-          '${toClean.length} dizi/film için fazladan günlük kayıtları silinecek, sadece en son ilerlemeyi yansıtan kayıt tutulacak. Bu işlem geri alınamaz.',
+          AppLocalizations.of(context).duplicateCleanupConfirmBody(toClean.length),
           style: const TextStyle(color: Colors.white70),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('İptal', style: TextStyle(color: Colors.white70)),
+            child: Text(AppLocalizations.of(context).commonCancel, style: const TextStyle(color: Colors.white70)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text('Sil', style: TextStyle(color: Colors.redAccent)),
+            child: Text(AppLocalizations.of(context).commonDelete, style: const TextStyle(color: Colors.redAccent)),
           ),
         ],
       ),
@@ -73,11 +74,11 @@ class _DuplicateCleanupScreenState extends ConsumerState<DuplicateCleanupScreen>
     });
 
     if (failureCount == 0) {
-      showPremiumToast(context, '${toClean.length} dizi/film için mükerrer kayıtlar temizlendi.');
+      showPremiumToast(context, AppLocalizations.of(context).duplicateCleanupCleaned(toClean.length));
     } else {
       showPremiumToast(
         context,
-        '${toClean.length - failureCount} temizlendi, $failureCount tanesi başarısız oldu.',
+        AppLocalizations.of(context).duplicateCleanupPartial(toClean.length - failureCount, failureCount),
         isError: true,
       );
     }
@@ -104,7 +105,7 @@ class _DuplicateCleanupScreenState extends ConsumerState<DuplicateCleanupScreen>
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
-                      'Mükerrer Kayıtları Temizle',
+                      AppLocalizations.of(context).settingsCleanDuplicates,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                   ),
@@ -115,7 +116,7 @@ class _DuplicateCleanupScreenState extends ConsumerState<DuplicateCleanupScreen>
               child: recordsAsync.when(
                 loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.accentColor)),
                 error: (e, _) => Center(
-                  child: Text('Kayıtlar yüklenemedi: $e', style: const TextStyle(color: AppTheme.textSecondary)),
+                  child: Text(AppLocalizations.of(context).duplicateCleanupLoadError(e.toString()), style: const TextStyle(color: AppTheme.textSecondary)),
                 ),
                 data: (records) {
                   final groups = findDuplicateWatchGroups(records);
@@ -124,7 +125,7 @@ class _DuplicateCleanupScreenState extends ConsumerState<DuplicateCleanupScreen>
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 32),
                         child: Text(
-                          'Mükerrer kayıt bulunamadı. Günlüğün temiz görünüyor.',
+                          AppLocalizations.of(context).duplicateCleanupNone,
                           textAlign: TextAlign.center,
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
@@ -144,7 +145,7 @@ class _DuplicateCleanupScreenState extends ConsumerState<DuplicateCleanupScreen>
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: Text(
-                          '${groups.length} dizi/film için aynı gün birden fazla kayıt bulundu. Her grupta en son ilerlemeyi yansıtan kayıt tutulacak, geri kalanı silinecek.',
+                          AppLocalizations.of(context).duplicateCleanupIntro(groups.length),
                           style: Theme.of(context).textTheme.labelLarge,
                         ),
                       ),
@@ -191,7 +192,7 @@ class _DuplicateCleanupScreenState extends ConsumerState<DuplicateCleanupScreen>
                                           ),
                                           const SizedBox(height: 2),
                                           Text(
-                                            '${_formatDay(group.day)} • ${group.records.length} kayıt, ${group.toDelete.length} silinecek',
+                                            AppLocalizations.of(context).duplicateCleanupGroupSummary(_formatDay(group.day), group.records.length, group.toDelete.length),
                                             style: Theme.of(context).textTheme.labelLarge,
                                           ),
                                         ],
@@ -237,7 +238,7 @@ class _DuplicateCleanupScreenState extends ConsumerState<DuplicateCleanupScreen>
                                     child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black),
                                   )
                                 : Text(
-                                    'Seçilenleri Temizle (${_selectedKeys.length})',
+                                    AppLocalizations.of(context).duplicateCleanupAction(_selectedKeys.length),
                                     style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
                                   ),
                           ),

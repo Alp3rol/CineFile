@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
 
@@ -158,7 +159,7 @@ class MovieDetailStickyCta extends StatelessWidget {
           ),
           icon: const Icon(Icons.add_circle_outline_rounded, color: Colors.black, size: 22),
           label: Text(
-            'Günlüğüme Ekle',
+            AppLocalizations.of(context).detailAddToMyDiary,
             style: GoogleFonts.outfit(
               fontSize: 16,
               fontWeight: FontWeight.bold,

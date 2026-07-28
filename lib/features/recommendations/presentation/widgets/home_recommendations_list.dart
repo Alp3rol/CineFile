@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/app_network_image.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../recommendations_provider.dart';
 
 class HomeRecommendationsList extends ConsumerWidget {
@@ -35,7 +36,7 @@ class HomeRecommendationsList extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Text(
-                'Sana Özel Öneriler',
+                AppLocalizations.of(context).recommendationsTitle,
                 style: textTheme.titleLarge,
               ),
             ),

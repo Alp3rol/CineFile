@@ -4,9 +4,14 @@ import 'package:drift/drift.dart';
 import '../../../core/network/tmdb_service.dart';
 import '../../../core/database/database_provider.dart';
 import '../../../core/database/app_database.dart';
+import '../../../core/l10n/l10n_lookup.dart';
+import '../../settings/presentation/settings_provider.dart';
 
 final movieDetailProvider = FutureProvider.family<Map<String, dynamic>?, ({int tmdbId, bool isTv})>((ref, arg) async {
   final tmdbService = ref.watch(tmdbServiceProvider);
+  // The offline fallbacks below put text into the payload the UI renders, so
+  // they need the user's language without a BuildContext.
+  final l10n = lookupL10n(ref.watch(localeProvider));
   try {
     return await tmdbService.getMovieDetails(arg.tmdbId, isTv: arg.isTv);
   } catch (e) {
@@ -32,11 +37,19 @@ final movieDetailProvider = FutureProvider.family<Map<String, dynamic>?, ({int t
           'backdrop_path': localMovie.backdropPath,
           'release_date': localMovie.releaseYear != null ? '${localMovie.releaseYear}-01-01' : '',
           'runtime': localMovie.runtime ?? 120,
-          'overview': localMovie.overview ?? 'Çevrimdışı mod: Özet yüklenemedi.',
+          'overview': localMovie.overview ?? l10n.offlineOverviewUnavailable,
           'genres': (localMovie.genres ?? '').split(', ').where((g) => g.isNotEmpty).map((g) => {'name': g}).toList(),
           'credits': {
             'cast': (localMovie.actors ?? '').split(', ').where((a) => a.isNotEmpty).map((a) => {'name': a, 'character': ''}).toList(),
-            'crew': [{'name': localMovie.director ?? 'Bilinmiyor', 'job': 'Director'}]
+            // No crew entry at all when the director is unknown. This used to
+            // fabricate the name "Bilinmiyor", which then got written back into
+            // the Movies row the next time details were cached — a localized
+            // placeholder masquerading as data, which recommendations still
+            // has to guard against. The UI supplies its own placeholder.
+            'crew': [
+              if (localMovie.director != null)
+                {'name': localMovie.director, 'job': 'Director'},
+            ],
           }
         };
       }
@@ -122,18 +135,17 @@ final movieDetailProvider = FutureProvider.family<Map<String, dynamic>?, ({int t
     // 3. Ultimate fallback: Return a basic template instead of crashing the screen
     return {
       'id': arg.tmdbId,
-      'title': 'Çevrimdışı İçerik',
+      'title': l10n.offlineContentTitle,
       'original_title': 'Offline Content',
       'poster_path': null,
       'backdrop_path': null,
       'release_date': '',
       'runtime': 120,
-      'overview': 'Bağlantı sorunu nedeniyle film detayları tam yüklenemedi. Ancak bu içeriği hala günlüğünüze veya listelerinize ekleyebilirsiniz.',
+      'overview': l10n.offlineFallbackOverview,
       'genres': [],
-      'credits': {
-        'cast': [],
-        'crew': [{'name': 'Bilinmiyor', 'job': 'Director'}]
-      }
+      // Empty rather than a fabricated director — see the local-cache branch
+      // above.
+      'credits': {'cast': [], 'crew': []},
     };
   }
 });

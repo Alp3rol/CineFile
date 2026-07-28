@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -21,7 +22,7 @@ class MovieDetailCastList extends ConsumerWidget {
     try {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('$name profili aranıyor...'),
+          content: Text(AppLocalizations.of(context).castSearching(name)),
           duration: const Duration(seconds: 2),
         ),
       );
@@ -41,7 +42,7 @@ class MovieDetailCastList extends ConsumerWidget {
           ));
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('$name için profil bulunamadı.')),
+            SnackBar(content: Text(AppLocalizations.of(context).castNotFound(name))),
           );
         }
       }
@@ -64,7 +65,7 @@ class MovieDetailCastList extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Oyuncular',
+          AppLocalizations.of(context).detailCast,
           style: Theme.of(context).textTheme.titleLarge,
         ),
         const SizedBox(height: 12),

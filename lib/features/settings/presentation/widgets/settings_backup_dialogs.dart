@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -32,7 +33,7 @@ Future<void> exportBackup(BuildContext context, WidgetRef ref) async {
                 const Icon(Icons.check_circle_rounded, color: Colors.green),
                 const SizedBox(width: 8),
                 Text(
-                  'Yedek Panoya Kopyalandı!',
+                  AppLocalizations.of(context).backupCopiedTitle,
                   style: GoogleFonts.outfit(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -46,7 +47,7 @@ Future<void> exportBackup(BuildContext context, WidgetRef ref) async {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Yedekleme verileriniz kopyalandı. Bu veriyi bir dosyaya kaydederek veya başka bir cihaza göndererek saklayabilirsiniz.',
+                  AppLocalizations.of(context).backupCopiedMessage,
                   style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary),
                 ),
                 const SizedBox(height: 12),
@@ -71,7 +72,7 @@ Future<void> exportBackup(BuildContext context, WidgetRef ref) async {
               TextButton(
                 onPressed: () => Navigator.pop(context),
                 child: Text(
-                  'Kapat',
+                  AppLocalizations.of(context).commonClose,
                   style: GoogleFonts.outfit(color: AppTheme.accentColor),
                 ),
               ),
@@ -83,7 +84,7 @@ Future<void> exportBackup(BuildContext context, WidgetRef ref) async {
   } catch (e) {
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Yedekleme dosyası oluşturulurken hata: $e')),
+        SnackBar(content: Text(AppLocalizations.of(context).backupExportError(e.toString()))),
       );
     }
   }
@@ -99,7 +100,7 @@ void showImportDialog(BuildContext context, WidgetRef ref) {
         backgroundColor: AppTheme.backgroundColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(
-          'Yedekten Geri Yükle',
+          AppLocalizations.of(context).backupRestoreTitle,
           style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
         ),
         content: Column(
@@ -107,8 +108,7 @@ void showImportDialog(BuildContext context, WidgetRef ref) {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Daha önce kopyaladığınız JSON yedek kodunu aşağıdaki alana yapıştırın. '
-              'Bu işlem koleksiyonlarınızın VE hesabınızdaki tüm izleme geçmişinizin üzerine yazacaktır!',
+              AppLocalizations.of(context).backupRestoreWarning,
               style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary, height: 1.4),
             ),
             const SizedBox(height: 12),
@@ -117,7 +117,7 @@ void showImportDialog(BuildContext context, WidgetRef ref) {
               maxLines: 6,
               style: const TextStyle(fontSize: 11, fontFamily: 'monospace', color: Colors.white),
               decoration: InputDecoration(
-                hintText: 'JSON kodunu buraya yapıştırın...',
+                hintText: AppLocalizations.of(context).backupRestoreHint,
                 hintStyle: GoogleFonts.inter(color: Colors.grey.shade600, fontSize: 12),
                 filled: true,
                 fillColor: Colors.black26,
@@ -136,7 +136,7 @@ void showImportDialog(BuildContext context, WidgetRef ref) {
               Navigator.pop(context);
             },
             child: Text(
-              'İptal',
+              AppLocalizations.of(context).commonCancel,
               style: GoogleFonts.outfit(color: Colors.grey),
             ),
           ),
@@ -157,8 +157,8 @@ void showImportDialog(BuildContext context, WidgetRef ref) {
                 if (context.mounted) {
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Verileriniz yedekten başarıyla yüklendi!'),
+                    SnackBar(
+                      content: Text(AppLocalizations.of(context).backupRestoreSuccess),
                       backgroundColor: Colors.green,
                     ),
                   );
@@ -167,7 +167,7 @@ void showImportDialog(BuildContext context, WidgetRef ref) {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Hata: Geçersiz yedek kodu formatı! ($e)'),
+                      content: Text(AppLocalizations.of(context).backupRestoreInvalid(e.toString())),
                       backgroundColor: Colors.redAccent,
                     ),
                   );
@@ -175,7 +175,7 @@ void showImportDialog(BuildContext context, WidgetRef ref) {
               }
             },
             child: Text(
-              'Yükle',
+              AppLocalizations.of(context).backupRestoreConfirm,
               style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
             ),
           ),

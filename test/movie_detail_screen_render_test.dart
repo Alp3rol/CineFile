@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'support/localized_app.dart';
 import 'package:cinefile/core/database/app_database.dart';
 import 'package:cinefile/core/database/database_provider.dart';
 import 'package:cinefile/features/movie_detail/presentation/movie_detail_provider.dart';
@@ -41,7 +42,7 @@ Widget _wrap({required List<WatchRecordWithMovie> watchRecords}) {
       // test harness.
       movieSettingsProvider((tmdbId: 1, isTv: false)).overrideWith((ref) => Stream.value(null)),
     ],
-    child: const MaterialApp(home: MovieDetailScreen(tmdbId: 1)),
+    child: const LocalizedTestApp(locale: Locale('tr'), home: MovieDetailScreen(tmdbId: 1)),
   );
 }
 

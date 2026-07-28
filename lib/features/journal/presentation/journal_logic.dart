@@ -15,7 +15,13 @@ List<WatchRecordWithMovie> filterJournalRecords({
   if (activeFilter == 'favorites') {
     filtered = filtered.where((r) => favorites.contains((tmdbId: r.movie.tmdbId, isTv: r.movie.isTv))).toList();
   } else if (activeFilter == 'cinema') {
-    filtered = filtered.where((r) => r.record.watchPlace?.toLowerCase().contains('sinema') ?? false).toList();
+    // watchPlace is free text the user typed, so this can never be exhaustive —
+    // but the suggestion chip that fills it is localized, so a library logged
+    // in English would otherwise never match this filter at all.
+    filtered = filtered.where((r) {
+      final place = r.record.watchPlace?.toLowerCase() ?? '';
+      return place.contains('sinema') || place.contains('cinema');
+    }).toList();
   } else if (activeFilter == 'notes') {
     filtered = filtered.where((r) => r.record.notes != null && r.record.notes!.trim().isNotEmpty).toList();
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/widgets/glass_container.dart';
+import '../../../../l10n/app_localizations.dart';
 
 // Shown when ApiConstants.tmdbApiKey is empty — the app falls back to a
 // small hardcoded set of demo movies (see tmdb_service.dart's mock data).
@@ -25,7 +26,7 @@ class SearchApiKeyWarningBanner extends StatelessWidget {
             const SizedBox(width: 10),
             Expanded(
               child: Text(
-                'TMDb API anahtarı girilmedi. Şu an deneme modundasınız ("dune", "interstellar", "inception" veya "dark" aramalarını test edebilirsiniz).',
+                AppLocalizations.of(context).searchDemoModeBanner,
                 style: GoogleFonts.inter(
                   fontSize: 11,
                   color: Colors.amber.shade200,

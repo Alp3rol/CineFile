@@ -6,6 +6,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/constants/tmdb_genres.dart';
 import 'search_provider.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'widgets/search_api_key_warning_banner.dart';
 import 'widgets/search_genre_chips.dart';
 import 'widgets/search_results_view.dart';
@@ -116,7 +117,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
-                    'Keşfet',
+                    AppLocalizations.of(context).searchTitle,
                     style: Theme.of(context).textTheme.displayLarge,
                   ),
                   const UserProfileAvatarButton(),
@@ -134,7 +135,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 controller: _searchController,
                 style: GoogleFonts.inter(color: Colors.white),
                 decoration: InputDecoration(
-                  hintText: 'Film veya dizi ara...',
+                  hintText: AppLocalizations.of(context).searchHint,
                   hintStyle: GoogleFonts.inter(color: AppTheme.textSecondary),
                   prefixIcon: const Icon(Icons.search_rounded, color: AppTheme.textSecondary),
                   suffixIcon: _searchController.text.isNotEmpty

@@ -136,7 +136,7 @@ class SettingsPreferencesSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SettingsSectionHeader(title: 'Tercihler'),
+        SettingsSectionHeader(title: AppLocalizations.of(context).settingsPreferences),
         const SizedBox(height: 10),
         GlassContainer(
           padding: const EdgeInsets.symmetric(vertical: 4),
@@ -146,18 +146,23 @@ class SettingsPreferencesSection extends ConsumerWidget {
             children: [
               _toggleRow(
                 icon: Icons.notifications_active_outlined,
-                label: 'Çıkış Hatırlatıcıları',
+                label: AppLocalizations.of(context).settingsReleaseReminders,
                 value: ref.watch(releaseRemindersEnabledProvider),
                 onChanged: (v) async {
                   if (v) {
                     final messenger = ScaffoldMessenger.of(context);
+                    // Resolved alongside the messenger, before the await, for
+                    // the same reason: neither may be read from context once
+                    // the permission dialog has returned.
+                    final deniedMessage =
+                        AppLocalizations.of(context).settingsNotificationPermissionDenied;
                     final granted = await ref.read(notificationServiceProvider).requestPermissions();
                     if (granted) {
                       await ref.read(releaseRemindersEnabledProvider.notifier).savePreference(true);
                       await ref.read(notificationServiceProvider).syncNotifications();
                     } else {
                       messenger.showSnackBar(
-                        const SnackBar(content: Text('Bildirim izni reddedildi. Sistem ayarlarından açabilirsiniz.')),
+                        SnackBar(content: Text(deniedMessage)),
                       );
                     }
                   } else {
@@ -169,7 +174,7 @@ class SettingsPreferencesSection extends ConsumerWidget {
               _divider(),
               _toggleRow(
                 icon: Icons.palette_outlined,
-                label: 'Dinamik Arka Plan',
+                label: AppLocalizations.of(context).settingsDynamicBackground,
                 value: ref.watch(dynamicBackgroundEnabledProvider),
                 onChanged: (v) => ref.read(dynamicBackgroundEnabledProvider.notifier).setEnabled(v),
               ),

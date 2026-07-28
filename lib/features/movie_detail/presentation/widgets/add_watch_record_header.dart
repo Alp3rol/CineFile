@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 // Handle bar + title + close button for AddWatchRecordSheet. Deliberately
@@ -35,7 +36,7 @@ class AddWatchRecordHeader extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Günlüğe İzleme Kaydı Ekle',
+                AppLocalizations.of(context).addRecordTitle,
                 style: GoogleFonts.outfit(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,

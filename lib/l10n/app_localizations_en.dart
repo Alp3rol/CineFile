@@ -295,4 +295,663 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileRankGuru => 'Cinema Guru 👑';
+
+  @override
+  String get commonClose => 'Close';
+
+  @override
+  String get commonDelete => 'Delete';
+
+  @override
+  String get settingsTitle => 'Settings';
+
+  @override
+  String get settingsPreferences => 'Preferences';
+
+  @override
+  String get settingsReleaseReminders => 'Release Reminders';
+
+  @override
+  String get settingsDynamicBackground => 'Dynamic Background';
+
+  @override
+  String get settingsNotificationPermissionDenied =>
+      'Notification permission was denied. You can enable it in your system settings.';
+
+  @override
+  String get settingsDataSection => 'Data & Backup';
+
+  @override
+  String get settingsBackupTitle => 'Diary Backup';
+
+  @override
+  String get settingsBackupDescription =>
+      'Back up your whole watch history, collections, favourites and notes as JSON, and restore it on any device. Restoring overwrites what is already there.';
+
+  @override
+  String get settingsExport => 'Export';
+
+  @override
+  String get settingsRestore => 'Restore';
+
+  @override
+  String get settingsCleanDuplicates => 'Clean Duplicate Records';
+
+  @override
+  String get settingsDataProvider => 'Data Provider';
+
+  @override
+  String get settingsTmdbAttribution =>
+      'This product uses the TMDB API but is not endorsed or certified by TMDB.';
+
+  @override
+  String settingsVersion(String version) {
+    return 'Version $version';
+  }
+
+  @override
+  String get backupCopiedTitle => 'Backup Copied to Clipboard';
+
+  @override
+  String get backupCopiedMessage =>
+      'Your backup data has been copied. Save it to a file or send it to another device to keep it safe.';
+
+  @override
+  String get backupRestoreTitle => 'Restore from Backup';
+
+  @override
+  String get backupRestoreWarning =>
+      'Paste the JSON backup code you copied earlier into the field below. This will overwrite your collections AND your entire watch history on this account.';
+
+  @override
+  String get backupRestoreHint => 'Paste the JSON code here...';
+
+  @override
+  String get backupRestoreConfirm => 'Restore';
+
+  @override
+  String get backupRestoreSuccess => 'Your data was restored from the backup.';
+
+  @override
+  String backupExportError(String error) {
+    return 'Could not create the backup file: $error';
+  }
+
+  @override
+  String backupRestoreInvalid(String error) {
+    return 'Invalid backup code format ($error)';
+  }
+
+  @override
+  String get duplicateCleanupTitle => 'Clean Duplicate Records';
+
+  @override
+  String get duplicateCleanupConfirmTitle => 'Delete Duplicate Records';
+
+  @override
+  String get duplicateCleanupNone =>
+      'No duplicates found. Your diary looks clean.';
+
+  @override
+  String duplicateCleanupConfirmBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Extra diary entries for $count titles will be deleted, keeping only the one reflecting the latest progress. This cannot be undone.',
+      one:
+          'Extra diary entries for 1 title will be deleted, keeping only the one reflecting the latest progress. This cannot be undone.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String duplicateCleanupIntro(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count titles have more than one entry on the same day. In each group the entry reflecting the latest progress is kept and the rest are deleted.',
+      one:
+          '1 title has more than one entry on the same day. In each group the entry reflecting the latest progress is kept and the rest are deleted.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String duplicateCleanupGroupSummary(String day, int total, int toDelete) {
+    return '$day • $total entries, $toDelete to delete';
+  }
+
+  @override
+  String duplicateCleanupCleaned(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Duplicates cleaned for $count titles.',
+      one: 'Duplicates cleaned for 1 title.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String duplicateCleanupPartial(int cleaned, int failed) {
+    return '$cleaned cleaned, $failed failed.';
+  }
+
+  @override
+  String duplicateCleanupAction(int count) {
+    return 'Clean Selected ($count)';
+  }
+
+  @override
+  String duplicateCleanupLoadError(String error) {
+    return 'Could not load records: $error';
+  }
+
+  @override
+  String get notificationChannelName => 'Release Reminders';
+
+  @override
+  String get notificationChannelDescription =>
+      'Release-day reminders for the films and shows on your watchlist.';
+
+  @override
+  String get notificationReleaseTitle => 'Out Today! 🎬';
+
+  @override
+  String get notificationEpisodeTitle => 'New Episode! 🎬';
+
+  @override
+  String get notificationWatchlistFallbackTitle => 'A title on your watchlist';
+
+  @override
+  String get notificationShowFallbackTitle => 'A show you follow';
+
+  @override
+  String notificationReleaseBodyMovie(String title) {
+    return '\"$title\" from your watchlist is out today.';
+  }
+
+  @override
+  String notificationReleaseBodyShow(String title) {
+    return 'A new episode of \"$title\" from your watchlist airs today.';
+  }
+
+  @override
+  String get searchTitle => 'Discover';
+
+  @override
+  String get searchHint => 'Search films and shows...';
+
+  @override
+  String get searchNoResultsTitle => 'No Results';
+
+  @override
+  String get searchNoResultsHint => 'Try a different word.';
+
+  @override
+  String get searchStartTitle => 'Start Exploring';
+
+  @override
+  String get searchStartHint => 'Search across millions of titles.';
+
+  @override
+  String get searchErrorNetwork =>
+      'Couldn\'t reach TMDb. Check your connection and try again.';
+
+  @override
+  String get searchErrorInvalidApiKey =>
+      'Your TMDb API key isn\'t valid. You can check it in Settings.';
+
+  @override
+  String get searchErrorUnknown =>
+      'The search couldn\'t be completed. Please try again.';
+
+  @override
+  String get discoverFilterAll => 'All';
+
+  @override
+  String get discoverFilterMovies => 'Films';
+
+  @override
+  String get discoverFilterShows => 'Shows';
+
+  @override
+  String get discoverCategoryTrend => 'Trending';
+
+  @override
+  String get discoverCategoryPopular => 'Popular';
+
+  @override
+  String get discoverCategoryTopRated => 'Top Rated';
+
+  @override
+  String get discoverWindowThisWeek => 'This Week';
+
+  @override
+  String get discoverWindowToday => 'Today';
+
+  @override
+  String get discoverGenreAll => 'All';
+
+  @override
+  String get discoverHeadingTrendToday => 'Trending Today';
+
+  @override
+  String get discoverHeadingTrendThisWeek => 'Trending This Week';
+
+  @override
+  String get discoverHeadingPopular => 'Popular Now';
+
+  @override
+  String get discoverHeadingTopRated => 'Top Rated';
+
+  @override
+  String get discoverFilterEmpty => 'Nothing in this category';
+
+  @override
+  String get searchTmdbAttribution => 'Data provided by TMDB.';
+
+  @override
+  String get recommendationsTitle => 'Picked For You';
+
+  @override
+  String get recommendationReasonPopular => 'Popular in the Community';
+
+  @override
+  String recommendationReasonGenre(String genre) {
+    return 'For $genre Fans';
+  }
+
+  @override
+  String recommendationReasonDirector(String director) {
+    return 'Directed by $director';
+  }
+
+  @override
+  String recommendationReasonActor(String actor) {
+    return 'Starring $actor';
+  }
+
+  @override
+  String get titleUnknown => 'Unknown Title';
+
+  @override
+  String get searchDemoModeBanner =>
+      'No TMDb API key set, so you\'re in demo mode (try searching \"dune\", \"interstellar\", \"inception\" or \"dark\").';
+
+  @override
+  String get detailNotFound => 'Details for this title could not be found.';
+
+  @override
+  String get detailNoOverview => 'No overview available.';
+
+  @override
+  String get detailOverview => 'Overview';
+
+  @override
+  String get detailCast => 'Cast';
+
+  @override
+  String get detailDirector => 'Director';
+
+  @override
+  String get detailMyRating => 'My Rating';
+
+  @override
+  String get detailPlace => 'Where';
+
+  @override
+  String get detailAddToDiary => 'Add to Diary';
+
+  @override
+  String get detailAddToList => 'Add to List';
+
+  @override
+  String get detailShare => 'Share';
+
+  @override
+  String get detailAddToMyDiary => 'Add to My Diary';
+
+  @override
+  String get detailSetRank => 'Set Rank';
+
+  @override
+  String get detailTmdbAttribution => 'Data provided by TMDB.';
+
+  @override
+  String get directorUnknown => 'Unknown';
+
+  @override
+  String get detailFavoriteFailed =>
+      'Couldn\'t update your favourites. Please try again.';
+
+  @override
+  String get detailWatchlistFailed =>
+      'Couldn\'t update your watchlist. Please try again.';
+
+  @override
+  String get detailRecordDeleted => 'Watch record deleted.';
+
+  @override
+  String get detailRecordDeleteFailed =>
+      'Couldn\'t delete that record. Please try again.';
+
+  @override
+  String get detailLoadFailed =>
+      'Couldn\'t load the details. Please try again.';
+
+  @override
+  String get timelineTitle => 'My Watch History';
+
+  @override
+  String get timelineEmpty => 'You haven\'t watched this yet.';
+
+  @override
+  String get timelineLoadFailed => 'Couldn\'t load your watch history.';
+
+  @override
+  String timelineMood(String mood) {
+    return 'Mood: $mood';
+  }
+
+  @override
+  String get timelineDeleteTitle => 'Delete Record?';
+
+  @override
+  String get timelineDeleteConfirm =>
+      'Permanently delete this watch record from your diary?';
+
+  @override
+  String get commonDiscard => 'Never mind';
+
+  @override
+  String get watchStatusCompleted => 'Completed';
+
+  @override
+  String watchStatusWatchingOf(int watched, int total) {
+    return 'Watching ($watched/$total)';
+  }
+
+  @override
+  String watchStatusWatchingEpisode(int episode) {
+    return 'Watching (episode $episode)';
+  }
+
+  @override
+  String get rankDialogTitle => 'Set Favourite Rank';
+
+  @override
+  String get rankDialogField => 'Rank Number';
+
+  @override
+  String get rankSaveFailed => 'Couldn\'t save that rank.';
+
+  @override
+  String get commonSave => 'Save';
+
+  @override
+  String get addRecordTitle => 'Add a Watch Record';
+
+  @override
+  String get addRecordSubmit => 'Add to Diary';
+
+  @override
+  String get addRecordSignInRequired => 'Please sign in first.';
+
+  @override
+  String get addRecordSaveFailed => 'Couldn\'t save the record.';
+
+  @override
+  String get addRecordMoodLabel => 'Viewing mood:';
+
+  @override
+  String get addRecordRatingLabel => 'Your rating:';
+
+  @override
+  String get addRecordPlaceLabel => 'Where did you watch it?';
+
+  @override
+  String get addRecordPlaceHint => 'e.g. Prince Charles Cinema, Home...';
+
+  @override
+  String get addRecordCompanionLabel => 'Who did you watch it with?';
+
+  @override
+  String get addRecordCompanionHint => 'e.g. On my own, Alex, My family...';
+
+  @override
+  String get addRecordNotesLabel => 'Your notes:';
+
+  @override
+  String get addRecordNotesHint =>
+      'What did you make of it? Scenes that stuck with you...';
+
+  @override
+  String get addRecordTagsLabel => 'Custom tags (#tag):';
+
+  @override
+  String get addRecordTagsHint =>
+      'e.g. #nostalgia, #inacinema, #alone (comma separated)...';
+
+  @override
+  String get addRecordVisibilityLabel => 'Show on my profile';
+
+  @override
+  String get addRecordVisibilityHint =>
+      'When on, this record appears in the \"Recently Watched\" section of your profile for everyone.';
+
+  @override
+  String get addRecordContentSection => 'Content';
+
+  @override
+  String get placeHome => 'Home';
+
+  @override
+  String get placeCinema => 'Cinema';
+
+  @override
+  String get placeFriendsHouse => 'A friend\'s place';
+
+  @override
+  String get placeTravelling => 'Travelling';
+
+  @override
+  String get placeHotel => 'Hotel';
+
+  @override
+  String get placePlane => 'On a plane';
+
+  @override
+  String get placeGarden => 'Garden';
+
+  @override
+  String get placeCamping => 'Camping';
+
+  @override
+  String get placeWork => 'At work';
+
+  @override
+  String get companionAlone => 'On my own';
+
+  @override
+  String get companionFriends => 'With friends';
+
+  @override
+  String get companionFamily => 'With family';
+
+  @override
+  String get companionPartner => 'With my partner';
+
+  @override
+  String get companionSpouse => 'With my spouse';
+
+  @override
+  String get companionSibling => 'With my sibling';
+
+  @override
+  String get companionKids => 'With the kids';
+
+  @override
+  String get companionColleagues => 'With colleagues';
+
+  @override
+  String get episodeTrackingActive => 'Currently Watching';
+
+  @override
+  String get episodeTrackingWholeSeason => 'Finished the whole season';
+
+  @override
+  String get episodeTrackingSpecificCount => 'A specific number of episodes';
+
+  @override
+  String get episodeTrackingCountLabel => 'How many episodes did you watch?';
+
+  @override
+  String episodeLabel(int episode) {
+    return 'Episode $episode';
+  }
+
+  @override
+  String episodeLabelOf(int episode, int total) {
+    return 'Episode $episode of $total';
+  }
+
+  @override
+  String get episodeGuideTitle => 'Episode Guide';
+
+  @override
+  String get episodeGuideEmpty => 'No episodes found for this season.';
+
+  @override
+  String get episodeGuideLoadFailed =>
+      'Couldn\'t load the episodes. Please try again.';
+
+  @override
+  String get episodeNoOverview => 'No episode summary available.';
+
+  @override
+  String get episodeMarkSeasonWatched => 'I Watched This Season';
+
+  @override
+  String get episodeMarkFailed => 'Couldn\'t mark that episode.';
+
+  @override
+  String get episodeAddShowPrompt => 'Add this show to your diary?';
+
+  @override
+  String get episodeAddShowExplain =>
+      'Adding it puts the show in your \"Currently Watching\" list and counts towards your stats.';
+
+  @override
+  String get episodeFollowOnly => 'Just Follow';
+
+  @override
+  String get episodeConfirmWatchedTitle => 'Did you watch these episodes?';
+
+  @override
+  String get episodeUndoProgressTitle => 'Undo watch progress?';
+
+  @override
+  String get commonYes => 'Yes';
+
+  @override
+  String get offlineOverviewUnavailable =>
+      'Offline: the overview couldn\'t be loaded.';
+
+  @override
+  String get offlineContentTitle => 'Offline Content';
+
+  @override
+  String get offlineFallbackOverview =>
+      'A connection problem meant the details couldn\'t be fully loaded. You can still add this to your diary or lists.';
+
+  @override
+  String addRecordSuccess(String title) {
+    return '$title was added to your diary.';
+  }
+
+  @override
+  String get rankDialogExplain =>
+      'Enter a favourite rank for this title (e.g. 1, 2, 5). Leave it empty to remove it from the ranking.';
+
+  @override
+  String castSearching(String name) {
+    return 'Looking up $name...';
+  }
+
+  @override
+  String castNotFound(String name) {
+    return 'No profile found for $name.';
+  }
+
+  @override
+  String episodeNumbered(int episode) {
+    return 'Episode $episode';
+  }
+
+  @override
+  String get episodeUpNext => '▶ UP NEXT';
+
+  @override
+  String episodeMarkedWatched(int episode) {
+    return 'Episode $episode marked as watched.';
+  }
+
+  @override
+  String episodeMarkedUnwatched(int episode) {
+    return 'Episode $episode marked as unwatched.';
+  }
+
+  @override
+  String episodeBulkWatchConfirm(int from, int to) {
+    return 'Marking this episode watched also marks every earlier one ($from - $to) as watched. Continue?';
+  }
+
+  @override
+  String episodeBulkUnwatchConfirm(int from, int to) {
+    return 'Marking this episode unwatched also marks every later one ($from - $to) as unwatched. Continue?';
+  }
+
+  @override
+  String get tagNostalgia => '#nostalgia';
+
+  @override
+  String get tagAtTheCinema => '#inacinema';
+
+  @override
+  String get tagAlone => '#alone';
+
+  @override
+  String get tagAction => '#action';
+
+  @override
+  String get tagRomance => '#romance';
+
+  @override
+  String get tagThriller => '#thriller';
+
+  @override
+  String get tagComedy => '#comedy';
+
+  @override
+  String get tagDrama => '#drama';
+
+  @override
+  String get tagSciFi => '#scifi';
+
+  @override
+  String get tagHorror => '#horror';
+
+  @override
+  String get tagClassic => '#classic';
+
+  @override
+  String get tagNewDiscovery => '#newdiscovery';
+
+  @override
+  String notificationEpisodeBody(String show, int season, int episode) {
+    return 'Season $season, episode $episode of \"$show\" airs today.';
+  }
 }

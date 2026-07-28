@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -48,7 +49,7 @@ class EpisodeTrackingSection extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Aktif İzliyorum',
+              AppLocalizations.of(context).episodeTrackingActive,
               style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
             ),
             Switch(
@@ -64,7 +65,9 @@ class EpisodeTrackingSection extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Bölüm $selectedEpisode${totalEpisodes != null ? ' / $totalEpisodes' : ''}',
+                totalEpisodes != null
+                    ? AppLocalizations.of(context).episodeLabelOf(selectedEpisode, totalEpisodes!)
+                    : AppLocalizations.of(context).episodeLabel(selectedEpisode),
                 style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
               ),
               Row(
@@ -93,7 +96,7 @@ class EpisodeTrackingSection extends StatelessWidget {
               children: [
                 Expanded(
                   child: _ChoiceChip(
-                    label: 'Tüm sezonu bitirdim',
+                    label: AppLocalizations.of(context).episodeTrackingWholeSeason,
                     selected: finishedWholeShow,
                     onTap: () => onFinishedWholeShowChanged(true),
                   ),
@@ -101,7 +104,7 @@ class EpisodeTrackingSection extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: _ChoiceChip(
-                    label: 'Belirli sayıda bölüm',
+                    label: AppLocalizations.of(context).episodeTrackingSpecificCount,
                     selected: !finishedWholeShow,
                     onTap: () => onFinishedWholeShowChanged(false),
                   ),
@@ -114,7 +117,7 @@ class EpisodeTrackingSection extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Kaç bölüm izledin?',
+                  AppLocalizations.of(context).episodeTrackingCountLabel,
                   style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
                 ),
                 Row(

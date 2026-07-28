@@ -40,12 +40,12 @@ final recommendationsProvider = FutureProvider<List<RecommendationItem>>((ref) a
 
       for (final m in popularMovies) {
         if (!libraryKeys.contains('${m['id']}_false')) {
-          list.add(RecommendationItem.fromJson(m, reason: 'Toplulukta Popüler', isTvOverride: false));
+          list.add(RecommendationItem.fromJson(m, reason: l10n.recommendationReasonPopular, fallbackTitle: l10n.titleUnknown, isTvOverride: false));
         }
       }
       for (final tv in popularTv) {
         if (!libraryKeys.contains('${tv['id']}_true')) {
-          list.add(RecommendationItem.fromJson(tv, reason: 'Toplulukta Popüler', isTvOverride: true));
+          list.add(RecommendationItem.fromJson(tv, reason: l10n.recommendationReasonPopular, fallbackTitle: l10n.titleUnknown, isTvOverride: true));
         }
       }
 
@@ -77,7 +77,8 @@ final recommendationsProvider = FutureProvider<List<RecommendationItem>>((ref) a
           if (!libraryKeys.contains('${id}_false')) {
             recommendationsMap['${id}_false'] = RecommendationItem.fromJson(
               m,
-              reason: '$topGenreLabel Sevenlere',
+              reason: l10n.recommendationReasonGenre(topGenreLabel),
+              fallbackTitle: l10n.titleUnknown,
               isTvOverride: false,
             );
           }
@@ -91,20 +92,26 @@ final recommendationsProvider = FutureProvider<List<RecommendationItem>>((ref) a
           if (!libraryKeys.contains('${id}_true')) {
             recommendationsMap['${id}_true'] = RecommendationItem.fromJson(
               tv,
-              reason: '$topGenreLabel Sevenlere',
+              reason: l10n.recommendationReasonGenre(topGenreLabel),
+              fallbackTitle: l10n.titleUnknown,
               isTvOverride: true,
             );
           }
         }
       }
     } catch (e) {
-      debugPrint('Tür bazlı öneri getirilemedi: $e');
+      debugPrint('Genre-based recommendations failed: $e');
     }
   }
 
   // 2. Discover by top director
   if (insights.topDirectors.isNotEmpty) {
     final topDirector = insights.topDirectors.first.key;
+    // 'Bilinmiyor' is not something the stats produce — it leaks in from rows
+    // cached before this guard existed, where movie_detail_provider.dart
+    // fabricated that placeholder as a crew name rather than leaving the
+    // director null. Kept as a legacy-data defence; the write path that
+    // creates it is fixed with the movie-detail slice.
     if (topDirector != 'Bilinmiyor' && topDirector.isNotEmpty) {
       try {
         final directorId = await tmdbService.searchPersonId(topDirector);
@@ -115,14 +122,15 @@ final recommendationsProvider = FutureProvider<List<RecommendationItem>>((ref) a
             if (!libraryKeys.contains('${id}_false')) {
               recommendationsMap['${id}_false'] = RecommendationItem.fromJson(
                 m,
-                reason: '$topDirector Yönettiği İçin',
+                reason: l10n.recommendationReasonDirector(topDirector),
+                fallbackTitle: l10n.titleUnknown,
                 isTvOverride: false,
               );
             }
           }
         }
       } catch (e) {
-        debugPrint('Yönetmen bazlı öneri getirilemedi: $e');
+        debugPrint('Director-based recommendations failed: $e');
       }
     }
   }
@@ -141,14 +149,15 @@ final recommendationsProvider = FutureProvider<List<RecommendationItem>>((ref) a
             if (!libraryKeys.contains('${id}_$isTv')) {
               recommendationsMap['${id}_$isTv'] = RecommendationItem.fromJson(
                 item,
-                reason: '$topActor Rol Alıyor',
+                reason: l10n.recommendationReasonActor(topActor),
+                fallbackTitle: l10n.titleUnknown,
                 isTvOverride: isTv,
               );
             }
           }
         }
       } catch (e) {
-        debugPrint('Oyuncu bazlı öneri getirilemedi: $e');
+        debugPrint('Actor-based recommendations failed: $e');
       }
     }
   }

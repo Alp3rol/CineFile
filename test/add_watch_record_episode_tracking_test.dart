@@ -17,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'support/localized_app.dart';
 import 'package:cinefile/core/database/app_database.dart';
 import 'package:cinefile/core/database/database_provider.dart';
 import 'package:cinefile/features/auth/controllers/auth_controller.dart';
@@ -51,7 +52,8 @@ const _longRunningTvMovieData = {
 // GlobalKey across separate pumpWidget trees in different tests corrupts
 // the element tree.
 Widget _rootApp(GlobalKey<NavigatorState> navigatorKey) {
-  return MaterialApp(
+  return LocalizedTestApp(
+    locale: const Locale('tr'),
     navigatorKey: navigatorKey,
     home: const Scaffold(body: SizedBox()),
   );
@@ -141,7 +143,8 @@ void main() {
     final movie = watchWithMovie.movie.copyWith(totalEpisodes: const Value(3));
 
     await tester.pumpWidget(
-      MaterialApp(
+      LocalizedTestApp(
+        locale: const Locale('tr'),
         home: Scaffold(
           body: JournalRecordsList(
             items: [WatchRecordWithMovie(watchWithMovie.record, movie, setting: setting)],
@@ -322,7 +325,8 @@ void main() {
     final movie = watchWithMovie.movie.copyWith(totalEpisodes: const Value(3));
 
     await tester.pumpWidget(
-      MaterialApp(
+      LocalizedTestApp(
+        locale: const Locale('tr'),
         home: Scaffold(
           body: JournalRecordsTable(
             items: [WatchRecordWithMovie(watchWithMovie.record, movie, setting: setting)],

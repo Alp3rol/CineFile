@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
 
@@ -72,14 +73,14 @@ class WatchPlaceField extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Nerede İzledin?',
+          AppLocalizations.of(context).addRecordPlaceLabel,
           style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
         ),
         const SizedBox(height: 6),
         TextField(
           controller: controller,
-          decoration: const InputDecoration(
-            hintText: 'Örn: Kadıköy Sineması, Ev...',
+          decoration: InputDecoration(
+            hintText: AppLocalizations.of(context).addRecordPlaceHint,
           ),
         ),
         const SizedBox(height: 8),
@@ -108,14 +109,14 @@ class WatchCompanionField extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Kiminle İzledin?',
+          AppLocalizations.of(context).addRecordCompanionLabel,
           style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
         ),
         const SizedBox(height: 6),
         TextField(
           controller: controller,
-          decoration: const InputDecoration(
-            hintText: 'Örn: Tek başıma, Ahmet, Ailem...',
+          decoration: InputDecoration(
+            hintText: AppLocalizations.of(context).addRecordCompanionHint,
           ),
         ),
         const SizedBox(height: 8),
@@ -137,15 +138,15 @@ class WatchNotesField extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Kişisel Notların:',
+          AppLocalizations.of(context).addRecordNotesLabel,
           style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
         ),
         const SizedBox(height: 6),
         TextField(
           controller: controller,
           maxLines: 3,
-          decoration: const InputDecoration(
-            hintText: 'Film hakkında ne düşünüyorsun? Akılda kalıcı sahneler...',
+          decoration: InputDecoration(
+            hintText: AppLocalizations.of(context).addRecordNotesHint,
           ),
         ),
       ],
@@ -186,14 +187,14 @@ class WatchTagsField extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Özel Etiketler (#tag):',
+          AppLocalizations.of(context).addRecordTagsLabel,
           style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
         ),
         const SizedBox(height: 6),
         TextField(
           controller: controller,
-          decoration: const InputDecoration(
-            hintText: 'Örn: #nostalji, #sinemada, #yalnız (Virgülle ayırın)...',
+          decoration: InputDecoration(
+            hintText: AppLocalizations.of(context).addRecordTagsHint,
           ),
         ),
         const SizedBox(height: 8),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -23,14 +24,14 @@ void showRankDialog(
       return AlertDialog(
         backgroundColor: AppTheme.surfaceColor,
         title: Text(
-          'Favori Sırası Belirle',
+          AppLocalizations.of(context).rankDialogTitle,
           style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Bu film için favori sıralama numarasını girin (Örn: 1, 2, 5). Boş bırakırsanız sıralamadan çıkarılır.',
+              AppLocalizations.of(context).rankDialogExplain,
               style: GoogleFonts.inter(color: AppTheme.textSecondary, fontSize: 12),
             ),
             const SizedBox(height: 16),
@@ -39,7 +40,7 @@ void showRankDialog(
               keyboardType: TextInputType.number,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
-                labelText: 'Sıra Numarası',
+                labelText: AppLocalizations.of(context).rankDialogField,
                 labelStyle: const TextStyle(color: Colors.white70),
                 filled: true,
                 fillColor: Colors.black26,
@@ -52,7 +53,7 @@ void showRankDialog(
                 } catch (e) {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Sıra kaydedilemedi: $e')),
+                      SnackBar(content: Text(AppLocalizations.of(context).rankSaveFailed)),
                     );
                   }
                 }
@@ -66,7 +67,7 @@ void showRankDialog(
               controller.dispose();
               Navigator.pop(context);
             },
-            child: const Text('İptal', style: TextStyle(color: Colors.white70)),
+            child: Text(AppLocalizations.of(context).commonCancel, style: const TextStyle(color: Colors.white70)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: AppTheme.accentColor),
@@ -83,12 +84,12 @@ void showRankDialog(
               } catch (e) {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Sıra kaydedilemedi: $e')),
+                    SnackBar(content: Text(AppLocalizations.of(context).rankSaveFailed)),
                   );
                 }
               }
             },
-            child: const Text('Kaydet', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+            child: Text(AppLocalizations.of(context).commonSave, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
           ),
         ],
       );

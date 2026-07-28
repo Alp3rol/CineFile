@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -73,6 +74,7 @@ class _MovieDetailTvEpisodesSectionState extends ConsumerState<MovieDetailTvEpis
   }
 
   Future<void> _toggleEpisodeWatched(int targetEpisodeIndex, int episodeNumber) async {
+    final l10n = AppLocalizations.of(context);
     // One-time journal prompt for un-journaled shows
     if (!widget.hasJournalEntry && !_journalPromptDismissed) {
       final wantsToAddToJournal = await showGlassChoiceDialog(
@@ -91,7 +93,7 @@ class _MovieDetailTvEpisodesSectionState extends ConsumerState<MovieDetailTvEpis
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                'Bu diziyi günlüğüne eklemek ister misin?',
+                AppLocalizations.of(context).episodeAddShowPrompt,
                 style: GoogleFonts.outfit(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -101,9 +103,9 @@ class _MovieDetailTvEpisodesSectionState extends ConsumerState<MovieDetailTvEpis
             ),
           ],
         ),
-        message: 'Günlüğe eklersen "Aktif İzliyorum" listende görünür ve istatistiklerine yansır.',
-        cancelLabel: 'Sadece Takip Et',
-        confirmLabel: 'Günlüğe Ekle',
+        message: AppLocalizations.of(context).episodeAddShowExplain,
+        cancelLabel: AppLocalizations.of(context).episodeFollowOnly,
+        confirmLabel: AppLocalizations.of(context).detailAddToDiary,
       );
       if (wantsToAddToJournal) {
         // User chose "Günlüğe Ekle" — open the add-record sheet and abort toggle
@@ -124,13 +126,13 @@ class _MovieDetailTvEpisodesSectionState extends ConsumerState<MovieDetailTvEpis
         shouldUpdate = await showGlassChoiceDialog(
           context,
           header: Text(
-            'Bölümleri İzledin mi?',
+            AppLocalizations.of(context).episodeConfirmWatchedTitle,
             style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
           ),
           message:
-              'Bu bölümü izlendi olarak işaretlemek, önceki tüm bölümleri de (${currentLastWatched + 1} - $targetEpisodeIndex) izlendi sayacaktır. Devam etmek istiyor musunuz?',
-          cancelLabel: 'İptal',
-          confirmLabel: 'Evet',
+              AppLocalizations.of(context).episodeBulkWatchConfirm(currentLastWatched + 1, targetEpisodeIndex),
+          cancelLabel: AppLocalizations.of(context).commonCancel,
+          confirmLabel: AppLocalizations.of(context).commonYes,
         );
       }
 
@@ -138,7 +140,7 @@ class _MovieDetailTvEpisodesSectionState extends ConsumerState<MovieDetailTvEpis
         await _writeProgress(
           lastWatchedEpisode: targetEpisodeIndex,
           isActivelyWatching: widget.totalEpisodes == null || targetEpisodeIndex < widget.totalEpisodes!,
-          successMessage: '$episodeNumber. Bölüm izlendi olarak işaretlendi.',
+          successMessage: l10n.episodeMarkedWatched(episodeNumber),
         );
       }
     } else {
@@ -148,13 +150,13 @@ class _MovieDetailTvEpisodesSectionState extends ConsumerState<MovieDetailTvEpis
         shouldUpdate = await showGlassChoiceDialog(
           context,
           header: Text(
-            'İzleme İlerlemesini Geri Al?',
+            AppLocalizations.of(context).episodeUndoProgressTitle,
             style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
           ),
           message:
-              'Bu bölümü izlenmedi olarak işaretlemek, sonraki tüm bölümleri de ($targetEpisodeIndex - $currentLastWatched) izlenmedi sayacaktır. Devam etmek istiyor musunuz?',
-          cancelLabel: 'İptal',
-          confirmLabel: 'Evet',
+              AppLocalizations.of(context).episodeBulkUnwatchConfirm(targetEpisodeIndex, currentLastWatched),
+          cancelLabel: AppLocalizations.of(context).commonCancel,
+          confirmLabel: AppLocalizations.of(context).commonYes,
         );
       }
 
@@ -162,7 +164,7 @@ class _MovieDetailTvEpisodesSectionState extends ConsumerState<MovieDetailTvEpis
         await _writeProgress(
           lastWatchedEpisode: targetEpisodeIndex - 1,
           isActivelyWatching: true,
-          successMessage: '$episodeNumber. Bölüm izlenmedi olarak işaretlendi.',
+          successMessage: l10n.episodeMarkedUnwatched(episodeNumber),
         );
       }
     }
@@ -194,7 +196,8 @@ class _MovieDetailTvEpisodesSectionState extends ConsumerState<MovieDetailTvEpis
       }
     } catch (e) {
       if (mounted) {
-        showPremiumToast(context, 'Bölüm işaretlenemedi: $e', isError: true);
+        debugPrint('Marking the episode failed: $e');
+        showPremiumToast(context, AppLocalizations.of(context).episodeMarkFailed, isError: true);
       }
     }
   }
@@ -212,7 +215,7 @@ class _MovieDetailTvEpisodesSectionState extends ConsumerState<MovieDetailTvEpis
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Bölüm Rehberi',
+          AppLocalizations.of(context).episodeGuideTitle,
           style: Theme.of(context).textTheme.titleLarge,
         ),
         const SizedBox(height: 12),
@@ -232,18 +235,18 @@ class _MovieDetailTvEpisodesSectionState extends ConsumerState<MovieDetailTvEpis
           error: (error, stack) => Padding(
             padding: const EdgeInsets.symmetric(vertical: 16.0),
             child: Text(
-              'Bölümler yüklenirken bir hata oluştu: $error',
+              AppLocalizations.of(context).episodeGuideLoadFailed,
               style: const TextStyle(color: Colors.white70, fontSize: 13),
             ),
           ),
           data: (seasonData) {
             final episodes = seasonData?['episodes'] as List<dynamic>? ?? [];
             if (episodes.isEmpty) {
-              return const Padding(
-                padding: EdgeInsets.symmetric(vertical: 16.0),
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16.0),
                 child: Text(
-                  'Bu sezona ait bölüm bulunamadı.',
-                  style: TextStyle(color: Colors.white30, fontSize: 13),
+                  AppLocalizations.of(context).episodeGuideEmpty,
+                  style: const TextStyle(color: Colors.white30, fontSize: 13),
                 ),
               );
             }
@@ -268,7 +271,7 @@ class _MovieDetailTvEpisodesSectionState extends ConsumerState<MovieDetailTvEpis
                         onPressed: () => _toggleEpisodeWatched(lastOverallIndex, lastEpisodeNumber),
                         icon: const Icon(Icons.done_all_rounded, size: 18, color: AppTheme.accentColor),
                         label: Text(
-                          'Bu Sezonu İzledim',
+                          AppLocalizations.of(context).episodeMarkSeasonWatched,
                           style: GoogleFonts.inter(fontWeight: FontWeight.w600, color: AppTheme.accentColor),
                         ),
                         style: OutlinedButton.styleFrom(

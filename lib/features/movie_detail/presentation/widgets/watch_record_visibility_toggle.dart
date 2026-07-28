@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
 
@@ -33,7 +34,7 @@ class WatchRecordVisibilityToggle extends StatelessWidget {
                   const Icon(Icons.public_rounded, color: AppTheme.accentColor, size: 20),
                   const SizedBox(width: 10),
                   Text(
-                    'Profilimde Göster',
+                    AppLocalizations.of(context).addRecordVisibilityLabel,
                     style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
                   ),
                 ],
@@ -47,7 +48,7 @@ class WatchRecordVisibilityToggle extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            'Açarsan bu kayıt profilindeki "Son İzlediklerim" bölümünde herkese görünür.',
+            AppLocalizations.of(context).addRecordVisibilityHint,
             style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary),
           ),
         ],

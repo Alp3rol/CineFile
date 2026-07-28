@@ -1,6 +1,15 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
+
+/// The version shown in Settings. Was hardcoded as "1.5.2" and had gone stale
+/// by five releases — pubspec.yaml said 1.7.2 — because nothing tied the two
+/// together. Still manual, but now there is exactly one place to update, next
+/// to a note saying so.
+///
+/// Keep in sync with `version:` in pubspec.yaml.
+const String kDisplayedAppVersion = '1.7.2';
 
 class SettingsCreditsFooter extends StatelessWidget {
   const SettingsCreditsFooter({super.key});
@@ -25,7 +34,7 @@ class SettingsCreditsFooter extends StatelessWidget {
             ),
           ),
           Text(
-            'Sürüm 1.5.2',
+            AppLocalizations.of(context).settingsVersion(kDisplayedAppVersion),
             style: GoogleFonts.inter(
               fontSize: 11,
               color: Colors.grey,

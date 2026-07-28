@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../constants/api_constants.dart';
 import '../l10n/l10n_lookup.dart';
 import 'dio_client.dart';
+import 'tmdb_exception.dart';
 import '../../features/settings/presentation/settings_provider.dart';
 
 final dioClientProvider = Provider<DioClient>((ref) {
@@ -156,7 +157,7 @@ class TmdbService {
 
       return normalized;
     } on DioException catch (e) {
-      throw Exception('TMDb Arama Hatası: ${e.message}');
+      throw TmdbException.from(e, operation: 'search');
     }
   }
 
@@ -210,13 +211,13 @@ class TmdbService {
       try {
         return await _getTvDetails(tmdbId, language: language);
       } catch (e) {
-        throw Exception('TMDb Dizi Detay Getirme Hatası: ${e.toString()}');
+        throw TmdbException.from(e, operation: 'tv details');
       }
     } else if (isTv == false) {
       try {
         return await _getMovieDetailsOnly(tmdbId, language: language);
       } catch (e) {
-        throw Exception('TMDb Film Detay Getirme Hatası: ${e.toString()}');
+        throw TmdbException.from(e, operation: 'movie details');
       }
     } else {
       // Fallback if isTv is not provided
@@ -226,7 +227,7 @@ class TmdbService {
         try {
           return await _getTvDetails(tmdbId, language: language);
         } catch (e) {
-          throw Exception('TMDb Detay Getirme Hatası: ${e.toString()}');
+          throw TmdbException.from(e, operation: 'details');
         }
       }
     }
@@ -315,7 +316,7 @@ class TmdbService {
       final results = response.data['results'] as List<dynamic>;
       return results.map((e) => e as Map<String, dynamic>).toList();
     } on DioException catch (e) {
-      throw Exception('TMDb Popüler Filmler Hatası: ${e.message}');
+      throw TmdbException.from(e, operation: 'popular movies');
     }
   }
 
@@ -346,7 +347,7 @@ class TmdbService {
         };
       }).toList();
     } on DioException catch (e) {
-      throw Exception('TMDb Popüler Dizi Hatası: ${e.message}');
+      throw TmdbException.from(e, operation: 'popular tv');
     }
   }
 
@@ -372,7 +373,7 @@ class TmdbService {
       }).toList();
     } on DioException catch (e) {
       debugPrint('TMDb Haftalık Trend Film Hatası: ${e.message}');
-      throw Exception('TMDb Haftalık Trend Film Hatası: ${e.message}');
+      throw TmdbException.from(e, operation: 'trending movies this week');
     }
   }
 
@@ -403,7 +404,7 @@ class TmdbService {
       }).toList();
     } on DioException catch (e) {
       debugPrint('TMDb Haftalık Trend Dizi Hatası: ${e.message}');
-      throw Exception('TMDb Haftalık Trend Dizi Hatası: ${e.message}');
+      throw TmdbException.from(e, operation: 'trending tv this week');
     }
   }
 
@@ -429,7 +430,7 @@ class TmdbService {
       }).toList();
     } on DioException catch (e) {
       debugPrint('TMDb Günlük Trend Film Hatası: ${e.message}');
-      throw Exception('TMDb Günlük Trend Film Hatası: ${e.message}');
+      throw TmdbException.from(e, operation: 'trending movies today');
     }
   }
 
@@ -460,7 +461,7 @@ class TmdbService {
       }).toList();
     } on DioException catch (e) {
       debugPrint('TMDb Günlük Trend Dizi Hatası: ${e.message}');
-      throw Exception('TMDb Günlük Trend Dizi Hatası: ${e.message}');
+      throw TmdbException.from(e, operation: 'trending tv today');
     }
   }
 
@@ -487,7 +488,7 @@ class TmdbService {
       }).toList();
     } on DioException catch (e) {
       debugPrint('TMDb En Çok Oy Alan Film Hatası: ${e.message}');
-      throw Exception('TMDb En Çok Oy Alan Film Hatası: ${e.message}');
+      throw TmdbException.from(e, operation: 'top rated movies');
     }
   }
 
@@ -519,7 +520,7 @@ class TmdbService {
       }).toList();
     } on DioException catch (e) {
       debugPrint('TMDb En Çok Oy Alan Dizi Hatası: ${e.message}');
-      throw Exception('TMDb En Çok Oy Alan Dizi Hatası: ${e.message}');
+      throw TmdbException.from(e, operation: 'top rated tv');
     }
   }
 
@@ -543,7 +544,7 @@ class TmdbService {
       }
       return null;
     } on DioException catch (e) {
-      throw Exception('TMDb Person Search Hatası: ${e.message}');
+      throw TmdbException.from(e, operation: 'person search');
     }
   }
 
@@ -576,7 +577,7 @@ class TmdbService {
               })
           .toList();
     } on DioException catch (e) {
-      throw Exception('TMDb Person Search Hatası: ${e.message}');
+      throw TmdbException.from(e, operation: 'person search');
     }
   }
 
@@ -611,7 +612,7 @@ class TmdbService {
         };
       }).toList();
     } on DioException catch (e) {
-      throw Exception('TMDb Discover Movie Hatası: ${e.message}');
+      throw TmdbException.from(e, operation: 'discover movies');
     }
   }
 
@@ -646,7 +647,7 @@ class TmdbService {
         };
       }).toList();
     } on DioException catch (e) {
-      throw Exception('TMDb Discover TV Hatası: ${e.message}');
+      throw TmdbException.from(e, operation: 'discover tv');
     }
   }
 
@@ -690,7 +691,7 @@ class TmdbService {
       }
       return data;
     } on DioException catch (e) {
-      throw Exception('TMDb Person Details Hatası: ${e.message}');
+      throw TmdbException.from(e, operation: 'person details');
     }
   }
 
@@ -710,7 +711,7 @@ class TmdbService {
       final cast = response.data['cast'] as List<dynamic>? ?? [];
       return cast.map((e) => e as Map<String, dynamic>).toList();
     } on DioException catch (e) {
-      throw Exception('TMDb Combined Credits Hatası: ${e.message}');
+      throw TmdbException.from(e, operation: 'combined credits');
     }
   }
 

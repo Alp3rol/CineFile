@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -110,7 +111,7 @@ class MovieDetailTimelineItem extends StatelessWidget {
                   Row(
                     children: [
                       Text(
-                        'Mod: ${record.mood ?? "🍿"}',
+                        AppLocalizations.of(context).timelineMood(record.mood ?? '🍿'),
                         style: GoogleFonts.inter(fontSize: 11, color: Colors.white),
                       ),
                       const Spacer(),
@@ -162,22 +163,22 @@ class MovieDetailTimelineItem extends StatelessWidget {
                           context: context,
                           builder: (dialogCtx) => AlertDialog(
                             backgroundColor: AppTheme.surfaceColor,
-                            title: Text('Kaydı Sil?', style: GoogleFonts.outfit(color: Colors.white)),
+                            title: Text(AppLocalizations.of(context).timelineDeleteTitle, style: GoogleFonts.outfit(color: Colors.white)),
                             content: Text(
-                              'Bu izleme kaydını günlüğünüzden kalıcı olarak silmek istediğinize emin misiniz?',
+                              AppLocalizations.of(context).timelineDeleteConfirm,
                               style: GoogleFonts.inter(color: AppTheme.textSecondary),
                             ),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.pop(dialogCtx),
-                                child: Text('Vazgeç', style: GoogleFonts.inter(color: AppTheme.textSecondary)),
+                                child: Text(AppLocalizations.of(context).commonDiscard, style: GoogleFonts.inter(color: AppTheme.textSecondary)),
                               ),
                               TextButton(
                                 onPressed: () {
                                   Navigator.pop(dialogCtx);
                                   onDelete();
                                 },
-                                child: const Text('Sil', style: TextStyle(color: Colors.redAccent)),
+                                child: Text(AppLocalizations.of(context).commonDelete, style: const TextStyle(color: Colors.redAccent)),
                               ),
                             ],
                           ),

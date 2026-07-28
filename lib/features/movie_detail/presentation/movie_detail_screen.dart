@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
@@ -93,16 +94,18 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
         'updatedAt': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
     } catch (e) {
-      debugPrint('Favori durumu güncellenemedi: $e');
+      debugPrint('Updating the favourite flag failed: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Favori durumu güncellenemedi. Lütfen tekrar deneyin.')),
+          SnackBar(content: Text(AppLocalizations.of(context).detailFavoriteFailed)),
         );
       }
     }
   }
 
   Future<void> _toggleWatchlist(WidgetRef ref, Map<String, dynamic> movieData) async {
+    // Resolved before the awaits below; the reminder title is built after them.
+    final l10n = AppLocalizations.of(context);
     final user = ref.currentUser;
     if (user == null) return;
 
@@ -142,7 +145,7 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
               movieData: movieData,
             );
       } catch (e) {
-        debugPrint('Yerel film metadata önbelleği yazılamadı: $e');
+        debugPrint('Writing the local title metadata cache failed: $e');
       }
 
       // Trigger local notifications schedule/cancel
@@ -154,7 +157,7 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
             if (parsedDate.isAfter(DateTime.now())) {
               await ref.read(notificationServiceProvider).scheduleReleaseReminder(
                 id: tmdbId,
-                title: (isTv ? (movieData['name'] ?? movieData['original_name']) : (movieData['title'] ?? movieData['original_title'])) as String? ?? 'Bilinmeyen Yapım',
+                title: (isTv ? (movieData['name'] ?? movieData['original_name']) : (movieData['title'] ?? movieData['original_title'])) as String? ?? l10n.titleUnknown,
                 releaseDate: parsedDate,
                 isTv: isTv,
               );
@@ -165,10 +168,10 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
         }
       }
     } catch (e) {
-      debugPrint('İzleme listesi güncellenemedi: $e');
+      debugPrint('Updating the watchlist failed: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('İzleme listesi güncellenemedi. Lütfen tekrar deneyin.')),
+          SnackBar(content: Text(AppLocalizations.of(context).detailWatchlistFailed)),
         );
       }
     }
@@ -190,16 +193,16 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('İzleme kaydı silindi.'),
-            duration: Duration(milliseconds: 1500),
+          SnackBar(
+            content: Text(AppLocalizations.of(context).detailRecordDeleted),
+            duration: const Duration(milliseconds: 1500),
           ),
         );
       }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Hata: $e')),
+          SnackBar(content: Text(AppLocalizations.of(context).detailRecordDeleteFailed)),
         );
       }
     }
@@ -258,17 +261,17 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
         ),
         body: detailAsync.when(
         loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.accentColor)),
-        error: (error, stack) => Center(child: Text('Hata: $error', style: const TextStyle(color: Colors.white))),
+        error: (error, stack) => Center(child: Text(AppLocalizations.of(context).detailLoadFailed, style: const TextStyle(color: Colors.white))),
         data: (movieData) {
           if (movieData == null) {
-            return const Center(child: Text('Film detayları bulunamadı.', style: TextStyle(color: Colors.white)));
+            return Center(child: Text(AppLocalizations.of(context).detailNotFound, style: const TextStyle(color: Colors.white)));
           }
 
           final backdropPath = movieData['backdrop_path'] as String?;
           final posterPath = movieData['poster_path'] as String?;
-          final title = (movieData['title'] ?? movieData['name'] ?? movieData['original_title'] ?? movieData['original_name'] ?? 'Bilinmeyen Yapım').toString();
+          final title = (movieData['title'] ?? movieData['name'] ?? movieData['original_title'] ?? movieData['original_name'] ?? AppLocalizations.of(context).titleUnknown).toString();
           final tagline = (movieData['tagline'] ?? '').toString();
-          final overview = (movieData['overview'] ?? 'Özet bulunmuyor.').toString();
+          final overview = (movieData['overview'] ?? AppLocalizations.of(context).detailNoOverview).toString();
 
           final releaseDateStr = (movieData['release_date'] ?? movieData['first_air_date'] ?? '').toString();
           final year = releaseDateStr.isNotEmpty ? releaseDateStr.split('-').first : '';
@@ -278,7 +281,7 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
           final genresString = genres?.map((e) => (e is Map) ? (e['name'] ?? '') : '').where((s) => s.toString().isNotEmpty).join(', ') ?? '';
 
           final crew = movieData['credits']?['crew'] as List<dynamic>?;
-          final director = crew?.where((e) => (e is Map) && e['job'] == 'Director').firstOrNull?['name'] as String? ?? 'Bilinmiyor';
+          final director = crew?.where((e) => (e is Map) && e['job'] == 'Director').firstOrNull?['name'] as String? ?? AppLocalizations.of(context).directorUnknown;
 
           final cast = movieData['credits']?['cast'] as List<dynamic>?;
 
@@ -343,7 +346,7 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
                                 icon: Icons.star_rounded,
                                 iconColor: AppTheme.ratingColor,
                                 value: latestRecord != null ? latestRecord.rating.toStringAsFixed(1) : '—',
-                                label: 'Puanım',
+                                label: AppLocalizations.of(context).detailMyRating,
                               ),
                             ),
                             const SizedBox(width: 10),
@@ -352,7 +355,7 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
                                 icon: Icons.movie_creation_outlined,
                                 iconColor: Colors.white,
                                 value: director,
-                                label: 'Yönetmen',
+                                label: AppLocalizations.of(context).detailDirector,
                               ),
                             ),
                             const SizedBox(width: 10),
@@ -361,7 +364,7 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
                                 icon: Icons.location_on_outlined,
                                 iconColor: Colors.white,
                                 value: latestRecord?.watchPlace ?? '—',
-                                label: 'Ortam',
+                                label: AppLocalizations.of(context).detailPlace,
                               ),
                             ),
                           ],
@@ -374,13 +377,13 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
                           children: [
                             MovieQuickActionButton(
                               icon: Icons.add_rounded,
-                              label: 'Günlüğe Ekle',
+                              label: AppLocalizations.of(context).detailAddToDiary,
                               isPrimary: true,
                               onTap: () => _openAddWatchRecordSheet(context, movieData),
                             ),
                             MovieQuickActionButton(
                               icon: Icons.bookmark_add_outlined,
-                              label: 'Listeye Ekle',
+                              label: AppLocalizations.of(context).detailAddToList,
                               onTap: () {
                                 final movie = Movie(
                                   tmdbId: tmdbId,
@@ -402,7 +405,7 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
                             ),
                             MovieQuickActionButton(
                               icon: Icons.share_rounded,
-                              label: 'Paylaş',
+                              label: AppLocalizations.of(context).detailShare,
                               onTap: () => _shareMovie(title, tmdbId),
                             ),
                           ],
@@ -411,7 +414,7 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
 
                         // Overview (Konu) Section
                         Text(
-                          'Özet',
+                          AppLocalizations.of(context).detailOverview,
                           style: Theme.of(context).textTheme.titleLarge,
                         ),
                         const SizedBox(height: 8),
@@ -465,20 +468,17 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Text(
-                                'Veriler ',
-                                style: GoogleFonts.inter(
-                                  fontSize: 10,
-                                  color: AppTheme.textSecondary,
-                                ),
-                              ),
+                              // One sentence under the logo rather than two Text
+                              // widgets either side of it — word order around
+                              // the brand name differs by language.
                               Image.asset(
                                 'assets/images/tmdb_logo.png',
                                 height: 10,
                                 fit: BoxFit.contain,
                               ),
+                              const SizedBox(width: 6),
                               Text(
-                                ' tarafından sağlanmaktadır.',
+                                AppLocalizations.of(context).detailTmdbAttribution,
                                 style: GoogleFonts.inter(
                                   fontSize: 10,
                                   color: AppTheme.textSecondary,

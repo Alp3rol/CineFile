@@ -12,6 +12,7 @@ import 'package:cinefile/core/network/tmdb_service.dart';
 import 'package:cinefile/features/search/presentation/search_provider.dart';
 import 'package:cinefile/features/search/presentation/trending_provider.dart';
 import 'package:cinefile/features/search/presentation/widgets/search_results_view.dart';
+import 'support/localized_app.dart';
 
 Map<String, dynamic> _movie(int id, String title) => {
       'id': id,
@@ -88,7 +89,10 @@ class _FakeTmdbService extends TmdbService {
 Widget _wrap(List<Override> overrides) {
   return ProviderScope(
     overrides: overrides,
-    child: MaterialApp(
+    child: LocalizedTestApp(
+      // Pinned to Turkish so these assertions keep reading as the screen the
+      // test was written against, rather than silently following the binding.
+      locale: const Locale('tr'),
       home: Scaffold(
         body: SearchResultsView(
           state: SearchState.initial(),
@@ -191,7 +195,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);
-    expect(find.text('Bu kategoride dizi bulunamadı'), findsOneWidget);
+    expect(find.text('Bu kategoride sonuç bulunamadı'), findsOneWidget);
     // Chip rows and heading stay visible even though the grid is empty.
     expect(find.text('Trend'), findsOneWidget);
     expect(find.text('Bu Hafta Trend Film/Dizileri'), findsOneWidget);

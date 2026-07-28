@@ -154,5 +154,329 @@
   "profileRankNovice": "Çaylak Sinefil 🍿",
   "profileRankTicketBuddy": "Bilet Ortağı 🎬",
   "profileRankConnoisseur": "Kültür Üstadı 🏛️",
-  "profileRankGuru": "Sinema Gurusu 👑"
+  "profileRankGuru": "Sinema Gurusu 👑",
+
+  "commonClose": "Kapat",
+  "commonDelete": "Sil",
+
+  "settingsTitle": "Ayarlar",
+  "settingsPreferences": "Tercihler",
+  "settingsReleaseReminders": "Çıkış Hatırlatıcıları",
+  "settingsDynamicBackground": "Dinamik Arka Plan",
+  "settingsNotificationPermissionDenied": "Bildirim izni reddedildi. Sistem ayarlarından açabilirsiniz.",
+  "settingsDataSection": "Veri Yönetimi & Yedekleme",
+  "settingsBackupTitle": "Günlük Yedekleme",
+  "settingsBackupDescription": "Tüm izleme geçmişinizi, koleksiyonlarınızı, favorilerinizi ve notlarınızı JSON formatında yedekleyebilir ve istediğiniz cihazda geri yükleyebilirsiniz. Geri yükleme mevcut verilerin üzerine yazar.",
+  "settingsExport": "Dışa Aktar",
+  "settingsRestore": "Geri Yükle",
+  "settingsCleanDuplicates": "Mükerrer Kayıtları Temizle",
+  "settingsDataProvider": "Veri Sağlayıcı",
+  "settingsTmdbAttribution": "Bu uygulama TMDB API'sini kullanır ancak TMDB tarafından desteklenmez veya onaylanmaz.",
+
+  "settingsVersion": "Sürüm {version}",
+  "@settingsVersion": {
+    "placeholders": { "version": { "type": "String" } }
+  },
+
+  "backupCopiedTitle": "Yedek Panoya Kopyalandı!",
+  "backupCopiedMessage": "Yedekleme verileriniz kopyalandı. Bu veriyi bir dosyaya kaydederek veya başka bir cihaza göndererek saklayabilirsiniz.",
+  "backupRestoreTitle": "Yedekten Geri Yükle",
+  "backupRestoreWarning": "Daha önce kopyaladığınız JSON yedek kodunu aşağıdaki alana yapıştırın. Bu işlem koleksiyonlarınızın VE hesabınızdaki tüm izleme geçmişinizin üzerine yazacaktır!",
+  "backupRestoreHint": "JSON kodunu buraya yapıştırın...",
+  "backupRestoreConfirm": "Yükle",
+  "backupRestoreSuccess": "Verileriniz yedekten başarıyla yüklendi!",
+
+  "backupExportError": "Yedekleme dosyası oluşturulurken hata: {error}",
+  "@backupExportError": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "backupRestoreInvalid": "Hata: Geçersiz yedek kodu formatı! ({error})",
+  "@backupRestoreInvalid": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+
+  "duplicateCleanupTitle": "Mükerrer Kayıtları Temizle",
+  "duplicateCleanupConfirmTitle": "Mükerrer Kayıtları Sil",
+  "duplicateCleanupNone": "Mükerrer kayıt bulunamadı. Günlüğün temiz görünüyor.",
+
+  "duplicateCleanupConfirmBody": "{count, plural, other{{count} dizi/film için fazladan günlük kayıtları silinecek, sadece en son ilerlemeyi yansıtan kayıt tutulacak. Bu işlem geri alınamaz.}}",
+  "@duplicateCleanupConfirmBody": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "duplicateCleanupIntro": "{count, plural, other{{count} dizi/film için aynı gün birden fazla kayıt bulundu. Her grupta en son ilerlemeyi yansıtan kayıt tutulacak, geri kalanı silinecek.}}",
+  "@duplicateCleanupIntro": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "duplicateCleanupGroupSummary": "{day} • {total} kayıt, {toDelete} silinecek",
+  "@duplicateCleanupGroupSummary": {
+    "placeholders": {
+      "day": { "type": "String" },
+      "total": { "type": "int" },
+      "toDelete": { "type": "int" }
+    }
+  },
+  "duplicateCleanupCleaned": "{count, plural, other{{count} dizi/film için mükerrer kayıtlar temizlendi.}}",
+  "@duplicateCleanupCleaned": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "duplicateCleanupPartial": "{cleaned} temizlendi, {failed} tanesi başarısız oldu.",
+  "@duplicateCleanupPartial": {
+    "placeholders": { "cleaned": { "type": "int" }, "failed": { "type": "int" } }
+  },
+  "duplicateCleanupAction": "Seçilenleri Temizle ({count})",
+  "@duplicateCleanupAction": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "duplicateCleanupLoadError": "Kayıtlar yüklenemedi: {error}",
+  "@duplicateCleanupLoadError": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+
+  "@_notifications": {
+    "description": "Local notification copy. Resolved via lookupL10n because NotificationService runs outside the widget tree."
+  },
+  "notificationChannelName": "Çıkış Hatırlatıcıları",
+  "notificationChannelDescription": "İzleme listendeki film ve dizilerin çıkış günü hatırlatıcıları.",
+  "notificationReleaseTitle": "Bugün Çıkıyor! 🎬",
+  "notificationEpisodeTitle": "Yeni Bölüm! 🎬",
+  "notificationWatchlistFallbackTitle": "İzleme Listendeki Yapım",
+  "notificationShowFallbackTitle": "Takip Ettiğin Dizi",
+
+  "notificationReleaseBodyMovie": "İzleme listendeki \"{title}\" filmi bugün yayınlanıyor.",
+  "@notificationReleaseBodyMovie": {
+    "placeholders": { "title": { "type": "String" } }
+  },
+  "notificationReleaseBodyShow": "İzleme listendeki \"{title}\" yeni bölümü bugün yayınlanıyor.",
+  "@notificationReleaseBodyShow": {
+    "description": "Deliberately a separate message from the movie one rather than a swapped-in noun: the two sentences do not share a grammatical shape across languages.",
+    "placeholders": { "title": { "type": "String" } }
+  },
+  "@_search": {
+    "description": "Discover/search tab. The error strings map to TmdbFailure — a failed request used to be shown as 'no results', which is the app's most common failure given TMDb is intercepted on some networks."
+  },
+  "searchTitle": "Keşfet",
+  "searchHint": "Film veya dizi ara...",
+  "searchNoResultsTitle": "Sonuç Bulunamadı",
+  "searchNoResultsHint": "Farklı bir kelime aramayı deneyin.",
+  "searchStartTitle": "Keşfetmeye Başlayın",
+  "searchStartHint": "Milyonlarca film arasından arama yapın.",
+  "searchErrorNetwork": "TMDb'ye ulaşılamadı. Bağlantını kontrol edip tekrar dene.",
+  "searchErrorInvalidApiKey": "TMDb API anahtarı geçersiz. Ayarlar'dan kontrol edebilirsin.",
+  "searchErrorUnknown": "Arama tamamlanamadı. Lütfen tekrar dene.",
+
+  "discoverFilterAll": "Hepsi",
+  "discoverFilterMovies": "Film",
+  "discoverFilterShows": "Dizi",
+  "discoverCategoryTrend": "Trend",
+  "discoverCategoryPopular": "Popüler",
+  "discoverCategoryTopRated": "En Çok Oy Alan",
+  "discoverWindowThisWeek": "Bu Hafta",
+  "discoverWindowToday": "Bugün",
+  "discoverGenreAll": "Tümü",
+
+  "discoverHeadingTrendToday": "Bugün Trend Film/Dizileri",
+  "discoverHeadingTrendThisWeek": "Bu Hafta Trend Film/Dizileri",
+  "discoverHeadingPopular": "Popüler Film/Dizileri",
+  "discoverHeadingTopRated": "En Çok Oy Alan Film/Dizileri",
+
+  "discoverFilterEmpty": "Bu kategoride sonuç bulunamadı",
+  "@discoverFilterEmpty": {
+    "description": "Shown when a media-type filter matches nothing. Deliberately does not name the filter: the old wording spliced 'Film'/'Dizi'/'Hepsi' into the sentence, which does not survive translation."
+  },
+  "searchTmdbAttribution": "Veriler TMDB tarafından sağlanmaktadır.",
+  "@searchTmdbAttribution": {
+    "description": "Replaces a sentence that was split around an inline TMDB logo image — the two halves could not be reordered for another language."
+  },
+
+  "recommendationsTitle": "Sana Özel Öneriler",
+  "recommendationReasonPopular": "Toplulukta Popüler",
+  "recommendationReasonGenre": "{genre} Sevenlere",
+  "@recommendationReasonGenre": {
+    "placeholders": { "genre": { "type": "String" } }
+  },
+  "recommendationReasonDirector": "{director} Yönettiği İçin",
+  "@recommendationReasonDirector": {
+    "placeholders": { "director": { "type": "String" } }
+  },
+  "recommendationReasonActor": "{actor} Rol Alıyor",
+  "@recommendationReasonActor": {
+    "placeholders": { "actor": { "type": "String" } }
+  },
+  "titleUnknown": "Bilinmeyen Yapım",
+  "searchDemoModeBanner": "TMDb API anahtarı girilmedi. Şu an deneme modundasınız (\"dune\", \"interstellar\", \"inception\" veya \"dark\" aramalarını test edebilirsiniz).",
+
+  "@_movieDetail": {
+    "description": "Title detail screen and the add-watch-record sheet."
+  },
+  "detailNotFound": "Film detayları bulunamadı.",
+  "detailNoOverview": "Özet bulunmuyor.",
+  "detailOverview": "Özet",
+  "detailCast": "Oyuncular",
+  "detailDirector": "Yönetmen",
+  "detailMyRating": "Puanım",
+  "detailPlace": "Ortam",
+  "detailAddToDiary": "Günlüğe Ekle",
+  "detailAddToList": "Listeye Ekle",
+  "detailShare": "Paylaş",
+  "detailAddToMyDiary": "Günlüğüme Ekle",
+  "detailSetRank": "Sıra Belirle",
+  "detailTmdbAttribution": "Veriler TMDB tarafından sağlanmaktadır.",
+  "directorUnknown": "Bilinmiyor",
+
+  "detailFavoriteFailed": "Favori durumu güncellenemedi. Lütfen tekrar deneyin.",
+  "detailWatchlistFailed": "İzleme listesi güncellenemedi. Lütfen tekrar deneyin.",
+  "detailRecordDeleted": "İzleme kaydı silindi.",
+  "detailRecordDeleteFailed": "İzleme kaydı silinemedi. Lütfen tekrar deneyin.",
+  "detailLoadFailed": "Detaylar yüklenemedi. Lütfen tekrar deneyin.",
+
+  "timelineTitle": "İzleme Geçmişim",
+  "timelineEmpty": "Bu filmi henüz izlemediniz.",
+  "timelineLoadFailed": "İzleme geçmişi yüklenemedi.",
+  "timelineMood": "Mod: {mood}",
+  "@timelineMood": {
+    "placeholders": { "mood": { "type": "String" } }
+  },
+  "timelineDeleteTitle": "Kaydı Sil?",
+  "timelineDeleteConfirm": "Bu izleme kaydını günlüğünüzden kalıcı olarak silmek istediğinize emin misiniz?",
+  "commonDiscard": "Vazgeç",
+
+  "watchStatusCompleted": "Tamamlandı",
+  "watchStatusWatchingOf": "İzleniyor ({watched}/{total})",
+  "@watchStatusWatchingOf": {
+    "placeholders": { "watched": { "type": "int" }, "total": { "type": "int" } }
+  },
+  "watchStatusWatchingEpisode": "İzleniyor (Bölüm {episode})",
+  "@watchStatusWatchingEpisode": {
+    "placeholders": { "episode": { "type": "int" } }
+  },
+
+  "rankDialogTitle": "Favori Sırası Belirle",
+  "rankDialogField": "Sıra Numarası",
+  "rankSaveFailed": "Sıra kaydedilemedi.",
+  "commonSave": "Kaydet",
+
+  "addRecordTitle": "Günlüğe İzleme Kaydı Ekle",
+  "addRecordSubmit": "Kaydı Günlüğe Ekle",
+  "addRecordSignInRequired": "Lütfen önce giriş yapın.",
+  "addRecordSaveFailed": "Kayıt kaydedilirken hata oluştu.",
+  "addRecordMoodLabel": "İzleme Modu / Ruh Hali:",
+  "addRecordRatingLabel": "Senin Puanın:",
+  "addRecordPlaceLabel": "Nerede İzledin?",
+  "addRecordPlaceHint": "Örn: Kadıköy Sineması, Ev...",
+  "addRecordCompanionLabel": "Kiminle İzledin?",
+  "addRecordCompanionHint": "Örn: Tek başıma, Ahmet, Ailem...",
+  "addRecordNotesLabel": "Kişisel Notların:",
+  "addRecordNotesHint": "Film hakkında ne düşünüyorsun? Akılda kalıcı sahneler...",
+  "addRecordTagsLabel": "Özel Etiketler (#tag):",
+  "addRecordTagsHint": "Örn: #nostalji, #sinemada, #yalnız (Virgülle ayırın)...",
+  "addRecordVisibilityLabel": "Profilimde Göster",
+  "addRecordVisibilityHint": "Açarsan bu kayıt profilindeki \"Son İzlediklerim\" bölümünde herkese görünür.",
+  "addRecordContentSection": "İçerik",
+
+  "@_watchSuggestions": {
+    "description": "Chips that pre-fill the free-text place/companion fields. What the user ends up with is their own text, stored and shown verbatim — these only save typing, so they are translated like any other UI label."
+  },
+  "placeHome": "Ev",
+  "placeCinema": "Sinema",
+  "placeFriendsHouse": "Arkadaşın Evi",
+  "placeTravelling": "Yolculukta",
+  "placeHotel": "Otelde",
+  "placePlane": "Uçakta",
+  "placeGarden": "Bahçede",
+  "placeCamping": "Kampta",
+  "placeWork": "İş Yerinde",
+  "companionAlone": "Tek Başına",
+  "companionFriends": "Arkadaşlarla",
+  "companionFamily": "Ailemle",
+  "companionPartner": "Sevgilimle",
+  "companionSpouse": "Eşimle",
+  "companionSibling": "Kardeşimle",
+  "companionKids": "Çocuklarla",
+  "companionColleagues": "İş Arkadaşlarımla",
+
+  "episodeTrackingActive": "Aktif İzliyorum",
+  "episodeTrackingWholeSeason": "Tüm sezonu bitirdim",
+  "episodeTrackingSpecificCount": "Belirli sayıda bölüm",
+  "episodeTrackingCountLabel": "Kaç bölüm izledin?",
+  "episodeLabel": "Bölüm {episode}",
+  "@episodeLabel": {
+    "placeholders": { "episode": { "type": "int" } }
+  },
+  "episodeLabelOf": "Bölüm {episode} / {total}",
+  "@episodeLabelOf": {
+    "placeholders": { "episode": { "type": "int" }, "total": { "type": "int" } }
+  },
+
+  "episodeGuideTitle": "Bölüm Rehberi",
+  "episodeGuideEmpty": "Bu sezona ait bölüm bulunamadı.",
+  "episodeGuideLoadFailed": "Bölümler yüklenemedi. Lütfen tekrar deneyin.",
+  "episodeNoOverview": "Bölüm özeti bulunmuyor.",
+  "episodeMarkSeasonWatched": "Bu Sezonu İzledim",
+  "episodeMarkFailed": "Bölüm işaretlenemedi.",
+  "episodeAddShowPrompt": "Bu diziyi günlüğüne eklemek ister misin?",
+  "episodeAddShowExplain": "Günlüğe eklersen \"Aktif İzliyorum\" listende görünür ve istatistiklerine yansır.",
+  "episodeFollowOnly": "Sadece Takip Et",
+  "episodeConfirmWatchedTitle": "Bölümleri İzledin mi?",
+  "episodeUndoProgressTitle": "İzleme İlerlemesini Geri Al?",
+  "commonYes": "Evet",
+
+  "offlineOverviewUnavailable": "Çevrimdışı mod: Özet yüklenemedi.",
+  "offlineContentTitle": "Çevrimdışı İçerik",
+  "offlineFallbackOverview": "Bağlantı sorunu nedeniyle film detayları tam yüklenemedi. Ancak bu içeriği hala günlüğünüze veya listelerinize ekleyebilirsiniz.",
+
+  "addRecordSuccess": "{title} günlüğünüze başarıyla eklendi!",
+  "@addRecordSuccess": {
+    "placeholders": { "title": { "type": "String" } }
+  },
+  "rankDialogExplain": "Bu film için favori sıralama numarasını girin (Örn: 1, 2, 5). Boş bırakırsanız sıralamadan çıkarılır.",
+  "castSearching": "{name} profili aranıyor...",
+  "@castSearching": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "castNotFound": "{name} için profil bulunamadı.",
+  "@castNotFound": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "episodeNumbered": "{episode}. Bölüm",
+  "@episodeNumbered": {
+    "placeholders": { "episode": { "type": "int" } }
+  },
+  "episodeUpNext": "▶ SIRADAKİ",
+  "episodeMarkedWatched": "{episode}. Bölüm izlendi olarak işaretlendi.",
+  "@episodeMarkedWatched": {
+    "placeholders": { "episode": { "type": "int" } }
+  },
+  "episodeMarkedUnwatched": "{episode}. Bölüm izlenmedi olarak işaretlendi.",
+  "@episodeMarkedUnwatched": {
+    "placeholders": { "episode": { "type": "int" } }
+  },
+  "episodeBulkWatchConfirm": "Bu bölümü izlendi olarak işaretlemek, önceki tüm bölümleri de ({from} - {to}) izlendi sayacaktır. Devam etmek istiyor musunuz?",
+  "@episodeBulkWatchConfirm": {
+    "placeholders": { "from": { "type": "int" }, "to": { "type": "int" } }
+  },
+  "episodeBulkUnwatchConfirm": "Bu bölümü izlenmedi olarak işaretlemek, sonraki tüm bölümleri de ({from} - {to}) izlenmedi sayacaktır. Devam etmek istiyor musunuz?",
+  "@episodeBulkUnwatchConfirm": {
+    "placeholders": { "from": { "type": "int" }, "to": { "type": "int" } }
+  },
+  "tagNostalgia": "#nostalji",
+  "tagAtTheCinema": "#sinemada",
+  "tagAlone": "#yalnız",
+  "tagAction": "#aksiyon",
+  "tagRomance": "#romantizm",
+  "tagThriller": "#gerilim",
+  "tagComedy": "#komedi",
+  "tagDrama": "#drama",
+  "tagSciFi": "#bilimkurgu",
+  "tagHorror": "#korku",
+  "tagClassic": "#klasik",
+  "tagNewDiscovery": "#yenikesif",
+
+  "notificationEpisodeBody": "\"{show}\" dizisinin {season}. sezon {episode}. bölümü bugün yayınlanıyor.",
+  "@notificationEpisodeBody": {
+    "placeholders": {
+      "show": { "type": "String" },
+      "season": { "type": "int" },
+      "episode": { "type": "int" }
+    }
+  }
 }

@@ -75,7 +75,7 @@ class SearchGenreChips extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(right: 6),
             child: _genreChip(
-              label: 'Tümü',
+              label: AppLocalizations.of(context).discoverGenreAll,
               isSelected: selectedGenreId == null,
               onTap: () => onGenreSelected(null),
             ),
