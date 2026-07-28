@@ -42,6 +42,8 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
   int? _lastWatchedEpisode;
   int _selectedEpisode = 1;
   bool _seededFromSettings = false;
+  // True until the settings have been re-fetched for this sheet; see initState.
+  bool _awaitingFreshSettings = true;
 
   // When "Aktif İzliyorum" is off, the default assumption is that the user
   // finished the whole show (that's why they're logging it, not tracking
@@ -78,6 +80,23 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
     super.initState();
     _selectedDate = DateTime.now();
     _totalEpisodes = (widget.movieData['number_of_episodes'] as num?)?.toInt();
+
+    // This sheet is reopened after every saved record, and
+    // _seedFromSettingsIfNeeded below latches onto the first settings value it
+    // sees. Nothing listens to those settings while the sheet is closed, so
+    // that first value can predate the record just saved (see
+    // refreshMovieSettings) — ask for a fresh one, and don't seed until it
+    // lands. Deferred to a post-frame callback because invalidating a provider
+    // from initState happens mid-build, which the framework rejects.
+    if (widget.movieData['media_type'] == 'tv') {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        refreshMovieSettings(ref, (tmdbId: (widget.movieData['id'] as num).toInt(), isTv: true));
+        setState(() => _awaitingFreshSettings = false);
+      });
+    } else {
+      _awaitingFreshSettings = false;
+    }
   }
 
   // Seeds _isActivelyWatching/_lastWatchedEpisode from the show's persisted
@@ -87,11 +106,15 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
   // reading ref.read(...).value there could silently see null even when a
   // row already exists in the database.
   void _seedFromSettingsIfNeeded() {
-    if (_seededFromSettings || widget.movieData['media_type'] != 'tv') return;
+    if (_seededFromSettings || _awaitingFreshSettings || widget.movieData['media_type'] != 'tv') return;
 
     final tmdbId = (widget.movieData['id'] as num).toInt();
     final asyncSettings = ref.watch(movieSettingsSnapshotProvider((tmdbId: tmdbId, isTv: true)));
-    if (!asyncSettings.hasValue) return; // still loading — try again next build
+    // Not just `hasValue`: after the refresh in initState the provider reports
+    // AsyncData(isLoading: true) carrying the value it had *before* the
+    // refresh, and seeding from that is exactly what the refresh is meant to
+    // avoid. Wait for a settled value — try again next build until then.
+    if (asyncSettings.isLoading || !asyncSettings.hasValue) return;
     final existing = asyncSettings.value;
 
     _seededFromSettings = true;

@@ -14,6 +14,7 @@ import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'support/riverpod_async.dart';
 import 'package:cinefile/features/auth/controllers/auth_controller.dart';
 import 'package:cinefile/core/database/database_provider.dart';
 
@@ -75,9 +76,9 @@ void main() {
     // decide whether isPublic should be filtered. Reading its .future before
     // authStateProvider has emitted races a provider rebuild against the
     // Future captured here, which orphans it — settle auth first.
-    await container.read(authStateProvider.future);
+    await readAsync(container, authStateProvider.future);
 
-    final records = await container.read(watchRecordsForUserProvider('owner').future);
+    final records = await readAsync(container, watchRecordsForUserProvider('owner').future);
     final titles = records.map((r) => r.movie.title).toSet();
 
     expect(titles, {'Public Movie', 'Private Movie'});
@@ -96,9 +97,9 @@ void main() {
     // decide whether isPublic should be filtered. Reading its .future before
     // authStateProvider has emitted races a provider rebuild against the
     // Future captured here, which orphans it — settle auth first.
-    await container.read(authStateProvider.future);
+    await readAsync(container, authStateProvider.future);
 
-    final records = await container.read(watchRecordsForUserProvider('owner').future);
+    final records = await readAsync(container, watchRecordsForUserProvider('owner').future);
     final titles = records.map((r) => r.movie.title).toSet();
 
     expect(titles, {'Public Movie'});

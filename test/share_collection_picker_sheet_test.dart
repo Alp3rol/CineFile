@@ -8,6 +8,7 @@ import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'support/riverpod_async.dart';
 import 'package:cinefile/core/database/app_database.dart';
 import 'package:cinefile/core/database/database_provider.dart';
 import 'package:cinefile/core/database/movie_repository.dart';
@@ -29,7 +30,7 @@ void main() {
       container.dispose();
       await db.close();
     });
-    await container.read(authStateProvider.future);
+    await readAsync(container, authStateProvider.future);
 
     // Seed a collection via the repository, exactly as the app's own
     // "Yeni Liste" flow would.

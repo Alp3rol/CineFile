@@ -3,6 +3,7 @@ import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'support/riverpod_async.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:cinefile/core/database/app_database.dart';
 import 'package:cinefile/features/auth/controllers/auth_controller.dart';
@@ -135,7 +136,7 @@ void main() {
     );
 
     // Pre-resolve auth so the stream is in AsyncData before the widget mounts.
-    await container.read(authStateProvider.future);
+    await readAsync(container, authStateProvider.future);
 
     await tester.pumpWidget(wrapWidget(movie: movie, settings: initialSetting));
     await tester.pumpAndSettle();
@@ -191,7 +192,7 @@ void main() {
     });
 
     // Pre-resolve auth
-    await container.read(authStateProvider.future);
+    await readAsync(container, authStateProvider.future);
 
     await tester.pumpWidget(wrapWidget(movie: movie, settings: initialSetting));
     await tester.pumpAndSettle();
@@ -231,7 +232,7 @@ void main() {
       isActivelyWatching: true,
     );
 
-    await container.read(authStateProvider.future);
+    await readAsync(container, authStateProvider.future);
 
     await tester.pumpWidget(wrapWidget(movie: movie, settings: initialSetting));
     await tester.pumpAndSettle();
@@ -267,7 +268,7 @@ void main() {
       createdAt: DateTime.now(),
     );
 
-    await container.read(authStateProvider.future);
+    await readAsync(container, authStateProvider.future);
 
     var addToJournalRequested = false;
     await tester.pumpWidget(wrapWidget(
@@ -307,7 +308,7 @@ void main() {
       createdAt: DateTime.now(),
     );
 
-    await container.read(authStateProvider.future);
+    await readAsync(container, authStateProvider.future);
 
     await tester.pumpWidget(wrapWidget(movie: movie, settings: null, hasJournalEntry: false));
     await tester.pumpAndSettle();
@@ -351,7 +352,7 @@ void main() {
       isActivelyWatching: true,
     );
 
-    await container.read(authStateProvider.future);
+    await readAsync(container, authStateProvider.future);
 
     await tester.pumpWidget(wrapWidget(movie: movie, settings: initialSetting, totalEpisodes: null));
     await tester.pumpAndSettle();
@@ -391,7 +392,7 @@ void main() {
       isActivelyWatching: true,
     );
 
-    await container.read(authStateProvider.future);
+    await readAsync(container, authStateProvider.future);
 
     await tester.pumpWidget(wrapWidget(movie: movie, settings: initialSetting));
     await tester.pumpAndSettle();
@@ -419,7 +420,7 @@ void main() {
       isActivelyWatching: true,
     );
 
-    await container.read(authStateProvider.future);
+    await readAsync(container, authStateProvider.future);
 
     await tester.pumpWidget(wrapWidget(movie: movie, settings: initialSetting));
     await tester.pumpAndSettle();
@@ -464,7 +465,7 @@ void main() {
       isActivelyWatching: true,
     );
 
-    await container.read(authStateProvider.future);
+    await readAsync(container, authStateProvider.future);
 
     await tester.pumpWidget(wrapWidget(movie: movie, settings: initialSetting));
     await tester.pumpAndSettle();

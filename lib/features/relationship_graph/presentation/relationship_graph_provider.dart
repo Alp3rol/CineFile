@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import '../../../core/constants/api_constants.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/database/database_provider.dart';

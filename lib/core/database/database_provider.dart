@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart'; // For kIsWeb
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -63,6 +64,28 @@ final movieSettingsSnapshotProvider = Provider.family<AsyncValue<UserMovieSettin
   }
   return ref.watch(movieSettingsProvider(key));
 });
+
+/// Re-subscribes [movieSettingsProvider] for [key] so its next value is a
+/// genuinely current snapshot.
+///
+/// Riverpod 3 pauses a provider while nothing is listening to it, and a
+/// paused stream provider hands its next listener the value it held at pause
+/// time — anything that landed in between is only applied a tick later, with
+/// no flag (`isRefreshing`, `isLoading`...) marking that first value as
+/// stale. Callers that seed state from the first build where settings have a
+/// value would therefore seed from a pre-write snapshot: reopening
+/// AddWatchRecordSheet after logging an episode suggested the episode just
+/// logged instead of the next one.
+///
+/// Invalidating drops the cached value, so the settings read as "loading"
+/// until Firestore answers again and seeding waits for real data. A reactive
+/// read is not possible here (the point is to discard what was cached), so
+/// this kIsWeb branch is within this file's documented exception (see
+/// CLAUDE.md) — the web-guest map lives in memory and is never stale.
+void refreshMovieSettings(WidgetRef ref, MovieKey key) {
+  if (kIsWeb) return;
+  ref.invalidate(movieSettingsProvider(key));
+}
 
 // Stream provider to get settings for a specific movie
 final movieSettingsProvider = StreamProvider.family<UserMovieSetting?, MovieKey>((ref, key) {

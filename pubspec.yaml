@@ -36,7 +36,7 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
-  flutter_riverpod: ^2.6.1
+  flutter_riverpod: ^3.4.1
   drift: ^2.34.1
   sqlite3: ^3.3.0
   path_provider: ^2.1.6
@@ -46,7 +46,7 @@ dependencies:
   google_fonts: ^8.1.0
   cached_network_image: ^3.4.1
   intl: ^0.20.3
-  fl_chart: ^0.70.0
+  fl_chart: ^1.2.0
   flutter_secure_storage: ^10.3.1
   share_plus: ^13.2.0
   visibility_detector: ^0.4.0+2
@@ -72,7 +72,11 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
-  drift_dev: ^2.34.2
+  # Pinned below 2.34.1+1: that release requires analyzer ^13, which is
+  # incompatible with the `test` version flutter_test's pinned test_api 0.7.11
+  # allows — and riverpod 3 depends on `test` directly. Revisit when a Flutter
+  # stable ships a newer test_api.
+  drift_dev: 2.34.0
   build_runner: ^2.15.0
   flutter_launcher_icons: 0.14.4
   flutter_native_splash: 2.4.8

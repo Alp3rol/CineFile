@@ -9,6 +9,7 @@ import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'support/riverpod_async.dart';
 import 'package:cinefile/core/database/app_database.dart';
 import 'package:cinefile/core/database/database_provider.dart';
 import 'package:cinefile/core/database/movie_repository.dart';
@@ -77,7 +78,7 @@ void main() {
     // Ensure the mocked authStateChanges() stream has actually emitted before
     // the repository reads it synchronously — otherwise authStateProvider is
     // still AsyncLoading (value == null) and the write becomes a no-op.
-    await signedInContainer.read(authStateProvider.future);
+    await readAsync(signedInContainer, authStateProvider.future);
 
     final repo = signedInContainer.read(movieRepositoryProvider);
     await repo.updateWatchRecordRankings({(tmdbId: 42, isTv: false): 3});

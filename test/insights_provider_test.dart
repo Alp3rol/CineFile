@@ -2,6 +2,7 @@
 // the shared _countCommaSeparatedField helper in insights_provider.dart.
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'support/riverpod_async.dart';
 import 'package:cinefile/core/database/app_database.dart';
 import 'package:cinefile/core/database/database_provider.dart';
 import 'package:cinefile/features/insights/presentation/insights_provider.dart';
@@ -54,8 +55,8 @@ void main() {
     ]);
     addTearDown(container.dispose);
 
-    await container.read(allWatchRecordsProvider.future);
-    await container.read(allMovieSettingsProvider.future);
+    await readAsync(container, allWatchRecordsProvider.future);
+    await readAsync(container, allMovieSettingsProvider.future);
     final data = container.read(insightsProvider)!;
 
     expect(data.topGenres.firstWhere((e) => e.key == 'Dram').value, 2);
@@ -80,8 +81,8 @@ void main() {
     ]);
     addTearDown(container.dispose);
 
-    await container.read(allWatchRecordsProvider.future);
-    await container.read(allMovieSettingsProvider.future);
+    await readAsync(container, allWatchRecordsProvider.future);
+    await readAsync(container, allMovieSettingsProvider.future);
     final data = container.read(insightsProvider)!;
 
     expect(data.totalDurationMinutes, 120 * 1 + 120 * 3);
@@ -106,8 +107,8 @@ void main() {
     ]);
     addTearDown(container.dispose);
 
-    await container.read(allWatchRecordsProvider.future);
-    await container.read(allMovieSettingsProvider.future);
+    await readAsync(container, allWatchRecordsProvider.future);
+    await readAsync(container, allMovieSettingsProvider.future);
     final data = container.read(insightsProvider);
 
     expect(data, isNotNull);
@@ -139,8 +140,8 @@ void main() {
     ]);
     addTearDown(container.dispose);
 
-    await container.read(allWatchRecordsProvider.future);
-    await container.read(allMovieSettingsProvider.future);
+    await readAsync(container, allWatchRecordsProvider.future);
+    await readAsync(container, allMovieSettingsProvider.future);
     final data = container.read(insightsProvider)!;
 
     // The diary record alone contributes episodeCount (2) for a TV show;

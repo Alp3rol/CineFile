@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import '../../../core/network/tmdb_service.dart';
 
 enum DiscoverCategory { trend, popular, topRated }

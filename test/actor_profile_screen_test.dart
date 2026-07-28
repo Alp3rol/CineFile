@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:cinefile/features/actor_profile/presentation/actor_profile_provider.dart';
 import 'package:cinefile/features/actor_profile/presentation/actor_profile_screen.dart';

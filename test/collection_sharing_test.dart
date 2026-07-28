@@ -9,6 +9,7 @@ import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'support/riverpod_async.dart';
 import 'package:cinefile/core/database/app_database.dart';
 import 'package:cinefile/core/database/database_provider.dart';
 import 'package:cinefile/core/database/movie_repository.dart';
@@ -35,7 +36,7 @@ void main() {
     });
     // Settle authStateProvider before the repository reads it synchronously
     // (same gotcha documented in movie_repository_test.dart).
-    await container.read(authStateProvider.future);
+    await readAsync(container, authStateProvider.future);
   });
 
   test('turning sharing on mirrors the collection; turning it off deletes the mirror', () async {

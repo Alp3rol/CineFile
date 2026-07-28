@@ -43,7 +43,7 @@ class _ActorProfileScreenState extends ConsumerState<ActorProfileScreen> {
     final filmographyAsync = ref.watch(actorFilmographyProvider(widget.actorId));
 
     // Register active color from actor's profile image to dynamic background
-    final actorDetails = detailAsync.valueOrNull;
+    final actorDetails = detailAsync.value;
     if (actorDetails != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final profilePath = actorDetails['profile_path'] as String?;

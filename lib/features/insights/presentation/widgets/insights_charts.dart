@@ -59,7 +59,7 @@ class MonthlyChartCard extends StatelessWidget {
                   enabled: true,
                   touchTooltipData: BarTouchTooltipData(
                     getTooltipColor: (_) => AppTheme.surfaceColor,
-                    tooltipRoundedRadius: 8,
+                    tooltipBorderRadius: BorderRadius.circular(8),
                     tooltipPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     getTooltipItem: (group, groupIndex, rod, rodIndex) {
                       return BarTooltipItem(
@@ -282,7 +282,7 @@ class RatingDistributionCard extends StatelessWidget {
                   enabled: true,
                   touchTooltipData: BarTouchTooltipData(
                     getTooltipColor: (_) => AppTheme.surfaceColor,
-                    tooltipRoundedRadius: 8,
+                    tooltipBorderRadius: BorderRadius.circular(8),
                     tooltipPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     getTooltipItem: (group, groupIndex, rod, rodIndex) {
                       return BarTooltipItem(

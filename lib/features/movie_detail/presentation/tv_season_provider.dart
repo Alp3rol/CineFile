@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import '../../../core/network/tmdb_service.dart';
 
 // Keeps track of the selected season number for a given TV show ID in the UI.
