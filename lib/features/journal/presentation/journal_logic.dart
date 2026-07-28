@@ -1,3 +1,4 @@
+import '../../../core/constants/tmdb_genres.dart';
 import '../../../core/database/database_provider.dart';
 
 // Filtering, insights-stat calculation, table-view sorting and drag-reorder
@@ -44,14 +45,16 @@ List<WatchRecordWithMovie> filterJournalRecords({
 class JournalInsightsStats {
   final int thisMonthCount;
   final double avgRating;
-  final String favoriteGenre;
+  /// Most-watched genre id in the current filter, or null when there is no
+  /// genre data yet. Rendered with `genreName(l10n, id)`.
+  final int? favoriteGenreId;
   final int totalHours;
   final int totalRemainingMinutes;
 
   const JournalInsightsStats({
     required this.thisMonthCount,
     required this.avgRating,
-    required this.favoriteGenre,
+    required this.favoriteGenreId,
     required this.totalHours,
     required this.totalRemainingMinutes,
   });
@@ -75,27 +78,26 @@ JournalInsightsStats computeJournalInsights(List<WatchRecordWithMovie> filtered)
   final totalHours = totalRuntimeMinutes ~/ 60;
   final totalRemainingMinutes = totalRuntimeMinutes % 60;
 
-  String favoriteGenre = 'Belirsiz';
+  // Counted by id, not by localized name, so a library logged across a
+  // language change still has one favourite genre rather than two halves.
+  int? favoriteGenreId;
   if (filtered.isNotEmpty) {
-    final genreCounts = <String, int>{};
+    final genreCounts = <int, int>{};
     for (final item in filtered) {
-      final genresList = item.movie.genres?.split(', ') ?? [];
-      for (final g in genresList) {
-        if (g.trim().isNotEmpty) {
-          genreCounts[g] = (genreCounts[g] ?? 0) + 1;
-        }
+      for (final id in parseGenreIds(item.movie.genreIds)) {
+        genreCounts[id] = (genreCounts[id] ?? 0) + 1;
       }
     }
     if (genreCounts.isNotEmpty) {
       final sortedGenres = genreCounts.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
-      favoriteGenre = sortedGenres.first.key;
+      favoriteGenreId = sortedGenres.first.key;
     }
   }
 
   return JournalInsightsStats(
     thisMonthCount: thisMonthCount,
     avgRating: avgRating,
-    favoriteGenre: favoriteGenre,
+    favoriteGenreId: favoriteGenreId,
     totalHours: totalHours,
     totalRemainingMinutes: totalRemainingMinutes,
   );

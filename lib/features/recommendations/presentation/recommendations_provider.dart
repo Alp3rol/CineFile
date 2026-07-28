@@ -1,52 +1,20 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/constants/tmdb_genres.dart';
 import '../../../core/database/database_provider.dart';
+import '../../../core/l10n/genre_names.dart';
+import '../../../core/l10n/l10n_lookup.dart';
 import '../../../core/network/tmdb_service.dart';
 import '../../insights/presentation/insights_provider.dart';
+import '../../settings/presentation/settings_provider.dart';
 import '../data/recommendation_model.dart';
-
-const Map<String, int> _tmdbMovieGenreMap = {
-  'Aksiyon': 28,
-  'Macera': 12,
-  'Animasyon': 16,
-  'Komedi': 35,
-  'Suç': 80,
-  'Belgesel': 99,
-  'Dram': 18,
-  'Aile': 10751,
-  'Fantastik': 14,
-  'Tarih': 36,
-  'Korku': 27,
-  'Müzik': 10402,
-  'Gizem': 9648,
-  'Romantik': 10749,
-  'Bilim Kurgu': 878,
-  'Gerilim': 53,
-  'Savaş': 10752,
-  'Vahşi Batı': 37
-};
-
-const Map<String, int> _tmdbTvGenreMap = {
-  'Aksiyon & Macera': 10759,
-  'Animasyon': 16,
-  'Komedi': 35,
-  'Suç': 80,
-  'Belgesel': 99,
-  'Dram': 18,
-  'Aile': 10751,
-  'Çocuk': 10762,
-  'Gizem': 9648,
-  'Haberler': 10763,
-  'Realite': 10764,
-  'Bilim Kurgu & Fantazi': 10765,
-  'Pembe Dizi': 10766,
-  'Talk Show': 10767,
-  'Savaş & Politika': 10768,
-  'Vahşi Batı': 37
-};
 
 final recommendationsProvider = FutureProvider<List<RecommendationItem>>((ref) async {
   final tmdbService = ref.watch(tmdbServiceProvider);
+  // Reasons are built here rather than in a widget, so the genre name is
+  // resolved through the context-free lookup against the user's chosen
+  // language.
+  final l10n = lookupL10n(ref.watch(localeProvider));
   final watchRecords = ref.watch(allWatchRecordsProvider).value ?? [];
   final movieSettings = ref.watch(allMovieSettingsProvider).value ?? {};
   final insights = ref.watch(insightsProvider);
@@ -93,15 +61,13 @@ final recommendationsProvider = FutureProvider<List<RecommendationItem>>((ref) a
 
   // 1. Discover by top genres
   if (insights.topGenres.isNotEmpty) {
+    // Ids come straight from the stats now — no name→id table to keep in sync.
+    // Each id is only valid against the endpoint whose vocabulary contains it,
+    // so a TV-only genre isn't sent to discover/movie and vice versa.
     final top2Genres = insights.topGenres.take(2).map((e) => e.key).toList();
-    final movieGenreIds = top2Genres
-        .map((g) => _tmdbMovieGenreMap[g])
-        .where((id) => id != null)
-        .join(',');
-    final tvGenreIds = top2Genres
-        .map((g) => _tmdbTvGenreMap[g])
-        .where((id) => id != null)
-        .join(',');
+    final topGenreLabel = genreName(l10n, top2Genres.first);
+    final movieGenreIds = top2Genres.where(kMovieGenreIds.contains).join(',');
+    final tvGenreIds = top2Genres.where(kTvGenreIds.contains).join(',');
 
     try {
       if (movieGenreIds.isNotEmpty) {
@@ -111,7 +77,7 @@ final recommendationsProvider = FutureProvider<List<RecommendationItem>>((ref) a
           if (!libraryKeys.contains('${id}_false')) {
             recommendationsMap['${id}_false'] = RecommendationItem.fromJson(
               m,
-              reason: '${top2Genres.first} Sevenlere',
+              reason: '$topGenreLabel Sevenlere',
               isTvOverride: false,
             );
           }
@@ -125,7 +91,7 @@ final recommendationsProvider = FutureProvider<List<RecommendationItem>>((ref) a
           if (!libraryKeys.contains('${id}_true')) {
             recommendationsMap['${id}_true'] = RecommendationItem.fromJson(
               tv,
-              reason: '${top2Genres.first} Sevenlere',
+              reason: '$topGenreLabel Sevenlere',
               isTvOverride: true,
             );
           }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/auth_controller.dart';
@@ -52,12 +53,12 @@ class AuthGate extends ConsumerWidget {
                 const Icon(Icons.error_outline_rounded, color: AppTheme.accentColor, size: 48),
                 const SizedBox(height: 16),
                 Text(
-                  'Kimlik Doğrulama Hatası',
+                  AppLocalizations.of(context).authGateErrorTitle,
                   style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Oturum bilgisi alınamadı. Lütfen tekrar deneyin.',
+                  AppLocalizations.of(context).authGateErrorMessage,
                   textAlign: TextAlign.center,
                   style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary),
                 ),

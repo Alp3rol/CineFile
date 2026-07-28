@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/database/database_provider.dart';
@@ -24,11 +25,11 @@ class UserProfileScreen extends ConsumerWidget {
     final effectiveUserId = userId ?? currentUser?.uid;
 
     if (effectiveUserId == null) {
-      return const Scaffold(
+      return Scaffold(
         backgroundColor: AppTheme.backgroundColor,
         body: Center(
           child: Text(
-            'Lütfen giriş yapın.',
+            AppLocalizations.of(context).authSignInRequired,
             style: TextStyle(color: Colors.white),
           ),
         ),
@@ -60,9 +61,9 @@ class UserProfileScreen extends ConsumerWidget {
           ),
           data: (userModel) {
             if (userModel == null) {
-              return const Center(
+              return Center(
                 child: Text(
-                  'Kullanıcı bulunamadı.',
+                  AppLocalizations.of(context).authUserNotFound,
                   style: TextStyle(color: Colors.white70),
                 ),
               );

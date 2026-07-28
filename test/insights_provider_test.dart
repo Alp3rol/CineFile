@@ -3,6 +3,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'support/riverpod_async.dart';
+import 'package:cinefile/core/constants/tmdb_genres.dart';
 import 'package:cinefile/core/database/app_database.dart';
 import 'package:cinefile/core/database/database_provider.dart';
 import 'package:cinefile/features/insights/presentation/insights_provider.dart';
@@ -10,7 +11,7 @@ import 'package:cinefile/features/insights/presentation/insights_provider.dart';
 WatchRecordWithMovie _record({
   required int id,
   required int movieId,
-  required String genres,
+  required List<int> genres,
   required String director,
   required String actors,
   String? tags,
@@ -21,7 +22,7 @@ WatchRecordWithMovie _record({
     tmdbId: movieId,
     title: 'Movie $movieId',
     isTv: false,
-    genres: genres,
+    genreIds: formatGenreIds(genres),
     director: director,
     actors: actors,
     runtime: runtime,
@@ -45,8 +46,8 @@ WatchRecordWithMovie _record({
 void main() {
   test('insightsProvider aggregates genres, directors, actors and tags correctly', () async {
     final records = [
-      _record(id: 1, movieId: 1, genres: 'Dram, Bilim Kurgu', director: 'Christopher Nolan', actors: 'A, B', tags: 'sinema,gece'),
-      _record(id: 2, movieId: 2, genres: 'Dram', director: 'Christopher Nolan', actors: 'B, C', tags: 'gece'),
+      _record(id: 1, movieId: 1, genres: const [TmdbGenre.drama, TmdbGenre.scienceFiction], director: 'Christopher Nolan', actors: 'A, B', tags: 'sinema,gece'),
+      _record(id: 2, movieId: 2, genres: const [TmdbGenre.drama], director: 'Christopher Nolan', actors: 'B, C', tags: 'gece'),
     ];
 
     final container = ProviderContainer(overrides: [
@@ -59,8 +60,10 @@ void main() {
     await readAsync(container, allMovieSettingsProvider.future);
     final data = container.read(insightsProvider)!;
 
-    expect(data.topGenres.firstWhere((e) => e.key == 'Dram').value, 2);
-    expect(data.topGenres.firstWhere((e) => e.key == 'Bilim Kurgu').value, 1);
+    // Keyed by TMDb genre id, not by the localized name — that is the whole
+    // point of the column, so the tally survives a language switch.
+    expect(data.topGenres.firstWhere((e) => e.key == TmdbGenre.drama).value, 2);
+    expect(data.topGenres.firstWhere((e) => e.key == TmdbGenre.scienceFiction).value, 1);
     expect(data.topDirectors.firstWhere((e) => e.key == 'Christopher Nolan').value, 2);
     expect(data.topActors.firstWhere((e) => e.key == 'B').value, 2);
     expect(data.topTags.firstWhere((e) => e.key == 'gece').value, 2);
@@ -70,9 +73,9 @@ void main() {
   test('totalDurationMinutes scales a watch record by its episodeCount', () async {
     final records = [
       // A single-movie watch: duration is just the runtime.
-      _record(id: 1, movieId: 1, genres: 'Dram', director: 'A', actors: 'A', runtime: 120, episodeCount: 1),
+      _record(id: 1, movieId: 1, genres: const [TmdbGenre.drama], director: 'A', actors: 'A', runtime: 120, episodeCount: 1),
       // A binge-watched TV record covering 3 episodes of a 120-minute show.
-      _record(id: 2, movieId: 2, genres: 'Dram', director: 'B', actors: 'B', runtime: 120, episodeCount: 3),
+      _record(id: 2, movieId: 2, genres: const [TmdbGenre.drama], director: 'B', actors: 'B', runtime: 120, episodeCount: 3),
     ];
 
     final container = ProviderContainer(overrides: [
@@ -120,7 +123,7 @@ void main() {
 
   test('a quick-tap episode-progress day is not double-counted when a real diary entry already covers it', () async {
     final sameDay = DateTime(2026, 3, 10, 20, 0);
-    final record = _record(id: 1, movieId: 99, genres: 'Dram', director: 'A', actors: 'A', episodeCount: 2)
+    final record = _record(id: 1, movieId: 99, genres: const [TmdbGenre.drama], director: 'A', actors: 'A', episodeCount: 2)
         .copyWithWatchDate(sameDay, isTv: true, tmdbId: 99);
 
     final settings = UserMovieSetting(
@@ -172,7 +175,7 @@ extension _WatchRecordWithMovieTestHelper on WatchRecordWithMovie {
         tmdbId: tmdbId,
         title: movie.title,
         isTv: isTv,
-        genres: movie.genres,
+        genreIds: movie.genreIds,
         director: movie.director,
         actors: movie.actors,
         runtime: movie.runtime,

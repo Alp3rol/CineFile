@@ -90,6 +90,17 @@ class $MoviesTable extends Movies with TableInfo<$MoviesTable, Movie> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _genreIdsMeta = const VerificationMeta(
+    'genreIds',
+  );
+  @override
+  late final GeneratedColumn<String> genreIds = GeneratedColumn<String>(
+    'genre_ids',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _directorMeta = const VerificationMeta(
     'director',
   );
@@ -189,6 +200,7 @@ class $MoviesTable extends Movies with TableInfo<$MoviesTable, Movie> {
     releaseYear,
     runtime,
     genres,
+    genreIds,
     director,
     actors,
     overview,
@@ -269,6 +281,12 @@ class $MoviesTable extends Movies with TableInfo<$MoviesTable, Movie> {
       context.handle(
         _genresMeta,
         genres.isAcceptableOrUnknown(data['genres']!, _genresMeta),
+      );
+    }
+    if (data.containsKey('genre_ids')) {
+      context.handle(
+        _genreIdsMeta,
+        genreIds.isAcceptableOrUnknown(data['genre_ids']!, _genreIdsMeta),
       );
     }
     if (data.containsKey('director')) {
@@ -363,6 +381,10 @@ class $MoviesTable extends Movies with TableInfo<$MoviesTable, Movie> {
         DriftSqlType.string,
         data['${effectivePrefix}genres'],
       ),
+      genreIds: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}genre_ids'],
+      ),
       director: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}director'],
@@ -413,6 +435,7 @@ class Movie extends DataClass implements Insertable<Movie> {
   final int? releaseYear;
   final int? runtime;
   final String? genres;
+  final String? genreIds;
   final String? director;
   final String? actors;
   final String? overview;
@@ -430,6 +453,7 @@ class Movie extends DataClass implements Insertable<Movie> {
     this.releaseYear,
     this.runtime,
     this.genres,
+    this.genreIds,
     this.director,
     this.actors,
     this.overview,
@@ -461,6 +485,9 @@ class Movie extends DataClass implements Insertable<Movie> {
     }
     if (!nullToAbsent || genres != null) {
       map['genres'] = Variable<String>(genres);
+    }
+    if (!nullToAbsent || genreIds != null) {
+      map['genre_ids'] = Variable<String>(genreIds);
     }
     if (!nullToAbsent || director != null) {
       map['director'] = Variable<String>(director);
@@ -507,6 +534,9 @@ class Movie extends DataClass implements Insertable<Movie> {
       genres: genres == null && nullToAbsent
           ? const Value.absent()
           : Value(genres),
+      genreIds: genreIds == null && nullToAbsent
+          ? const Value.absent()
+          : Value(genreIds),
       director: director == null && nullToAbsent
           ? const Value.absent()
           : Value(director),
@@ -544,6 +574,7 @@ class Movie extends DataClass implements Insertable<Movie> {
       releaseYear: serializer.fromJson<int?>(json['releaseYear']),
       runtime: serializer.fromJson<int?>(json['runtime']),
       genres: serializer.fromJson<String?>(json['genres']),
+      genreIds: serializer.fromJson<String?>(json['genreIds']),
       director: serializer.fromJson<String?>(json['director']),
       actors: serializer.fromJson<String?>(json['actors']),
       overview: serializer.fromJson<String?>(json['overview']),
@@ -566,6 +597,7 @@ class Movie extends DataClass implements Insertable<Movie> {
       'releaseYear': serializer.toJson<int?>(releaseYear),
       'runtime': serializer.toJson<int?>(runtime),
       'genres': serializer.toJson<String?>(genres),
+      'genreIds': serializer.toJson<String?>(genreIds),
       'director': serializer.toJson<String?>(director),
       'actors': serializer.toJson<String?>(actors),
       'overview': serializer.toJson<String?>(overview),
@@ -586,6 +618,7 @@ class Movie extends DataClass implements Insertable<Movie> {
     Value<int?> releaseYear = const Value.absent(),
     Value<int?> runtime = const Value.absent(),
     Value<String?> genres = const Value.absent(),
+    Value<String?> genreIds = const Value.absent(),
     Value<String?> director = const Value.absent(),
     Value<String?> actors = const Value.absent(),
     Value<String?> overview = const Value.absent(),
@@ -605,6 +638,7 @@ class Movie extends DataClass implements Insertable<Movie> {
     releaseYear: releaseYear.present ? releaseYear.value : this.releaseYear,
     runtime: runtime.present ? runtime.value : this.runtime,
     genres: genres.present ? genres.value : this.genres,
+    genreIds: genreIds.present ? genreIds.value : this.genreIds,
     director: director.present ? director.value : this.director,
     actors: actors.present ? actors.value : this.actors,
     overview: overview.present ? overview.value : this.overview,
@@ -634,6 +668,7 @@ class Movie extends DataClass implements Insertable<Movie> {
           : this.releaseYear,
       runtime: data.runtime.present ? data.runtime.value : this.runtime,
       genres: data.genres.present ? data.genres.value : this.genres,
+      genreIds: data.genreIds.present ? data.genreIds.value : this.genreIds,
       director: data.director.present ? data.director.value : this.director,
       actors: data.actors.present ? data.actors.value : this.actors,
       overview: data.overview.present ? data.overview.value : this.overview,
@@ -658,6 +693,7 @@ class Movie extends DataClass implements Insertable<Movie> {
           ..write('releaseYear: $releaseYear, ')
           ..write('runtime: $runtime, ')
           ..write('genres: $genres, ')
+          ..write('genreIds: $genreIds, ')
           ..write('director: $director, ')
           ..write('actors: $actors, ')
           ..write('overview: $overview, ')
@@ -680,6 +716,7 @@ class Movie extends DataClass implements Insertable<Movie> {
     releaseYear,
     runtime,
     genres,
+    genreIds,
     director,
     actors,
     overview,
@@ -701,6 +738,7 @@ class Movie extends DataClass implements Insertable<Movie> {
           other.releaseYear == this.releaseYear &&
           other.runtime == this.runtime &&
           other.genres == this.genres &&
+          other.genreIds == this.genreIds &&
           other.director == this.director &&
           other.actors == this.actors &&
           other.overview == this.overview &&
@@ -720,6 +758,7 @@ class MoviesCompanion extends UpdateCompanion<Movie> {
   final Value<int?> releaseYear;
   final Value<int?> runtime;
   final Value<String?> genres;
+  final Value<String?> genreIds;
   final Value<String?> director;
   final Value<String?> actors;
   final Value<String?> overview;
@@ -738,6 +777,7 @@ class MoviesCompanion extends UpdateCompanion<Movie> {
     this.releaseYear = const Value.absent(),
     this.runtime = const Value.absent(),
     this.genres = const Value.absent(),
+    this.genreIds = const Value.absent(),
     this.director = const Value.absent(),
     this.actors = const Value.absent(),
     this.overview = const Value.absent(),
@@ -757,6 +797,7 @@ class MoviesCompanion extends UpdateCompanion<Movie> {
     this.releaseYear = const Value.absent(),
     this.runtime = const Value.absent(),
     this.genres = const Value.absent(),
+    this.genreIds = const Value.absent(),
     this.director = const Value.absent(),
     this.actors = const Value.absent(),
     this.overview = const Value.absent(),
@@ -777,6 +818,7 @@ class MoviesCompanion extends UpdateCompanion<Movie> {
     Expression<int>? releaseYear,
     Expression<int>? runtime,
     Expression<String>? genres,
+    Expression<String>? genreIds,
     Expression<String>? director,
     Expression<String>? actors,
     Expression<String>? overview,
@@ -796,6 +838,7 @@ class MoviesCompanion extends UpdateCompanion<Movie> {
       if (releaseYear != null) 'release_year': releaseYear,
       if (runtime != null) 'runtime': runtime,
       if (genres != null) 'genres': genres,
+      if (genreIds != null) 'genre_ids': genreIds,
       if (director != null) 'director': director,
       if (actors != null) 'actors': actors,
       if (overview != null) 'overview': overview,
@@ -817,6 +860,7 @@ class MoviesCompanion extends UpdateCompanion<Movie> {
     Value<int?>? releaseYear,
     Value<int?>? runtime,
     Value<String?>? genres,
+    Value<String?>? genreIds,
     Value<String?>? director,
     Value<String?>? actors,
     Value<String?>? overview,
@@ -836,6 +880,7 @@ class MoviesCompanion extends UpdateCompanion<Movie> {
       releaseYear: releaseYear ?? this.releaseYear,
       runtime: runtime ?? this.runtime,
       genres: genres ?? this.genres,
+      genreIds: genreIds ?? this.genreIds,
       director: director ?? this.director,
       actors: actors ?? this.actors,
       overview: overview ?? this.overview,
@@ -874,6 +919,9 @@ class MoviesCompanion extends UpdateCompanion<Movie> {
     }
     if (genres.present) {
       map['genres'] = Variable<String>(genres.value);
+    }
+    if (genreIds.present) {
+      map['genre_ids'] = Variable<String>(genreIds.value);
     }
     if (director.present) {
       map['director'] = Variable<String>(director.value);
@@ -916,6 +964,7 @@ class MoviesCompanion extends UpdateCompanion<Movie> {
           ..write('releaseYear: $releaseYear, ')
           ..write('runtime: $runtime, ')
           ..write('genres: $genres, ')
+          ..write('genreIds: $genreIds, ')
           ..write('director: $director, ')
           ..write('actors: $actors, ')
           ..write('overview: $overview, ')
@@ -3318,6 +3367,7 @@ typedef $$MoviesTableCreateCompanionBuilder =
       Value<int?> releaseYear,
       Value<int?> runtime,
       Value<String?> genres,
+      Value<String?> genreIds,
       Value<String?> director,
       Value<String?> actors,
       Value<String?> overview,
@@ -3338,6 +3388,7 @@ typedef $$MoviesTableUpdateCompanionBuilder =
       Value<int?> releaseYear,
       Value<int?> runtime,
       Value<String?> genres,
+      Value<String?> genreIds,
       Value<String?> director,
       Value<String?> actors,
       Value<String?> overview,
@@ -3395,6 +3446,11 @@ class $$MoviesTableFilterComposer
 
   ColumnFilters<String> get genres => $composableBuilder(
     column: $table.genres,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get genreIds => $composableBuilder(
+    column: $table.genreIds,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3488,6 +3544,11 @@ class $$MoviesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get genreIds => $composableBuilder(
+    column: $table.genreIds,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get director => $composableBuilder(
     column: $table.director,
     builder: (column) => ColumnOrderings(column),
@@ -3570,6 +3631,9 @@ class $$MoviesTableAnnotationComposer
   GeneratedColumn<String> get genres =>
       $composableBuilder(column: $table.genres, builder: (column) => column);
 
+  GeneratedColumn<String> get genreIds =>
+      $composableBuilder(column: $table.genreIds, builder: (column) => column);
+
   GeneratedColumn<String> get director =>
       $composableBuilder(column: $table.director, builder: (column) => column);
 
@@ -3633,6 +3697,7 @@ class $$MoviesTableTableManager
                 Value<int?> releaseYear = const Value.absent(),
                 Value<int?> runtime = const Value.absent(),
                 Value<String?> genres = const Value.absent(),
+                Value<String?> genreIds = const Value.absent(),
                 Value<String?> director = const Value.absent(),
                 Value<String?> actors = const Value.absent(),
                 Value<String?> overview = const Value.absent(),
@@ -3651,6 +3716,7 @@ class $$MoviesTableTableManager
                 releaseYear: releaseYear,
                 runtime: runtime,
                 genres: genres,
+                genreIds: genreIds,
                 director: director,
                 actors: actors,
                 overview: overview,
@@ -3671,6 +3737,7 @@ class $$MoviesTableTableManager
                 Value<int?> releaseYear = const Value.absent(),
                 Value<int?> runtime = const Value.absent(),
                 Value<String?> genres = const Value.absent(),
+                Value<String?> genreIds = const Value.absent(),
                 Value<String?> director = const Value.absent(),
                 Value<String?> actors = const Value.absent(),
                 Value<String?> overview = const Value.absent(),
@@ -3689,6 +3756,7 @@ class $$MoviesTableTableManager
                 releaseYear: releaseYear,
                 runtime: runtime,
                 genres: genres,
+                genreIds: genreIds,
                 director: director,
                 actors: actors,
                 overview: overview,

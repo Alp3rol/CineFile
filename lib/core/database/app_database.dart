@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:meta/meta.dart';
+import '../constants/tmdb_genres.dart';
 import 'tables.dart';
 import 'connection/connection.dart';
 
@@ -13,7 +14,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 12;
+  int get schemaVersion => 13;
 
   @override
   MigrationStrategy get migration {
@@ -174,6 +175,34 @@ class AppDatabase extends _$AppDatabase {
           // them.
           await m.addColumn(watchRecords, watchRecords.remoteId);
           from = 12;
+        }
+        if (from < 13) {
+          // v13: store language-independent TMDb genre ids alongside the
+          // localized genre names (see Movies.genreIds). Adding a second
+          // language makes `genres` unusable as an identity — the same title
+          // logged before and after a language switch would count as two
+          // different genres everywhere statistics are aggregated.
+          //
+          // Existing rows are backfilled from their stored names, which were
+          // necessarily Turkish since that was the only language the app
+          // supported. Names that don't resolve leave genreIds null; those
+          // rows fill in on their own the next time TMDb details are fetched
+          // for them. Nothing is deleted and `genres` is left untouched.
+          await m.addColumn(movies, movies.genreIds);
+
+          final existing = await select(movies).get();
+          await batch((b) {
+            for (final row in existing) {
+              final ids = genreIdsFromLegacyNames(row.genres);
+              if (ids.isEmpty) continue;
+              b.update(
+                movies,
+                MoviesCompanion(genreIds: Value(formatGenreIds(ids))),
+                where: (t) => t.tmdbId.equals(row.tmdbId) & t.isTv.equals(row.isTv),
+              );
+            }
+          });
+          from = 13;
         }
         if (from != to) {
           throw StateError(

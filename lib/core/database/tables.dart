@@ -9,7 +9,20 @@ class Movies extends Table {
   TextColumn get backdropPath => text().nullable()();
   IntColumn get releaseYear => integer().nullable()();
   IntColumn get runtime => integer().nullable()();
+  // The genre names TMDb returned, in whatever language it was asked for at
+  // the time the row was written. Display-only, and only as a fallback for
+  // rows genreIds could not be recovered for — see genreIds below.
   TextColumn get genres => text().nullable()(); // Comma-separated string
+  // Comma-separated TMDb genre ids, the language-independent identity of this
+  // title's genres. Everything that *compares* genres (statistics, tier
+  // badges, filters, recommendations) must key off this rather than `genres`
+  // above, which changes meaning when the user switches language and would
+  // otherwise split a user's history into two incompatible halves.
+  //
+  // Nullable because rows written before schema 13 are backfilled from their
+  // Turkish names on a best-effort basis; anything that doesn't resolve is
+  // repopulated the next time the title's details are fetched.
+  TextColumn get genreIds => text().nullable()();
   TextColumn get director => text().nullable()();
   TextColumn get actors => text().nullable()(); // Comma-separated string
   TextColumn get overview => text().nullable()();

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -90,7 +91,7 @@ class FeaturedShowcaseSection extends ConsumerWidget {
                             child: const Icon(Icons.edit_rounded, color: AppTheme.accentColor, size: 16),
                           ),
                           onPressed: onEditPressed,
-                          tooltip: 'Vitrini Düzenle',
+                          tooltip: AppLocalizations.of(context).profileShowcaseEdit,
                         ),
                     ],
                   ),
@@ -100,7 +101,7 @@ class FeaturedShowcaseSection extends ConsumerWidget {
                       padding: const EdgeInsets.symmetric(vertical: 20),
                       child: Center(
                         child: Text(
-                          'Henüz öne çıkarılan film seçilmedi.',
+                          AppLocalizations.of(context).profileShowcaseNone,
                           style: GoogleFonts.inter(color: AppTheme.textSecondary, fontSize: 13),
                         ),
                       ),

@@ -13,17 +13,22 @@ import '../../l10n/app_localizations.dart';
 ///
 /// [locale] of `null` means "follow the system", matching `localeProvider`'s
 /// own null-is-system convention.
-AppLocalizations lookupL10n(Locale? locale) {
-  final resolved = locale ?? _systemLocale();
-  return lookupAppLocalizations(resolved);
-}
+AppLocalizations lookupL10n(Locale? locale) => lookupAppLocalizations(resolveAppLocale(locale));
 
-/// The device locale, narrowed to a language the app actually ships. Falls back
-/// to Turkish, which is the template language.
-Locale _systemLocale() {
+/// Turns `localeProvider`'s nullable value into a concrete language the app
+/// ships translations for.
+///
+/// `null` means "follow the device", so the device's preferred languages are
+/// walked in order and the first supported one wins; if none match, Turkish is
+/// used because it is the template language. Anything that needs to act on the
+/// effective language outside the widget tree — [lookupL10n], the TMDb request
+/// language — goes through here so they can never disagree.
+Locale resolveAppLocale(Locale? locale) {
+  if (locale != null) return locale;
+
   final supported = AppLocalizations.supportedLocales.map((l) => l.languageCode).toSet();
-  for (final locale in PlatformDispatcher.instance.locales) {
-    if (supported.contains(locale.languageCode)) return Locale(locale.languageCode);
+  for (final deviceLocale in PlatformDispatcher.instance.locales) {
+    if (supported.contains(deviceLocale.languageCode)) return Locale(deviceLocale.languageCode);
   }
   return const Locale('tr');
 }

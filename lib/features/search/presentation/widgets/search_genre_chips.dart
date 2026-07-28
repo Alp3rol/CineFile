@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/l10n/genre_names.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../l10n/app_localizations.dart';
 
 class SearchGenreChips extends StatelessWidget {
-  final Map<String, int> genres;
+  /// TMDb genre ids to offer, in display order. Names come from
+  /// [genreName] so the chips follow the user's language.
+  final List<int> genreIds;
   final int? selectedGenreId;
   final ValueChanged<int?> onGenreSelected;
 
   const SearchGenreChips({
     super.key,
-    required this.genres,
+    required this.genreIds,
     required this.selectedGenreId,
     required this.onGenreSelected,
   });
@@ -76,14 +80,14 @@ class SearchGenreChips extends StatelessWidget {
               onTap: () => onGenreSelected(null),
             ),
           ),
-          ...genres.entries.map((entry) {
-            final isSelected = selectedGenreId == entry.value;
+          ...genreIds.map((id) {
+            final isSelected = selectedGenreId == id;
             return Padding(
               padding: const EdgeInsets.only(right: 6),
               child: _genreChip(
-                label: entry.key,
+                label: genreName(AppLocalizations.of(context), id),
                 isSelected: isSelected,
-                onTap: () => onGenreSelected(isSelected ? null : entry.value),
+                onTap: () => onGenreSelected(isSelected ? null : id),
               ),
             );
           }),

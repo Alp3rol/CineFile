@@ -20,6 +20,7 @@ import 'package:cinefile/features/community/presentation/community_feed_provider
 import 'package:cinefile/features/community/presentation/community_feed_screen.dart';
 import 'package:cinefile/features/community/presentation/user_search_screen.dart';
 import 'package:cinefile/core/database/database_provider.dart';
+import 'support/localized_app.dart';
 import 'support/network_image_mock.dart';
 
 Future<void> _seedUsers(FakeFirebaseFirestore firestore) async {
@@ -61,7 +62,7 @@ void main() {
         communityFeedProvider.overrideWith((ref) => Stream.value(const [])),
         followedUserIdsProvider.overrideWith((ref) => Stream.value(<String>{})),
       ],
-      child: const MaterialApp(home: CommunityFeedScreen()),
+      child: const LocalizedTestApp(home: CommunityFeedScreen()),
     );
   }
 

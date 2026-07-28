@@ -1,7 +1,10 @@
+import 'dart:ui' show Locale;
+
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../constants/api_constants.dart';
+import '../l10n/l10n_lookup.dart';
 import 'dio_client.dart';
 import '../../features/settings/presentation/settings_provider.dart';
 
@@ -10,15 +13,35 @@ final dioClientProvider = Provider<DioClient>((ref) {
   return DioClient(baseUrl: baseUrl);
 });
 
+/// TMDb's `language` values for the languages the app ships.
+const _tmdbLanguageTags = {'tr': 'tr-TR', 'en': 'en-US'};
+
+/// The TMDb `language` query value matching [locale] (null = follow device).
+String tmdbLanguageTag(Locale? locale) =>
+    _tmdbLanguageTags[resolveAppLocale(locale).languageCode] ?? _englishLanguageTag;
+
+const _englishLanguageTag = 'en-US';
+
+/// Rebuilt when the user changes language, so every subsequent request asks
+/// TMDb for titles, overviews and genre names in the new one. Responses are
+/// cached per-URL and `language` is a query parameter, so the two languages'
+/// caches separate on their own rather than one poisoning the other.
 final tmdbServiceProvider = Provider<TmdbService>((ref) {
   final dio = ref.watch(dioClientProvider).dio;
-  return TmdbService(dio);
+  return TmdbService(dio, language: tmdbLanguageTag(ref.watch(localeProvider)));
 });
 
 class TmdbService {
   final Dio _dio;
 
-  TmdbService(this._dio);
+  /// The `language` sent when a call doesn't override it. Every method takes an
+  /// optional `language` for the rare case a specific request needs a
+  /// different one (see the English biography fallback in [getPersonDetails]);
+  /// inside those methods the parameter shadows this field, hence
+  /// `language ?? this.language`.
+  final String language;
+
+  TmdbService(this._dio, {this.language = 'tr-TR'});
 
   // In the future, we can load this from SharedPreferences or Secure Storage.
   // For now, it uses the constant or a fallback.
@@ -88,7 +111,7 @@ class TmdbService {
   ];
 
   /// Search for movies and series by title
-  Future<List<Map<String, dynamic>>> searchMovies(String query, {int page = 1, String language = 'tr-TR'}) async {
+  Future<List<Map<String, dynamic>>> searchMovies(String query, {int page = 1, String? language}) async {
     if (_apiKey.isEmpty) {
       // Return filtered mock results when API key is empty (offline demo mode)
       final lowerQuery = query.toLowerCase();
@@ -106,7 +129,7 @@ class TmdbService {
           'api_key': _apiKey,
           'query': query,
           'page': page,
-          'language': language,
+          'language': language ?? this.language,
         },
       );
 
@@ -137,7 +160,7 @@ class TmdbService {
     }
   }
 
-  Future<Map<String, dynamic>?> getMovieDetails(int tmdbId, {bool? isTv, String language = 'tr-TR'}) async {
+  Future<Map<String, dynamic>?> getMovieDetails(int tmdbId, {bool? isTv, String? language}) async {
     if (_apiKey.isEmpty) {
       try {
         final basicMovie = _mockMovies.firstWhere((m) => m['id'] == tmdbId);
@@ -209,12 +232,12 @@ class TmdbService {
     }
   }
 
-  Future<Map<String, dynamic>?> _getMovieDetailsOnly(int tmdbId, {String language = 'tr-TR'}) async {
+  Future<Map<String, dynamic>?> _getMovieDetailsOnly(int tmdbId, {String? language}) async {
     final response = await _dio.get(
       '/movie/$tmdbId',
       queryParameters: {
         'api_key': _apiKey,
-        'language': language,
+        'language': language ?? this.language,
         'append_to_response': 'credits,release_dates',
       },
     );
@@ -223,12 +246,12 @@ class TmdbService {
     return data;
   }
 
-  Future<Map<String, dynamic>?> _getTvDetails(int tmdbId, {String language = 'tr-TR'}) async {
+  Future<Map<String, dynamic>?> _getTvDetails(int tmdbId, {String? language}) async {
     final response = await _dio.get(
       '/tv/$tmdbId',
       queryParameters: {
         'api_key': _apiKey,
-        'language': language,
+        'language': language ?? this.language,
         'append_to_response': 'credits,aggregate_credits,content_ratings',
       },
     );
@@ -274,7 +297,7 @@ class TmdbService {
   }
 
   /// Get popular movies (useful for search home or suggestions)
-  Future<List<Map<String, dynamic>>> getPopularMovies({int page = 1, String language = 'tr-TR'}) async {
+  Future<List<Map<String, dynamic>>> getPopularMovies({int page = 1, String? language}) async {
     if (_apiKey.isEmpty) {
       return [];
     }
@@ -285,7 +308,7 @@ class TmdbService {
         queryParameters: {
           'api_key': _apiKey,
           'page': page,
-          'language': language,
+          'language': language ?? this.language,
         },
       );
 
@@ -297,7 +320,7 @@ class TmdbService {
   }
 
   /// Get popular TV shows
-  Future<List<Map<String, dynamic>>> getPopularTvShows({int page = 1, String language = 'tr-TR'}) async {
+  Future<List<Map<String, dynamic>>> getPopularTvShows({int page = 1, String? language}) async {
     if (_apiKey.isEmpty) {
       return [];
     }
@@ -308,7 +331,7 @@ class TmdbService {
         queryParameters: {
           'api_key': _apiKey,
           'page': page,
-          'language': language,
+          'language': language ?? this.language,
         },
       );
 
@@ -328,7 +351,7 @@ class TmdbService {
   }
 
   /// Get this week's trending movies (TMDb /trending/movie/week)
-  Future<List<Map<String, dynamic>>> getTrendingMoviesThisWeek({String language = 'tr-TR'}) async {
+  Future<List<Map<String, dynamic>>> getTrendingMoviesThisWeek({String? language}) async {
     if (_apiKey.isEmpty) {
       return [];
     }
@@ -338,7 +361,7 @@ class TmdbService {
         '/trending/movie/week',
         queryParameters: {
           'api_key': _apiKey,
-          'language': language,
+          'language': language ?? this.language,
         },
       );
 
@@ -354,7 +377,7 @@ class TmdbService {
   }
 
   /// Get this week's trending TV shows (TMDb /trending/tv/week)
-  Future<List<Map<String, dynamic>>> getTrendingTvShowsThisWeek({String language = 'tr-TR'}) async {
+  Future<List<Map<String, dynamic>>> getTrendingTvShowsThisWeek({String? language}) async {
     if (_apiKey.isEmpty) {
       return [];
     }
@@ -364,7 +387,7 @@ class TmdbService {
         '/trending/tv/week',
         queryParameters: {
           'api_key': _apiKey,
-          'language': language,
+          'language': language ?? this.language,
         },
       );
 
@@ -385,7 +408,7 @@ class TmdbService {
   }
 
   /// Get today's trending movies (TMDb /trending/movie/day)
-  Future<List<Map<String, dynamic>>> getTrendingMoviesToday({String language = 'tr-TR'}) async {
+  Future<List<Map<String, dynamic>>> getTrendingMoviesToday({String? language}) async {
     if (_apiKey.isEmpty) {
       return [];
     }
@@ -395,7 +418,7 @@ class TmdbService {
         '/trending/movie/day',
         queryParameters: {
           'api_key': _apiKey,
-          'language': language,
+          'language': language ?? this.language,
         },
       );
 
@@ -411,7 +434,7 @@ class TmdbService {
   }
 
   /// Get today's trending TV shows (TMDb /trending/tv/day)
-  Future<List<Map<String, dynamic>>> getTrendingTvShowsToday({String language = 'tr-TR'}) async {
+  Future<List<Map<String, dynamic>>> getTrendingTvShowsToday({String? language}) async {
     if (_apiKey.isEmpty) {
       return [];
     }
@@ -421,7 +444,7 @@ class TmdbService {
         '/trending/tv/day',
         queryParameters: {
           'api_key': _apiKey,
-          'language': language,
+          'language': language ?? this.language,
         },
       );
 
@@ -442,7 +465,7 @@ class TmdbService {
   }
 
   /// Get top rated movies (TMDb /movie/top_rated)
-  Future<List<Map<String, dynamic>>> getTopRatedMovies({int page = 1, String language = 'tr-TR'}) async {
+  Future<List<Map<String, dynamic>>> getTopRatedMovies({int page = 1, String? language}) async {
     if (_apiKey.isEmpty) {
       return [];
     }
@@ -453,7 +476,7 @@ class TmdbService {
         queryParameters: {
           'api_key': _apiKey,
           'page': page,
-          'language': language,
+          'language': language ?? this.language,
         },
       );
 
@@ -469,7 +492,7 @@ class TmdbService {
   }
 
   /// Get top rated TV shows (TMDb /tv/top_rated)
-  Future<List<Map<String, dynamic>>> getTopRatedTvShows({int page = 1, String language = 'tr-TR'}) async {
+  Future<List<Map<String, dynamic>>> getTopRatedTvShows({int page = 1, String? language}) async {
     if (_apiKey.isEmpty) {
       return [];
     }
@@ -480,7 +503,7 @@ class TmdbService {
         queryParameters: {
           'api_key': _apiKey,
           'page': page,
-          'language': language,
+          'language': language ?? this.language,
         },
       );
 
@@ -528,7 +551,7 @@ class TmdbService {
   /// profile_path, known_for_department) — used by the İlişki Ağı "add person"
   /// picker, where [searchPersonId]'s first-result-only shape isn't enough.
   Future<List<Map<String, dynamic>>> searchPeople(String query,
-      {String language = 'tr-TR'}) async {
+      {String? language}) async {
     if (_apiKey.isEmpty || query.trim().isEmpty) {
       return [];
     }
@@ -538,7 +561,7 @@ class TmdbService {
         queryParameters: {
           'api_key': _apiKey,
           'query': query,
-          'language': language,
+          'language': language ?? this.language,
           'page': 1,
         },
       );
@@ -562,7 +585,7 @@ class TmdbService {
     String? withGenres,
     String? withCrew,
     String? withCast,
-    String language = 'tr-TR',
+    String? language,
   }) async {
     if (_apiKey.isEmpty) {
       return [];
@@ -572,7 +595,7 @@ class TmdbService {
         '/discover/movie',
         queryParameters: {
           'api_key': _apiKey,
-          'language': language,
+          'language': language ?? this.language,
           'sort_by': 'popularity.desc',
           'with_genres': ?withGenres,
           'with_crew': ?withCrew,
@@ -596,7 +619,7 @@ class TmdbService {
   Future<List<Map<String, dynamic>>> discoverTvShows({
     String? withGenres,
     String? withPeople,
-    String language = 'tr-TR',
+    String? language,
   }) async {
     if (_apiKey.isEmpty) {
       return [];
@@ -606,7 +629,7 @@ class TmdbService {
         '/discover/tv',
         queryParameters: {
           'api_key': _apiKey,
-          'language': language,
+          'language': language ?? this.language,
           'sort_by': 'popularity.desc',
           'with_genres': ?withGenres,
           'with_people': ?withPeople,
@@ -628,7 +651,7 @@ class TmdbService {
   }
 
   /// Get person details (TMDb /person/{id})
-  Future<Map<String, dynamic>?> getPersonDetails(int personId, {String language = 'tr-TR'}) async {
+  Future<Map<String, dynamic>?> getPersonDetails(int personId, {String? language}) async {
     if (_apiKey.isEmpty) {
       return null;
     }
@@ -637,20 +660,23 @@ class TmdbService {
         '/person/$personId',
         queryParameters: {
           'api_key': _apiKey,
-          'language': language,
+          'language': language ?? this.language,
         },
       );
       final data = response.data as Map<String, dynamic>;
 
-      // Fallback to English if Turkish biography is empty or null
+      // TMDb has a biography for most people in English and far fewer in other
+      // languages, so an empty one falls back to English rather than leaving
+      // the actor page blank. Previously this only triggered for Turkish.
+      final requested = language ?? this.language;
       final biography = data['biography'] as String?;
-      if (language == 'tr-TR' && (biography == null || biography.trim().isEmpty)) {
+      if (requested != _englishLanguageTag && (biography == null || biography.trim().isEmpty)) {
         try {
           final enResponse = await _dio.get(
             '/person/$personId',
             queryParameters: {
               'api_key': _apiKey,
-              'language': 'en-US',
+              'language': _englishLanguageTag,
             },
           );
           final enData = enResponse.data as Map<String, dynamic>;
@@ -669,7 +695,7 @@ class TmdbService {
   }
 
   /// Get person combined credits (TMDb /person/$personId/combined_credits)
-  Future<List<Map<String, dynamic>>> getPersonCombinedCredits(int personId, {String language = 'tr-TR'}) async {
+  Future<List<Map<String, dynamic>>> getPersonCombinedCredits(int personId, {String? language}) async {
     if (_apiKey.isEmpty) {
       return [];
     }
@@ -678,7 +704,7 @@ class TmdbService {
         '/person/$personId/combined_credits',
         queryParameters: {
           'api_key': _apiKey,
-          'language': language,
+          'language': language ?? this.language,
         },
       );
       final cast = response.data['cast'] as List<dynamic>? ?? [];
@@ -689,7 +715,7 @@ class TmdbService {
   }
 
   /// Get detailed episodes for a specific season of a TV show
-  Future<Map<String, dynamic>?> getTvSeasonDetails(int tvId, int seasonNumber, {String language = 'tr-TR'}) async {
+  Future<Map<String, dynamic>?> getTvSeasonDetails(int tvId, int seasonNumber, {String? language}) async {
     if (_apiKey.isEmpty) {
       return null;
     }
@@ -698,7 +724,7 @@ class TmdbService {
         '/tv/$tvId/season/$seasonNumber',
         queryParameters: {
           'api_key': _apiKey,
-          'language': language,
+          'language': language ?? this.language,
         },
       );
       return response.data as Map<String, dynamic>?;

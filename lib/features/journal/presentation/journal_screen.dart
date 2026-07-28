@@ -265,7 +265,7 @@ class _JournalScreenState extends ConsumerState<JournalScreen>
                                 JournalMiniInsightsBar(
                                   thisMonthCount: stats.thisMonthCount,
                                   avgRating: stats.avgRating,
-                                  favoriteGenre: stats.favoriteGenre,
+                                  favoriteGenreId: stats.favoriteGenreId,
                                   totalHours: stats.totalHours,
                                   totalMinutes: stats.totalRemainingMinutes,
                                 ),

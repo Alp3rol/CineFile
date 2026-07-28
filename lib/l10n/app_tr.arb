@@ -39,5 +39,120 @@
   "commonCancel": "İptal",
   "@commonCancel": {
     "description": "Generic cancel button label."
-  }
+  },
+
+  "@_genres": {
+    "description": "TMDb genre names, resolved from the stored genre id. TMDb also returns localized names, but those are only kept for display fallback — see lib/core/constants/tmdb_genres.dart for why identity is the id."
+  },
+  "genreAction": "Aksiyon",
+  "genreAdventure": "Macera",
+  "genreAnimation": "Animasyon",
+  "genreComedy": "Komedi",
+  "genreCrime": "Suç",
+  "genreDocumentary": "Belgesel",
+  "genreDrama": "Dram",
+  "genreFamily": "Aile",
+  "genreFantasy": "Fantastik",
+  "genreHistory": "Tarih",
+  "genreHorror": "Korku",
+  "genreMusic": "Müzik",
+  "genreMystery": "Gizem",
+  "genreRomance": "Romantik",
+  "genreScienceFiction": "Bilim Kurgu",
+  "genreThriller": "Gerilim",
+  "genreWar": "Savaş",
+  "genreWestern": "Vahşi Batı",
+  "genreActionAdventure": "Aksiyon & Macera",
+  "genreKids": "Çocuk",
+  "genreNews": "Haberler",
+  "genreReality": "Realite",
+  "genreSciFiFantasy": "Bilim Kurgu & Fantazi",
+  "genreSoap": "Pembe Dizi",
+  "genreTalk": "Talk Show",
+  "genreWarPolitics": "Savaş & Politika",
+
+  "genreUnknown": "Bilinmiyor",
+  "@genreUnknown": {
+    "description": "Shown for a stored genre id TMDb has since retired or that this app does not know."
+  },
+
+  "@_auth": {
+    "description": "Sign-in, sign-up and profile. The error strings map 1:1 to the AuthFailure enum — the controller returns a reason, not a message, so the raw exception text never reaches the user."
+  },
+  "authErrorUsernameEmpty": "Kullanıcı adı boş olamaz.",
+  "authErrorAccountCreationFailed": "Hesap oluşturulamadı, lütfen tekrar deneyin.",
+  "authErrorUsernameTaken": "Bu kullanıcı adı zaten alınmış.",
+  "authErrorEmailInUse": "Bu e-posta adresi zaten kullanılıyor.",
+  "authErrorWeakPassword": "Şifre en az 6 karakter olmalıdır.",
+  "authErrorInvalidEmail": "Geçersiz bir e-posta adresi girdiniz.",
+  "authErrorInvalidCredentials": "E-posta veya şifre hatalı.",
+  "authErrorNotSignedIn": "Kullanıcı oturumu bulunamadı.",
+  "authErrorUserDataMissing": "Kullanıcı verisi bulunamadı.",
+  "authErrorUnknown": "Bir hata oluştu.",
+
+  "authGateErrorTitle": "Kimlik Doğrulama Hatası",
+  "authGateErrorMessage": "Oturum bilgisi alınamadı. Lütfen tekrar deneyin.",
+
+  "authTagline": "Topluluğa katılın, günlüklerinizi paylaşın.",
+  "authSignIn": "Giriş Yap",
+  "authSignUp": "Kayıt Ol",
+  "authEmailHint": "E-posta",
+  "authEmailRequired": "Lütfen e-posta adresinizi girin.",
+  "authEmailInvalid": "Lütfen geçerli bir e-posta adresi girin.",
+  "authPasswordHint": "Şifre",
+  "authPasswordRequired": "Lütfen şifrenizi girin.",
+  "authPasswordTooShort": "Şifre en az 6 karakter olmalıdır.",
+  "authUsernameLabel": "Kullanıcı Adı",
+  "authUsernameRequired": "Lütfen kullanıcı adı girin.",
+  "authUsernameTooShort": "Kullanıcı adı en az 3 karakter olmalıdır.",
+  "authUsernameNoSpaces": "Kullanıcı adı boşluk içeremez.",
+  "authNoAccountPrompt": "Hesabınız yok mu? ",
+  "authSignUpLink": "Kayıt Olun",
+  "authHasAccountPrompt": "Zaten bir hesabınız var mı? ",
+  "authSignInLink": "Giriş Yapın",
+  "authRegisterSuccess": "Kayıt başarılı! Giriş yapabilirsiniz.",
+  "authSignInRequired": "Lütfen giriş yapın.",
+  "authUserNotFound": "Kullanıcı bulunamadı.",
+
+  "profileEdit": "Profili Düzenle",
+  "profilePresetAvatars": "Hazır Avatarlar",
+  "profileUsernameHint": "Kullanıcı adı girin",
+  "profileShowcaseTitle": "Profil Vitrini (En Fazla 5 Öne Çıkan Film)",
+  "profileShowcaseEdit": "Vitrini Düzenle",
+  "profileShowcasePickTitle": "Öne Çıkarılacak Filmleri Seç",
+  "profileShowcaseNone": "Henüz öne çıkarılan film seçilmedi.",
+  "profileShowcaseLimit": "En fazla 5 film seçebilirsiniz.",
+
+  "profileShowcaseSelected": "Öne Çıkarılan Filmleri Seç ({count}/5)",
+  "@profileShowcaseSelected": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "profileShowcasePickCount": "En fazla 5 favori seçin ({count}/5)",
+  "@profileShowcasePickCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "profileUpdated": "Profil başarıyla güncellendi.",
+  "profileNoWatchRecords": "Henüz hiç izleme kaydınız yok.",
+  "profileRecentWatches": "Son İzlediklerim",
+  "profileNoRecentWatches": "Henüz hiç izleme kaydı eklenmemiş.",
+  "profileBadgesTitle": "Kazanılan Rozetler",
+  "profileBadgesEmpty": "Henüz kazanılmış bir rozet yok. Film izledikçe kilitler açılacaktır! Tümünü incelemek için tıklayın.",
+  "profileBadgesSeeAll": "Tümünü Gör ({unlocked}/{total})",
+  "@profileBadgesSeeAll": {
+    "placeholders": { "unlocked": { "type": "int" }, "total": { "type": "int" } }
+  },
+
+  "profileSignOut": "Çıkış Yap",
+  "profileSignOutConfirm": "Hesabınızdan çıkış yapmak istediğinize emin misiniz?",
+  "profileFollowers": "Takipçi",
+  "profileFollowing": "Takip",
+
+  "@_profileRanks": {
+    "description": "Playful rank shown on the profile header, based on how many achievement badges the user has unlocked. The emoji is part of the string so a translation can pick a different one."
+  },
+  "profileRankNovice": "Çaylak Sinefil 🍿",
+  "profileRankTicketBuddy": "Bilet Ortağı 🎬",
+  "profileRankConnoisseur": "Kültür Üstadı 🏛️",
+  "profileRankGuru": "Sinema Gurusu 👑"
 }

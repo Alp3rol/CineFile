@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -31,7 +32,7 @@ class ProfileAchievementsSection extends ConsumerWidget {
                 const Icon(Icons.emoji_events_rounded, color: AppTheme.accentColor, size: 20),
                 const SizedBox(width: 8),
                 Text(
-                  'Kazanılan Rozetler',
+                  AppLocalizations.of(context).profileBadgesTitle,
                   style: GoogleFonts.outfit(
                     fontSize: 17,
                     fontWeight: FontWeight.bold,
@@ -48,7 +49,7 @@ class ProfileAchievementsSection extends ConsumerWidget {
                 child: Row(
                   children: [
                     Text(
-                      'Tümünü Gör (${unlockedBadges.length}/${allBadges.length})',
+                      AppLocalizations.of(context).profileBadgesSeeAll(unlockedBadges.length, allBadges.length),
                       style: GoogleFonts.outfit(
                         fontSize: 12.5,
                         fontWeight: FontWeight.bold,
@@ -80,7 +81,7 @@ class ProfileAchievementsSection extends ConsumerWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      'Henüz kazanılmış bir rozet yok. Film izledikçe kilitler açılacaktır! Tümünü incelemek için tıklayın.',
+                      AppLocalizations.of(context).profileBadgesEmpty,
                       style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary),
                     ),
                   ),

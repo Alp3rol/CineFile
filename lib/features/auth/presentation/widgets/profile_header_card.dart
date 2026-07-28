@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -29,13 +30,13 @@ class ProfileHeaderCard extends ConsumerWidget {
     final unlockedCount = insights?.achievementBadges.where((b) => b.isUnlocked).length ?? 0;
     final totalBadges = insights?.achievementBadges.length ?? 28;
 
-    String rankTitle = 'Çaylak Sinefil 🍿';
+    String rankTitle = AppLocalizations.of(context).profileRankNovice;
     if (unlockedCount >= 15) {
-      rankTitle = 'Sinema Gurusu 👑';
+      rankTitle = AppLocalizations.of(context).profileRankGuru;
     } else if (unlockedCount >= 8) {
-      rankTitle = 'Kültür Üstadı 🏛️';
+      rankTitle = AppLocalizations.of(context).profileRankConnoisseur;
     } else if (unlockedCount >= 3) {
-      rankTitle = 'Bilet Ortağı 🎬';
+      rankTitle = AppLocalizations.of(context).profileRankTicketBuddy;
     }
 
     return Container(
@@ -97,7 +98,7 @@ class ProfileHeaderCard extends ConsumerWidget {
                         child: const Icon(Icons.edit_rounded, color: Colors.white, size: 18),
                       ),
                       onPressed: onEditPressed,
-                      tooltip: 'Profili Düzenle',
+                      tooltip: AppLocalizations.of(context).profileEdit,
                     ),
                   ),
 
@@ -212,12 +213,12 @@ class ProfileHeaderCard extends ConsumerWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       _StatColumn(
-                        label: 'Takipçi',
+                        label: AppLocalizations.of(context).profileFollowers,
                         value: '${userModel.followerCount}',
                       ),
                       Container(height: 28, width: 1, color: Colors.white12),
                       _StatColumn(
-                        label: 'Takip',
+                        label: AppLocalizations.of(context).profileFollowing,
                         value: '${userModel.followingCount}',
                       ),
                       Container(height: 28, width: 1, color: Colors.white12),

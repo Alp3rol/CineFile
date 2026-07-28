@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -20,7 +21,7 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
   late String _selectedAvatarUrl;
   late List<String> _tempFeaturedMovieIds;
   bool _isLoading = false;
-  String? _errorMessage;
+  AuthFailure? _error;
 
   final List<String> _presetAvatars = const [
     'https://api.dicebear.com/7.x/bottts/png?seed=cine1',
@@ -73,7 +74,7 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Profili Düzenle',
+                  AppLocalizations.of(context).profileEdit,
                   style: GoogleFonts.outfit(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -107,7 +108,7 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
 
             // Predefined Avatars section
             Text(
-              'Hazır Avatarlar',
+              AppLocalizations.of(context).profilePresetAvatars,
               style: GoogleFonts.inter(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -155,7 +156,7 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
 
             // Username field
             Text(
-              'Kullanıcı Adı',
+              AppLocalizations.of(context).authUsernameLabel,
               style: GoogleFonts.inter(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -167,7 +168,7 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
               controller: _usernameController,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
-                hintText: 'Kullanıcı adı girin',
+                hintText: AppLocalizations.of(context).profileUsernameHint,
                 hintStyle: const TextStyle(color: Colors.white38),
                 filled: true,
                 fillColor: Colors.white.withValues(alpha: 0.05),
@@ -208,7 +209,7 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
 
             // Featured Movies section
             Text(
-              'Profil Vitrini (En Fazla 5 Öne Çıkan Film)',
+              AppLocalizations.of(context).profileShowcaseTitle,
               style: GoogleFonts.inter(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -227,13 +228,13 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
                 ),
               ),
               icon: const Icon(Icons.star_rounded, color: AppTheme.accentColor),
-              label: Text('Öne Çıkarılan Filmleri Seç (${_tempFeaturedMovieIds.length}/5)'),
+              label: Text(AppLocalizations.of(context).profileShowcaseSelected(_tempFeaturedMovieIds.length)),
             ),
 
-            if (_errorMessage != null) ...[
+            if (_error != null) ...[
               const SizedBox(height: 16),
               Text(
-                _errorMessage!,
+                _error!.message(AppLocalizations.of(context)),
                 style: const TextStyle(color: Colors.redAccent, fontSize: 13),
               ),
             ],
@@ -284,17 +285,17 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
                     return AlertDialog(
                       backgroundColor: AppTheme.surfaceColor,
                       title: Text(
-                        'Öne Çıkarılacak Filmleri Seç',
+                        AppLocalizations.of(context).profileShowcasePickTitle,
                         style: GoogleFonts.outfit(color: Colors.white, fontSize: 18),
                       ),
                       content: SizedBox(
                         width: double.maxFinite,
                         height: 300,
                         child: records.isEmpty
-                            ? const Center(
+                            ? Center(
                                 child: Text(
-                                  'Henüz hiç izleme kaydınız yok.',
-                                  style: TextStyle(color: Colors.white38),
+                                  AppLocalizations.of(context).profileNoWatchRecords,
+                                  style: const TextStyle(color: Colors.white38),
                                 ),
                               )
                             : ListView.builder(
@@ -319,8 +320,8 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
                                       if (checked == true) {
                                         if (_tempFeaturedMovieIds.length >= 5) {
                                           ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(
-                                              content: Text('En fazla 5 film seçebilirsiniz.'),
+                                            SnackBar(
+                                              content: Text(AppLocalizations.of(context).profileShowcaseLimit),
                                             ),
                                           );
                                           return;
@@ -361,16 +362,16 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
     final bio = _bioController.text.trim();
 
     if (username.isEmpty) {
-      setState(() => _errorMessage = 'Kullanıcı adı boş olamaz.');
+      setState(() => _error = AuthFailure.usernameEmpty);
       return;
     }
 
     setState(() {
       _isLoading = true;
-      _errorMessage = null;
+      _error = null;
     });
 
-    final error = await ref.read(authControllerProvider).updateProfile(
+    final failure = await ref.read(authControllerProvider).updateProfile(
       username: username,
       avatarUrl: _selectedAvatarUrl,
       bio: bio,
@@ -379,12 +380,12 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
 
     if (mounted) {
       setState(() => _isLoading = false);
-      if (error != null) {
-        setState(() => _errorMessage = error);
+      if (failure != null) {
+        setState(() => _error = failure);
       } else {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profil başarıyla güncellendi.')),
+          SnackBar(content: Text(AppLocalizations.of(context).profileUpdated)),
         );
       }
     }

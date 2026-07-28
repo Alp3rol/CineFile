@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/constants/tmdb_genres.dart';
 import '../../../core/database/database_provider.dart';
 import '../domain/achievement_models.dart';
 import 'widgets/contribution_heatmap_utils.dart';
@@ -38,7 +39,10 @@ class InsightsData {
   final int uniqueTitleCount;
   final int totalDurationMinutes;
   final double averageRating;
-  final List<MapEntry<String, int>> topGenres;
+  /// Genre **ids** and how many watch records carry them, most-watched first.
+  /// Ids rather than names so the tally survives a language switch; callers
+  /// render them with `genreName(l10n, id)`.
+  final List<MapEntry<int, int>> topGenres;
   final List<MapEntry<String, int>> topDirectors;
   final List<MapEntry<String, int>> topActors;
   final Map<int, int> monthlyWatchTrend;
@@ -141,7 +145,7 @@ final insightsProvider = Provider<InsightsData?>((ref) {
   }
   final averageRating = ratingCount > 0 ? (totalRating / ratingCount) : 0.0;
 
-  final topGenres = _countCommaSeparatedField(list, (r) => r.movie.genres);
+  final topGenres = _countGenreIds(list);
   final topDirectors = _countCommaSeparatedField(list, (r) => r.movie.director);
   final topActors = _countCommaSeparatedField(list, (r) => r.movie.actors);
 
@@ -659,7 +663,7 @@ List<AchievementBadge> _calculateAllTieredAchievements({
   ));
 
   // --- 4. TÜRLER & TEMALAR ---
-  final westernCount = _countByKeyword(list, (r) => r.movie.genres, 'western');
+  final westernCount = _countByGenreId(list, TmdbGenre.western);
   badges.add(_buildTieredBadge(
     id: 'western_series',
     defaultTitle: 'Vahşi Batı Serisi',
@@ -673,7 +677,10 @@ List<AchievementBadge> _calculateAllTieredAchievements({
     ],
   ));
 
-  final scifiCount = _countByKeyword(list, (r) => r.movie.genres, 'bilim kurgu');
+  // The old substring 'bilim kurgu' also caught the TV genre "Bilim Kurgu &
+  // Fantazi"; both ids are counted here to keep that behaviour.
+  final scifiCount = _countByGenreId(list, TmdbGenre.scienceFiction) +
+      _countByGenreId(list, TmdbGenre.sciFiFantasy);
   badges.add(_buildTieredBadge(
     id: 'scifi_series',
     defaultTitle: 'Sci-Fi Kaşifi',
@@ -687,8 +694,11 @@ List<AchievementBadge> _calculateAllTieredAchievements({
     ],
   ));
 
-  final horrorCount = _countByKeyword(list, (r) => r.movie.genres, 'korku') +
-      _countByKeyword(list, (r) => r.movie.genres, 'gerilim');
+  // Summed rather than OR'd, matching the previous behaviour: a title that is
+  // both horror and thriller counts twice. Changing that would retroactively
+  // lower some users' badge progress.
+  final horrorCount = _countByGenreId(list, TmdbGenre.horror) +
+      _countByGenreId(list, TmdbGenre.thriller);
   badges.add(_buildTieredBadge(
     id: 'horror_series',
     defaultTitle: 'Korku & Gerilim',
@@ -702,7 +712,7 @@ List<AchievementBadge> _calculateAllTieredAchievements({
     ],
   ));
 
-  final dramaCount = _countByKeyword(list, (r) => r.movie.genres, 'drama');
+  final dramaCount = _countByGenreId(list, TmdbGenre.drama);
   badges.add(_buildTieredBadge(
     id: 'drama_series',
     defaultTitle: 'Drama Tutkunu',
@@ -716,8 +726,8 @@ List<AchievementBadge> _calculateAllTieredAchievements({
     ],
   ));
 
-  final crimeCount = _countByKeyword(list, (r) => r.movie.genres, 'suç') +
-      _countByKeyword(list, (r) => r.movie.genres, 'gizem');
+  final crimeCount = _countByGenreId(list, TmdbGenre.crime) +
+      _countByGenreId(list, TmdbGenre.mystery);
   badges.add(_buildTieredBadge(
     id: 'crime_series',
     defaultTitle: 'Suç & Gizem Ajanı',
@@ -731,8 +741,9 @@ List<AchievementBadge> _calculateAllTieredAchievements({
     ],
   ));
 
-  final animationCount = _countByKeyword(list, (r) => r.movie.genres, 'animasyon') +
-      _countByKeyword(list, (r) => r.movie.genres, 'çizgi');
+  // The old second term, 'çizgi', matched no TMDb genre name at all — TMDb
+  // calls this one "Animasyon" — so it only ever contributed zero.
+  final animationCount = _countByGenreId(list, TmdbGenre.animation);
   badges.add(_buildTieredBadge(
     id: 'animation_series',
     defaultTitle: 'Animasyon & Çizgi Düşler',
@@ -871,6 +882,31 @@ List<AchievementBadge> _calculateAllTieredAchievements({
   ));
 
   return badges;
+}
+
+/// Tallies genre ids across [list], most-watched first.
+///
+/// Replaces counting the localized `movie.genres` text: that made "Dram" and
+/// "Drama" two different genres for anyone who switched language mid-history.
+List<MapEntry<int, int>> _countGenreIds(List<WatchRecordWithMovie> list) {
+  final counts = <int, int>{};
+  for (final r in list) {
+    for (final id in parseGenreIds(r.movie.genreIds)) {
+      counts[id] = (counts[id] ?? 0) + 1;
+    }
+  }
+  final sorted = counts.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
+  return sorted;
+}
+
+/// How many records in [list] carry [genreId].
+///
+/// The genre badges below used to substring-match the localized genre text,
+/// which was both language-dependent and quietly wrong: 'western' never
+/// matched "Vahşi Batı" and 'drama' never matched "Dram", so those two badges
+/// could not be earned at all.
+int _countByGenreId(List<WatchRecordWithMovie> list, int genreId) {
+  return list.where((r) => parseGenreIds(r.movie.genreIds).contains(genreId)).length;
 }
 
 int _countByKeyword(

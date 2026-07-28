@@ -41,46 +41,46 @@ class _FakeTmdbService extends TmdbService {
   int topRatedCalls = 0;
 
   @override
-  Future<List<Map<String, dynamic>>> getTrendingMoviesThisWeek({String language = 'tr-TR'}) async {
+  Future<List<Map<String, dynamic>>> getTrendingMoviesThisWeek({String? language}) async {
     trendWeekCalls++;
     return [_movie(1, 'Trend Film Hafta')];
   }
 
   @override
-  Future<List<Map<String, dynamic>>> getTrendingTvShowsThisWeek({String language = 'tr-TR'}) async {
+  Future<List<Map<String, dynamic>>> getTrendingTvShowsThisWeek({String? language}) async {
     return tvEmpty ? [] : [_tv(2, 'Trend Dizi Hafta')];
   }
 
   @override
-  Future<List<Map<String, dynamic>>> getTrendingMoviesToday({String language = 'tr-TR'}) async {
+  Future<List<Map<String, dynamic>>> getTrendingMoviesToday({String? language}) async {
     trendTodayCalls++;
     return [_movie(3, 'Trend Film Bugün')];
   }
 
   @override
-  Future<List<Map<String, dynamic>>> getTrendingTvShowsToday({String language = 'tr-TR'}) async {
+  Future<List<Map<String, dynamic>>> getTrendingTvShowsToday({String? language}) async {
     return tvEmpty ? [] : [_tv(4, 'Trend Dizi Bugün')];
   }
 
   @override
-  Future<List<Map<String, dynamic>>> getPopularMovies({int page = 1, String language = 'tr-TR'}) async {
+  Future<List<Map<String, dynamic>>> getPopularMovies({int page = 1, String? language}) async {
     popularCalls++;
     return [_movie(5, 'Popüler Film')];
   }
 
   @override
-  Future<List<Map<String, dynamic>>> getPopularTvShows({int page = 1, String language = 'tr-TR'}) async {
+  Future<List<Map<String, dynamic>>> getPopularTvShows({int page = 1, String? language}) async {
     return tvEmpty ? [] : [_tv(6, 'Popüler Dizi')];
   }
 
   @override
-  Future<List<Map<String, dynamic>>> getTopRatedMovies({int page = 1, String language = 'tr-TR'}) async {
+  Future<List<Map<String, dynamic>>> getTopRatedMovies({int page = 1, String? language}) async {
     topRatedCalls++;
     return [_movie(7, 'En Çok Oy Alan Film')];
   }
 
   @override
-  Future<List<Map<String, dynamic>>> getTopRatedTvShows({int page = 1, String language = 'tr-TR'}) async {
+  Future<List<Map<String, dynamic>>> getTopRatedTvShows({int page = 1, String? language}) async {
     return tvEmpty ? [] : [_tv(8, 'En Çok Oy Alan Dizi')];
   }
 }

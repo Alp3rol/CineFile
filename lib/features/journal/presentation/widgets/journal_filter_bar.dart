@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/l10n/genre_names.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
+import '../../../../l10n/app_localizations.dart';
 
 // Quick Filter Chips Bar — full-width, no horizontal scroll.
 // Each chip gets an equal Expanded share of the available width.
@@ -74,7 +76,10 @@ class JournalFiltersBar extends StatelessWidget {
 class JournalMiniInsightsBar extends StatelessWidget {
   final int thisMonthCount;
   final double avgRating;
-  final String favoriteGenre;
+  /// Most-watched genre id, or null when nothing in the current filter has
+  /// genre data. Resolved to a name here rather than upstream so it follows
+  /// the user's language.
+  final int? favoriteGenreId;
   final int totalHours;
   final int totalMinutes;
 
@@ -82,7 +87,7 @@ class JournalMiniInsightsBar extends StatelessWidget {
     super.key,
     required this.thisMonthCount,
     required this.avgRating,
-    required this.favoriteGenre,
+    required this.favoriteGenreId,
     required this.totalHours,
     required this.totalMinutes,
   });
@@ -160,7 +165,15 @@ class JournalMiniInsightsBar extends StatelessWidget {
             const SizedBox(height: 12),
             Row(
               children: [
-                _buildStat(context, 'Favori Tür', favoriteGenre, Icons.movie_filter_rounded, AppTheme.accentColor),
+                _buildStat(
+                  context,
+                  'Favori Tür',
+                  favoriteGenreId == null
+                      ? 'Belirsiz'
+                      : genreName(AppLocalizations.of(context), favoriteGenreId!),
+                  Icons.movie_filter_rounded,
+                  AppTheme.accentColor,
+                ),
                 _divider(),
                 _buildStat(context, 'Toplam Süre', durationStr, Icons.hourglass_bottom_rounded, AppTheme.ratingColor),
               ],

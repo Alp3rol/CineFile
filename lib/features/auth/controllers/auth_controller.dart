@@ -6,6 +6,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import '../models/user_model.dart';
+import 'auth_failure.dart';
+
+export 'auth_failure.dart';
 
 final firebaseAuthProvider = Provider<FirebaseAuth>((ref) => FirebaseAuth.instance);
 final firestoreProvider = Provider<FirebaseFirestore>((ref) => FirebaseFirestore.instance);
@@ -198,14 +201,16 @@ class AuthController {
   Map<String, dynamic> _userDocFor(UserModel model) =>
       model.toMap()..['usernameLower'] = model.username.toLowerCase();
 
-  Future<String?> signUp({
+  /// Returns null on success, or why it failed. See [AuthFailure] for why this
+  /// is a reason rather than a ready-made message.
+  Future<AuthFailure?> signUp({
     required String email,
     required String password,
     required String username,
   }) async {
     final trimmedUsername = username.trim();
     if (trimmedUsername.isEmpty) {
-      return 'Kullanıcı adı boş olamaz.';
+      return AuthFailure.usernameEmpty;
     }
 
     User? createdUser;
@@ -222,7 +227,7 @@ class AuthController {
       );
       createdUser = credential.user;
       if (createdUser == null) {
-        return 'Hesap oluşturulamadı, lütfen tekrar deneyin.';
+        return AuthFailure.accountCreationFailed;
       }
 
       final claimed = await _claimUsername(
@@ -231,7 +236,7 @@ class AuthController {
       );
       if (!claimed) {
         await createdUser.delete();
-        return 'Bu kullanıcı adı zaten alınmış.';
+        return AuthFailure.usernameTaken;
       }
 
       final newUser = UserModel(
@@ -244,24 +249,27 @@ class AuthController {
       return null;
     } on FirebaseAuthException catch (e) {
       if (e.code == 'email-already-in-use') {
-        return 'Bu e-posta adresi zaten kullanılıyor.';
+        return AuthFailure.emailAlreadyInUse;
       } else if (e.code == 'weak-password') {
-        return 'Şifre en az 6 karakter olmalıdır.';
+        return AuthFailure.weakPassword;
       } else if (e.code == 'invalid-email') {
-        return 'Geçersiz bir e-posta adresi girdiniz.';
+        return AuthFailure.invalidEmail;
       }
-      return e.message ?? 'Bir hata oluştu.';
+      debugPrint('signUp failed with unhandled code "${e.code}": ${e.message}');
+      return AuthFailure.unknown;
     } catch (e) {
       // Never leave a half-created account behind: without a profile document
       // the user would be signed in to a broken state on next launch.
       try {
         await createdUser?.delete();
       } catch (_) {}
-      return e.toString();
+      debugPrint('signUp failed: $e');
+      return AuthFailure.unknown;
     }
   }
 
-  Future<String?> signIn({
+  /// Returns null on success, or why it failed.
+  Future<AuthFailure?> signIn({
     required String email,
     required String password,
   }) async {
@@ -277,11 +285,13 @@ class AuthController {
       return null;
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found' || e.code == 'wrong-password' || e.code == 'invalid-credential') {
-        return 'E-posta veya şifre hatalı.';
+        return AuthFailure.invalidCredentials;
       }
-      return e.message ?? 'Giriş yapılamadı.';
+      debugPrint('signIn failed with unhandled code "${e.code}": ${e.message}');
+      return AuthFailure.unknown;
     } catch (e) {
-      return e.toString();
+      debugPrint('signIn failed: $e');
+      return AuthFailure.unknown;
     }
   }
 
@@ -290,7 +300,8 @@ class AuthController {
     _ref.read(userModelProvider.notifier).state = null;
   }
 
-  Future<String?> updateProfile({
+  /// Returns null on success, or why it failed.
+  Future<AuthFailure?> updateProfile({
     required String username,
     required String? avatarUrl,
     required String? bio,
@@ -298,13 +309,13 @@ class AuthController {
   }) async {
     try {
       final user = _auth.currentUser;
-      if (user == null) return 'Kullanıcı oturumu bulunamadı.';
+      if (user == null) return AuthFailure.notSignedIn;
 
       final currentModel = _ref.read(userModelProvider);
-      if (currentModel == null) return 'Kullanıcı verisi bulunamadı.';
+      if (currentModel == null) return AuthFailure.userDataMissing;
 
       final newUsername = username.trim();
-      if (newUsername.isEmpty) return 'Kullanıcı adı boş olamaz.';
+      if (newUsername.isEmpty) return AuthFailure.usernameEmpty;
 
       // Same server-enforced claim as signup, so a rename can't take a name
       // another user grabbed a moment earlier.
@@ -314,7 +325,7 @@ class AuthController {
           usernameLower: newUsername.toLowerCase(),
           previousUsernameLower: currentModel.username.toLowerCase(),
         );
-        if (!claimed) return 'Bu kullanıcı adı zaten alınmış.';
+        if (!claimed) return AuthFailure.usernameTaken;
       }
 
       final updatedModel = currentModel.copyWith(
@@ -331,7 +342,8 @@ class AuthController {
 
       return null;
     } catch (e) {
-      return e.toString();
+      debugPrint('updateProfile failed: $e');
+      return AuthFailure.unknown;
     }
   }
 }

@@ -5,6 +5,7 @@ import 'package:drift/drift.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'app_database.dart';
 import 'database_provider.dart';
+import '../constants/tmdb_genres.dart';
 import '../../features/auth/controllers/auth_controller.dart';
 
 /// Centralizes the native (Drift/SQLite) vs. web (in-memory) write paths
@@ -119,6 +120,10 @@ Movie movieFromTmdbPayload({
       .where((s) => s.toString().isNotEmpty)
       .join(', ');
 
+  // The names above are whatever language TMDb was asked for; the ids are
+  // what statistics and filters compare on. See Movies.genreIds.
+  final genreIds = formatGenreIds(genreIdsFromTmdbPayload(movieData));
+
   // TMDb names the date field differently for movies and shows, and the
   // detail normalisation in TmdbService may have already copied one to the
   // other — accept whichever is present.
@@ -137,6 +142,7 @@ Movie movieFromTmdbPayload({
     releaseYear: releaseYear,
     runtime: (movieData['runtime'] as num?)?.toInt(),
     genres: genres,
+    genreIds: genreIds,
     director: director,
     actors: actors,
     overview: movieData['overview'] as String?,
@@ -144,6 +150,18 @@ Movie movieFromTmdbPayload({
     createdAt: createdAt ?? DateTime.now(),
     totalEpisodes: (movieData['number_of_episodes'] as num?)?.toInt(),
   );
+}
+
+/// [Movie.fromJson] plus recovery of [Movie.genreIds] for backups written
+/// before schema 13, which only carry localized genre names. Without this a
+/// restored library would be invisible to every genre statistic until each
+/// title happened to be opened again.
+Movie _movieFromBackupJson(Map<String, dynamic> json) {
+  final movie = Movie.fromJson(json);
+  if (movie.genreIds != null) return movie;
+
+  final recovered = formatGenreIds(genreIdsFromLegacyNames(movie.genres));
+  return recovered == null ? movie : movie.copyWith(genreIds: Value(recovered));
 }
 
 final movieRepositoryProvider = Provider<MovieRepository>((ref) {
@@ -206,6 +224,7 @@ class NativeMovieRepository implements MovieRepository {
               releaseYear: Value(movieData.releaseYear),
               runtime: Value(movieData.runtime),
               genres: Value(movieData.genres),
+              genreIds: Value(movieData.genreIds),
               director: Value(movieData.director),
               actors: Value(movieData.actors),
               overview: Value(movieData.overview),
@@ -452,6 +471,7 @@ class NativeMovieRepository implements MovieRepository {
             releaseYear: Value(movie.releaseYear),
             runtime: Value(movie.runtime),
             genres: Value(movie.genres),
+            genreIds: Value(movie.genreIds),
             director: Value(movie.director),
             actors: Value(movie.actors),
             overview: Value(movie.overview),
@@ -527,7 +547,7 @@ class NativeMovieRepository implements MovieRepository {
       await _db.delete(_db.movies).go();
 
       for (final x in moviesList) {
-        await _db.into(_db.movies).insertOnConflictUpdate(Movie.fromJson(x as Map<String, dynamic>));
+        await _db.into(_db.movies).insertOnConflictUpdate(_movieFromBackupJson(x as Map<String, dynamic>));
       }
       for (final x in settingsList) {
         await _db.into(_db.userMovieSettings).insertOnConflictUpdate(UserMovieSetting.fromJson(x as Map<String, dynamic>));
@@ -839,6 +859,7 @@ class WebMovieRepository implements MovieRepository {
         'releaseYear': m.releaseYear,
         'runtime': m.runtime,
         'genres': m.genres,
+        'genreIds': m.genreIds,
         'director': m.director,
         'actors': m.actors,
         'overview': m.overview,
@@ -953,6 +974,11 @@ class WebMovieRepository implements MovieRepository {
         releaseYear: (map['releaseYear'] as num?)?.toInt(),
         runtime: (map['runtime'] as num?)?.toInt(),
         genres: map['genres'] as String?,
+        // Backups taken before schema 13 have no ids; recover them from the
+        // stored names the same way the migration does, so restoring an old
+        // file doesn't leave the library invisible to genre statistics.
+        genreIds: (map['genreIds'] as String?) ??
+            formatGenreIds(genreIdsFromLegacyNames(map['genres'] as String?)),
         director: map['director'] as String?,
         actors: map['actors'] as String?,
         overview: map['overview'] as String?,

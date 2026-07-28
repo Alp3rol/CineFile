@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -15,7 +16,7 @@ class RecentWatchesGrid extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const ProfileSectionHeader(title: 'Son İzlediklerim'),
+        ProfileSectionHeader(title: AppLocalizations.of(context).profileRecentWatches),
         const SizedBox(height: 16),
         ref.watch(watchRecordsForUserProvider(userId)).when(
           loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.accentColor)),
@@ -25,7 +26,7 @@ class RecentWatchesGrid extends ConsumerWidget {
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 20),
                 child: Text(
-                  'Henüz hiç izleme kaydı eklenmemiş.',
+                  AppLocalizations.of(context).profileNoRecentWatches,
                   style: GoogleFonts.inter(color: AppTheme.textSecondary, fontSize: 13),
                 ),
               );

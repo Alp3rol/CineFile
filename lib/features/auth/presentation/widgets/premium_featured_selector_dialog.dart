@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
@@ -49,7 +50,7 @@ class _PremiumFeaturedSelectorDialogState extends State<PremiumFeaturedSelectorD
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Vitrini Düzenle',
+                      AppLocalizations.of(context).profileShowcaseEdit,
                       style: GoogleFonts.outfit(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -58,7 +59,7 @@ class _PremiumFeaturedSelectorDialogState extends State<PremiumFeaturedSelectorD
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'En fazla 5 favori seçin (${_selectedIds.length}/5)',
+                      AppLocalizations.of(context).profileShowcasePickCount(_selectedIds.length),
                       style: GoogleFonts.inter(
                         fontSize: 12,
                         color: Colors.white54,
@@ -81,7 +82,7 @@ class _PremiumFeaturedSelectorDialogState extends State<PremiumFeaturedSelectorD
                       padding: const EdgeInsets.symmetric(vertical: 40.0),
                       child: Center(
                         child: Text(
-                          'Henüz hiç izleme kaydınız yok.',
+                          AppLocalizations.of(context).profileNoWatchRecords,
                           style: GoogleFonts.inter(color: Colors.white38),
                         ),
                       ),
@@ -105,9 +106,9 @@ class _PremiumFeaturedSelectorDialogState extends State<PremiumFeaturedSelectorD
                                 } else {
                                   if (_selectedIds.length >= 5) {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('En fazla 5 film seçebilirsiniz.'),
-                                        duration: Duration(seconds: 2),
+                                      SnackBar(
+                                        content: Text(AppLocalizations.of(context).profileShowcaseLimit),
+                                        duration: const Duration(seconds: 2),
                                       ),
                                     );
                                     return;
@@ -233,7 +234,7 @@ class _PremiumFeaturedSelectorDialogState extends State<PremiumFeaturedSelectorD
                       ),
                     ),
                     child: Text(
-                      'İptal',
+                      AppLocalizations.of(context).commonCancel,
                       style: GoogleFonts.inter(
                         fontWeight: FontWeight.w600,
                         color: Colors.white70,

@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/dynamic_background_provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/constants/api_constants.dart';
+import '../../../../core/constants/tmdb_genres.dart';
 import 'search_provider.dart';
 import 'widgets/search_api_key_warning_banner.dart';
 import 'widgets/search_genre_chips.dart';
@@ -24,14 +25,16 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   final ScrollController _scrollController = ScrollController();
   bool _showScrollToTop = false;
 
-  // TMDb Genre IDs
-  final Map<String, int> _genres = {
-    'Aksiyon': 28,
-    'Komedi': 35,
-    'Dram': 18,
-    'Bilim Kurgu': 878,
-    'Gerilim': 53,
-  };
+  // A short, opinionated shortlist of the full movie vocabulary in
+  // tmdb_genres.dart — the chip row only has room for a handful. Names are
+  // resolved from these ids at render time.
+  static const List<int> _genreIds = [
+    TmdbGenre.action,
+    TmdbGenre.comedy,
+    TmdbGenre.drama,
+    TmdbGenre.scienceFiction,
+    TmdbGenre.thriller,
+  ];
 
   @override
   void initState() {
@@ -163,7 +166,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             if (searchState.query.trim().isNotEmpty) ...[
               const SizedBox(height: 4),
               SearchGenreChips(
-                genres: _genres,
+                genreIds: _genreIds,
                 selectedGenreId: searchState.selectedGenreId,
                 onGenreSelected: searchNotifier.setGenre,
               ),

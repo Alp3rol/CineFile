@@ -88,7 +88,7 @@ void main() {
         bio: 'New bio',
       );
 
-      expect(result, 'Bu kullanıcı adı zaten alınmış.');
+      expect(result, AuthFailure.usernameTaken);
 
       // Verify that user doc was not updated in Firestore
       final doc = await firestore.collection('users').doc(uid).get();
@@ -152,7 +152,7 @@ void main() {
             avatarUrl: '',
             bio: '',
           );
-      expect(result, 'Bu kullanıcı adı zaten alınmış.');
+      expect(result, AuthFailure.usernameTaken);
 
       // The user keeps their own name, and the other user keeps theirs.
       final own = await firestore.collection('usernames').doc('tester').get();

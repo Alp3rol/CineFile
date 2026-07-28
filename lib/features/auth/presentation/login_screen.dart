@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/glass_container.dart';
 import '../../../core/widgets/dynamic_background_wrapper.dart';
+import '../../../l10n/app_localizations.dart';
 import '../controllers/auth_controller.dart';
 import 'register_screen.dart';
 
@@ -19,7 +20,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   bool _isLoading = false;
-  String? _errorMessage;
+  AuthFailure? _error;
 
   @override
   void dispose() {
@@ -33,10 +34,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     setState(() {
       _isLoading = true;
-      _errorMessage = null;
+      _error = null;
     });
 
-    final error = await ref.read(authControllerProvider).signIn(
+    final failure = await ref.read(authControllerProvider).signIn(
           email: _emailController.text,
           password: _passwordController.text,
         );
@@ -44,13 +45,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (mounted) {
       setState(() {
         _isLoading = false;
-        _errorMessage = error;
+        _error = failure;
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       body: DynamicBackgroundWrapper(
@@ -80,7 +83,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Topluluğa katılın, günlüklerinizi paylaşın.',
+                      l10n.authTagline,
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: AppTheme.textSecondary,
@@ -97,7 +100,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Text(
-                            'Giriş Yap',
+                            l10n.authSignIn,
                             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
@@ -110,16 +113,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             controller: _emailController,
                             keyboardType: TextInputType.emailAddress,
                             textInputAction: TextInputAction.next,
-                            decoration: const InputDecoration(
-                              hintText: 'E-posta',
-                              prefixIcon: Icon(Icons.email_outlined, color: AppTheme.textSecondary),
+                            decoration: InputDecoration(
+                              hintText: l10n.authEmailHint,
+                              prefixIcon: const Icon(Icons.email_outlined, color: AppTheme.textSecondary),
                             ),
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
-                                return 'Lütfen e-posta adresinizi girin.';
+                                return l10n.authEmailRequired;
                               }
                               if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value.trim())) {
-                                return 'Lütfen geçerli bir e-posta adresi girin.';
+                                return l10n.authEmailInvalid;
                               }
                               return null;
                             },
@@ -133,7 +136,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             textInputAction: TextInputAction.done,
                             onFieldSubmitted: (_) => _submit(),
                             decoration: InputDecoration(
-                              hintText: 'Şifre',
+                              hintText: l10n.authPasswordHint,
                               prefixIcon: const Icon(Icons.lock_outline_rounded, color: AppTheme.textSecondary),
                               suffixIcon: IconButton(
                                 icon: Icon(
@@ -149,19 +152,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
-                                return 'Lütfen şifrenizi girin.';
+                                return l10n.authPasswordRequired;
                               }
                               if (value.trim().length < 6) {
-                                return 'Şifre en az 6 karakter olmalıdır.';
+                                return l10n.authPasswordTooShort;
                               }
                               return null;
                             },
                           ),
                           const SizedBox(height: 20),
 
-                          if (_errorMessage != null) ...[
+                          if (_error != null) ...[
                             Text(
-                              _errorMessage!,
+                              _error!.message(l10n),
                               style: const TextStyle(
                                 color: AppTheme.accentColor,
                                 fontSize: 13,
@@ -192,9 +195,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                       valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                                     ),
                                   )
-                                : const Text(
-                                    'Giriş Yap',
-                                    style: TextStyle(
+                                : Text(
+                                    l10n.authSignIn,
+                                    style: const TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -209,9 +212,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Text(
-                          'Hesabınız yok mu? ',
-                          style: TextStyle(color: AppTheme.textSecondary),
+                        Text(
+                          l10n.authNoAccountPrompt,
+                          style: const TextStyle(color: AppTheme.textSecondary),
                         ),
                         GestureDetector(
                           onTap: () {
@@ -221,9 +224,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               ),
                             );
                           },
-                          child: const Text(
-                            'Kayıt Olun',
-                            style: TextStyle(
+                          child: Text(
+                            l10n.authSignUpLink,
+                            style: const TextStyle(
                               color: AppTheme.accentColor,
                               fontWeight: FontWeight.bold,
                             ),

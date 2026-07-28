@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fl_chart/fl_chart.dart';
+import '../../../../core/l10n/genre_names.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../insights_provider.dart';
 
 class MonthlyChartCard extends StatelessWidget {
@@ -115,8 +117,13 @@ class GenreChartCard extends StatelessWidget {
   Widget build(BuildContext context) {
     if (data.topGenres.isEmpty) return const SizedBox.shrink();
 
-    // Use top 5 genres, group others
-    final displayedGenres = data.topGenres.take(4).toList();
+    // Use top 5 genres, group others. Ids become names only here — the tally
+    // itself is language-independent (see InsightsData.topGenres).
+    final l10n = AppLocalizations.of(context);
+    final displayedGenres = data.topGenres
+        .take(4)
+        .map((e) => MapEntry(genreName(l10n, e.key), e.value))
+        .toList();
     final othersCount = data.topGenres.skip(4).fold<int>(0, (sum, item) => sum + item.value);
 
     if (othersCount > 0) {
