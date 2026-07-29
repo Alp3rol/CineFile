@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
@@ -10,7 +11,7 @@ class LeadersCard extends StatelessWidget {
   final InsightsData data;
   const LeadersCard({super.key, required this.data});
 
-  Widget _buildLeaderList(String title, IconData headerIcon, List<MapEntry<String, int>> items) {
+  Widget _buildLeaderList(BuildContext context, String title, IconData headerIcon, List<MapEntry<String, int>> items) {
     final topItems = items.take(4).toList();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -34,7 +35,7 @@ class LeadersCard extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
-              'Kayıt bulunamadı.',
+              AppLocalizations.of(context).insightsNoRecords,
               style: GoogleFonts.inter(fontSize: 11, color: AppTheme.textSecondary),
             ),
           )
@@ -85,7 +86,7 @@ class LeadersCard extends StatelessWidget {
             borderRadius: 20,
             opacity: 0.6,
             padding: const EdgeInsets.all(14),
-            child: _buildLeaderList('En Çok İzlenen Yönetmenler', Icons.movie_creation_rounded, data.topDirectors),
+            child: _buildLeaderList(context, AppLocalizations.of(context).insightsTopDirectors, Icons.movie_creation_rounded, data.topDirectors),
           ),
         ),
         const SizedBox(width: 12),
@@ -95,7 +96,7 @@ class LeadersCard extends StatelessWidget {
             borderRadius: 20,
             opacity: 0.6,
             padding: const EdgeInsets.all(14),
-            child: _buildLeaderList('En Çok İzlenen Oyuncular', Icons.people_rounded, data.topActors),
+            child: _buildLeaderList(context, AppLocalizations.of(context).insightsTopActors, Icons.people_rounded, data.topActors),
           ),
         ),
       ],
@@ -133,7 +134,7 @@ class _BadgesSectionState extends State<BadgesSection> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '🏆 Başarılar & Rozetler',
+                AppLocalizations.of(context).insightsBadgesTitle,
                 style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
               ),
               Container(
@@ -144,7 +145,7 @@ class _BadgesSectionState extends State<BadgesSection> {
                   border: Border.all(color: AppTheme.accentColor.withValues(alpha: 0.4), width: 1),
                 ),
                 child: Text(
-                  '$unlockedCount / ${allBadges.length} Kazanıldı',
+                  AppLocalizations.of(context).insightsBadgesEarned(unlockedCount, allBadges.length),
                   style: GoogleFonts.outfit(fontSize: 11, color: AppTheme.accentColor, fontWeight: FontWeight.bold),
                 ),
               ),
@@ -162,7 +163,7 @@ class _BadgesSectionState extends State<BadgesSection> {
               Padding(
                 padding: const EdgeInsets.only(right: 6),
                 child: FilterChip(
-                  label: Text('Tümü (${allBadges.length})', style: const TextStyle(fontSize: 11)),
+                  label: Text(AppLocalizations.of(context).achievementsAllCount(allBadges.length), style: const TextStyle(fontSize: 11)),
                   selected: selectedCategory == null,
                   onSelected: (sel) => setState(() => selectedCategory = null),
                   selectedColor: AppTheme.accentColor,
@@ -323,11 +324,11 @@ class TagsSection extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '🏷️ En Sık Kullanılan Etiketler',
+                AppLocalizations.of(context).insightsTopTagsTitle,
                 style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
               ),
               Text(
-                '${data.topTags.length} Farklı Etiket',
+                AppLocalizations.of(context).insightsDistinctTags(data.topTags.length),
                 style: GoogleFonts.outfit(fontSize: 11, color: AppTheme.accentColor, fontWeight: FontWeight.bold),
               ),
             ],

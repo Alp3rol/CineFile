@@ -6,18 +6,10 @@ String formatHeatmapDateKey(DateTime date) {
   return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
 }
 
-String formatHeatmapDateTurkish(DateTime date) {
-  const months = [
-    'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
-    'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık',
-  ];
-  return '${date.day} ${months[date.month - 1]} ${date.year}';
-}
-
-String heatmapMonthName(int month) {
-  const months = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
-  return months[month - 1];
-}
+// The month-name tables that used to live here are gone: they were one of
+// three separate hardcoded Turkish arrays in this feature, none of which would
+// ever have followed the user's language. Callers use formatLongDate and
+// shortMonthName from core/l10n/date_text.dart instead.
 
 // Neon renk paleti — bilinçli olarak AppTheme'in kırmızı/altın sinematik
 // temasından ayrık tutuluyor, sadece bu ısı haritasına özel.

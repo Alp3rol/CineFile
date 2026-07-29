@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
@@ -73,10 +74,10 @@ class SummaryCardsGrid extends StatelessWidget {
       mainAxisSpacing: 12,
       childAspectRatio: 2.0,
       children: [
-        _buildMiniStatCard('Toplam İzleme', '${data.totalWatchCount}', Icons.movie_filter_rounded, Colors.blueAccent),
-        _buildMiniStatCard('Tekil İçerik', '${data.uniqueTitleCount}', Icons.local_play_rounded, Colors.purpleAccent),
-        _buildMiniStatCard('Toplam Süre', durationStr, Icons.timelapse_rounded, Colors.tealAccent),
-        _buildMiniStatCard('Ort. Puan', '${data.averageRating.toStringAsFixed(1)} / 10', Icons.star_rounded, AppTheme.ratingColor),
+        _buildMiniStatCard(AppLocalizations.of(context).insightsSummaryTotalWatches, '${data.totalWatchCount}', Icons.movie_filter_rounded, Colors.blueAccent),
+        _buildMiniStatCard(AppLocalizations.of(context).insightsSummaryUniqueTitles, '${data.uniqueTitleCount}', Icons.local_play_rounded, Colors.purpleAccent),
+        _buildMiniStatCard(AppLocalizations.of(context).insightsSummaryTotalTime, durationStr, Icons.timelapse_rounded, Colors.tealAccent),
+        _buildMiniStatCard(AppLocalizations.of(context).insightsSummaryAvgRating, '${data.averageRating.toStringAsFixed(1)} / 10', Icons.star_rounded, AppTheme.ratingColor),
       ],
     );
   }

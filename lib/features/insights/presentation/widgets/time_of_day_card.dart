@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../domain/insight_buckets.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../insights_provider.dart';
@@ -8,7 +10,9 @@ class TimeOfDayCard extends StatelessWidget {
   final InsightsData data;
   const TimeOfDayCard({super.key, required this.data});
 
-  Widget _buildTimeOfDayRow(String label, String hours, int count, int total, IconData icon, Color color) {
+  Widget _buildTimeOfDayRow(BuildContext context, TimeOfDayBand band, int count, int total, IconData icon, Color color) {
+    final label = band.label(AppLocalizations.of(context));
+    final hours = band.hoursLabel;
     final percentage = total > 0 ? (count / total) * 100 : 0.0;
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -29,7 +33,7 @@ class TimeOfDayCard extends StatelessWidget {
               ),
               const Spacer(),
               Text(
-                '$count İzleme (${percentage.toStringAsFixed(0)}%)',
+                AppLocalizations.of(context).insightsWatchesWithPercent(count, percentage.toStringAsFixed(0)),
                 style: GoogleFonts.outfit(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold),
               ),
             ],
@@ -62,14 +66,14 @@ class TimeOfDayCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Günün Hangi Saatlerinde İzliyorsun?',
+            AppLocalizations.of(context).insightsTimeOfDayTitle,
             style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
           ),
           const SizedBox(height: 18),
-          _buildTimeOfDayRow('Sabah', '06:00 - 12:00', values['Sabah'] ?? 0, total, Icons.wb_sunny_rounded, Colors.orangeAccent),
-          _buildTimeOfDayRow('Öğle', '12:00 - 18:00', values['Öğle'] ?? 0, total, Icons.wb_cloudy_rounded, const Color(0xFF29B6F6)),
-          _buildTimeOfDayRow('Akşam', '18:00 - 24:00', values['Akşam'] ?? 0, total, Icons.nights_stay_rounded, Colors.indigoAccent),
-          _buildTimeOfDayRow('Gece', '00:00 - 06:00', values['Gece'] ?? 0, total, Icons.dark_mode_rounded, Colors.purpleAccent),
+          _buildTimeOfDayRow(context, TimeOfDayBand.morning, values[TimeOfDayBand.morning] ?? 0, total, Icons.wb_sunny_rounded, Colors.orangeAccent),
+          _buildTimeOfDayRow(context, TimeOfDayBand.midday, values[TimeOfDayBand.midday] ?? 0, total, Icons.wb_cloudy_rounded, const Color(0xFF29B6F6)),
+          _buildTimeOfDayRow(context, TimeOfDayBand.evening, values[TimeOfDayBand.evening] ?? 0, total, Icons.nights_stay_rounded, Colors.indigoAccent),
+          _buildTimeOfDayRow(context, TimeOfDayBand.night, values[TimeOfDayBand.night] ?? 0, total, Icons.dark_mode_rounded, Colors.purpleAccent),
         ],
       ),
     );

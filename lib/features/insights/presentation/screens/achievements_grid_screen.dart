@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -38,7 +39,7 @@ class _AchievementsGridScreenState extends ConsumerState<AchievementsGridScreen>
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: Text(
-          'Rozet & Başarım Koleksiyonu',
+          AppLocalizations.of(context).achievementsTitle,
           style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 19, color: Colors.white),
         ),
         centerTitle: true,
@@ -53,7 +54,7 @@ class _AchievementsGridScreenState extends ConsumerState<AchievementsGridScreen>
                 child: Padding(
                   padding: const EdgeInsets.all(24.0),
                   child: Text(
-                    'Rozetlerin yüklenmesi için günlüğünüze en az 1 izleme kaydı eklemelisiniz.',
+                    AppLocalizations.of(context).achievementsNeedRecords,
                     textAlign: TextAlign.center,
                     style: GoogleFonts.inter(color: AppTheme.textSecondary, fontSize: 14),
                   ),
@@ -72,17 +73,17 @@ class _AchievementsGridScreenState extends ConsumerState<AchievementsGridScreen>
     final percentage = (ratio * 100).toInt();
 
     // Determine Rank / Title based on unlocked count
-    String rankTitle = 'Çaylak Sinefil 🍿';
-    String rankSub = 'Sinema yolculuğuna yeni başladın';
+    String rankTitle = AppLocalizations.of(context).profileRankNovice;
+    String rankSub = AppLocalizations.of(context).achievementsRankNoviceSubtitle;
     if (unlockedCount >= 15) {
-      rankTitle = 'Sinema Gurusu 👑';
-      rankSub = 'Gerçek bir kültür abidesi';
+      rankTitle = AppLocalizations.of(context).profileRankGuru;
+      rankSub = AppLocalizations.of(context).achievementsRankGuruSubtitle;
     } else if (unlockedCount >= 8) {
-      rankTitle = 'Kültür Üstadı 🏛️';
-      rankSub = 'Sinematik hafızası yüksek';
+      rankTitle = AppLocalizations.of(context).profileRankConnoisseur;
+      rankSub = AppLocalizations.of(context).achievementsRankConnoisseurSubtitle;
     } else if (unlockedCount >= 3) {
-      rankTitle = 'Sinema Bilet Ortağı 🎬';
-      rankSub = 'Düzenli izleyici';
+      rankTitle = AppLocalizations.of(context).achievementsRankTicketBuddy;
+      rankSub = AppLocalizations.of(context).achievementsRankTicketBuddySubtitle;
     }
 
     // Filter Badges
@@ -183,7 +184,7 @@ class _AchievementsGridScreenState extends ConsumerState<AchievementsGridScreen>
                                         border: Border.all(color: AppTheme.accentColor.withValues(alpha: 0.5), width: 0.8),
                                       ),
                                       child: Text(
-                                        'MEVCUT UNVAN',
+                                        AppLocalizations.of(context).achievementsCurrentRank,
                                         style: GoogleFonts.outfit(
                                           fontSize: 9,
                                           fontWeight: FontWeight.bold,
@@ -232,7 +233,7 @@ class _AchievementsGridScreenState extends ConsumerState<AchievementsGridScreen>
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                'Koleksiyon İlerlemesi',
+                                AppLocalizations.of(context).achievementsProgress,
                                 style: GoogleFonts.inter(fontSize: 11, color: Colors.white70, fontWeight: FontWeight.w600),
                               ),
                               Text(
@@ -272,7 +273,7 @@ class _AchievementsGridScreenState extends ConsumerState<AchievementsGridScreen>
                 Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: FilterChip(
-                    label: Text('Tümü ($totalCount)', style: const TextStyle(fontSize: 11.5)),
+                    label: Text(AppLocalizations.of(context).achievementsAllCount(totalCount), style: const TextStyle(fontSize: 11.5)),
                     selected: selectedCategory == null,
                     onSelected: (_) => setState(() => selectedCategory = null),
                     selectedColor: AppTheme.accentColor,
@@ -293,7 +294,7 @@ class _AchievementsGridScreenState extends ConsumerState<AchievementsGridScreen>
                     padding: const EdgeInsets.only(right: 8),
                     child: FilterChip(
                       avatar: Icon(cat.icon, size: 14, color: isSelected ? Colors.black : AppTheme.accentColor),
-                      label: Text('${cat.label} ($catCount)', style: const TextStyle(fontSize: 11.5)),
+                      label: Text(AppLocalizations.of(context).achievementsCategoryCount(cat.label(AppLocalizations.of(context)), catCount), style: const TextStyle(fontSize: 11.5)),
                       selected: isSelected,
                       onSelected: (sel) => setState(() => selectedCategory = sel ? cat : null),
                       selectedColor: AppTheme.accentColor,
@@ -319,13 +320,13 @@ class _AchievementsGridScreenState extends ConsumerState<AchievementsGridScreen>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '${filtered.length} Başarım Gösteriliyor',
+                AppLocalizations.of(context).achievementsShowing(filtered.length),
                 style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary, fontWeight: FontWeight.w500),
               ),
               Row(
                 children: [
                   Text(
-                    'Kazanılanlar',
+                    AppLocalizations.of(context).achievementsUnlocked,
                     style: GoogleFonts.inter(fontSize: 11.5, color: Colors.white70, fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(width: 4),
@@ -350,7 +351,7 @@ class _AchievementsGridScreenState extends ConsumerState<AchievementsGridScreen>
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 40),
                     child: Text(
-                      'Seçili filtreye uygun rozet bulunamadı.',
+                      AppLocalizations.of(context).achievementsNoneForFilter,
                       style: GoogleFonts.inter(color: AppTheme.textSecondary, fontSize: 13),
                     ),
                   ),
@@ -475,7 +476,7 @@ class _AchievementsGridScreenState extends ConsumerState<AchievementsGridScreen>
                               )
                             else
                               Text(
-                                '🔒 Kilitli',
+                                AppLocalizations.of(context).badgeLockedLabel,
                                 style: GoogleFonts.inter(
                                   fontSize: 10,
                                   color: Colors.grey.shade500,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -21,20 +22,20 @@ class WeeklyGoalCard extends ConsumerWidget {
               backgroundColor: AppTheme.surfaceColor,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               title: Text(
-                'Haftalık Hedefi Ayarla',
+                AppLocalizations.of(context).weeklyGoalSetTitle,
                 style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
               ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Haftada kaç film/dizi izlemek istersiniz?',
+                    AppLocalizations.of(context).weeklyGoalQuestion,
                     style: GoogleFonts.inter(fontSize: 12, color: Colors.white70),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    '$tempGoal İçerik',
+                    AppLocalizations.of(context).weeklyGoalItemsCount(tempGoal),
                     style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold, color: AppTheme.accentColor),
                   ),
                   const SizedBox(height: 8),
@@ -61,7 +62,7 @@ class WeeklyGoalCard extends ConsumerWidget {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('İptal', style: TextStyle(color: Colors.white70)),
+                  child: Text(AppLocalizations.of(context).commonCancel, style: TextStyle(color: Colors.white70)),
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(backgroundColor: AppTheme.accentColor),
@@ -69,7 +70,7 @@ class WeeklyGoalCard extends ConsumerWidget {
                     ref.read(weeklyGoalProvider.notifier).saveGoal(tempGoal);
                     Navigator.pop(context);
                   },
-                  child: const Text('Kaydet', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                  child: Text(AppLocalizations.of(context).commonSave, style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
                 ),
               ],
             );
@@ -102,7 +103,7 @@ class WeeklyGoalCard extends ConsumerWidget {
                     const SizedBox(width: 8),
                     Flexible(
                       child: Text(
-                        '🎯 Haftalık İzleme Hedefi',
+                        AppLocalizations.of(context).weeklyGoalTitle,
                         style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -127,29 +128,19 @@ class WeeklyGoalCard extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    RichText(
-                      text: TextSpan(
-                        style: GoogleFonts.inter(fontSize: 11.5, color: Colors.white70),
-                        children: [
-                          const TextSpan(text: 'Bu hafta '),
-                          TextSpan(
-                            text: '$count ',
-                            style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.accentColor),
-                          ),
-                          const TextSpan(text: 'film/dizi izlediniz. (Hedef: '),
-                          TextSpan(
-                            text: '$weeklyGoal',
-                            style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-                          ),
-                          const TextSpan(text: ')'),
-                        ],
-                      ),
+                    // One message rather than five TextSpans with the numbers
+                    // bolded between them: the sentence's parts don't stay in
+                    // that order across languages, so the split cannot be
+                    // translated. The bold accent on the numbers is the cost.
+                    Text(
+                      AppLocalizations.of(context).weeklyGoalProgress(count, weeklyGoal),
+                      style: GoogleFonts.inter(fontSize: 11.5, color: Colors.white70),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       progress >= 1.0
-                          ? 'Tebrikler, bu haftaki hedefinize ulaştınız! 🎉'
-                          : 'Hedefe ulaşmak için ${weeklyGoal - count} film daha izlemelisiniz.',
+                          ? AppLocalizations.of(context).weeklyGoalReached
+                          : AppLocalizations.of(context).weeklyGoalRemaining(weeklyGoal - count),
                       style: GoogleFonts.inter(
                         fontSize: 10,
                         color: progress >= 1.0 ? Colors.greenAccent : AppTheme.textSecondary,

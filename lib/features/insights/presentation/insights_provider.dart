@@ -2,6 +2,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/tmdb_genres.dart';
 import '../../../core/database/database_provider.dart';
 import '../domain/achievement_models.dart';
+import '../domain/insight_buckets.dart';
+import '../../../core/l10n/l10n_lookup.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../settings/presentation/settings_provider.dart';
 import 'widgets/contribution_heatmap_utils.dart';
 
 // Legacy class kept for backward compatibility
@@ -46,7 +50,10 @@ class InsightsData {
   final List<MapEntry<String, int>> topDirectors;
   final List<MapEntry<String, int>> topActors;
   final Map<int, int> monthlyWatchTrend;
-  final Map<String, int> timeOfDayTrend;
+  /// Watches per time-of-day band. Keyed by [TimeOfDayBand] rather than the
+  /// band's display name — those keys were Turkish strings, so the widget's
+  /// lookup silently missed every bucket once the UI spoke another language.
+  final Map<TimeOfDayBand, int> timeOfDayTrend;
   final Map<int, int> dayOfWeekTrend;
   final List<BadgeState> badges;
   final List<AchievementBadge> achievementBadges;
@@ -63,7 +70,9 @@ class InsightsData {
   final int mostFrequentRating;
 
   // Seasonal Trends
-  final Map<String, int> seasonalCounts;
+  /// Watches per season, keyed by [Season] for the same reason as
+  /// [timeOfDayTrend].
+  final Map<Season, int> seasonalCounts;
   final int goldenWeekday;
 
   // Tags & Weekly Goal
@@ -110,6 +119,9 @@ class TierStep {
 }
 
 final insightsProvider = Provider<InsightsData?>((ref) {
+  // Badge titles and descriptions are assembled here, not in a widget, so the
+  // language has to be resolved without a BuildContext.
+  final l10n = lookupL10n(ref.watch(localeProvider));
   final watchRecordsAsync = ref.watch(allWatchRecordsProvider);
   final list = watchRecordsAsync.value;
   final settingsMap = ref.watch(allMovieSettingsProvider).value ?? {};
@@ -161,23 +173,10 @@ final insightsProvider = Provider<InsightsData?>((ref) {
     }
   }
 
-  final timeOfDayTrend = <String, int>{
-    'Sabah': 0,
-    'Öğle': 0,
-    'Akşam': 0,
-    'Gece': 0,
-  };
+  final timeOfDayTrend = {for (final band in TimeOfDayBand.values) band: 0};
   for (final r in list) {
-    final hour = r.record.watchDate.hour;
-    if (hour >= 6 && hour < 12) {
-      timeOfDayTrend['Sabah'] = (timeOfDayTrend['Sabah'] ?? 0) + 1;
-    } else if (hour >= 12 && hour < 18) {
-      timeOfDayTrend['Öğle'] = (timeOfDayTrend['Öğle'] ?? 0) + 1;
-    } else if (hour >= 18 && hour < 24) {
-      timeOfDayTrend['Akşam'] = (timeOfDayTrend['Akşam'] ?? 0) + 1;
-    } else {
-      timeOfDayTrend['Gece'] = (timeOfDayTrend['Gece'] ?? 0) + 1;
-    }
+    final band = TimeOfDayBand.forHour(r.record.watchDate.hour);
+    timeOfDayTrend[band] = (timeOfDayTrend[band] ?? 0) + 1;
   }
 
   final dayOfWeekTrend = <int, int>{};
@@ -271,23 +270,10 @@ final insightsProvider = Provider<InsightsData?>((ref) {
     }
   }
 
-  final seasonalCounts = {
-    'Kış': 0,
-    'İlkbahar': 0,
-    'Yaz': 0,
-    'Sonbahar': 0,
-  };
+  final seasonalCounts = {for (final season in Season.values) season: 0};
   for (final r in list) {
-    final month = r.record.watchDate.month;
-    if (month == 12 || month == 1 || month == 2) {
-      seasonalCounts['Kış'] = seasonalCounts['Kış']! + 1;
-    } else if (month >= 3 && month <= 5) {
-      seasonalCounts['İlkbahar'] = seasonalCounts['İlkbahar']! + 1;
-    } else if (month >= 6 && month <= 8) {
-      seasonalCounts['Yaz'] = seasonalCounts['Yaz']! + 1;
-    } else {
-      seasonalCounts['Sonbahar'] = seasonalCounts['Sonbahar']! + 1;
-    }
+    final season = Season.forMonth(r.record.watchDate.month);
+    seasonalCounts[season] = seasonalCounts[season]! + 1;
   }
 
   int goldenWeekday = 7;
@@ -317,6 +303,7 @@ final insightsProvider = Provider<InsightsData?>((ref) {
     longestStreak: longestStreak,
     dailyWatchCounts: dailyWatchCounts,
     topTags: topTags,
+    l10n: l10n,
   );
 
   final badges = achievementBadges.map((b) => BadgeState.fromAchievement(b)).toList();
@@ -449,48 +436,54 @@ List<AchievementBadge> _calculateAllTieredAchievements({
   required int longestStreak,
   required Map<String, int> dailyWatchCounts,
   required List<MapEntry<String, int>> topTags,
+  required AppLocalizations l10n,
 }) {
   final badges = <AchievementBadge>[];
+
+  // Tier titles and descriptions are localized here rather than in a widget:
+  // the badge list is assembled in this provider, and AchievementBadge carries
+  // the finished strings. The `const` on each step list is therefore gone —
+  // that is the price of the text no longer being baked in.
 
   // --- 1. HACİM VE MARATON (MILSTONES) ---
   badges.add(_buildTieredBadge(
     id: 'first_watch_series',
-    defaultTitle: 'İlk Adımlar',
+    defaultTitle: l10n.badgeFirstWatchTitle,
     icon: '🥇',
     category: AchievementCategory.milestone,
     currentValue: totalWatchCount,
-    steps: const [
-      TierStep(target: 1, title: 'İlk Adım', description: 'Günlüğe 1 izleme kaydı ekle.'),
-      TierStep(target: 5, title: 'İzleme Tutkusu', description: 'Günlüğe 5 izleme kaydı ekle.'),
-      TierStep(target: 15, title: 'Sıkı Takipçi', description: 'Günlüğe 15 izleme kaydı ekle.'),
+    steps: [
+      TierStep(target: 1, title: l10n.badgeFirstWatchT1, description: l10n.badgeDescLogEntries(1)),
+      TierStep(target: 5, title: l10n.badgeFirstWatchT2, description: l10n.badgeDescLogEntries(5)),
+      TierStep(target: 15, title: l10n.badgeFirstWatchT3, description: l10n.badgeDescLogEntries(15)),
     ],
   ));
 
   badges.add(_buildTieredBadge(
     id: 'sinefil_series',
-    defaultTitle: 'Sinefil Serisi',
+    defaultTitle: l10n.badgeSinefilTitle,
     icon: '🍿',
     category: AchievementCategory.milestone,
     currentValue: totalWatchCount,
-    steps: const [
-      TierStep(target: 10, title: 'Sinefil', description: 'En az 10 film veya dizi izle.'),
-      TierStep(target: 50, title: 'Kültür Mantarı', description: 'En az 50 film veya dizi izle.'),
-      TierStep(target: 100, title: 'Sinema Efsanesi', description: 'En az 100 film veya dizi izle.'),
-      TierStep(target: 250, title: 'Sinema Gurusu', description: 'En az 250 film veya dizi izle.'),
+    steps: [
+      TierStep(target: 10, title: l10n.badgeSinefilT1, description: l10n.badgeDescWatchAtLeast(10)),
+      TierStep(target: 50, title: l10n.badgeSinefilT2, description: l10n.badgeDescWatchAtLeast(50)),
+      TierStep(target: 100, title: l10n.badgeSinefilT3, description: l10n.badgeDescWatchAtLeast(100)),
+      TierStep(target: 250, title: l10n.badgeSinefilT4, description: l10n.badgeDescWatchAtLeast(250)),
     ],
   ));
 
   badges.add(_buildTieredBadge(
     id: 'streak_series',
-    defaultTitle: 'Seri İzleyici',
+    defaultTitle: l10n.badgeStreakTitle,
     icon: '🔥',
     category: AchievementCategory.milestone,
     currentValue: longestStreak,
-    steps: const [
-      TierStep(target: 3, title: 'Kısa Maraton', description: 'Üst üste 3 gün boyunca kayıt gir.'),
-      TierStep(target: 7, title: 'Seri İzleyici', description: 'Üst üste 7 gün boyunca kayıt gir.'),
-      TierStep(target: 14, title: 'Ateşli İzleyici', description: 'Üst üste 14 gün boyunca kayıt gir.'),
-      TierStep(target: 30, title: 'Durdurulamaz Maratoncu', description: 'Üst üste 30 gün boyunca kayıt gir.'),
+    steps: [
+      TierStep(target: 3, title: l10n.badgeStreakT1, description: l10n.badgeDescStreak(3)),
+      TierStep(target: 7, title: l10n.badgeStreakT2, description: l10n.badgeDescStreak(7)),
+      TierStep(target: 14, title: l10n.badgeStreakT3, description: l10n.badgeDescStreak(14)),
+      TierStep(target: 30, title: l10n.badgeStreakT4, description: l10n.badgeDescStreak(30)),
     ],
   ));
 
@@ -501,14 +494,14 @@ List<AchievementBadge> _calculateAllTieredAchievements({
   }).length;
   badges.add(_buildTieredBadge(
     id: 'night_owl_series',
-    defaultTitle: 'Gece Kuşu Serisi',
+    defaultTitle: l10n.badgeNightOwlTitle,
     icon: '🌙',
     category: AchievementCategory.timeOfDay,
     currentValue: nightWatches,
-    steps: const [
-      TierStep(target: 3, title: 'Gece Kuşu', description: 'Gece 00:00 - 05:00 arasında 3 izleme yap.'),
-      TierStep(target: 7, title: 'Gece Bekçisi', description: 'Gece 00:00 - 05:00 arasında 7 izleme yap.'),
-      TierStep(target: 15, title: 'Karanlıklar Prensi', description: 'Gece 00:00 - 05:00 arasında 15 izleme yap.'),
+    steps: [
+      TierStep(target: 3, title: l10n.badgeNightOwlT1, description: l10n.badgeDescNightWatch(3)),
+      TierStep(target: 7, title: l10n.badgeNightOwlT2, description: l10n.badgeDescNightWatch(7)),
+      TierStep(target: 15, title: l10n.badgeNightOwlT3, description: l10n.badgeDescNightWatch(15)),
     ],
   ));
 
@@ -518,42 +511,42 @@ List<AchievementBadge> _calculateAllTieredAchievements({
   }).length;
   badges.add(_buildTieredBadge(
     id: 'early_bird_series',
-    defaultTitle: 'Erken Kuş Serisi',
+    defaultTitle: l10n.badgeEarlyBirdTitle,
     icon: '🌅',
     category: AchievementCategory.timeOfDay,
     currentValue: earlyWatches,
-    steps: const [
-      TierStep(target: 2, title: 'Gün Doğumu İzleyicisi', description: 'Sabah 06:00 - 09:00 arasında 2 izleme yap.'),
-      TierStep(target: 5, title: 'Erken Kuş', description: 'Sabah 06:00 - 09:00 arasında 5 izleme yap.'),
-      TierStep(target: 10, title: 'Şafak Bekçisi', description: 'Sabah 06:00 - 09:00 arasında 10 izleme yap.'),
+    steps: [
+      TierStep(target: 2, title: l10n.badgeEarlyBirdT1, description: l10n.badgeDescEarlyWatch(2)),
+      TierStep(target: 5, title: l10n.badgeEarlyBirdT2, description: l10n.badgeDescEarlyWatch(5)),
+      TierStep(target: 10, title: l10n.badgeEarlyBirdT3, description: l10n.badgeDescEarlyWatch(10)),
     ],
   ));
 
   final sundayWatches = list.where((r) => r.record.watchDate.weekday == 7).length;
   badges.add(_buildTieredBadge(
     id: 'sunday_series',
-    defaultTitle: 'Pazar Sineması',
+    defaultTitle: l10n.badgeSundayTitle,
     icon: '☀️',
     category: AchievementCategory.timeOfDay,
     currentValue: sundayWatches,
-    steps: const [
-      TierStep(target: 3, title: 'Pazar Keyfi', description: 'Pazar günleri 3 film/dizi izle.'),
-      TierStep(target: 7, title: 'Pazar Sineması', description: 'Pazar günleri 7 film/dizi izle.'),
-      TierStep(target: 15, title: 'Pazar Üstadı', description: 'Pazar günleri 15 film/dizi izle.'),
+    steps: [
+      TierStep(target: 3, title: l10n.badgeSundayT1, description: l10n.badgeDescSunday(3)),
+      TierStep(target: 7, title: l10n.badgeSundayT2, description: l10n.badgeDescSunday(7)),
+      TierStep(target: 15, title: l10n.badgeSundayT3, description: l10n.badgeDescSunday(15)),
     ],
   ));
 
   final maxSingleDayCount = dailyWatchCounts.values.isEmpty ? 0 : dailyWatchCounts.values.reduce((a, b) => a > b ? a : b);
   badges.add(_buildTieredBadge(
     id: 'weekend_marathon_series',
-    defaultTitle: 'Hafta Sonu Maratonu',
+    defaultTitle: l10n.badgeWeekendTitle,
     icon: '🍿',
     category: AchievementCategory.timeOfDay,
     currentValue: maxSingleDayCount,
-    steps: const [
-      TierStep(target: 2, title: 'Hafta Sonu Başlangıcı', description: 'Tek günde en az 2 film/dizi izle.'),
-      TierStep(target: 4, title: 'Hafta Sonu Maratoncusu', description: 'Tek günde en az 4 film/dizi izle.'),
-      TierStep(target: 7, title: 'Hafta Sonu Canavarı', description: 'Tek günde en az 7 film/dizi izle.'),
+    steps: [
+      TierStep(target: 2, title: l10n.badgeWeekendT1, description: l10n.badgeDescSingleDay(2)),
+      TierStep(target: 4, title: l10n.badgeWeekendT2, description: l10n.badgeDescSingleDay(4)),
+      TierStep(target: 7, title: l10n.badgeWeekendT3, description: l10n.badgeDescSingleDay(7)),
     ],
   ));
 
@@ -563,14 +556,14 @@ List<AchievementBadge> _calculateAllTieredAchievements({
   }).length;
   badges.add(_buildTieredBadge(
     id: 'seasonal_series',
-    defaultTitle: 'Kışlık Battaniye & Film',
+    defaultTitle: l10n.badgeWinterTitle,
     icon: '❄️',
     category: AchievementCategory.timeOfDay,
     currentValue: winterWatches,
-    steps: const [
-      TierStep(target: 5, title: 'Mevsimlik İzleyici', description: 'Kış aylarında 5 yapım izle.'),
-      TierStep(target: 15, title: 'Kışlık Battaniye & Film', description: 'Kış aylarında 15 yapım izle.'),
-      TierStep(target: 30, title: 'Dört Mevsim Sinefil', description: 'Kış aylarında 30 yapım izle.'),
+    steps: [
+      TierStep(target: 5, title: l10n.badgeWinterT1, description: l10n.badgeDescWinter(5)),
+      TierStep(target: 15, title: l10n.badgeWinterT2, description: l10n.badgeDescWinter(15)),
+      TierStep(target: 30, title: l10n.badgeWinterT3, description: l10n.badgeDescWinter(30)),
     ],
   ));
 
@@ -580,14 +573,14 @@ List<AchievementBadge> _calculateAllTieredAchievements({
   }).length;
   badges.add(_buildTieredBadge(
     id: 'time_traveler_series',
-    defaultTitle: 'Zaman Gezgini',
+    defaultTitle: l10n.badgeTimeTravelerTitle,
     icon: '⌛',
     category: AchievementCategory.timeOfDay,
     currentValue: retroWatches,
-    steps: const [
-      TierStep(target: 3, title: 'Nostalji Meraklısı', description: '1980 öncesi çekilmiş 3 film izle.'),
-      TierStep(target: 7, title: 'Zaman Gezgini', description: '1980 öncesi çekilmiş 7 film izle.'),
-      TierStep(target: 15, title: 'Klasikler Arşivcisi', description: '1980 öncesi çekilmiş 15 film izle.'),
+    steps: [
+      TierStep(target: 3, title: l10n.badgeTimeTravelerT1, description: l10n.badgeDescRetro(3)),
+      TierStep(target: 7, title: l10n.badgeTimeTravelerT2, description: l10n.badgeDescRetro(7)),
+      TierStep(target: 15, title: l10n.badgeTimeTravelerT3, description: l10n.badgeDescRetro(15)),
     ],
   ));
 
@@ -595,70 +588,70 @@ List<AchievementBadge> _calculateAllTieredAchievements({
   final nolanCount = _countByKeyword(list, (r) => r.movie.director, 'christopher nolan');
   badges.add(_buildTieredBadge(
     id: 'nolan_series',
-    defaultTitle: 'Nolanist Serisi',
+    defaultTitle: l10n.badgeNolanTitle,
     icon: '🎬',
     category: AchievementCategory.directors,
     currentValue: nolanCount,
-    steps: const [
-      TierStep(target: 2, title: 'Nolan Meraklısı', description: '2 Christopher Nolan filmi izle.'),
-      TierStep(target: 4, title: 'Zaman Büken Nolanist', description: '4 Christopher Nolan filmi izle.'),
-      TierStep(target: 7, title: 'Rüya İçinde Rüya Mimarı', description: '7 Christopher Nolan filmi izle.'),
+    steps: [
+      TierStep(target: 2, title: l10n.badgeNolanT1, description: l10n.badgeDescDirector(2, 'Christopher Nolan')),
+      TierStep(target: 4, title: l10n.badgeNolanT2, description: l10n.badgeDescDirector(4, 'Christopher Nolan')),
+      TierStep(target: 7, title: l10n.badgeNolanT3, description: l10n.badgeDescDirector(7, 'Christopher Nolan')),
     ],
   ));
 
   final tarantinoCount = _countByKeyword(list, (r) => r.movie.director, 'tarantino');
   badges.add(_buildTieredBadge(
     id: 'tarantino_series',
-    defaultTitle: 'Tarantino Sever',
+    defaultTitle: l10n.badgeTarantinoTitle,
     icon: '🕶️',
     category: AchievementCategory.directors,
     currentValue: tarantinoCount,
-    steps: const [
-      TierStep(target: 2, title: 'Ucuz Roman Sever', description: '2 Quentin Tarantino filmi izle.'),
-      TierStep(target: 4, title: 'Kanlı İntikam Ustası', description: '4 Quentin Tarantino filmi izle.'),
-      TierStep(target: 7, title: 'Sinematik Auteur', description: '7 Quentin Tarantino filmi izle.'),
+    steps: [
+      TierStep(target: 2, title: l10n.badgeTarantinoT1, description: l10n.badgeDescDirector(2, 'Quentin Tarantino')),
+      TierStep(target: 4, title: l10n.badgeTarantinoT2, description: l10n.badgeDescDirector(4, 'Quentin Tarantino')),
+      TierStep(target: 7, title: l10n.badgeTarantinoT3, description: l10n.badgeDescDirector(7, 'Quentin Tarantino')),
     ],
   ));
 
   final spielbergCount = _countByKeyword(list, (r) => r.movie.director, 'spielberg');
   badges.add(_buildTieredBadge(
     id: 'spielberg_series',
-    defaultTitle: 'Spielberg Hayranı',
+    defaultTitle: l10n.badgeSpielbergTitle,
     icon: '🚀',
     category: AchievementCategory.directors,
     currentValue: spielbergCount,
-    steps: const [
-      TierStep(target: 2, title: 'Macera Çırağı', description: '2 Steven Spielberg filmi izle.'),
-      TierStep(target: 5, title: 'Spielberg Hayranı', description: '5 Steven Spielberg filmi izle.'),
-      TierStep(target: 9, title: 'Blockbuster Efsanesi', description: '9 Steven Spielberg filmi izle.'),
+    steps: [
+      TierStep(target: 2, title: l10n.badgeSpielbergT1, description: l10n.badgeDescDirector(2, 'Steven Spielberg')),
+      TierStep(target: 5, title: l10n.badgeSpielbergT2, description: l10n.badgeDescDirector(5, 'Steven Spielberg')),
+      TierStep(target: 9, title: l10n.badgeSpielbergT3, description: l10n.badgeDescDirector(9, 'Steven Spielberg')),
     ],
   ));
 
   final scorseseCount = _countByKeyword(list, (r) => r.movie.director, 'scorsese');
   badges.add(_buildTieredBadge(
     id: 'scorsese_series',
-    defaultTitle: 'Scorsese Müptelası',
+    defaultTitle: l10n.badgeScorseseTitle,
     icon: '🎻',
     category: AchievementCategory.directors,
     currentValue: scorseseCount,
-    steps: const [
-      TierStep(target: 2, title: 'Mafya & Suç Sever', description: '2 Martin Scorsese filmi izle.'),
-      TierStep(target: 4, title: 'Scorsese Müptelası', description: '4 Martin Scorsese filmi izle.'),
-      TierStep(target: 7, title: 'Sinema Sanatçısı', description: '7 Martin Scorsese filmi izle.'),
+    steps: [
+      TierStep(target: 2, title: l10n.badgeScorseseT1, description: l10n.badgeDescDirector(2, 'Martin Scorsese')),
+      TierStep(target: 4, title: l10n.badgeScorseseT2, description: l10n.badgeDescDirector(4, 'Martin Scorsese')),
+      TierStep(target: 7, title: l10n.badgeScorseseT3, description: l10n.badgeDescDirector(7, 'Martin Scorsese')),
     ],
   ));
 
   final kubrickCount = _countByKeyword(list, (r) => r.movie.director, 'kubrick');
   badges.add(_buildTieredBadge(
     id: 'kubrick_series',
-    defaultTitle: 'Kubrick Ustalığı',
+    defaultTitle: l10n.badgeKubrickTitle,
     icon: '🌌',
     category: AchievementCategory.directors,
     currentValue: kubrickCount,
-    steps: const [
-      TierStep(target: 2, title: 'Kubrick Çırağı', description: '2 Stanley Kubrick filmi izle.'),
-      TierStep(target: 4, title: 'Kubrick Ustalığı', description: '4 Stanley Kubrick filmi izle.'),
-      TierStep(target: 6, title: 'Görsel Vizyoner', description: '6 Stanley Kubrick filmi izle.'),
+    steps: [
+      TierStep(target: 2, title: l10n.badgeKubrickT1, description: l10n.badgeDescDirector(2, 'Stanley Kubrick')),
+      TierStep(target: 4, title: l10n.badgeKubrickT2, description: l10n.badgeDescDirector(4, 'Stanley Kubrick')),
+      TierStep(target: 6, title: l10n.badgeKubrickT3, description: l10n.badgeDescDirector(6, 'Stanley Kubrick')),
     ],
   ));
 
@@ -666,14 +659,14 @@ List<AchievementBadge> _calculateAllTieredAchievements({
   final westernCount = _countByGenreId(list, TmdbGenre.western);
   badges.add(_buildTieredBadge(
     id: 'western_series',
-    defaultTitle: 'Vahşi Batı Serisi',
+    defaultTitle: l10n.badgeWesternTitle,
     icon: '🤠',
     category: AchievementCategory.genres,
     currentValue: westernCount,
-    steps: const [
-      TierStep(target: 3, title: 'Vahşi Batı Kaşifi', description: '3 Western filmi izle.'),
-      TierStep(target: 5, title: 'Kovboy & Şerif', description: '5 Western filmi izle.'),
-      TierStep(target: 10, title: 'İyi, Kötü ve Çirkin Efsanesi', description: '10 Western filmi izle.'),
+    steps: [
+      TierStep(target: 3, title: l10n.badgeWesternT1, description: l10n.badgeDescWestern(3)),
+      TierStep(target: 5, title: l10n.badgeWesternT2, description: l10n.badgeDescWestern(5)),
+      TierStep(target: 10, title: l10n.badgeWesternT3, description: l10n.badgeDescWestern(10)),
     ],
   ));
 
@@ -683,14 +676,14 @@ List<AchievementBadge> _calculateAllTieredAchievements({
       _countByGenreId(list, TmdbGenre.sciFiFantasy);
   badges.add(_buildTieredBadge(
     id: 'scifi_series',
-    defaultTitle: 'Sci-Fi Kaşifi',
+    defaultTitle: l10n.badgeScifiTitle,
     icon: '🌌',
     category: AchievementCategory.genres,
     currentValue: scifiCount,
-    steps: const [
-      TierStep(target: 3, title: 'Uzay Yolcusu', description: '3 Bilim Kurgu yapımı izle.'),
-      TierStep(target: 7, title: 'Galaksi Kaşifi', description: '7 Bilim Kurgu yapımı izle.'),
-      TierStep(target: 15, title: 'Evrenin Hakimi', description: '15 Bilim Kurgu yapımı izle.'),
+    steps: [
+      TierStep(target: 3, title: l10n.badgeScifiT1, description: l10n.badgeDescScifi(3)),
+      TierStep(target: 7, title: l10n.badgeScifiT2, description: l10n.badgeDescScifi(7)),
+      TierStep(target: 15, title: l10n.badgeScifiT3, description: l10n.badgeDescScifi(15)),
     ],
   ));
 
@@ -701,28 +694,28 @@ List<AchievementBadge> _calculateAllTieredAchievements({
       _countByGenreId(list, TmdbGenre.thriller);
   badges.add(_buildTieredBadge(
     id: 'horror_series',
-    defaultTitle: 'Korku & Gerilim',
+    defaultTitle: l10n.badgeHorrorTitle,
     icon: '👻',
     category: AchievementCategory.genres,
     currentValue: horrorCount,
-    steps: const [
-      TierStep(target: 3, title: 'Korkusuz İzleyici', description: '3 Korku/Gerilim yapımı izle.'),
-      TierStep(target: 7, title: 'Gerilim Üstadı', description: '7 Korku/Gerilim yapımı izle.'),
-      TierStep(target: 12, title: 'Kabusların Efendisi', description: '12 Korku/Gerilim yapımı izle.'),
+    steps: [
+      TierStep(target: 3, title: l10n.badgeHorrorT1, description: l10n.badgeDescHorror(3)),
+      TierStep(target: 7, title: l10n.badgeHorrorT2, description: l10n.badgeDescHorror(7)),
+      TierStep(target: 12, title: l10n.badgeHorrorT3, description: l10n.badgeDescHorror(12)),
     ],
   ));
 
   final dramaCount = _countByGenreId(list, TmdbGenre.drama);
   badges.add(_buildTieredBadge(
     id: 'drama_series',
-    defaultTitle: 'Drama Tutkunu',
+    defaultTitle: l10n.badgeDramaTitle,
     icon: '🎭',
     category: AchievementCategory.genres,
     currentValue: dramaCount,
-    steps: const [
-      TierStep(target: 5, title: 'Duygusal İzleyici', description: '5 Drama yapımı izle.'),
-      TierStep(target: 12, title: 'Drama Tutkunu', description: '12 Drama yapımı izle.'),
-      TierStep(target: 25, title: 'Duygu Üstadı', description: '25 Drama yapımı izle.'),
+    steps: [
+      TierStep(target: 5, title: l10n.badgeDramaT1, description: l10n.badgeDescDrama(5)),
+      TierStep(target: 12, title: l10n.badgeDramaT2, description: l10n.badgeDescDrama(12)),
+      TierStep(target: 25, title: l10n.badgeDramaT3, description: l10n.badgeDescDrama(25)),
     ],
   ));
 
@@ -730,14 +723,14 @@ List<AchievementBadge> _calculateAllTieredAchievements({
       _countByGenreId(list, TmdbGenre.mystery);
   badges.add(_buildTieredBadge(
     id: 'crime_series',
-    defaultTitle: 'Suç & Gizem Ajanı',
+    defaultTitle: l10n.badgeCrimeTitle,
     icon: '🕵️',
     category: AchievementCategory.genres,
     currentValue: crimeCount,
-    steps: const [
-      TierStep(target: 3, title: 'Amatör Dedektif', description: '3 Suç veya Gizem yapımı izle.'),
-      TierStep(target: 7, title: 'Suç & Gizem Ajanı', description: '7 Suç veya Gizem yapımı izle.'),
-      TierStep(target: 15, title: 'Sherlock Seviyesi', description: '15 Suç veya Gizem yapımı izle.'),
+    steps: [
+      TierStep(target: 3, title: l10n.badgeCrimeT1, description: l10n.badgeDescCrime(3)),
+      TierStep(target: 7, title: l10n.badgeCrimeT2, description: l10n.badgeDescCrime(7)),
+      TierStep(target: 15, title: l10n.badgeCrimeT3, description: l10n.badgeDescCrime(15)),
     ],
   ));
 
@@ -746,14 +739,14 @@ List<AchievementBadge> _calculateAllTieredAchievements({
   final animationCount = _countByGenreId(list, TmdbGenre.animation);
   badges.add(_buildTieredBadge(
     id: 'animation_series',
-    defaultTitle: 'Animasyon & Çizgi Düşler',
+    defaultTitle: l10n.badgeAnimationTitle,
     icon: '🎨',
     category: AchievementCategory.genres,
     currentValue: animationCount,
-    steps: const [
-      TierStep(target: 3, title: 'Çizgi Sever', description: '3 Animasyon yapımı izle.'),
-      TierStep(target: 7, title: 'Hayal Perdesi', description: '7 Animasyon yapımı izle.'),
-      TierStep(target: 15, title: 'Anime & Animasyon Üstadı', description: '15 Animasyon yapımı izle.'),
+    steps: [
+      TierStep(target: 3, title: l10n.badgeAnimationT1, description: l10n.badgeDescAnimation(3)),
+      TierStep(target: 7, title: l10n.badgeAnimationT2, description: l10n.badgeDescAnimation(7)),
+      TierStep(target: 15, title: l10n.badgeAnimationT3, description: l10n.badgeDescAnimation(15)),
     ],
   ));
 
@@ -771,14 +764,14 @@ List<AchievementBadge> _calculateAllTieredAchievements({
   }).length;
   badges.add(_buildTieredBadge(
     id: 'turkish_series',
-    defaultTitle: 'Yerli Sinema',
+    defaultTitle: l10n.badgeTurkishTitle,
     icon: '🇹🇷',
     category: AchievementCategory.genres,
     currentValue: turkishCount,
-    steps: const [
-      TierStep(target: 3, title: 'Yerli Sinema Dostu', description: '3 Türk yapımı izle.'),
-      TierStep(target: 7, title: 'Yeşilçam Sevdalısı', description: '7 Türk yapımı izle.'),
-      TierStep(target: 15, title: 'Yerli Sinema Muhafızı', description: '15 Türk yapımı izle.'),
+    steps: [
+      TierStep(target: 3, title: l10n.badgeTurkishT1, description: l10n.badgeDescTurkish(3)),
+      TierStep(target: 7, title: l10n.badgeTurkishT2, description: l10n.badgeDescTurkish(7)),
+      TierStep(target: 15, title: l10n.badgeTurkishT3, description: l10n.badgeDescTurkish(15)),
     ],
   ));
 
@@ -786,69 +779,69 @@ List<AchievementBadge> _calculateAllTieredAchievements({
   final criticNotesCount = list.where((r) => r.setting?.personalNotes != null && r.setting!.personalNotes!.trim().isNotEmpty).length;
   badges.add(_buildTieredBadge(
     id: 'critic_series',
-    defaultTitle: 'Eleştirmen Serisi',
+    defaultTitle: l10n.badgeCriticTitle,
     icon: '✍️',
     category: AchievementCategory.critic,
     currentValue: criticNotesCount,
-    steps: const [
-      TierStep(target: 3, title: 'Not Tutucu', description: '3 filme kişisel not yaz.'),
-      TierStep(target: 10, title: 'Ciddi Eleştirmen', description: '10 filme kişisel not yaz.'),
-      TierStep(target: 25, title: 'Köşe Yazarı', description: '25 filme kişisel not yaz.'),
+    steps: [
+      TierStep(target: 3, title: l10n.badgeCriticT1, description: l10n.badgeDescNotes(3)),
+      TierStep(target: 10, title: l10n.badgeCriticT2, description: l10n.badgeDescNotes(10)),
+      TierStep(target: 25, title: l10n.badgeCriticT3, description: l10n.badgeDescNotes(25)),
     ],
   ));
 
   final perfectRaters = list.where((r) => r.record.rating >= 9.8).length;
   badges.add(_buildTieredBadge(
     id: 'generous_series',
-    defaultTitle: 'Cömert Puanlayıcı',
+    defaultTitle: l10n.badgeGenerousTitle,
     icon: '🌟',
     category: AchievementCategory.critic,
     currentValue: perfectRaters,
-    steps: const [
-      TierStep(target: 3, title: 'Tam Puan Sever', description: '3 yapıma 10/10 tam puan ver.'),
-      TierStep(target: 7, title: 'Cömert Puanlayıcı', description: '7 yapıma 10/10 tam puan ver.'),
-      TierStep(target: 15, title: 'Başyapıt Avcısı', description: '15 yapıma 10/10 tam puan ver.'),
+    steps: [
+      TierStep(target: 3, title: l10n.badgeGenerousT1, description: l10n.badgeDescPerfectScore(3)),
+      TierStep(target: 7, title: l10n.badgeGenerousT2, description: l10n.badgeDescPerfectScore(7)),
+      TierStep(target: 15, title: l10n.badgeGenerousT3, description: l10n.badgeDescPerfectScore(15)),
     ],
   ));
 
   final strictRaters = list.where((r) => r.record.rating < 5.0).length;
   badges.add(_buildTieredBadge(
     id: 'strict_series',
-    defaultTitle: 'Zor Beğenen',
+    defaultTitle: l10n.badgeStrictTitle,
     icon: '🌵',
     category: AchievementCategory.critic,
     currentValue: strictRaters,
-    steps: const [
-      TierStep(target: 2, title: 'Sert Eleştirmen', description: '2 yapıma 5.0 altı puan ver.'),
-      TierStep(target: 5, title: 'Zor Beğenen', description: '5 yapıma 5.0 altı puan ver.'),
-      TierStep(target: 10, title: 'Affetmeyen Jüri', description: '10 yapıma 5.0 altı puan ver.'),
+    steps: [
+      TierStep(target: 2, title: l10n.badgeStrictT1, description: l10n.badgeDescLowScore(2)),
+      TierStep(target: 5, title: l10n.badgeStrictT2, description: l10n.badgeDescLowScore(5)),
+      TierStep(target: 10, title: l10n.badgeStrictT3, description: l10n.badgeDescLowScore(10)),
     ],
   ));
 
   final rewatches = list.where((r) => r.record.watchNumber > 1).length;
   badges.add(_buildTieredBadge(
     id: 'rewatch_series',
-    defaultTitle: 'Sadık İzleyici',
+    defaultTitle: l10n.badgeRewatchTitle,
     icon: '🔁',
     category: AchievementCategory.critic,
     currentValue: rewatches,
-    steps: const [
-      TierStep(target: 1, title: 'Tekrar İzleyen', description: 'Aynı içeriği 2. kez izle.'),
-      TierStep(target: 4, title: 'Sadık İzleyici', description: 'Aynı içeriği 4 kez tekrar izle.'),
-      TierStep(target: 10, title: 'Fanatik Tekrarcı', description: '10 tekrar izleme kaydı yap.'),
+    steps: [
+      TierStep(target: 1, title: l10n.badgeRewatchT1, description: l10n.badgeDescRewatchNth(2)),
+      TierStep(target: 4, title: l10n.badgeRewatchT2, description: l10n.badgeDescRewatchTimes(4)),
+      TierStep(target: 10, title: l10n.badgeRewatchT3, description: l10n.badgeDescRewatchRecords(10)),
     ],
   ));
 
   badges.add(_buildTieredBadge(
     id: 'tag_master_series',
-    defaultTitle: 'Etiket Ustası',
+    defaultTitle: l10n.badgeTagMasterTitle,
     icon: '🏷️',
     category: AchievementCategory.critic,
     currentValue: topTags.length,
-    steps: const [
-      TierStep(target: 3, title: 'Etiket Çırağı', description: '3 farklı kişisel etiket kullan.'),
-      TierStep(target: 7, title: 'Kategori Ustası', description: '7 farklı kişisel etiket kullan.'),
-      TierStep(target: 15, title: 'Etiket Koleksiyoneri', description: '15 farklı kişisel etiket kullan.'),
+    steps: [
+      TierStep(target: 3, title: l10n.badgeTagMasterT1, description: l10n.badgeDescTags(3)),
+      TierStep(target: 7, title: l10n.badgeTagMasterT2, description: l10n.badgeDescTags(7)),
+      TierStep(target: 15, title: l10n.badgeTagMasterT3, description: l10n.badgeDescTags(15)),
     ],
   ));
 
@@ -856,28 +849,28 @@ List<AchievementBadge> _calculateAllTieredAchievements({
   final totalTvEpisodes = list.where((r) => r.movie.isTv).fold<int>(0, (prev, e) => prev + e.record.episodeCount);
   badges.add(_buildTieredBadge(
     id: 'tv_series',
-    defaultTitle: 'Dizi Kolik Serisi',
+    defaultTitle: l10n.badgeTvTitle,
     icon: '📺',
     category: AchievementCategory.tvShows,
     currentValue: totalTvEpisodes,
-    steps: const [
-      TierStep(target: 10, title: 'Dizi Meraklısı', description: '10 dizi bölümü izle.'),
-      TierStep(target: 50, title: 'Dizi Kolik', description: '50 dizi bölümü izle.'),
-      TierStep(target: 150, title: 'Dizi Müptelası', description: '150 dizi bölümü izle.'),
+    steps: [
+      TierStep(target: 10, title: l10n.badgeTvT1, description: l10n.badgeDescEpisodes(10)),
+      TierStep(target: 50, title: l10n.badgeTvT2, description: l10n.badgeDescEpisodes(50)),
+      TierStep(target: 150, title: l10n.badgeTvT3, description: l10n.badgeDescEpisodes(150)),
     ],
   ));
 
   final finishedSeasons = list.where((r) => r.movie.isTv && r.record.episodeCount >= 8).length;
   badges.add(_buildTieredBadge(
     id: 'season_finisher_series',
-    defaultTitle: 'Sezon Canavarı',
+    defaultTitle: l10n.badgeSeasonTitle,
     icon: '📦',
     category: AchievementCategory.tvShows,
     currentValue: finishedSeasons,
-    steps: const [
-      TierStep(target: 1, title: 'Sezon Bitişi', description: '1 dizinin tüm sezonunu tamamla.'),
-      TierStep(target: 3, title: 'Sezon Canavarı', description: '3 dizinin tüm sezonunu tamamla.'),
-      TierStep(target: 8, title: 'Maraton Ustası', description: '8 dizinin tüm sezonunu tamamla.'),
+    steps: [
+      TierStep(target: 1, title: l10n.badgeSeasonT1, description: l10n.badgeDescSeasons(1)),
+      TierStep(target: 3, title: l10n.badgeSeasonT2, description: l10n.badgeDescSeasons(3)),
+      TierStep(target: 8, title: l10n.badgeSeasonT3, description: l10n.badgeDescSeasons(8)),
     ],
   ));
 

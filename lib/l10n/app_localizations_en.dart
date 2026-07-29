@@ -1118,6 +1118,939 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recordDelete => 'Delete Record';
 
   @override
+  String get insightsInsufficientData => 'Not Enough Data';
+
+  @override
+  String get insightsSummaryTotalWatches => 'Total Watches';
+
+  @override
+  String get insightsSummaryUniqueTitles => 'Unique Titles';
+
+  @override
+  String get insightsSummaryTotalTime => 'Total Time';
+
+  @override
+  String get insightsSummaryAvgRating => 'Avg. Rating';
+
+  @override
+  String get insightsGenreChartTitle => 'Most-Watched Genres';
+
+  @override
+  String get insightsGenreOther => 'Other';
+
+  @override
+  String get insightsRatingChartTitle => 'Your Rating Distribution';
+
+  @override
+  String get insightsCriticProfile => 'Your Critic Profile';
+
+  @override
+  String get insightsTopDirectors => 'Most-Watched Directors';
+
+  @override
+  String get insightsTopActors => 'Most-Watched Actors';
+
+  @override
+  String get insightsNoRecords => 'No records found.';
+
+  @override
+  String get insightsTimeOfDayTitle => 'When Do You Watch?';
+
+  @override
+  String get insightsTimeMorning => 'Morning';
+
+  @override
+  String get insightsTimeNoon => 'Midday';
+
+  @override
+  String get insightsTimeEvening => 'Evening';
+
+  @override
+  String get insightsTimeNight => 'Night';
+
+  @override
+  String get insightsSeasonWinter => 'Winter';
+
+  @override
+  String get insightsSeasonSpring => 'Spring';
+
+  @override
+  String get insightsSeasonSummer => 'Summer';
+
+  @override
+  String get insightsSeasonAutumn => 'Autumn';
+
+  @override
+  String insightsMonthlyChartTitle(int year) {
+    return 'Monthly Watches in $year';
+  }
+
+  @override
+  String insightsWatchesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count watches',
+      one: '1 watch',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String insightsGoldenDay(String day) {
+    return 'Golden day: $day 🏆';
+  }
+
+  @override
+  String get heatmapTitle => 'Watch Frequency This Year';
+
+  @override
+  String get heatmapFilterAll => 'All';
+
+  @override
+  String get heatmapFilterMovies => 'Films';
+
+  @override
+  String get heatmapFilterShows => 'Shows';
+
+  @override
+  String get heatmapLegendLess => 'Less';
+
+  @override
+  String get heatmapLegendMore => 'More';
+
+  @override
+  String get heatmapLegendMovie => 'Film';
+
+  @override
+  String get heatmapLegendShow => 'Show';
+
+  @override
+  String get heatmapLegendBoth => 'Both';
+
+  @override
+  String get heatmapActiveDays => 'Active Days';
+
+  @override
+  String get heatmapCurrentStreak => 'Current Streak';
+
+  @override
+  String get heatmapPeakHour => 'Peak Hour';
+
+  @override
+  String get heatmapNoRecordOnDay => '— nothing logged.';
+
+  @override
+  String get weeklyGoalSetTitle => 'Set Your Weekly Goal';
+
+  @override
+  String get weeklyGoalQuestion => 'How many titles a week are you aiming for?';
+
+  @override
+  String get weeklyGoalThisWeekPrefix => 'This week ';
+
+  @override
+  String get weeklyGoalReached => 'You hit this week\'s goal. Nice one! 🎉';
+
+  @override
+  String weeklyGoalRemaining(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count more to reach your goal.',
+      one: '1 more to reach your goal.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get achievementsTitle => 'Badges & Achievements';
+
+  @override
+  String get achievementsNeedRecords =>
+      'Add at least one watch record to your diary to start unlocking badges.';
+
+  @override
+  String get achievementsCurrentRank => 'CURRENT RANK';
+
+  @override
+  String get achievementsProgress => 'Collection Progress';
+
+  @override
+  String get achievementsUnlocked => 'Unlocked';
+
+  @override
+  String get achievementsNoneForFilter => 'No badges match this filter.';
+
+  @override
+  String achievementsAllCount(int count) {
+    return 'All ($count)';
+  }
+
+  @override
+  String get achievementsRankNoviceSubtitle => 'Just getting started';
+
+  @override
+  String get achievementsRankTicketBuddy => 'Ticket Buddy 🎬';
+
+  @override
+  String get achievementsRankTicketBuddySubtitle => 'A regular now';
+
+  @override
+  String get achievementsRankConnoisseurSubtitle => 'A long cinematic memory';
+
+  @override
+  String get achievementsRankGuruSubtitle => 'A genuine authority';
+
+  @override
+  String get badgeMaxLevel => 'Max Level! 👑';
+
+  @override
+  String get badgeNextLevelProgress => 'Progress to Next Level';
+
+  @override
+  String get badgeUnlockProgress => 'Progress to Unlock';
+
+  @override
+  String get badgeShare => 'Share Achievement';
+
+  @override
+  String get badgeCategoryMilestone => 'Volume & Marathons';
+
+  @override
+  String get badgeCategoryTime => 'Time & Atmosphere';
+
+  @override
+  String get badgeCategoryDirectors => 'Directors & Auteurs';
+
+  @override
+  String get badgeCategoryGenres => 'Genres & Themes';
+
+  @override
+  String get badgeCategoryCritic => 'Critic & Diary';
+
+  @override
+  String get badgeCategorySeries => 'Shows & Seasons';
+
+  @override
+  String get badgeFirstWatchTitle => 'First Steps';
+
+  @override
+  String get badgeFirstWatchT1 => 'First Step';
+
+  @override
+  String get badgeFirstWatchT2 => 'Getting the Bug';
+
+  @override
+  String get badgeFirstWatchT3 => 'Keen Watcher';
+
+  @override
+  String get badgeSinefilTitle => 'Cinephile Series';
+
+  @override
+  String get badgeSinefilT1 => 'Cinephile';
+
+  @override
+  String get badgeSinefilT2 => 'Culture Vulture';
+
+  @override
+  String get badgeSinefilT3 => 'Screen Legend';
+
+  @override
+  String get badgeSinefilT4 => 'Cinema Guru';
+
+  @override
+  String get badgeStreakTitle => 'Streak Watcher';
+
+  @override
+  String get badgeStreakT1 => 'Short Marathon';
+
+  @override
+  String get badgeStreakT2 => 'Streak Watcher';
+
+  @override
+  String get badgeStreakT3 => 'On a Roll';
+
+  @override
+  String get badgeStreakT4 => 'Unstoppable';
+
+  @override
+  String get badgeNightOwlTitle => 'Night Owl Series';
+
+  @override
+  String get badgeNightOwlT1 => 'Night Owl';
+
+  @override
+  String get badgeNightOwlT2 => 'Night Watchman';
+
+  @override
+  String get badgeNightOwlT3 => 'Prince of Darkness';
+
+  @override
+  String get badgeEarlyBirdTitle => 'Early Bird Series';
+
+  @override
+  String get badgeEarlyBirdT1 => 'Sunrise Viewer';
+
+  @override
+  String get badgeEarlyBirdT2 => 'Early Bird';
+
+  @override
+  String get badgeEarlyBirdT3 => 'Dawn Watchman';
+
+  @override
+  String get badgeSundayTitle => 'Sunday Cinema';
+
+  @override
+  String get badgeSundayT1 => 'Sunday Treat';
+
+  @override
+  String get badgeSundayT2 => 'Sunday Cinema';
+
+  @override
+  String get badgeSundayT3 => 'Sunday Master';
+
+  @override
+  String get badgeWeekendTitle => 'Weekend Marathon';
+
+  @override
+  String get badgeWeekendT1 => 'Weekend Warm-Up';
+
+  @override
+  String get badgeWeekendT2 => 'Weekend Marathoner';
+
+  @override
+  String get badgeWeekendT3 => 'Weekend Monster';
+
+  @override
+  String get badgeWinterTitle => 'Blanket & a Film';
+
+  @override
+  String get badgeWinterT1 => 'Seasonal Viewer';
+
+  @override
+  String get badgeWinterT2 => 'Blanket & a Film';
+
+  @override
+  String get badgeWinterT3 => 'All-Season Cinephile';
+
+  @override
+  String get badgeTimeTravelerTitle => 'Time Traveller';
+
+  @override
+  String get badgeTimeTravelerT1 => 'Nostalgia Seeker';
+
+  @override
+  String get badgeTimeTravelerT2 => 'Time Traveller';
+
+  @override
+  String get badgeTimeTravelerT3 => 'Archivist of Classics';
+
+  @override
+  String get badgeNolanTitle => 'Nolanist Series';
+
+  @override
+  String get badgeNolanT1 => 'Nolan Curious';
+
+  @override
+  String get badgeNolanT2 => 'Time-Bending Nolanist';
+
+  @override
+  String get badgeNolanT3 => 'Dream Within a Dream';
+
+  @override
+  String get badgeTarantinoTitle => 'Tarantino Fan';
+
+  @override
+  String get badgeTarantinoT1 => 'Pulp Reader';
+
+  @override
+  String get badgeTarantinoT2 => 'Revenge Connoisseur';
+
+  @override
+  String get badgeTarantinoT3 => 'Cinematic Auteur';
+
+  @override
+  String get badgeSpielbergTitle => 'Spielberg Fan';
+
+  @override
+  String get badgeSpielbergT1 => 'Adventure Apprentice';
+
+  @override
+  String get badgeSpielbergT2 => 'Spielberg Fan';
+
+  @override
+  String get badgeSpielbergT3 => 'Blockbuster Legend';
+
+  @override
+  String get badgeScorseseTitle => 'Scorsese Devotee';
+
+  @override
+  String get badgeScorseseT1 => 'Mob & Crime Fan';
+
+  @override
+  String get badgeScorseseT2 => 'Scorsese Devotee';
+
+  @override
+  String get badgeScorseseT3 => 'Cinema Artist';
+
+  @override
+  String get badgeKubrickTitle => 'Kubrick Mastery';
+
+  @override
+  String get badgeKubrickT1 => 'Kubrick Apprentice';
+
+  @override
+  String get badgeKubrickT2 => 'Kubrick Mastery';
+
+  @override
+  String get badgeKubrickT3 => 'Visual Visionary';
+
+  @override
+  String get badgeWesternTitle => 'Wild West Series';
+
+  @override
+  String get badgeWesternT1 => 'Wild West Explorer';
+
+  @override
+  String get badgeWesternT2 => 'Cowboy & Sheriff';
+
+  @override
+  String get badgeWesternT3 => 'The Good, the Bad and the Legend';
+
+  @override
+  String get badgeScifiTitle => 'Sci-Fi Explorer';
+
+  @override
+  String get badgeScifiT1 => 'Space Traveller';
+
+  @override
+  String get badgeScifiT2 => 'Galaxy Explorer';
+
+  @override
+  String get badgeScifiT3 => 'Master of the Universe';
+
+  @override
+  String get badgeHorrorTitle => 'Horror & Thriller';
+
+  @override
+  String get badgeHorrorT1 => 'Fearless Viewer';
+
+  @override
+  String get badgeHorrorT2 => 'Thriller Master';
+
+  @override
+  String get badgeHorrorT3 => 'Lord of Nightmares';
+
+  @override
+  String get badgeDramaTitle => 'Drama Lover';
+
+  @override
+  String get badgeDramaT1 => 'Emotional Viewer';
+
+  @override
+  String get badgeDramaT2 => 'Drama Lover';
+
+  @override
+  String get badgeDramaT3 => 'Master of Feeling';
+
+  @override
+  String get badgeCrimeTitle => 'Crime & Mystery Agent';
+
+  @override
+  String get badgeCrimeT1 => 'Amateur Detective';
+
+  @override
+  String get badgeCrimeT2 => 'Crime & Mystery Agent';
+
+  @override
+  String get badgeCrimeT3 => 'Sherlock Level';
+
+  @override
+  String get badgeAnimationTitle => 'Animation & Daydreams';
+
+  @override
+  String get badgeAnimationT1 => 'Cartoon Fan';
+
+  @override
+  String get badgeAnimationT2 => 'Screen of Dreams';
+
+  @override
+  String get badgeAnimationT3 => 'Anime & Animation Master';
+
+  @override
+  String get badgeTurkishTitle => 'Turkish Cinema';
+
+  @override
+  String get badgeTurkishT1 => 'Friend of Turkish Cinema';
+
+  @override
+  String get badgeTurkishT2 => 'Yeşilçam Devotee';
+
+  @override
+  String get badgeTurkishT3 => 'Guardian of Turkish Cinema';
+
+  @override
+  String get badgeCriticTitle => 'Critic Series';
+
+  @override
+  String get badgeCriticT1 => 'Note Taker';
+
+  @override
+  String get badgeCriticT2 => 'Serious Critic';
+
+  @override
+  String get badgeCriticT3 => 'Columnist';
+
+  @override
+  String get badgeGenerousTitle => 'Generous Rater';
+
+  @override
+  String get badgeGenerousT1 => 'Full Marks Fan';
+
+  @override
+  String get badgeGenerousT2 => 'Generous Rater';
+
+  @override
+  String get badgeGenerousT3 => 'Masterpiece Hunter';
+
+  @override
+  String get badgeStrictTitle => 'Hard to Please';
+
+  @override
+  String get badgeStrictT1 => 'Harsh Critic';
+
+  @override
+  String get badgeStrictT2 => 'Hard to Please';
+
+  @override
+  String get badgeStrictT3 => 'Unforgiving Jury';
+
+  @override
+  String get badgeRewatchTitle => 'Loyal Viewer';
+
+  @override
+  String get badgeRewatchT1 => 'Rewatcher';
+
+  @override
+  String get badgeRewatchT2 => 'Loyal Viewer';
+
+  @override
+  String get badgeRewatchT3 => 'Serial Rewatcher';
+
+  @override
+  String get badgeTagMasterTitle => 'Tag Master';
+
+  @override
+  String get badgeTagMasterT1 => 'Tag Apprentice';
+
+  @override
+  String get badgeTagMasterT2 => 'Category Master';
+
+  @override
+  String get badgeTagMasterT3 => 'Tag Collector';
+
+  @override
+  String get badgeTvTitle => 'Binge Series';
+
+  @override
+  String get badgeTvT1 => 'Show Curious';
+
+  @override
+  String get badgeTvT2 => 'Binge Watcher';
+
+  @override
+  String get badgeTvT3 => 'Serial Addict';
+
+  @override
+  String get badgeSeasonTitle => 'Season Monster';
+
+  @override
+  String get badgeSeasonT1 => 'Season Finished';
+
+  @override
+  String get badgeSeasonT2 => 'Season Monster';
+
+  @override
+  String get badgeSeasonT3 => 'Marathon Master';
+
+  @override
+  String badgeDescLogEntries(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Add $n watch records to your diary.',
+      one: 'Add 1 watch record to your diary.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String badgeDescWatchAtLeast(int n) {
+    return 'Watch at least $n films or shows.';
+  }
+
+  @override
+  String badgeDescStreak(int n) {
+    return 'Log something $n days in a row.';
+  }
+
+  @override
+  String badgeDescNightWatch(int n) {
+    return 'Log $n watches between 00:00 and 05:00.';
+  }
+
+  @override
+  String badgeDescEarlyWatch(int n) {
+    return 'Log $n watches between 06:00 and 09:00.';
+  }
+
+  @override
+  String badgeDescSunday(int n) {
+    return 'Watch $n titles on Sundays.';
+  }
+
+  @override
+  String badgeDescSingleDay(int n) {
+    return 'Watch at least $n titles in a single day.';
+  }
+
+  @override
+  String badgeDescWinter(int n) {
+    return 'Watch $n titles during the winter months.';
+  }
+
+  @override
+  String badgeDescRetro(int n) {
+    return 'Watch $n films made before 1980.';
+  }
+
+  @override
+  String badgeDescDirector(int n, String director) {
+    return 'Watch $n $director films.';
+  }
+
+  @override
+  String badgeDescWestern(int n) {
+    return 'Watch $n Westerns.';
+  }
+
+  @override
+  String badgeDescScifi(int n) {
+    return 'Watch $n science-fiction titles.';
+  }
+
+  @override
+  String badgeDescHorror(int n) {
+    return 'Watch $n horror or thriller titles.';
+  }
+
+  @override
+  String badgeDescDrama(int n) {
+    return 'Watch $n dramas.';
+  }
+
+  @override
+  String badgeDescCrime(int n) {
+    return 'Watch $n crime or mystery titles.';
+  }
+
+  @override
+  String badgeDescAnimation(int n) {
+    return 'Watch $n animated titles.';
+  }
+
+  @override
+  String badgeDescTurkish(int n) {
+    return 'Watch $n Turkish productions.';
+  }
+
+  @override
+  String badgeDescNotes(int n) {
+    return 'Write personal notes on $n titles.';
+  }
+
+  @override
+  String badgeDescPerfectScore(int n) {
+    return 'Give $n titles a full 10/10.';
+  }
+
+  @override
+  String badgeDescLowScore(int n) {
+    return 'Rate $n titles below 5.0.';
+  }
+
+  @override
+  String badgeDescRewatchNth(int n) {
+    return 'Watch the same title for the ${n}th time.';
+  }
+
+  @override
+  String badgeDescRewatchTimes(int n) {
+    return 'Rewatch the same title $n times.';
+  }
+
+  @override
+  String badgeDescRewatchRecords(int n) {
+    return 'Log $n rewatches.';
+  }
+
+  @override
+  String badgeDescTags(int n) {
+    return 'Use $n different personal tags.';
+  }
+
+  @override
+  String badgeDescEpisodes(int n) {
+    return 'Watch $n episodes.';
+  }
+
+  @override
+  String badgeDescSeasons(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Finish a whole season of $n shows.',
+      one: 'Finish a whole season of 1 show.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get tierLocked => 'Locked';
+
+  @override
+  String get tierBronze => 'Bronze';
+
+  @override
+  String get tierSilver => 'Silver';
+
+  @override
+  String get tierGold => 'Gold';
+
+  @override
+  String get tierPlatinum => 'Platinum';
+
+  @override
+  String badgeTierLevel(String symbol, String tier, int current, int max) {
+    return '$symbol $tier (level $current/$max)';
+  }
+
+  @override
+  String achievementsCategoryCount(String category, int count) {
+    return '$category ($count)';
+  }
+
+  @override
+  String get insightsEmptyBody =>
+      'Add at least one watch record to your diary and your charts and statistics will start filling in.';
+
+  @override
+  String achievementsShowing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Showing $count achievements',
+      one: 'Showing 1 achievement',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get badgeLockedLabel => '🔒 Locked';
+
+  @override
+  String badgeCurrentCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count titles',
+      one: '1 title',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String badgeNextTier(int remaining, String tier) {
+    return '$remaining more ➔ reach \"$tier\"!';
+  }
+
+  @override
+  String badgeCopied(String title) {
+    return '\"$title\" copied to your clipboard — share it wherever you like.';
+  }
+
+  @override
+  String heatmapYearTotal(int year, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count watches in $year',
+      one: '1 watch in $year',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String heatmapEpisodesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count episodes',
+      one: '1 episode',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get insightsBadgesTitle => '🏆 Achievements & Badges';
+
+  @override
+  String insightsBadgesEarned(int unlocked, int total) {
+    return '$unlocked / $total earned';
+  }
+
+  @override
+  String get insightsTopTagsTitle => '🏷️ Most-Used Tags';
+
+  @override
+  String insightsDistinctTags(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count distinct tags',
+      one: '1 distinct tag',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String insightsWatchesWithPercent(int count, String percent) {
+    return '$count watches ($percent%)';
+  }
+
+  @override
+  String get insightsSeasonalTitle => '📅 By Season';
+
+  @override
+  String get insightsSeasonWinterLong => '❄️ Winter (Dec–Feb)';
+
+  @override
+  String get insightsSeasonSpringLong => '🌱 Spring (Mar–May)';
+
+  @override
+  String get insightsSeasonSummerLong => '☀️ Summer (Jun–Aug)';
+
+  @override
+  String get insightsSeasonAutumnLong => '🍂 Autumn (Sep–Nov)';
+
+  @override
+  String get weeklyGoalTitle => '🎯 Weekly Watch Goal';
+
+  @override
+  String weeklyGoalProgress(int count, int goal) {
+    return 'You have watched $count this week. (Goal: $goal)';
+  }
+
+  @override
+  String weeklyGoalItemsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count titles',
+      one: '1 title',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get timeVisualizerTitle => '🍿 What Else Could You Have Done?';
+
+  @override
+  String get timeVisualizerFooter =>
+      'Watching things is a great use of it though. 🎬';
+
+  @override
+  String timeCompareLotr(String n) {
+    return 'You could have watched the Lord of the Rings Extended Trilogy back to back $n times!';
+  }
+
+  @override
+  String timeCompareFlight(String n) {
+    return 'That\'s $n return flights between London and New York!';
+  }
+
+  @override
+  String timeCompareBreakingBad(String n) {
+    return 'You could have marathoned all of Breaking Bad $n times over!';
+  }
+
+  @override
+  String timeCompareWalk(String n) {
+    return 'You could have walked the length of Great Britain $n times without stopping!';
+  }
+
+  @override
+  String timeCompareBooks(String n) {
+    return 'At eight hours a book, that\'s $n books finished!';
+  }
+
+  @override
+  String timeCompareFood(String n) {
+    return 'You could have eaten $n slices of pizza back to back. Enjoy!';
+  }
+
+  @override
+  String timeCompareIss(String n) {
+    return 'The ISS would have orbited Earth $n times in that time!';
+  }
+
+  @override
+  String timeCompareLight(String n) {
+    return 'Light would have travelled $n million kilometres through space!';
+  }
+
+  @override
+  String timeCompareMinecraft(String n) {
+    return 'You could have placed $n blocks in Minecraft without a break!';
+  }
+
+  @override
+  String timeCompareCoffee(String n) {
+    return 'You could have had $n cups of coffee with friends!';
+  }
+
+  @override
+  String timeCompareMusic(String n) {
+    return 'That\'s $n songs from your favourite playlist!';
+  }
+
+  @override
+  String timeCompareMonopoly(String n) {
+    return 'You could have played $n games of Monopoly that felt like they\'d never end!';
+  }
+
+  @override
+  String timeCompareSleep(String n) {
+    return 'That\'s $n full, undisturbed nights of sleep!';
+  }
+
+  @override
+  String timeCompareHair(String n) {
+    return 'Your hair would have grown $n millimetres in that time!';
+  }
+
+  @override
+  String timeCompareCells(String n) {
+    return 'Your body made $n million new cells while you sat there!';
+  }
+
+  @override
+  String timeCompareOrbit(String n) {
+    return 'Earth travelled $n thousand kilometres around the sun in that time!';
+  }
+
+  @override
   String recordEpisodesCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

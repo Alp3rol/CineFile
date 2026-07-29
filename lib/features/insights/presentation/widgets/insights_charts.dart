@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fl_chart/fl_chart.dart';
+import '../../../../core/l10n/date_text.dart';
 import '../../../../core/l10n/genre_names.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
@@ -47,7 +48,7 @@ class MonthlyChartCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '$currentYear Aylık İzleme Grafiği',
+            AppLocalizations.of(context).insightsMonthlyChartTitle(currentYear),
             style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
           ),
           const SizedBox(height: 24),
@@ -65,7 +66,7 @@ class MonthlyChartCard extends StatelessWidget {
                     tooltipPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     getTooltipItem: (group, groupIndex, rod, rodIndex) {
                       return BarTooltipItem(
-                        '${rod.toY.toInt()} İzleme',
+                        AppLocalizations.of(context).insightsWatchesCount(rod.toY.toInt()),
                         GoogleFonts.inter(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
                       );
                     },
@@ -77,14 +78,13 @@ class MonthlyChartCard extends StatelessWidget {
                     sideTitles: SideTitles(
                       showTitles: true,
                       getTitlesWidget: (double value, TitleMeta meta) {
-                        const months = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
                         final index = value.toInt() - 1;
                         if (index >= 0 && index < 12) {
                           return SideTitleWidget(
                             meta: meta,
                             space: 6,
                             child: Text(
-                              months[index],
+                              shortMonthName(context, index + 1),
                               style: GoogleFonts.inter(fontSize: 9, color: AppTheme.textSecondary),
                             ),
                           );
@@ -127,7 +127,7 @@ class GenreChartCard extends StatelessWidget {
     final othersCount = data.topGenres.skip(4).fold<int>(0, (sum, item) => sum + item.value);
 
     if (othersCount > 0) {
-      displayedGenres.add(MapEntry('Diğer', othersCount));
+      displayedGenres.add(MapEntry(AppLocalizations.of(context).insightsGenreOther, othersCount));
     }
 
     final colors = [
@@ -161,7 +161,7 @@ class GenreChartCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'En Popüler Türler (Tür Dağılımı)',
+            AppLocalizations.of(context).insightsGenreChartTitle,
             style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
           ),
           const SizedBox(height: 16),
@@ -275,7 +275,7 @@ class RatingDistributionCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Kişisel Puan Dağılımı',
+            AppLocalizations.of(context).insightsRatingChartTitle,
             style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
           ),
           const SizedBox(height: 20),
@@ -346,7 +346,7 @@ class RatingDistributionCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Eleştirmen Profilin',
+                        AppLocalizations.of(context).insightsCriticProfile,
                         style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
                       ),
                       const SizedBox(height: 4),

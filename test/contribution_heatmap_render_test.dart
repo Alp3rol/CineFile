@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'support/localized_app.dart';
 import 'package:cinefile/core/database/app_database.dart';
 import 'package:cinefile/core/database/database_provider.dart';
 import 'package:cinefile/features/insights/presentation/insights_provider.dart';
@@ -30,7 +31,8 @@ WatchRecordWithMovie _record(int id, Movie movie, DateTime watchDate) {
 }
 
 Widget _harness() {
-  return MaterialApp(
+  return LocalizedTestApp(
+    locale: const Locale('tr'),
     home: Scaffold(
       body: SingleChildScrollView(
         child: Consumer(

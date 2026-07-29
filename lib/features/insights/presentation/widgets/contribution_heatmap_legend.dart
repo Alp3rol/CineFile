@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
 import 'contribution_heatmap_utils.dart';
@@ -53,7 +54,7 @@ class ContributionHeatmapLegend extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             Text(
-              'Az',
+              AppLocalizations.of(context).heatmapLegendLess,
               style: GoogleFonts.inter(fontSize: 11, color: AppTheme.textSecondary),
             ),
             const SizedBox(width: 8),
@@ -67,7 +68,7 @@ class ContributionHeatmapLegend extends StatelessWidget {
             _legendCell(HeatmapColors.neonPurple, 1.0),
             const SizedBox(width: 8),
             Text(
-              'Çok',
+              AppLocalizations.of(context).heatmapLegendMore,
               style: GoogleFonts.inter(fontSize: 11, color: AppTheme.textSecondary),
             ),
           ],
@@ -76,11 +77,11 @@ class ContributionHeatmapLegend extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            _legendLabel('Film', HeatmapColors.neonCyan),
+            _legendLabel(AppLocalizations.of(context).heatmapLegendMovie, HeatmapColors.neonCyan),
             const SizedBox(width: 14),
-            _legendLabel('Dizi', HeatmapColors.neonPink),
+            _legendLabel(AppLocalizations.of(context).heatmapLegendShow, HeatmapColors.neonPink),
             const SizedBox(width: 14),
-            _legendLabel('İkisi', HeatmapColors.neonPurple),
+            _legendLabel(AppLocalizations.of(context).heatmapLegendBoth, HeatmapColors.neonPurple),
           ],
         ),
       ],

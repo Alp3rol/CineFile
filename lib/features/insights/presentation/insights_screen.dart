@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_theme.dart';
@@ -108,7 +109,7 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen>
             ),
             const SizedBox(height: 20),
             Text(
-              'Yetersiz Veri',
+              AppLocalizations.of(context).insightsInsufficientData,
               style: GoogleFonts.outfit(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -117,7 +118,7 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen>
             ),
             const SizedBox(height: 8),
             Text(
-              'Grafiklerin ve istatistiklerin oluşturulabilmesi için günlüğünüze en az 1 adet izleme kaydı eklemelisiniz.',
+              AppLocalizations.of(context).insightsEmptyBody,
               textAlign: TextAlign.center,
               style: GoogleFonts.inter(
                 fontSize: 13,

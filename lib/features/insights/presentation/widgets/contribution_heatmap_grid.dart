@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/l10n/date_text.dart';
 import 'contribution_heatmap_utils.dart';
 
 // The scrollable 53-week x 7-day grid itself, plus its day/month labels.
@@ -44,12 +45,12 @@ class _ContributionHeatmapGridState extends State<ContributionHeatmapGrid> {
 
   // Builds the month-label row for the fixed per-column stride, so labels
   // stay aligned with the (horizontally scrollable) grid below them.
-  List<Widget> _buildMonthLabels(DateTime startMonday) {
+  List<Widget> _buildMonthLabels(BuildContext context, DateTime startMonday) {
     final labels = <Widget>[];
     String? lastMonthName;
     for (int w = 0; w < 53; w++) {
       final colDate = startMonday.add(Duration(days: w * 7));
-      final monthName = heatmapMonthName(colDate.month);
+      final monthName = shortMonthName(context, colDate.month);
       if (lastMonthName != monthName) {
         labels.add(
           SizedBox(
@@ -145,11 +146,11 @@ class _ContributionHeatmapGridState extends State<ContributionHeatmapGrid> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 18), // offset for month labels
-                  _dayLabel('Pzt', ContributionHeatmapGrid.rowStride),
+                  _dayLabel(shortWeekdayName(context, DateTime.monday), ContributionHeatmapGrid.rowStride),
                   const SizedBox(height: ContributionHeatmapGrid.rowStride),
-                  _dayLabel('Çar', ContributionHeatmapGrid.rowStride),
+                  _dayLabel(shortWeekdayName(context, DateTime.wednesday), ContributionHeatmapGrid.rowStride),
                   const SizedBox(height: ContributionHeatmapGrid.rowStride),
-                  _dayLabel('Cum', ContributionHeatmapGrid.rowStride),
+                  _dayLabel(shortWeekdayName(context, DateTime.friday), ContributionHeatmapGrid.rowStride),
                 ],
               ),
             ),
@@ -165,7 +166,7 @@ class _ContributionHeatmapGridState extends State<ContributionHeatmapGrid> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Month Labels Row
-                      Row(children: _buildMonthLabels(startMonday)),
+                      Row(children: _buildMonthLabels(context, startMonday)),
                       const SizedBox(height: 6),
 
                       // Grid Columns

@@ -5,8 +5,9 @@ void main() {
   group('Tiered Achievement Models & Enum Tests', () {
     test('AchievementCategory contains 6 distinct categories with icons', () {
       expect(AchievementCategory.values.length, equals(6));
-      expect(AchievementCategory.milestone.label, contains('Hacim'));
-      expect(AchievementCategory.directors.label, contains('Yönetmenler'));
+      // Labels moved off the enum (a const enum cannot localize) — see
+      // AchievementCategoryLabel. What is asserted here is the enum's shape.
+      expect(AchievementCategory.values.map((c) => c.icon).toSet().length, equals(6));
     });
 
     test('BadgeTier enum definitions', () {

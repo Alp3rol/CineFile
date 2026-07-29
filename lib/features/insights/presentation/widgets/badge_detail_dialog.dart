@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/premium_toast.dart';
@@ -125,7 +126,7 @@ class BadgeDetailDialog extends StatelessWidget {
                       Icon(badge.category.icon, size: 13, color: AppTheme.accentColor),
                       const SizedBox(width: 5),
                       Text(
-                        badge.category.label,
+                        badge.category.label(AppLocalizations.of(context)),
                         style: GoogleFonts.inter(
                           fontSize: 10.5,
                           fontWeight: FontWeight.bold,
@@ -144,7 +145,7 @@ class BadgeDetailDialog extends StatelessWidget {
                       border: Border.all(color: tier.color, width: 1.0),
                     ),
                     child: Text(
-                      '${tier.symbol} ${tier.label} (Seviye ${badge.currentTier}/${badge.maxTier})',
+                      AppLocalizations.of(context).badgeTierLevel(tier.symbol, tier.label(AppLocalizations.of(context)), badge.currentTier, badge.maxTier),
                       style: GoogleFonts.inter(
                         fontSize: 10.5,
                         fontWeight: FontWeight.bold,
@@ -195,10 +196,10 @@ class BadgeDetailDialog extends StatelessWidget {
                     children: [
                       Text(
                         isMaxTier
-                            ? 'Maksimum Seviye! 👑'
+                            ? AppLocalizations.of(context).badgeMaxLevel
                             : badge.isUnlocked
-                                ? 'Sonraki Seviye İlerlemesi'
-                                : 'Kilit İlerlemesi',
+                                ? AppLocalizations.of(context).badgeNextLevelProgress
+                                : AppLocalizations.of(context).badgeUnlockProgress,
                         style: GoogleFonts.inter(
                           fontSize: 11.5,
                           fontWeight: FontWeight.bold,
@@ -207,7 +208,7 @@ class BadgeDetailDialog extends StatelessWidget {
                       ),
                       Text(
                         isMaxTier
-                            ? '${badge.currentValue} Yapım'
+                            ? AppLocalizations.of(context).badgeCurrentCount(badge.currentValue)
                             : '${badge.currentValue} / ${badge.nextTargetValue} (%$pct)',
                         style: GoogleFonts.outfit(
                           fontSize: 12,
@@ -232,7 +233,7 @@ class BadgeDetailDialog extends StatelessWidget {
                   if (!isMaxTier && badge.nextTierTitle != null) ...[
                     const SizedBox(height: 10),
                     Text(
-                      '${badge.nextTargetValue - badge.currentValue} yapım daha ➔ "${badge.nextTierTitle}" seviyesine yüksel!',
+                      AppLocalizations.of(context).badgeNextTier(badge.nextTargetValue - badge.currentValue, badge.nextTierTitle!),
                       textAlign: TextAlign.center,
                       style: GoogleFonts.inter(
                         fontSize: 11.5,
@@ -255,7 +256,7 @@ class BadgeDetailDialog extends StatelessWidget {
                   final titleText = badge.isUnlocked ? badge.currentTierTitle : badge.title;
                   showPremiumToast(
                     context,
-                    '"$titleText" başarımı panoya kopyalandı! Sosyal medyada paylaşabilirsiniz.',
+                    AppLocalizations.of(context).badgeCopied(titleText),
                   );
                 },
                 style: ElevatedButton.styleFrom(
@@ -267,7 +268,7 @@ class BadgeDetailDialog extends StatelessWidget {
                 ),
                 icon: const Icon(Icons.share_rounded, size: 18),
                 label: Text(
-                  'Başarımı Paylaş',
+                  AppLocalizations.of(context).badgeShare,
                   style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 14.5),
                 ),
               ),

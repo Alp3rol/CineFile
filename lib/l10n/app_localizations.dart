@@ -2060,6 +2060,1506 @@ abstract class AppLocalizations {
   /// **'Kaydı Sil'**
   String get recordDelete;
 
+  /// No description provided for @insightsInsufficientData.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yetersiz Veri'**
+  String get insightsInsufficientData;
+
+  /// No description provided for @insightsSummaryTotalWatches.
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplam İzleme'**
+  String get insightsSummaryTotalWatches;
+
+  /// No description provided for @insightsSummaryUniqueTitles.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tekil İçerik'**
+  String get insightsSummaryUniqueTitles;
+
+  /// No description provided for @insightsSummaryTotalTime.
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplam Süre'**
+  String get insightsSummaryTotalTime;
+
+  /// No description provided for @insightsSummaryAvgRating.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ort. Puan'**
+  String get insightsSummaryAvgRating;
+
+  /// No description provided for @insightsGenreChartTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'En Popüler Türler (Tür Dağılımı)'**
+  String get insightsGenreChartTitle;
+
+  /// No description provided for @insightsGenreOther.
+  ///
+  /// In tr, this message translates to:
+  /// **'Diğer'**
+  String get insightsGenreOther;
+
+  /// No description provided for @insightsRatingChartTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kişisel Puan Dağılımı'**
+  String get insightsRatingChartTitle;
+
+  /// No description provided for @insightsCriticProfile.
+  ///
+  /// In tr, this message translates to:
+  /// **'Eleştirmen Profilin'**
+  String get insightsCriticProfile;
+
+  /// No description provided for @insightsTopDirectors.
+  ///
+  /// In tr, this message translates to:
+  /// **'En Çok İzlenen Yönetmenler'**
+  String get insightsTopDirectors;
+
+  /// No description provided for @insightsTopActors.
+  ///
+  /// In tr, this message translates to:
+  /// **'En Çok İzlenen Oyuncular'**
+  String get insightsTopActors;
+
+  /// No description provided for @insightsNoRecords.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kayıt bulunamadı.'**
+  String get insightsNoRecords;
+
+  /// No description provided for @insightsTimeOfDayTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Günün Hangi Saatlerinde İzliyorsun?'**
+  String get insightsTimeOfDayTitle;
+
+  /// No description provided for @insightsTimeMorning.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sabah'**
+  String get insightsTimeMorning;
+
+  /// No description provided for @insightsTimeNoon.
+  ///
+  /// In tr, this message translates to:
+  /// **'Öğle'**
+  String get insightsTimeNoon;
+
+  /// No description provided for @insightsTimeEvening.
+  ///
+  /// In tr, this message translates to:
+  /// **'Akşam'**
+  String get insightsTimeEvening;
+
+  /// No description provided for @insightsTimeNight.
+  ///
+  /// In tr, this message translates to:
+  /// **'Gece'**
+  String get insightsTimeNight;
+
+  /// No description provided for @insightsSeasonWinter.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kış'**
+  String get insightsSeasonWinter;
+
+  /// No description provided for @insightsSeasonSpring.
+  ///
+  /// In tr, this message translates to:
+  /// **'İlkbahar'**
+  String get insightsSeasonSpring;
+
+  /// No description provided for @insightsSeasonSummer.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yaz'**
+  String get insightsSeasonSummer;
+
+  /// No description provided for @insightsSeasonAutumn.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sonbahar'**
+  String get insightsSeasonAutumn;
+
+  /// No description provided for @insightsMonthlyChartTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'{year} Aylık İzleme Grafiği'**
+  String insightsMonthlyChartTitle(int year);
+
+  /// No description provided for @insightsWatchesCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} İzleme'**
+  String insightsWatchesCount(int count);
+
+  /// No description provided for @insightsGoldenDay.
+  ///
+  /// In tr, this message translates to:
+  /// **'Altın Gün: {day} 🏆'**
+  String insightsGoldenDay(String day);
+
+  /// No description provided for @heatmapTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yıllık İzleme Sıklığı'**
+  String get heatmapTitle;
+
+  /// No description provided for @heatmapFilterAll.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tümü'**
+  String get heatmapFilterAll;
+
+  /// No description provided for @heatmapFilterMovies.
+  ///
+  /// In tr, this message translates to:
+  /// **'Filmler'**
+  String get heatmapFilterMovies;
+
+  /// No description provided for @heatmapFilterShows.
+  ///
+  /// In tr, this message translates to:
+  /// **'Diziler'**
+  String get heatmapFilterShows;
+
+  /// No description provided for @heatmapLegendLess.
+  ///
+  /// In tr, this message translates to:
+  /// **'Az'**
+  String get heatmapLegendLess;
+
+  /// No description provided for @heatmapLegendMore.
+  ///
+  /// In tr, this message translates to:
+  /// **'Çok'**
+  String get heatmapLegendMore;
+
+  /// No description provided for @heatmapLegendMovie.
+  ///
+  /// In tr, this message translates to:
+  /// **'Film'**
+  String get heatmapLegendMovie;
+
+  /// No description provided for @heatmapLegendShow.
+  ///
+  /// In tr, this message translates to:
+  /// **'Dizi'**
+  String get heatmapLegendShow;
+
+  /// No description provided for @heatmapLegendBoth.
+  ///
+  /// In tr, this message translates to:
+  /// **'İkisi'**
+  String get heatmapLegendBoth;
+
+  /// No description provided for @heatmapActiveDays.
+  ///
+  /// In tr, this message translates to:
+  /// **'Aktif Gün'**
+  String get heatmapActiveDays;
+
+  /// No description provided for @heatmapCurrentStreak.
+  ///
+  /// In tr, this message translates to:
+  /// **'Mevcut Seri'**
+  String get heatmapCurrentStreak;
+
+  /// No description provided for @heatmapPeakHour.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yoğun Saat'**
+  String get heatmapPeakHour;
+
+  /// No description provided for @heatmapNoRecordOnDay.
+  ///
+  /// In tr, this message translates to:
+  /// **'tarihinde izleme kaydı yok.'**
+  String get heatmapNoRecordOnDay;
+
+  /// No description provided for @weeklyGoalSetTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Haftalık Hedefi Ayarla'**
+  String get weeklyGoalSetTitle;
+
+  /// No description provided for @weeklyGoalQuestion.
+  ///
+  /// In tr, this message translates to:
+  /// **'Haftada kaç film/dizi izlemek istersiniz?'**
+  String get weeklyGoalQuestion;
+
+  /// No description provided for @weeklyGoalThisWeekPrefix.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu hafta '**
+  String get weeklyGoalThisWeekPrefix;
+
+  /// No description provided for @weeklyGoalReached.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tebrikler, bu haftaki hedefinize ulaştınız! 🎉'**
+  String get weeklyGoalReached;
+
+  /// No description provided for @weeklyGoalRemaining.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hedefe ulaşmak için {count} film daha izlemelisiniz.'**
+  String weeklyGoalRemaining(int count);
+
+  /// No description provided for @achievementsTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Rozet & Başarım Koleksiyonu'**
+  String get achievementsTitle;
+
+  /// No description provided for @achievementsNeedRecords.
+  ///
+  /// In tr, this message translates to:
+  /// **'Rozetlerin yüklenmesi için günlüğünüze en az 1 izleme kaydı eklemelisiniz.'**
+  String get achievementsNeedRecords;
+
+  /// No description provided for @achievementsCurrentRank.
+  ///
+  /// In tr, this message translates to:
+  /// **'MEVCUT UNVAN'**
+  String get achievementsCurrentRank;
+
+  /// No description provided for @achievementsProgress.
+  ///
+  /// In tr, this message translates to:
+  /// **'Koleksiyon İlerlemesi'**
+  String get achievementsProgress;
+
+  /// No description provided for @achievementsUnlocked.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kazanılanlar'**
+  String get achievementsUnlocked;
+
+  /// No description provided for @achievementsNoneForFilter.
+  ///
+  /// In tr, this message translates to:
+  /// **'Seçili filtreye uygun rozet bulunamadı.'**
+  String get achievementsNoneForFilter;
+
+  /// No description provided for @achievementsAllCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tümü ({count})'**
+  String achievementsAllCount(int count);
+
+  /// No description provided for @achievementsRankNoviceSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sinema yolculuğuna yeni başladın'**
+  String get achievementsRankNoviceSubtitle;
+
+  /// No description provided for @achievementsRankTicketBuddy.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sinema Bilet Ortağı 🎬'**
+  String get achievementsRankTicketBuddy;
+
+  /// No description provided for @achievementsRankTicketBuddySubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Düzenli izleyici'**
+  String get achievementsRankTicketBuddySubtitle;
+
+  /// No description provided for @achievementsRankConnoisseurSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sinematik hafızası yüksek'**
+  String get achievementsRankConnoisseurSubtitle;
+
+  /// No description provided for @achievementsRankGuruSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Gerçek bir kültür abidesi'**
+  String get achievementsRankGuruSubtitle;
+
+  /// No description provided for @badgeMaxLevel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Maksimum Seviye! 👑'**
+  String get badgeMaxLevel;
+
+  /// No description provided for @badgeNextLevelProgress.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sonraki Seviye İlerlemesi'**
+  String get badgeNextLevelProgress;
+
+  /// No description provided for @badgeUnlockProgress.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kilit İlerlemesi'**
+  String get badgeUnlockProgress;
+
+  /// No description provided for @badgeShare.
+  ///
+  /// In tr, this message translates to:
+  /// **'Başarımı Paylaş'**
+  String get badgeShare;
+
+  /// No description provided for @badgeCategoryMilestone.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hacim & Maraton'**
+  String get badgeCategoryMilestone;
+
+  /// No description provided for @badgeCategoryTime.
+  ///
+  /// In tr, this message translates to:
+  /// **'Zaman & Atmosfer'**
+  String get badgeCategoryTime;
+
+  /// No description provided for @badgeCategoryDirectors.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yönetmenler & Auteurs'**
+  String get badgeCategoryDirectors;
+
+  /// No description provided for @badgeCategoryGenres.
+  ///
+  /// In tr, this message translates to:
+  /// **'Türler & Temalar'**
+  String get badgeCategoryGenres;
+
+  /// No description provided for @badgeCategoryCritic.
+  ///
+  /// In tr, this message translates to:
+  /// **'Eleştirmen & Günlük'**
+  String get badgeCategoryCritic;
+
+  /// No description provided for @badgeCategorySeries.
+  ///
+  /// In tr, this message translates to:
+  /// **'Dizi & Sezon'**
+  String get badgeCategorySeries;
+
+  /// No description provided for @badgeFirstWatchTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'İlk Adımlar'**
+  String get badgeFirstWatchTitle;
+
+  /// No description provided for @badgeFirstWatchT1.
+  ///
+  /// In tr, this message translates to:
+  /// **'İlk Adım'**
+  String get badgeFirstWatchT1;
+
+  /// No description provided for @badgeFirstWatchT2.
+  ///
+  /// In tr, this message translates to:
+  /// **'İzleme Tutkusu'**
+  String get badgeFirstWatchT2;
+
+  /// No description provided for @badgeFirstWatchT3.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sıkı Takipçi'**
+  String get badgeFirstWatchT3;
+
+  /// No description provided for @badgeSinefilTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sinefil Serisi'**
+  String get badgeSinefilTitle;
+
+  /// No description provided for @badgeSinefilT1.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sinefil'**
+  String get badgeSinefilT1;
+
+  /// No description provided for @badgeSinefilT2.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kültür Mantarı'**
+  String get badgeSinefilT2;
+
+  /// No description provided for @badgeSinefilT3.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sinema Efsanesi'**
+  String get badgeSinefilT3;
+
+  /// No description provided for @badgeSinefilT4.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sinema Gurusu'**
+  String get badgeSinefilT4;
+
+  /// No description provided for @badgeStreakTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Seri İzleyici'**
+  String get badgeStreakTitle;
+
+  /// No description provided for @badgeStreakT1.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kısa Maraton'**
+  String get badgeStreakT1;
+
+  /// No description provided for @badgeStreakT2.
+  ///
+  /// In tr, this message translates to:
+  /// **'Seri İzleyici'**
+  String get badgeStreakT2;
+
+  /// No description provided for @badgeStreakT3.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ateşli İzleyici'**
+  String get badgeStreakT3;
+
+  /// No description provided for @badgeStreakT4.
+  ///
+  /// In tr, this message translates to:
+  /// **'Durdurulamaz Maratoncu'**
+  String get badgeStreakT4;
+
+  /// No description provided for @badgeNightOwlTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Gece Kuşu Serisi'**
+  String get badgeNightOwlTitle;
+
+  /// No description provided for @badgeNightOwlT1.
+  ///
+  /// In tr, this message translates to:
+  /// **'Gece Kuşu'**
+  String get badgeNightOwlT1;
+
+  /// No description provided for @badgeNightOwlT2.
+  ///
+  /// In tr, this message translates to:
+  /// **'Gece Bekçisi'**
+  String get badgeNightOwlT2;
+
+  /// No description provided for @badgeNightOwlT3.
+  ///
+  /// In tr, this message translates to:
+  /// **'Karanlıklar Prensi'**
+  String get badgeNightOwlT3;
+
+  /// No description provided for @badgeEarlyBirdTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Erken Kuş Serisi'**
+  String get badgeEarlyBirdTitle;
+
+  /// No description provided for @badgeEarlyBirdT1.
+  ///
+  /// In tr, this message translates to:
+  /// **'Gün Doğumu İzleyicisi'**
+  String get badgeEarlyBirdT1;
+
+  /// No description provided for @badgeEarlyBirdT2.
+  ///
+  /// In tr, this message translates to:
+  /// **'Erken Kuş'**
+  String get badgeEarlyBirdT2;
+
+  /// No description provided for @badgeEarlyBirdT3.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şafak Bekçisi'**
+  String get badgeEarlyBirdT3;
+
+  /// No description provided for @badgeSundayTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Pazar Sineması'**
+  String get badgeSundayTitle;
+
+  /// No description provided for @badgeSundayT1.
+  ///
+  /// In tr, this message translates to:
+  /// **'Pazar Keyfi'**
+  String get badgeSundayT1;
+
+  /// No description provided for @badgeSundayT2.
+  ///
+  /// In tr, this message translates to:
+  /// **'Pazar Sineması'**
+  String get badgeSundayT2;
+
+  /// No description provided for @badgeSundayT3.
+  ///
+  /// In tr, this message translates to:
+  /// **'Pazar Üstadı'**
+  String get badgeSundayT3;
+
+  /// No description provided for @badgeWeekendTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hafta Sonu Maratonu'**
+  String get badgeWeekendTitle;
+
+  /// No description provided for @badgeWeekendT1.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hafta Sonu Başlangıcı'**
+  String get badgeWeekendT1;
+
+  /// No description provided for @badgeWeekendT2.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hafta Sonu Maratoncusu'**
+  String get badgeWeekendT2;
+
+  /// No description provided for @badgeWeekendT3.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hafta Sonu Canavarı'**
+  String get badgeWeekendT3;
+
+  /// No description provided for @badgeWinterTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kışlık Battaniye & Film'**
+  String get badgeWinterTitle;
+
+  /// No description provided for @badgeWinterT1.
+  ///
+  /// In tr, this message translates to:
+  /// **'Mevsimlik İzleyici'**
+  String get badgeWinterT1;
+
+  /// No description provided for @badgeWinterT2.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kışlık Battaniye & Film'**
+  String get badgeWinterT2;
+
+  /// No description provided for @badgeWinterT3.
+  ///
+  /// In tr, this message translates to:
+  /// **'Dört Mevsim Sinefil'**
+  String get badgeWinterT3;
+
+  /// No description provided for @badgeTimeTravelerTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Zaman Gezgini'**
+  String get badgeTimeTravelerTitle;
+
+  /// No description provided for @badgeTimeTravelerT1.
+  ///
+  /// In tr, this message translates to:
+  /// **'Nostalji Meraklısı'**
+  String get badgeTimeTravelerT1;
+
+  /// No description provided for @badgeTimeTravelerT2.
+  ///
+  /// In tr, this message translates to:
+  /// **'Zaman Gezgini'**
+  String get badgeTimeTravelerT2;
+
+  /// No description provided for @badgeTimeTravelerT3.
+  ///
+  /// In tr, this message translates to:
+  /// **'Klasikler Arşivcisi'**
+  String get badgeTimeTravelerT3;
+
+  /// No description provided for @badgeNolanTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Nolanist Serisi'**
+  String get badgeNolanTitle;
+
+  /// No description provided for @badgeNolanT1.
+  ///
+  /// In tr, this message translates to:
+  /// **'Nolan Meraklısı'**
+  String get badgeNolanT1;
+
+  /// No description provided for @badgeNolanT2.
+  ///
+  /// In tr, this message translates to:
+  /// **'Zaman Büken Nolanist'**
+  String get badgeNolanT2;
+
+  /// No description provided for @badgeNolanT3.
+  ///
+  /// In tr, this message translates to:
+  /// **'Rüya İçinde Rüya Mimarı'**
+  String get badgeNolanT3;
+
+  /// No description provided for @badgeTarantinoTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tarantino Sever'**
+  String get badgeTarantinoTitle;
+
+  /// No description provided for @badgeTarantinoT1.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ucuz Roman Sever'**
+  String get badgeTarantinoT1;
+
+  /// No description provided for @badgeTarantinoT2.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kanlı İntikam Ustası'**
+  String get badgeTarantinoT2;
+
+  /// No description provided for @badgeTarantinoT3.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sinematik Auteur'**
+  String get badgeTarantinoT3;
+
+  /// No description provided for @badgeSpielbergTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Spielberg Hayranı'**
+  String get badgeSpielbergTitle;
+
+  /// No description provided for @badgeSpielbergT1.
+  ///
+  /// In tr, this message translates to:
+  /// **'Macera Çırağı'**
+  String get badgeSpielbergT1;
+
+  /// No description provided for @badgeSpielbergT2.
+  ///
+  /// In tr, this message translates to:
+  /// **'Spielberg Hayranı'**
+  String get badgeSpielbergT2;
+
+  /// No description provided for @badgeSpielbergT3.
+  ///
+  /// In tr, this message translates to:
+  /// **'Blockbuster Efsanesi'**
+  String get badgeSpielbergT3;
+
+  /// No description provided for @badgeScorseseTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Scorsese Müptelası'**
+  String get badgeScorseseTitle;
+
+  /// No description provided for @badgeScorseseT1.
+  ///
+  /// In tr, this message translates to:
+  /// **'Mafya & Suç Sever'**
+  String get badgeScorseseT1;
+
+  /// No description provided for @badgeScorseseT2.
+  ///
+  /// In tr, this message translates to:
+  /// **'Scorsese Müptelası'**
+  String get badgeScorseseT2;
+
+  /// No description provided for @badgeScorseseT3.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sinema Sanatçısı'**
+  String get badgeScorseseT3;
+
+  /// No description provided for @badgeKubrickTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kubrick Ustalığı'**
+  String get badgeKubrickTitle;
+
+  /// No description provided for @badgeKubrickT1.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kubrick Çırağı'**
+  String get badgeKubrickT1;
+
+  /// No description provided for @badgeKubrickT2.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kubrick Ustalığı'**
+  String get badgeKubrickT2;
+
+  /// No description provided for @badgeKubrickT3.
+  ///
+  /// In tr, this message translates to:
+  /// **'Görsel Vizyoner'**
+  String get badgeKubrickT3;
+
+  /// No description provided for @badgeWesternTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Vahşi Batı Serisi'**
+  String get badgeWesternTitle;
+
+  /// No description provided for @badgeWesternT1.
+  ///
+  /// In tr, this message translates to:
+  /// **'Vahşi Batı Kaşifi'**
+  String get badgeWesternT1;
+
+  /// No description provided for @badgeWesternT2.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kovboy & Şerif'**
+  String get badgeWesternT2;
+
+  /// No description provided for @badgeWesternT3.
+  ///
+  /// In tr, this message translates to:
+  /// **'İyi, Kötü ve Çirkin Efsanesi'**
+  String get badgeWesternT3;
+
+  /// No description provided for @badgeScifiTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sci-Fi Kaşifi'**
+  String get badgeScifiTitle;
+
+  /// No description provided for @badgeScifiT1.
+  ///
+  /// In tr, this message translates to:
+  /// **'Uzay Yolcusu'**
+  String get badgeScifiT1;
+
+  /// No description provided for @badgeScifiT2.
+  ///
+  /// In tr, this message translates to:
+  /// **'Galaksi Kaşifi'**
+  String get badgeScifiT2;
+
+  /// No description provided for @badgeScifiT3.
+  ///
+  /// In tr, this message translates to:
+  /// **'Evrenin Hakimi'**
+  String get badgeScifiT3;
+
+  /// No description provided for @badgeHorrorTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Korku & Gerilim'**
+  String get badgeHorrorTitle;
+
+  /// No description provided for @badgeHorrorT1.
+  ///
+  /// In tr, this message translates to:
+  /// **'Korkusuz İzleyici'**
+  String get badgeHorrorT1;
+
+  /// No description provided for @badgeHorrorT2.
+  ///
+  /// In tr, this message translates to:
+  /// **'Gerilim Üstadı'**
+  String get badgeHorrorT2;
+
+  /// No description provided for @badgeHorrorT3.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kabusların Efendisi'**
+  String get badgeHorrorT3;
+
+  /// No description provided for @badgeDramaTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Drama Tutkunu'**
+  String get badgeDramaTitle;
+
+  /// No description provided for @badgeDramaT1.
+  ///
+  /// In tr, this message translates to:
+  /// **'Duygusal İzleyici'**
+  String get badgeDramaT1;
+
+  /// No description provided for @badgeDramaT2.
+  ///
+  /// In tr, this message translates to:
+  /// **'Drama Tutkunu'**
+  String get badgeDramaT2;
+
+  /// No description provided for @badgeDramaT3.
+  ///
+  /// In tr, this message translates to:
+  /// **'Duygu Üstadı'**
+  String get badgeDramaT3;
+
+  /// No description provided for @badgeCrimeTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Suç & Gizem Ajanı'**
+  String get badgeCrimeTitle;
+
+  /// No description provided for @badgeCrimeT1.
+  ///
+  /// In tr, this message translates to:
+  /// **'Amatör Dedektif'**
+  String get badgeCrimeT1;
+
+  /// No description provided for @badgeCrimeT2.
+  ///
+  /// In tr, this message translates to:
+  /// **'Suç & Gizem Ajanı'**
+  String get badgeCrimeT2;
+
+  /// No description provided for @badgeCrimeT3.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sherlock Seviyesi'**
+  String get badgeCrimeT3;
+
+  /// No description provided for @badgeAnimationTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Animasyon & Çizgi Düşler'**
+  String get badgeAnimationTitle;
+
+  /// No description provided for @badgeAnimationT1.
+  ///
+  /// In tr, this message translates to:
+  /// **'Çizgi Sever'**
+  String get badgeAnimationT1;
+
+  /// No description provided for @badgeAnimationT2.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hayal Perdesi'**
+  String get badgeAnimationT2;
+
+  /// No description provided for @badgeAnimationT3.
+  ///
+  /// In tr, this message translates to:
+  /// **'Anime & Animasyon Üstadı'**
+  String get badgeAnimationT3;
+
+  /// No description provided for @badgeTurkishTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yerli Sinema'**
+  String get badgeTurkishTitle;
+
+  /// No description provided for @badgeTurkishT1.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yerli Sinema Dostu'**
+  String get badgeTurkishT1;
+
+  /// No description provided for @badgeTurkishT2.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeşilçam Sevdalısı'**
+  String get badgeTurkishT2;
+
+  /// No description provided for @badgeTurkishT3.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yerli Sinema Muhafızı'**
+  String get badgeTurkishT3;
+
+  /// No description provided for @badgeCriticTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Eleştirmen Serisi'**
+  String get badgeCriticTitle;
+
+  /// No description provided for @badgeCriticT1.
+  ///
+  /// In tr, this message translates to:
+  /// **'Not Tutucu'**
+  String get badgeCriticT1;
+
+  /// No description provided for @badgeCriticT2.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ciddi Eleştirmen'**
+  String get badgeCriticT2;
+
+  /// No description provided for @badgeCriticT3.
+  ///
+  /// In tr, this message translates to:
+  /// **'Köşe Yazarı'**
+  String get badgeCriticT3;
+
+  /// No description provided for @badgeGenerousTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Cömert Puanlayıcı'**
+  String get badgeGenerousTitle;
+
+  /// No description provided for @badgeGenerousT1.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tam Puan Sever'**
+  String get badgeGenerousT1;
+
+  /// No description provided for @badgeGenerousT2.
+  ///
+  /// In tr, this message translates to:
+  /// **'Cömert Puanlayıcı'**
+  String get badgeGenerousT2;
+
+  /// No description provided for @badgeGenerousT3.
+  ///
+  /// In tr, this message translates to:
+  /// **'Başyapıt Avcısı'**
+  String get badgeGenerousT3;
+
+  /// No description provided for @badgeStrictTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Zor Beğenen'**
+  String get badgeStrictTitle;
+
+  /// No description provided for @badgeStrictT1.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sert Eleştirmen'**
+  String get badgeStrictT1;
+
+  /// No description provided for @badgeStrictT2.
+  ///
+  /// In tr, this message translates to:
+  /// **'Zor Beğenen'**
+  String get badgeStrictT2;
+
+  /// No description provided for @badgeStrictT3.
+  ///
+  /// In tr, this message translates to:
+  /// **'Affetmeyen Jüri'**
+  String get badgeStrictT3;
+
+  /// No description provided for @badgeRewatchTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sadık İzleyici'**
+  String get badgeRewatchTitle;
+
+  /// No description provided for @badgeRewatchT1.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tekrar İzleyen'**
+  String get badgeRewatchT1;
+
+  /// No description provided for @badgeRewatchT2.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sadık İzleyici'**
+  String get badgeRewatchT2;
+
+  /// No description provided for @badgeRewatchT3.
+  ///
+  /// In tr, this message translates to:
+  /// **'Fanatik Tekrarcı'**
+  String get badgeRewatchT3;
+
+  /// No description provided for @badgeTagMasterTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Etiket Ustası'**
+  String get badgeTagMasterTitle;
+
+  /// No description provided for @badgeTagMasterT1.
+  ///
+  /// In tr, this message translates to:
+  /// **'Etiket Çırağı'**
+  String get badgeTagMasterT1;
+
+  /// No description provided for @badgeTagMasterT2.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kategori Ustası'**
+  String get badgeTagMasterT2;
+
+  /// No description provided for @badgeTagMasterT3.
+  ///
+  /// In tr, this message translates to:
+  /// **'Etiket Koleksiyoneri'**
+  String get badgeTagMasterT3;
+
+  /// No description provided for @badgeTvTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Dizi Kolik Serisi'**
+  String get badgeTvTitle;
+
+  /// No description provided for @badgeTvT1.
+  ///
+  /// In tr, this message translates to:
+  /// **'Dizi Meraklısı'**
+  String get badgeTvT1;
+
+  /// No description provided for @badgeTvT2.
+  ///
+  /// In tr, this message translates to:
+  /// **'Dizi Kolik'**
+  String get badgeTvT2;
+
+  /// No description provided for @badgeTvT3.
+  ///
+  /// In tr, this message translates to:
+  /// **'Dizi Müptelası'**
+  String get badgeTvT3;
+
+  /// No description provided for @badgeSeasonTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sezon Canavarı'**
+  String get badgeSeasonTitle;
+
+  /// No description provided for @badgeSeasonT1.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sezon Bitişi'**
+  String get badgeSeasonT1;
+
+  /// No description provided for @badgeSeasonT2.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sezon Canavarı'**
+  String get badgeSeasonT2;
+
+  /// No description provided for @badgeSeasonT3.
+  ///
+  /// In tr, this message translates to:
+  /// **'Maraton Ustası'**
+  String get badgeSeasonT3;
+
+  /// No description provided for @badgeDescLogEntries.
+  ///
+  /// In tr, this message translates to:
+  /// **'Günlüğe {n} izleme kaydı ekle.'**
+  String badgeDescLogEntries(int n);
+
+  /// No description provided for @badgeDescWatchAtLeast.
+  ///
+  /// In tr, this message translates to:
+  /// **'En az {n} film veya dizi izle.'**
+  String badgeDescWatchAtLeast(int n);
+
+  /// No description provided for @badgeDescStreak.
+  ///
+  /// In tr, this message translates to:
+  /// **'Üst üste {n} gün boyunca kayıt gir.'**
+  String badgeDescStreak(int n);
+
+  /// No description provided for @badgeDescNightWatch.
+  ///
+  /// In tr, this message translates to:
+  /// **'Gece 00:00 - 05:00 arasında {n} izleme yap.'**
+  String badgeDescNightWatch(int n);
+
+  /// No description provided for @badgeDescEarlyWatch.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sabah 06:00 - 09:00 arasında {n} izleme yap.'**
+  String badgeDescEarlyWatch(int n);
+
+  /// No description provided for @badgeDescSunday.
+  ///
+  /// In tr, this message translates to:
+  /// **'Pazar günleri {n} film/dizi izle.'**
+  String badgeDescSunday(int n);
+
+  /// No description provided for @badgeDescSingleDay.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tek günde en az {n} film/dizi izle.'**
+  String badgeDescSingleDay(int n);
+
+  /// No description provided for @badgeDescWinter.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kış aylarında {n} yapım izle.'**
+  String badgeDescWinter(int n);
+
+  /// No description provided for @badgeDescRetro.
+  ///
+  /// In tr, this message translates to:
+  /// **'1980 öncesi çekilmiş {n} film izle.'**
+  String badgeDescRetro(int n);
+
+  /// Director names are proper nouns and stay as they are.
+  ///
+  /// In tr, this message translates to:
+  /// **'{n} {director} filmi izle.'**
+  String badgeDescDirector(int n, String director);
+
+  /// No description provided for @badgeDescWestern.
+  ///
+  /// In tr, this message translates to:
+  /// **'{n} Western filmi izle.'**
+  String badgeDescWestern(int n);
+
+  /// No description provided for @badgeDescScifi.
+  ///
+  /// In tr, this message translates to:
+  /// **'{n} Bilim Kurgu yapımı izle.'**
+  String badgeDescScifi(int n);
+
+  /// No description provided for @badgeDescHorror.
+  ///
+  /// In tr, this message translates to:
+  /// **'{n} Korku/Gerilim yapımı izle.'**
+  String badgeDescHorror(int n);
+
+  /// No description provided for @badgeDescDrama.
+  ///
+  /// In tr, this message translates to:
+  /// **'{n} Drama yapımı izle.'**
+  String badgeDescDrama(int n);
+
+  /// No description provided for @badgeDescCrime.
+  ///
+  /// In tr, this message translates to:
+  /// **'{n} Suç veya Gizem yapımı izle.'**
+  String badgeDescCrime(int n);
+
+  /// No description provided for @badgeDescAnimation.
+  ///
+  /// In tr, this message translates to:
+  /// **'{n} Animasyon yapımı izle.'**
+  String badgeDescAnimation(int n);
+
+  /// No description provided for @badgeDescTurkish.
+  ///
+  /// In tr, this message translates to:
+  /// **'{n} Türk yapımı izle.'**
+  String badgeDescTurkish(int n);
+
+  /// No description provided for @badgeDescNotes.
+  ///
+  /// In tr, this message translates to:
+  /// **'{n} filme kişisel not yaz.'**
+  String badgeDescNotes(int n);
+
+  /// No description provided for @badgeDescPerfectScore.
+  ///
+  /// In tr, this message translates to:
+  /// **'{n} yapıma 10/10 tam puan ver.'**
+  String badgeDescPerfectScore(int n);
+
+  /// No description provided for @badgeDescLowScore.
+  ///
+  /// In tr, this message translates to:
+  /// **'{n} yapıma 5.0 altı puan ver.'**
+  String badgeDescLowScore(int n);
+
+  /// No description provided for @badgeDescRewatchNth.
+  ///
+  /// In tr, this message translates to:
+  /// **'Aynı içeriği {n}. kez izle.'**
+  String badgeDescRewatchNth(int n);
+
+  /// No description provided for @badgeDescRewatchTimes.
+  ///
+  /// In tr, this message translates to:
+  /// **'Aynı içeriği {n} kez tekrar izle.'**
+  String badgeDescRewatchTimes(int n);
+
+  /// No description provided for @badgeDescRewatchRecords.
+  ///
+  /// In tr, this message translates to:
+  /// **'{n} tekrar izleme kaydı yap.'**
+  String badgeDescRewatchRecords(int n);
+
+  /// No description provided for @badgeDescTags.
+  ///
+  /// In tr, this message translates to:
+  /// **'{n} farklı kişisel etiket kullan.'**
+  String badgeDescTags(int n);
+
+  /// No description provided for @badgeDescEpisodes.
+  ///
+  /// In tr, this message translates to:
+  /// **'{n} dizi bölümü izle.'**
+  String badgeDescEpisodes(int n);
+
+  /// No description provided for @badgeDescSeasons.
+  ///
+  /// In tr, this message translates to:
+  /// **'{n} dizinin tüm sezonunu tamamla.'**
+  String badgeDescSeasons(int n);
+
+  /// No description provided for @tierLocked.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kilitli'**
+  String get tierLocked;
+
+  /// No description provided for @tierBronze.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bronz'**
+  String get tierBronze;
+
+  /// No description provided for @tierSilver.
+  ///
+  /// In tr, this message translates to:
+  /// **'Gümüş'**
+  String get tierSilver;
+
+  /// No description provided for @tierGold.
+  ///
+  /// In tr, this message translates to:
+  /// **'Altın'**
+  String get tierGold;
+
+  /// No description provided for @tierPlatinum.
+  ///
+  /// In tr, this message translates to:
+  /// **'Platin'**
+  String get tierPlatinum;
+
+  /// No description provided for @badgeTierLevel.
+  ///
+  /// In tr, this message translates to:
+  /// **'{symbol} {tier} (Seviye {current}/{max})'**
+  String badgeTierLevel(String symbol, String tier, int current, int max);
+
+  /// No description provided for @achievementsCategoryCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'{category} ({count})'**
+  String achievementsCategoryCount(String category, int count);
+
+  /// No description provided for @insightsEmptyBody.
+  ///
+  /// In tr, this message translates to:
+  /// **'Grafiklerin ve istatistiklerin oluşturulabilmesi için günlüğünüze en az 1 adet izleme kaydı eklemelisiniz.'**
+  String get insightsEmptyBody;
+
+  /// No description provided for @achievementsShowing.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} Başarım Gösteriliyor'**
+  String achievementsShowing(int count);
+
+  /// No description provided for @badgeLockedLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'🔒 Kilitli'**
+  String get badgeLockedLabel;
+
+  /// No description provided for @badgeCurrentCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} Yapım'**
+  String badgeCurrentCount(int count);
+
+  /// No description provided for @badgeNextTier.
+  ///
+  /// In tr, this message translates to:
+  /// **'{remaining} yapım daha ➔ \"{tier}\" seviyesine yüksel!'**
+  String badgeNextTier(int remaining, String tier);
+
+  /// No description provided for @badgeCopied.
+  ///
+  /// In tr, this message translates to:
+  /// **'\"{title}\" başarımı panoya kopyalandı! Sosyal medyada paylaşabilirsiniz.'**
+  String badgeCopied(String title);
+
+  /// No description provided for @heatmapYearTotal.
+  ///
+  /// In tr, this message translates to:
+  /// **'{year} içinde {count} İzleme'**
+  String heatmapYearTotal(int year, int count);
+
+  /// No description provided for @heatmapEpisodesCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} Dizi Bölümü'**
+  String heatmapEpisodesCount(int count);
+
+  /// No description provided for @insightsBadgesTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'🏆 Başarılar & Rozetler'**
+  String get insightsBadgesTitle;
+
+  /// No description provided for @insightsBadgesEarned.
+  ///
+  /// In tr, this message translates to:
+  /// **'{unlocked} / {total} Kazanıldı'**
+  String insightsBadgesEarned(int unlocked, int total);
+
+  /// No description provided for @insightsTopTagsTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'🏷️ En Sık Kullanılan Etiketler'**
+  String get insightsTopTagsTitle;
+
+  /// No description provided for @insightsDistinctTags.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} Farklı Etiket'**
+  String insightsDistinctTags(int count);
+
+  /// No description provided for @insightsWatchesWithPercent.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} İzleme ({percent}%)'**
+  String insightsWatchesWithPercent(int count, String percent);
+
+  /// No description provided for @insightsSeasonalTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'📅 Mevsimsel Dağılım'**
+  String get insightsSeasonalTitle;
+
+  /// No description provided for @insightsSeasonWinterLong.
+  ///
+  /// In tr, this message translates to:
+  /// **'❄️ Kış (Ara-Oca-Şub)'**
+  String get insightsSeasonWinterLong;
+
+  /// No description provided for @insightsSeasonSpringLong.
+  ///
+  /// In tr, this message translates to:
+  /// **'🌱 İlkbahar (Mar-Nis-May)'**
+  String get insightsSeasonSpringLong;
+
+  /// No description provided for @insightsSeasonSummerLong.
+  ///
+  /// In tr, this message translates to:
+  /// **'☀️ Yaz (Haz-Tem-Ağu)'**
+  String get insightsSeasonSummerLong;
+
+  /// No description provided for @insightsSeasonAutumnLong.
+  ///
+  /// In tr, this message translates to:
+  /// **'🍂 Sonbahar (Eyl-Eki-Kas)'**
+  String get insightsSeasonAutumnLong;
+
+  /// No description provided for @weeklyGoalTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'🎯 Haftalık İzleme Hedefi'**
+  String get weeklyGoalTitle;
+
+  /// No description provided for @weeklyGoalProgress.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu hafta {count} film/dizi izlediniz. (Hedef: {goal})'**
+  String weeklyGoalProgress(int count, int goal);
+
+  /// No description provided for @weeklyGoalItemsCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} İçerik'**
+  String weeklyGoalItemsCount(int count);
+
+  /// No description provided for @timeVisualizerTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'🍿 Bu Sürede Neler Yapabilirdin?'**
+  String get timeVisualizerTitle;
+
+  /// No description provided for @timeVisualizerFooter.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ama film/dizi izlemek de harika bir tercih! 🎬'**
+  String get timeVisualizerFooter;
+
+  /// No description provided for @timeCompareLotr.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yüzüklerin Efendisi (Uzatılmış Versiyon) Üçlemesi\'ni aralıksız {n} kez baştan sona izleyebilirdin!'**
+  String timeCompareLotr(String n);
+
+  /// No description provided for @timeCompareFlight.
+  ///
+  /// In tr, this message translates to:
+  /// **'İstanbul - Londra arası uçakla tam {n} kez gidiş-dönüş seyahat edebilirdin!'**
+  String timeCompareFlight(String n);
+
+  /// No description provided for @timeCompareBreakingBad.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kült dizi Breaking Bad\'i baştan sona tam {n} kez maraton yapabilirdin!'**
+  String timeCompareBreakingBad(String n);
+
+  /// No description provided for @timeCompareWalk.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hiç durmadan yürüyerek İstanbul\'dan Ankara\'ya tam {n} kez gidip gelebilirdin!'**
+  String timeCompareWalk(String n);
+
+  /// No description provided for @timeCompareBooks.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ortalama 8 saatlik okuma süresiyle tam {n} adet kitap bitirebilirdin!'**
+  String timeCompareBooks(String n);
+
+  /// No description provided for @timeCompareFood.
+  ///
+  /// In tr, this message translates to:
+  /// **'Arka arkaya hiç durmadan tam {n} lahmacun yiyebilirdin! (Afiyet olsun)'**
+  String timeCompareFood(String n);
+
+  /// No description provided for @timeCompareIss.
+  ///
+  /// In tr, this message translates to:
+  /// **'Uluslararası Uzay İstasyonu (ISS) Dünya\'nın etrafında tam {n} tur atardı!'**
+  String timeCompareIss(String n);
+
+  /// No description provided for @timeCompareLight.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu sürede ışık uzay boşluğunda tam {n} milyon kilometre yol alırdı!'**
+  String timeCompareLight(String n);
+
+  /// No description provided for @timeCompareMinecraft.
+  ///
+  /// In tr, this message translates to:
+  /// **'Minecraft\'ta hiç durmadan tam {n} blok yerleştirebilirdin!'**
+  String timeCompareMinecraft(String n);
+
+  /// No description provided for @timeCompareCoffee.
+  ///
+  /// In tr, this message translates to:
+  /// **'Arkadaşlarınla sohbet edip tam {n} fincan kahve içebilirdin!'**
+  String timeCompareCoffee(String n);
+
+  /// No description provided for @timeCompareMusic.
+  ///
+  /// In tr, this message translates to:
+  /// **'Spotify\'da favori çalma listenden tam {n} şarkı dinleyebilirdin!'**
+  String timeCompareMusic(String n);
+
+  /// No description provided for @timeCompareMonopoly.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hiç bitmeyecekmiş gibi hissettiren tam {n} Monopoly partisi yapabilirdin!'**
+  String timeCompareMonopoly(String n);
+
+  /// No description provided for @timeCompareSleep.
+  ///
+  /// In tr, this message translates to:
+  /// **'Deliksiz ve huzurlu bir şekilde tam {n} gece uykusu çekebilirdin!'**
+  String timeCompareSleep(String n);
+
+  /// No description provided for @timeCompareHair.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu sürede saç tellerin toplamda tam {n} milimetre uzardı!'**
+  String timeCompareHair(String n);
+
+  /// No description provided for @timeCompareCells.
+  ///
+  /// In tr, this message translates to:
+  /// **'Vücudun sen ekran karşısındayken tam {n} milyon yeni hücre üretti!'**
+  String timeCompareCells(String n);
+
+  /// No description provided for @timeCompareOrbit.
+  ///
+  /// In tr, this message translates to:
+  /// **'Dünya güneşin etrafındaki yörüngesinde tam {n} bin kilometre yol katetti!'**
+  String timeCompareOrbit(String n);
+
   /// No description provided for @recordEpisodesCount.
   ///
   /// In tr, this message translates to:

@@ -27,6 +27,27 @@ String formatMonthHeading(BuildContext context, DateTime date) {
   return upperCaseFor(DateFormat.yMMMM(locale.toLanguageTag()).format(date), locale);
 }
 
+/// A short month name for chart and heatmap axes — "Oca" / "Jan".
+///
+/// [month] is 1-based, matching [DateTime.month]. Comes from intl rather than a
+/// hand-written table: three separate hardcoded Turkish month arrays existed
+/// before this, and none of them would ever have been translated.
+String shortMonthName(BuildContext context, int month) =>
+    DateFormat.MMM(localeTagOf(context)).format(DateTime(2000, month));
+
+/// A full weekday name — "Pazartesi" / "Monday". [weekday] is 1-based
+/// (Monday = 1), matching [DateTime.weekday].
+String weekdayName(BuildContext context, int weekday) =>
+    DateFormat.EEEE(localeTagOf(context)).format(_dateForWeekday(weekday));
+
+/// A short weekday name — "Pzt" / "Mon".
+String shortWeekdayName(BuildContext context, int weekday) =>
+    DateFormat.E(localeTagOf(context)).format(_dateForWeekday(weekday));
+
+/// Any date with the requested weekday. 2024-01-01 was a Monday, so adding
+/// `weekday - 1` days lands on the one asked for.
+DateTime _dateForWeekday(int weekday) => DateTime(2024, 1, weekday);
+
 /// [String.toUpperCase] with the Turkish dotted-i rule applied.
 ///
 /// Dart's casing is locale-invariant, so "Nisan".toUpperCase() gives "NISAN" —

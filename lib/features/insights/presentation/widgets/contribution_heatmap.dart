@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/l10n/date_text.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../insights_provider.dart';
 import 'contribution_heatmap_badges.dart';
@@ -116,7 +118,9 @@ class _ContributionHeatmapState extends State<ContributionHeatmap> {
     String peakTimeOfDay = '—';
     if (widget.insights.timeOfDayTrend.isNotEmpty) {
       final sorted = widget.insights.timeOfDayTrend.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
-      if (sorted.first.value > 0) peakTimeOfDay = sorted.first.key;
+      if (sorted.first.value > 0) {
+        peakTimeOfDay = sorted.first.key.label(AppLocalizations.of(context));
+      }
     }
 
     return GlassContainer(
@@ -131,11 +135,11 @@ class _ContributionHeatmapState extends State<ContributionHeatmap> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Yıllık İzleme Sıklığı',
+                AppLocalizations.of(context).heatmapTitle,
                 style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
               ),
               Text(
-                '$selectedYear içinde $yearTotal İzleme',
+                AppLocalizations.of(context).heatmapYearTotal(selectedYear, yearTotal),
                 style: GoogleFonts.outfit(fontSize: 11, color: HeatmapColors.neonPurple, fontWeight: FontWeight.bold),
               ),
             ],
@@ -181,9 +185,9 @@ class _ContributionHeatmapState extends State<ContributionHeatmap> {
                   spacing: 6,
                   runSpacing: 6,
                   children: [
-                    _buildFilterButton('Tümü', 'all'),
-                    _buildFilterButton('Filmler', 'movies'),
-                    _buildFilterButton('Diziler', 'tv'),
+                    _buildFilterButton(AppLocalizations.of(context).heatmapFilterAll, 'all'),
+                    _buildFilterButton(AppLocalizations.of(context).heatmapFilterMovies, 'movies'),
+                    _buildFilterButton(AppLocalizations.of(context).heatmapFilterShows, 'tv'),
                   ],
                 ),
               ),
@@ -209,11 +213,11 @@ class _ContributionHeatmapState extends State<ContributionHeatmap> {
                     style: GoogleFonts.inter(fontSize: 10.5, color: Colors.white70),
                     children: [
                       TextSpan(
-                        text: '${formatHeatmapDateTurkish(selectedDate)} ',
+                        text: '${formatLongDate(context, selectedDate)} ',
                         style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
                       ),
                       TextSpan(
-                        text: (selectedMovies + selectedTv) == 0 ? 'tarihinde izleme kaydı yok.' : '• ',
+                        text: (selectedMovies + selectedTv) == 0 ? AppLocalizations.of(context).heatmapNoRecordOnDay : '• ',
                       ),
                       if (selectedMovies > 0)
                         TextSpan(
@@ -223,7 +227,7 @@ class _ContributionHeatmapState extends State<ContributionHeatmap> {
                       if (selectedMovies > 0 && selectedTv > 0) const TextSpan(text: ', '),
                       if (selectedTv > 0)
                         TextSpan(
-                          text: '$selectedTv Dizi Bölümü',
+                          text: AppLocalizations.of(context).heatmapEpisodesCount(selectedTv),
                           style: const TextStyle(fontWeight: FontWeight.bold, color: HeatmapColors.neonPink),
                         ),
                     ],

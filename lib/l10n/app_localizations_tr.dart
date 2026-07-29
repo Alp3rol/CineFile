@@ -1096,6 +1096,882 @@ class AppLocalizationsTr extends AppLocalizations {
   String get recordDelete => 'Kaydı Sil';
 
   @override
+  String get insightsInsufficientData => 'Yetersiz Veri';
+
+  @override
+  String get insightsSummaryTotalWatches => 'Toplam İzleme';
+
+  @override
+  String get insightsSummaryUniqueTitles => 'Tekil İçerik';
+
+  @override
+  String get insightsSummaryTotalTime => 'Toplam Süre';
+
+  @override
+  String get insightsSummaryAvgRating => 'Ort. Puan';
+
+  @override
+  String get insightsGenreChartTitle => 'En Popüler Türler (Tür Dağılımı)';
+
+  @override
+  String get insightsGenreOther => 'Diğer';
+
+  @override
+  String get insightsRatingChartTitle => 'Kişisel Puan Dağılımı';
+
+  @override
+  String get insightsCriticProfile => 'Eleştirmen Profilin';
+
+  @override
+  String get insightsTopDirectors => 'En Çok İzlenen Yönetmenler';
+
+  @override
+  String get insightsTopActors => 'En Çok İzlenen Oyuncular';
+
+  @override
+  String get insightsNoRecords => 'Kayıt bulunamadı.';
+
+  @override
+  String get insightsTimeOfDayTitle => 'Günün Hangi Saatlerinde İzliyorsun?';
+
+  @override
+  String get insightsTimeMorning => 'Sabah';
+
+  @override
+  String get insightsTimeNoon => 'Öğle';
+
+  @override
+  String get insightsTimeEvening => 'Akşam';
+
+  @override
+  String get insightsTimeNight => 'Gece';
+
+  @override
+  String get insightsSeasonWinter => 'Kış';
+
+  @override
+  String get insightsSeasonSpring => 'İlkbahar';
+
+  @override
+  String get insightsSeasonSummer => 'Yaz';
+
+  @override
+  String get insightsSeasonAutumn => 'Sonbahar';
+
+  @override
+  String insightsMonthlyChartTitle(int year) {
+    return '$year Aylık İzleme Grafiği';
+  }
+
+  @override
+  String insightsWatchesCount(int count) {
+    return '$count İzleme';
+  }
+
+  @override
+  String insightsGoldenDay(String day) {
+    return 'Altın Gün: $day 🏆';
+  }
+
+  @override
+  String get heatmapTitle => 'Yıllık İzleme Sıklığı';
+
+  @override
+  String get heatmapFilterAll => 'Tümü';
+
+  @override
+  String get heatmapFilterMovies => 'Filmler';
+
+  @override
+  String get heatmapFilterShows => 'Diziler';
+
+  @override
+  String get heatmapLegendLess => 'Az';
+
+  @override
+  String get heatmapLegendMore => 'Çok';
+
+  @override
+  String get heatmapLegendMovie => 'Film';
+
+  @override
+  String get heatmapLegendShow => 'Dizi';
+
+  @override
+  String get heatmapLegendBoth => 'İkisi';
+
+  @override
+  String get heatmapActiveDays => 'Aktif Gün';
+
+  @override
+  String get heatmapCurrentStreak => 'Mevcut Seri';
+
+  @override
+  String get heatmapPeakHour => 'Yoğun Saat';
+
+  @override
+  String get heatmapNoRecordOnDay => 'tarihinde izleme kaydı yok.';
+
+  @override
+  String get weeklyGoalSetTitle => 'Haftalık Hedefi Ayarla';
+
+  @override
+  String get weeklyGoalQuestion => 'Haftada kaç film/dizi izlemek istersiniz?';
+
+  @override
+  String get weeklyGoalThisWeekPrefix => 'Bu hafta ';
+
+  @override
+  String get weeklyGoalReached =>
+      'Tebrikler, bu haftaki hedefinize ulaştınız! 🎉';
+
+  @override
+  String weeklyGoalRemaining(int count) {
+    return 'Hedefe ulaşmak için $count film daha izlemelisiniz.';
+  }
+
+  @override
+  String get achievementsTitle => 'Rozet & Başarım Koleksiyonu';
+
+  @override
+  String get achievementsNeedRecords =>
+      'Rozetlerin yüklenmesi için günlüğünüze en az 1 izleme kaydı eklemelisiniz.';
+
+  @override
+  String get achievementsCurrentRank => 'MEVCUT UNVAN';
+
+  @override
+  String get achievementsProgress => 'Koleksiyon İlerlemesi';
+
+  @override
+  String get achievementsUnlocked => 'Kazanılanlar';
+
+  @override
+  String get achievementsNoneForFilter =>
+      'Seçili filtreye uygun rozet bulunamadı.';
+
+  @override
+  String achievementsAllCount(int count) {
+    return 'Tümü ($count)';
+  }
+
+  @override
+  String get achievementsRankNoviceSubtitle =>
+      'Sinema yolculuğuna yeni başladın';
+
+  @override
+  String get achievementsRankTicketBuddy => 'Sinema Bilet Ortağı 🎬';
+
+  @override
+  String get achievementsRankTicketBuddySubtitle => 'Düzenli izleyici';
+
+  @override
+  String get achievementsRankConnoisseurSubtitle => 'Sinematik hafızası yüksek';
+
+  @override
+  String get achievementsRankGuruSubtitle => 'Gerçek bir kültür abidesi';
+
+  @override
+  String get badgeMaxLevel => 'Maksimum Seviye! 👑';
+
+  @override
+  String get badgeNextLevelProgress => 'Sonraki Seviye İlerlemesi';
+
+  @override
+  String get badgeUnlockProgress => 'Kilit İlerlemesi';
+
+  @override
+  String get badgeShare => 'Başarımı Paylaş';
+
+  @override
+  String get badgeCategoryMilestone => 'Hacim & Maraton';
+
+  @override
+  String get badgeCategoryTime => 'Zaman & Atmosfer';
+
+  @override
+  String get badgeCategoryDirectors => 'Yönetmenler & Auteurs';
+
+  @override
+  String get badgeCategoryGenres => 'Türler & Temalar';
+
+  @override
+  String get badgeCategoryCritic => 'Eleştirmen & Günlük';
+
+  @override
+  String get badgeCategorySeries => 'Dizi & Sezon';
+
+  @override
+  String get badgeFirstWatchTitle => 'İlk Adımlar';
+
+  @override
+  String get badgeFirstWatchT1 => 'İlk Adım';
+
+  @override
+  String get badgeFirstWatchT2 => 'İzleme Tutkusu';
+
+  @override
+  String get badgeFirstWatchT3 => 'Sıkı Takipçi';
+
+  @override
+  String get badgeSinefilTitle => 'Sinefil Serisi';
+
+  @override
+  String get badgeSinefilT1 => 'Sinefil';
+
+  @override
+  String get badgeSinefilT2 => 'Kültür Mantarı';
+
+  @override
+  String get badgeSinefilT3 => 'Sinema Efsanesi';
+
+  @override
+  String get badgeSinefilT4 => 'Sinema Gurusu';
+
+  @override
+  String get badgeStreakTitle => 'Seri İzleyici';
+
+  @override
+  String get badgeStreakT1 => 'Kısa Maraton';
+
+  @override
+  String get badgeStreakT2 => 'Seri İzleyici';
+
+  @override
+  String get badgeStreakT3 => 'Ateşli İzleyici';
+
+  @override
+  String get badgeStreakT4 => 'Durdurulamaz Maratoncu';
+
+  @override
+  String get badgeNightOwlTitle => 'Gece Kuşu Serisi';
+
+  @override
+  String get badgeNightOwlT1 => 'Gece Kuşu';
+
+  @override
+  String get badgeNightOwlT2 => 'Gece Bekçisi';
+
+  @override
+  String get badgeNightOwlT3 => 'Karanlıklar Prensi';
+
+  @override
+  String get badgeEarlyBirdTitle => 'Erken Kuş Serisi';
+
+  @override
+  String get badgeEarlyBirdT1 => 'Gün Doğumu İzleyicisi';
+
+  @override
+  String get badgeEarlyBirdT2 => 'Erken Kuş';
+
+  @override
+  String get badgeEarlyBirdT3 => 'Şafak Bekçisi';
+
+  @override
+  String get badgeSundayTitle => 'Pazar Sineması';
+
+  @override
+  String get badgeSundayT1 => 'Pazar Keyfi';
+
+  @override
+  String get badgeSundayT2 => 'Pazar Sineması';
+
+  @override
+  String get badgeSundayT3 => 'Pazar Üstadı';
+
+  @override
+  String get badgeWeekendTitle => 'Hafta Sonu Maratonu';
+
+  @override
+  String get badgeWeekendT1 => 'Hafta Sonu Başlangıcı';
+
+  @override
+  String get badgeWeekendT2 => 'Hafta Sonu Maratoncusu';
+
+  @override
+  String get badgeWeekendT3 => 'Hafta Sonu Canavarı';
+
+  @override
+  String get badgeWinterTitle => 'Kışlık Battaniye & Film';
+
+  @override
+  String get badgeWinterT1 => 'Mevsimlik İzleyici';
+
+  @override
+  String get badgeWinterT2 => 'Kışlık Battaniye & Film';
+
+  @override
+  String get badgeWinterT3 => 'Dört Mevsim Sinefil';
+
+  @override
+  String get badgeTimeTravelerTitle => 'Zaman Gezgini';
+
+  @override
+  String get badgeTimeTravelerT1 => 'Nostalji Meraklısı';
+
+  @override
+  String get badgeTimeTravelerT2 => 'Zaman Gezgini';
+
+  @override
+  String get badgeTimeTravelerT3 => 'Klasikler Arşivcisi';
+
+  @override
+  String get badgeNolanTitle => 'Nolanist Serisi';
+
+  @override
+  String get badgeNolanT1 => 'Nolan Meraklısı';
+
+  @override
+  String get badgeNolanT2 => 'Zaman Büken Nolanist';
+
+  @override
+  String get badgeNolanT3 => 'Rüya İçinde Rüya Mimarı';
+
+  @override
+  String get badgeTarantinoTitle => 'Tarantino Sever';
+
+  @override
+  String get badgeTarantinoT1 => 'Ucuz Roman Sever';
+
+  @override
+  String get badgeTarantinoT2 => 'Kanlı İntikam Ustası';
+
+  @override
+  String get badgeTarantinoT3 => 'Sinematik Auteur';
+
+  @override
+  String get badgeSpielbergTitle => 'Spielberg Hayranı';
+
+  @override
+  String get badgeSpielbergT1 => 'Macera Çırağı';
+
+  @override
+  String get badgeSpielbergT2 => 'Spielberg Hayranı';
+
+  @override
+  String get badgeSpielbergT3 => 'Blockbuster Efsanesi';
+
+  @override
+  String get badgeScorseseTitle => 'Scorsese Müptelası';
+
+  @override
+  String get badgeScorseseT1 => 'Mafya & Suç Sever';
+
+  @override
+  String get badgeScorseseT2 => 'Scorsese Müptelası';
+
+  @override
+  String get badgeScorseseT3 => 'Sinema Sanatçısı';
+
+  @override
+  String get badgeKubrickTitle => 'Kubrick Ustalığı';
+
+  @override
+  String get badgeKubrickT1 => 'Kubrick Çırağı';
+
+  @override
+  String get badgeKubrickT2 => 'Kubrick Ustalığı';
+
+  @override
+  String get badgeKubrickT3 => 'Görsel Vizyoner';
+
+  @override
+  String get badgeWesternTitle => 'Vahşi Batı Serisi';
+
+  @override
+  String get badgeWesternT1 => 'Vahşi Batı Kaşifi';
+
+  @override
+  String get badgeWesternT2 => 'Kovboy & Şerif';
+
+  @override
+  String get badgeWesternT3 => 'İyi, Kötü ve Çirkin Efsanesi';
+
+  @override
+  String get badgeScifiTitle => 'Sci-Fi Kaşifi';
+
+  @override
+  String get badgeScifiT1 => 'Uzay Yolcusu';
+
+  @override
+  String get badgeScifiT2 => 'Galaksi Kaşifi';
+
+  @override
+  String get badgeScifiT3 => 'Evrenin Hakimi';
+
+  @override
+  String get badgeHorrorTitle => 'Korku & Gerilim';
+
+  @override
+  String get badgeHorrorT1 => 'Korkusuz İzleyici';
+
+  @override
+  String get badgeHorrorT2 => 'Gerilim Üstadı';
+
+  @override
+  String get badgeHorrorT3 => 'Kabusların Efendisi';
+
+  @override
+  String get badgeDramaTitle => 'Drama Tutkunu';
+
+  @override
+  String get badgeDramaT1 => 'Duygusal İzleyici';
+
+  @override
+  String get badgeDramaT2 => 'Drama Tutkunu';
+
+  @override
+  String get badgeDramaT3 => 'Duygu Üstadı';
+
+  @override
+  String get badgeCrimeTitle => 'Suç & Gizem Ajanı';
+
+  @override
+  String get badgeCrimeT1 => 'Amatör Dedektif';
+
+  @override
+  String get badgeCrimeT2 => 'Suç & Gizem Ajanı';
+
+  @override
+  String get badgeCrimeT3 => 'Sherlock Seviyesi';
+
+  @override
+  String get badgeAnimationTitle => 'Animasyon & Çizgi Düşler';
+
+  @override
+  String get badgeAnimationT1 => 'Çizgi Sever';
+
+  @override
+  String get badgeAnimationT2 => 'Hayal Perdesi';
+
+  @override
+  String get badgeAnimationT3 => 'Anime & Animasyon Üstadı';
+
+  @override
+  String get badgeTurkishTitle => 'Yerli Sinema';
+
+  @override
+  String get badgeTurkishT1 => 'Yerli Sinema Dostu';
+
+  @override
+  String get badgeTurkishT2 => 'Yeşilçam Sevdalısı';
+
+  @override
+  String get badgeTurkishT3 => 'Yerli Sinema Muhafızı';
+
+  @override
+  String get badgeCriticTitle => 'Eleştirmen Serisi';
+
+  @override
+  String get badgeCriticT1 => 'Not Tutucu';
+
+  @override
+  String get badgeCriticT2 => 'Ciddi Eleştirmen';
+
+  @override
+  String get badgeCriticT3 => 'Köşe Yazarı';
+
+  @override
+  String get badgeGenerousTitle => 'Cömert Puanlayıcı';
+
+  @override
+  String get badgeGenerousT1 => 'Tam Puan Sever';
+
+  @override
+  String get badgeGenerousT2 => 'Cömert Puanlayıcı';
+
+  @override
+  String get badgeGenerousT3 => 'Başyapıt Avcısı';
+
+  @override
+  String get badgeStrictTitle => 'Zor Beğenen';
+
+  @override
+  String get badgeStrictT1 => 'Sert Eleştirmen';
+
+  @override
+  String get badgeStrictT2 => 'Zor Beğenen';
+
+  @override
+  String get badgeStrictT3 => 'Affetmeyen Jüri';
+
+  @override
+  String get badgeRewatchTitle => 'Sadık İzleyici';
+
+  @override
+  String get badgeRewatchT1 => 'Tekrar İzleyen';
+
+  @override
+  String get badgeRewatchT2 => 'Sadık İzleyici';
+
+  @override
+  String get badgeRewatchT3 => 'Fanatik Tekrarcı';
+
+  @override
+  String get badgeTagMasterTitle => 'Etiket Ustası';
+
+  @override
+  String get badgeTagMasterT1 => 'Etiket Çırağı';
+
+  @override
+  String get badgeTagMasterT2 => 'Kategori Ustası';
+
+  @override
+  String get badgeTagMasterT3 => 'Etiket Koleksiyoneri';
+
+  @override
+  String get badgeTvTitle => 'Dizi Kolik Serisi';
+
+  @override
+  String get badgeTvT1 => 'Dizi Meraklısı';
+
+  @override
+  String get badgeTvT2 => 'Dizi Kolik';
+
+  @override
+  String get badgeTvT3 => 'Dizi Müptelası';
+
+  @override
+  String get badgeSeasonTitle => 'Sezon Canavarı';
+
+  @override
+  String get badgeSeasonT1 => 'Sezon Bitişi';
+
+  @override
+  String get badgeSeasonT2 => 'Sezon Canavarı';
+
+  @override
+  String get badgeSeasonT3 => 'Maraton Ustası';
+
+  @override
+  String badgeDescLogEntries(int n) {
+    return 'Günlüğe $n izleme kaydı ekle.';
+  }
+
+  @override
+  String badgeDescWatchAtLeast(int n) {
+    return 'En az $n film veya dizi izle.';
+  }
+
+  @override
+  String badgeDescStreak(int n) {
+    return 'Üst üste $n gün boyunca kayıt gir.';
+  }
+
+  @override
+  String badgeDescNightWatch(int n) {
+    return 'Gece 00:00 - 05:00 arasında $n izleme yap.';
+  }
+
+  @override
+  String badgeDescEarlyWatch(int n) {
+    return 'Sabah 06:00 - 09:00 arasında $n izleme yap.';
+  }
+
+  @override
+  String badgeDescSunday(int n) {
+    return 'Pazar günleri $n film/dizi izle.';
+  }
+
+  @override
+  String badgeDescSingleDay(int n) {
+    return 'Tek günde en az $n film/dizi izle.';
+  }
+
+  @override
+  String badgeDescWinter(int n) {
+    return 'Kış aylarında $n yapım izle.';
+  }
+
+  @override
+  String badgeDescRetro(int n) {
+    return '1980 öncesi çekilmiş $n film izle.';
+  }
+
+  @override
+  String badgeDescDirector(int n, String director) {
+    return '$n $director filmi izle.';
+  }
+
+  @override
+  String badgeDescWestern(int n) {
+    return '$n Western filmi izle.';
+  }
+
+  @override
+  String badgeDescScifi(int n) {
+    return '$n Bilim Kurgu yapımı izle.';
+  }
+
+  @override
+  String badgeDescHorror(int n) {
+    return '$n Korku/Gerilim yapımı izle.';
+  }
+
+  @override
+  String badgeDescDrama(int n) {
+    return '$n Drama yapımı izle.';
+  }
+
+  @override
+  String badgeDescCrime(int n) {
+    return '$n Suç veya Gizem yapımı izle.';
+  }
+
+  @override
+  String badgeDescAnimation(int n) {
+    return '$n Animasyon yapımı izle.';
+  }
+
+  @override
+  String badgeDescTurkish(int n) {
+    return '$n Türk yapımı izle.';
+  }
+
+  @override
+  String badgeDescNotes(int n) {
+    return '$n filme kişisel not yaz.';
+  }
+
+  @override
+  String badgeDescPerfectScore(int n) {
+    return '$n yapıma 10/10 tam puan ver.';
+  }
+
+  @override
+  String badgeDescLowScore(int n) {
+    return '$n yapıma 5.0 altı puan ver.';
+  }
+
+  @override
+  String badgeDescRewatchNth(int n) {
+    return 'Aynı içeriği $n. kez izle.';
+  }
+
+  @override
+  String badgeDescRewatchTimes(int n) {
+    return 'Aynı içeriği $n kez tekrar izle.';
+  }
+
+  @override
+  String badgeDescRewatchRecords(int n) {
+    return '$n tekrar izleme kaydı yap.';
+  }
+
+  @override
+  String badgeDescTags(int n) {
+    return '$n farklı kişisel etiket kullan.';
+  }
+
+  @override
+  String badgeDescEpisodes(int n) {
+    return '$n dizi bölümü izle.';
+  }
+
+  @override
+  String badgeDescSeasons(int n) {
+    return '$n dizinin tüm sezonunu tamamla.';
+  }
+
+  @override
+  String get tierLocked => 'Kilitli';
+
+  @override
+  String get tierBronze => 'Bronz';
+
+  @override
+  String get tierSilver => 'Gümüş';
+
+  @override
+  String get tierGold => 'Altın';
+
+  @override
+  String get tierPlatinum => 'Platin';
+
+  @override
+  String badgeTierLevel(String symbol, String tier, int current, int max) {
+    return '$symbol $tier (Seviye $current/$max)';
+  }
+
+  @override
+  String achievementsCategoryCount(String category, int count) {
+    return '$category ($count)';
+  }
+
+  @override
+  String get insightsEmptyBody =>
+      'Grafiklerin ve istatistiklerin oluşturulabilmesi için günlüğünüze en az 1 adet izleme kaydı eklemelisiniz.';
+
+  @override
+  String achievementsShowing(int count) {
+    return '$count Başarım Gösteriliyor';
+  }
+
+  @override
+  String get badgeLockedLabel => '🔒 Kilitli';
+
+  @override
+  String badgeCurrentCount(int count) {
+    return '$count Yapım';
+  }
+
+  @override
+  String badgeNextTier(int remaining, String tier) {
+    return '$remaining yapım daha ➔ \"$tier\" seviyesine yüksel!';
+  }
+
+  @override
+  String badgeCopied(String title) {
+    return '\"$title\" başarımı panoya kopyalandı! Sosyal medyada paylaşabilirsiniz.';
+  }
+
+  @override
+  String heatmapYearTotal(int year, int count) {
+    return '$year içinde $count İzleme';
+  }
+
+  @override
+  String heatmapEpisodesCount(int count) {
+    return '$count Dizi Bölümü';
+  }
+
+  @override
+  String get insightsBadgesTitle => '🏆 Başarılar & Rozetler';
+
+  @override
+  String insightsBadgesEarned(int unlocked, int total) {
+    return '$unlocked / $total Kazanıldı';
+  }
+
+  @override
+  String get insightsTopTagsTitle => '🏷️ En Sık Kullanılan Etiketler';
+
+  @override
+  String insightsDistinctTags(int count) {
+    return '$count Farklı Etiket';
+  }
+
+  @override
+  String insightsWatchesWithPercent(int count, String percent) {
+    return '$count İzleme ($percent%)';
+  }
+
+  @override
+  String get insightsSeasonalTitle => '📅 Mevsimsel Dağılım';
+
+  @override
+  String get insightsSeasonWinterLong => '❄️ Kış (Ara-Oca-Şub)';
+
+  @override
+  String get insightsSeasonSpringLong => '🌱 İlkbahar (Mar-Nis-May)';
+
+  @override
+  String get insightsSeasonSummerLong => '☀️ Yaz (Haz-Tem-Ağu)';
+
+  @override
+  String get insightsSeasonAutumnLong => '🍂 Sonbahar (Eyl-Eki-Kas)';
+
+  @override
+  String get weeklyGoalTitle => '🎯 Haftalık İzleme Hedefi';
+
+  @override
+  String weeklyGoalProgress(int count, int goal) {
+    return 'Bu hafta $count film/dizi izlediniz. (Hedef: $goal)';
+  }
+
+  @override
+  String weeklyGoalItemsCount(int count) {
+    return '$count İçerik';
+  }
+
+  @override
+  String get timeVisualizerTitle => '🍿 Bu Sürede Neler Yapabilirdin?';
+
+  @override
+  String get timeVisualizerFooter =>
+      'Ama film/dizi izlemek de harika bir tercih! 🎬';
+
+  @override
+  String timeCompareLotr(String n) {
+    return 'Yüzüklerin Efendisi (Uzatılmış Versiyon) Üçlemesi\'ni aralıksız $n kez baştan sona izleyebilirdin!';
+  }
+
+  @override
+  String timeCompareFlight(String n) {
+    return 'İstanbul - Londra arası uçakla tam $n kez gidiş-dönüş seyahat edebilirdin!';
+  }
+
+  @override
+  String timeCompareBreakingBad(String n) {
+    return 'Kült dizi Breaking Bad\'i baştan sona tam $n kez maraton yapabilirdin!';
+  }
+
+  @override
+  String timeCompareWalk(String n) {
+    return 'Hiç durmadan yürüyerek İstanbul\'dan Ankara\'ya tam $n kez gidip gelebilirdin!';
+  }
+
+  @override
+  String timeCompareBooks(String n) {
+    return 'Ortalama 8 saatlik okuma süresiyle tam $n adet kitap bitirebilirdin!';
+  }
+
+  @override
+  String timeCompareFood(String n) {
+    return 'Arka arkaya hiç durmadan tam $n lahmacun yiyebilirdin! (Afiyet olsun)';
+  }
+
+  @override
+  String timeCompareIss(String n) {
+    return 'Uluslararası Uzay İstasyonu (ISS) Dünya\'nın etrafında tam $n tur atardı!';
+  }
+
+  @override
+  String timeCompareLight(String n) {
+    return 'Bu sürede ışık uzay boşluğunda tam $n milyon kilometre yol alırdı!';
+  }
+
+  @override
+  String timeCompareMinecraft(String n) {
+    return 'Minecraft\'ta hiç durmadan tam $n blok yerleştirebilirdin!';
+  }
+
+  @override
+  String timeCompareCoffee(String n) {
+    return 'Arkadaşlarınla sohbet edip tam $n fincan kahve içebilirdin!';
+  }
+
+  @override
+  String timeCompareMusic(String n) {
+    return 'Spotify\'da favori çalma listenden tam $n şarkı dinleyebilirdin!';
+  }
+
+  @override
+  String timeCompareMonopoly(String n) {
+    return 'Hiç bitmeyecekmiş gibi hissettiren tam $n Monopoly partisi yapabilirdin!';
+  }
+
+  @override
+  String timeCompareSleep(String n) {
+    return 'Deliksiz ve huzurlu bir şekilde tam $n gece uykusu çekebilirdin!';
+  }
+
+  @override
+  String timeCompareHair(String n) {
+    return 'Bu sürede saç tellerin toplamda tam $n milimetre uzardı!';
+  }
+
+  @override
+  String timeCompareCells(String n) {
+    return 'Vücudun sen ekran karşısındayken tam $n milyon yeni hücre üretti!';
+  }
+
+  @override
+  String timeCompareOrbit(String n) {
+    return 'Dünya güneşin etrafındaki yörüngesinde tam $n bin kilometre yol katetti!';
+  }
+
+  @override
   String recordEpisodesCount(int count) {
     return '$count Bölüm';
   }

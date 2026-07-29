@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
 import 'contribution_heatmap_utils.dart';
@@ -68,11 +69,11 @@ class ContributionHeatmapBadges extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        _badge(Icons.event_available_rounded, 'Aktif Gün', '$activeDays', HeatmapColors.neonCyan),
+        _badge(Icons.event_available_rounded, AppLocalizations.of(context).heatmapActiveDays, '$activeDays', HeatmapColors.neonCyan),
         const SizedBox(width: 8),
-        _badge(Icons.local_fire_department_rounded, 'Mevcut Seri', '${currentStreak}g', Colors.orange),
+        _badge(Icons.local_fire_department_rounded, AppLocalizations.of(context).heatmapCurrentStreak, '${currentStreak}g', Colors.orange),
         const SizedBox(width: 8),
-        _badge(Icons.schedule_rounded, 'Yoğun Saat', peakTimeOfDay, HeatmapColors.neonPink),
+        _badge(Icons.schedule_rounded, AppLocalizations.of(context).heatmapPeakHour, peakTimeOfDay, HeatmapColors.neonPink),
       ],
     );
   }

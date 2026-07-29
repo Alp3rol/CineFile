@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../domain/insight_buckets.dart';
+import '../../../../core/l10n/date_text.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../insights_provider.dart';
@@ -8,7 +11,8 @@ class SeasonalTrendsCard extends StatelessWidget {
   final InsightsData data;
   const SeasonalTrendsCard({super.key, required this.data});
 
-  Widget _buildSeasonalBar(String label, int count, int total, Color color) {
+  Widget _buildSeasonalBar(BuildContext context, Season season, int count, int total, Color color) {
+    final label = season.longLabel(AppLocalizations.of(context));
     final percentage = total > 0 ? (count / total) * 100 : 0.0;
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
@@ -22,7 +26,7 @@ class SeasonalTrendsCard extends StatelessWidget {
                 style: GoogleFonts.inter(fontSize: 11.5, color: Colors.white, fontWeight: FontWeight.w600),
               ),
               Text(
-                '$count İzleme (${percentage.toStringAsFixed(0)}%)',
+                AppLocalizations.of(context).insightsWatchesWithPercent(count, percentage.toStringAsFixed(0)),
                 style: GoogleFonts.outfit(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold),
               ),
             ],
@@ -47,8 +51,7 @@ class SeasonalTrendsCard extends StatelessWidget {
     final values = data.seasonalCounts;
     final total = values.values.fold<int>(0, (sum, v) => sum + v);
 
-    final weekdays = ['', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
-    final goldenDayStr = weekdays[data.goldenWeekday];
+    final goldenDayStr = weekdayName(context, data.goldenWeekday);
 
     return GlassContainer(
       borderRadius: 20,
@@ -61,7 +64,7 @@ class SeasonalTrendsCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '📅 Mevsimsel Dağılım',
+                AppLocalizations.of(context).insightsSeasonalTitle,
                 style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
               ),
               Container(
@@ -71,17 +74,17 @@ class SeasonalTrendsCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  'Altın Gün: $goldenDayStr 🏆',
+                  AppLocalizations.of(context).insightsGoldenDay(goldenDayStr),
                   style: GoogleFonts.outfit(fontSize: 9.5, color: AppTheme.accentColor, fontWeight: FontWeight.bold),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 18),
-          _buildSeasonalBar('❄️ Kış (Ara-Oca-Şub)', values['Kış'] ?? 0, total, Colors.lightBlueAccent),
-          _buildSeasonalBar('🌱 İlkbahar (Mar-Nis-May)', values['İlkbahar'] ?? 0, total, Colors.lightGreenAccent),
-          _buildSeasonalBar('☀️ Yaz (Haz-Tem-Ağu)', values['Yaz'] ?? 0, total, Colors.amberAccent),
-          _buildSeasonalBar('🍂 Sonbahar (Eyl-Eki-Kas)', values['Sonbahar'] ?? 0, total, Colors.deepOrangeAccent),
+          _buildSeasonalBar(context, Season.winter, values[Season.winter] ?? 0, total, Colors.lightBlueAccent),
+          _buildSeasonalBar(context, Season.spring, values[Season.spring] ?? 0, total, Colors.lightGreenAccent),
+          _buildSeasonalBar(context, Season.summer, values[Season.summer] ?? 0, total, Colors.amberAccent),
+          _buildSeasonalBar(context, Season.autumn, values[Season.autumn] ?? 0, total, Colors.deepOrangeAccent),
         ],
       ),
     );

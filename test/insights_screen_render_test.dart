@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'support/localized_app.dart';
 import 'package:cinefile/core/database/app_database.dart';
 import 'package:cinefile/core/database/database_provider.dart';
 import 'package:cinefile/features/insights/presentation/insights_screen.dart';
@@ -50,7 +51,7 @@ void main() {
           allWatchRecordsProvider.overrideWith((ref) => Stream.value(records)),
           allMovieSettingsProvider.overrideWith((ref) => Stream.value(const {})),
         ],
-        child: const MaterialApp(home: Scaffold(body: InsightsScreen())),
+        child: const LocalizedTestApp(locale: Locale('tr'), home: Scaffold(body: InsightsScreen())),
       ),
     );
     await tester.pumpAndSettle();
@@ -67,7 +68,7 @@ void main() {
           allWatchRecordsProvider.overrideWith((ref) => Stream.value(const [])),
           allMovieSettingsProvider.overrideWith((ref) => Stream.value(const {})),
         ],
-        child: const MaterialApp(home: Scaffold(body: InsightsScreen())),
+        child: const LocalizedTestApp(locale: Locale('tr'), home: Scaffold(body: InsightsScreen())),
       ),
     );
     await tester.pumpAndSettle();
