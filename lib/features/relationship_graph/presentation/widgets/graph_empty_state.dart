@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../../core/theme/app_theme.dart';
 
 /// Shown when the user has fewer than two titles that share a person — there's
@@ -19,15 +20,13 @@ class GraphEmptyState extends StatelessWidget {
                 size: 64, color: AppTheme.accentColor.withValues(alpha: 0.7)),
             const SizedBox(height: 20),
             Text(
-              'İlişki Ağı henüz boş',
+              AppLocalizations.of(context).graphEmptyTitle,
               style: Theme.of(context).textTheme.titleLarge,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 10),
             Text(
-              'Ortak oyuncu veya yönetmeni olan en az iki yapımı günlüğüne '
-              'ekleyince, aralarındaki gizli bağlantılar burada otomatik olarak '
-              'belirmeye başlar.',
+              AppLocalizations.of(context).graphEmptyBody,
               style: Theme.of(context).textTheme.bodyMedium,
               textAlign: TextAlign.center,
             ),

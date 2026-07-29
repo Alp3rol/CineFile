@@ -4,6 +4,7 @@
 // a watch date from years ago was "nearly impossible").
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'support/localized_app.dart';
 import 'package:cinefile/core/widgets/premium_date_picker.dart';
 
 void main() {
@@ -11,7 +12,8 @@ void main() {
     DateTime? result;
 
     await tester.pumpWidget(
-      MaterialApp(
+      LocalizedTestApp(
+        locale: const Locale('tr'),
         home: Builder(
           builder: (context) => Scaffold(
             body: ElevatedButton(

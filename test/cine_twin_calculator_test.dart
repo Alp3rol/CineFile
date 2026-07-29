@@ -1,5 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:cinefile/l10n/app_localizations.dart';
+import 'package:cinefile/l10n/app_localizations_en.dart';
 import 'package:cinefile/features/relationship_graph/domain/cine_twin_calculator.dart';
+
+/// Recommendation reasons are localized, so the calculator takes an
+/// AppLocalizations. These tests assert scores, not copy.
+final AppLocalizations _l10n = AppLocalizationsEn();
 
 void main() {
   group('CineTwinCalculator Tests', () {
@@ -11,6 +17,7 @@ void main() {
         userBLogs: [],
         userAName: 'Sen',
         userBName: '@Şüko35',
+        l10n: _l10n,
       );
 
       expect(result.matchPercentage, equals(0));
@@ -32,6 +39,7 @@ void main() {
         userBLogs: logsA,
         userAName: 'Ahmet',
         userBName: 'Mehmet',
+        l10n: _l10n,
       );
 
       expect(result.matchPercentage, greaterThanOrEqualTo(85));
@@ -56,6 +64,7 @@ void main() {
         userBLogs: logsB,
         userAName: 'UserA',
         userBName: 'UserB',
+        l10n: _l10n,
       );
 
       expect(result.ratingDisputes.length, equals(1));
@@ -77,6 +86,7 @@ void main() {
         userBLogs: logsB,
         userAName: 'UserA',
         userBName: 'UserB',
+        l10n: _l10n,
       );
 
       expect(result.recommendations.length, equals(1));

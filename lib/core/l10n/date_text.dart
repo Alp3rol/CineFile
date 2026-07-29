@@ -23,6 +23,10 @@ String formatLongDate(BuildContext context, DateTime date) =>
 String formatShortDate(BuildContext context, DateTime date) =>
     DateFormat.yMd(localeTagOf(context)).format(date);
 
+/// A month and year, in title case — "Mart 2026" / "March 2026".
+String formatMonthYear(BuildContext context, DateTime date) =>
+    DateFormat.yMMMM(localeTagOf(context)).format(date);
+
 /// A month heading — "MART 2026" / "MARCH 2026".
 String formatMonthHeading(BuildContext context, DateTime date) {
   final locale = Localizations.localeOf(context);

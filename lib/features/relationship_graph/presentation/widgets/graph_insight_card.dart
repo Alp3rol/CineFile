@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../domain/map_graph.dart';
@@ -46,7 +47,7 @@ class _GraphInsightCardState extends State<GraphInsightCard> {
                 const Icon(Icons.insights_rounded,
                     size: 16, color: AppTheme.accentColor),
                 const SizedBox(width: 6),
-                Text('İçgörüler',
+                Text(AppLocalizations.of(context).graphInsightsTitle,
                     style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(width: 4),
                 Icon(_expanded ? Icons.expand_less_rounded : Icons.expand_more_rounded,
@@ -58,19 +59,22 @@ class _GraphInsightCardState extends State<GraphInsightCard> {
             const SizedBox(height: 8),
             _row(Icons.hub_rounded,
                 '${i.clusterCount} evren'
-                '${i.biggestCluster != null && i.biggestCluster!.label.isNotEmpty ? ' · en büyük: ${i.biggestCluster!.label}' : ''}',
+                '${i.biggestCluster != null && i.biggestCluster!.label.isNotEmpty ? AppLocalizations.of(context).graphInsightBiggestCluster(i.biggestCluster!.label) : ''}',
                 null),
             if (i.mostCentralPerson != null)
               _row(
                 Icons.star_rounded,
-                'En merkezi: ${i.mostCentralPerson!.name} (${i.centralPersonTitleCount} yapım)',
+                AppLocalizations.of(context).graphInsightMostCentral(i.mostCentralPerson!.name, i.centralPersonTitleCount),
                 widget.onOpenCentralPerson,
               ),
             if (i.strongestPair != null)
               _row(
                 Icons.link_rounded,
-                'En bağlı: ${widget.titleLabel(i.strongestPair!.aId)} ↔ '
-                '${widget.titleLabel(i.strongestPair!.bId)} (${i.strongestPair!.weight})',
+                AppLocalizations.of(context).graphInsightStrongestPair(
+                  widget.titleLabel(i.strongestPair!.aId),
+                  widget.titleLabel(i.strongestPair!.bId),
+                  i.strongestPair!.weight,
+                ),
                 widget.onFocusStrongestPair,
               ),
           ],

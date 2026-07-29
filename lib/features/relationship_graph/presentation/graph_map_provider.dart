@@ -1,4 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/l10n/l10n_lookup.dart';
+import '../../settings/presentation/settings_provider.dart';
 import '../domain/graph_overrides.dart';
 import '../domain/map_graph.dart';
 import '../domain/map_graph_builder.dart';
@@ -7,11 +9,14 @@ import 'relationship_graph_provider.dart';
 
 /// The clustered map ("Sinema Evrenim"). Curates cheaply over the cached raw
 /// credits, so depth/override changes re-cluster instantly without refetching.
+// Cluster labels are user-facing text built inside the pure domain builder,
+// so the language is resolved here and handed down.
 final graphMapProvider = Provider<AsyncValue<MapGraph>>((ref) {
   final rawAsync = ref.watch(rawTitleCreditsProvider);
   final overrides =
       ref.watch(graphOverridesProvider).value ?? GraphOverrides.empty;
   final depth = ref.watch(graphCastDepthProvider);
   return rawAsync
-      .whenData((raw) => buildMapGraph(raw.titles, raw.credits, overrides, depth));
+      .whenData((raw) => buildMapGraph(raw.titles, raw.credits, overrides, depth,
+          lookupL10n(ref.watch(localeProvider))));
 });

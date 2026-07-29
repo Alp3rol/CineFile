@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/network/tmdb_service.dart';
@@ -109,7 +110,7 @@ class _AddPersonSheetState extends ConsumerState<AddPersonSheet> {
         .addPersonToTitle(widget.tmdbId, widget.isTv, credit);
     if (!mounted) return;
     Navigator.of(context).pop();
-    showPremiumToast(context, '$name, "${widget.titleLabel}" yapımına eklendi.');
+    showPremiumToast(context, AppLocalizations.of(context).graphPersonAdded(name, widget.titleLabel));
   }
 
   @override
@@ -135,29 +136,29 @@ class _AddPersonSheetState extends ConsumerState<AddPersonSheet> {
               ),
             ),
             const SizedBox(height: 16),
-            Text('Kişi Ekle',
+            Text(AppLocalizations.of(context).graphAddPerson,
                 style: Theme.of(context).textTheme.titleLarge),
-            Text('"${widget.titleLabel}" yapımına bağlanacak kişiyi ara.',
+            Text(AppLocalizations.of(context).graphAddPersonPrompt(widget.titleLabel),
                 style: Theme.of(context).textTheme.bodyMedium),
             const SizedBox(height: 14),
             TextField(
               controller: _controller,
               autofocus: true,
               onChanged: _onChanged,
-              decoration: const InputDecoration(
-                hintText: 'Oyuncu / yönetmen adı…',
-                prefixIcon: Icon(Icons.search_rounded),
+              decoration: InputDecoration(
+                hintText: AppLocalizations.of(context).graphAddPersonHint,
+                prefixIcon: const Icon(Icons.search_rounded),
               ),
             ),
             const SizedBox(height: 10),
             Row(
               children: [
-                const Text('Rol:',
-                    style: TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+                Text(AppLocalizations.of(context).graphAddPersonRole,
+                    style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
                 const SizedBox(width: 10),
-                _roleChip('Oyuncu', !_asDirector, () => setState(() => _asDirector = false)),
+                _roleChip(AppLocalizations.of(context).graphNodeActor, !_asDirector, () => setState(() => _asDirector = false)),
                 const SizedBox(width: 8),
-                _roleChip('Yönetmen', _asDirector, () => setState(() => _asDirector = true)),
+                _roleChip(AppLocalizations.of(context).graphNodeDirector, _asDirector, () => setState(() => _asDirector = true)),
               ],
             ),
             const SizedBox(height: 12),
@@ -191,7 +192,7 @@ class _AddPersonSheetState extends ConsumerState<AddPersonSheet> {
 
   Widget _resultsList() {
     if (_loading) {
-      return const Padding(
+      return Padding(
         padding: EdgeInsets.symmetric(vertical: 24),
         child: Center(
           child: CircularProgressIndicator(
@@ -201,11 +202,11 @@ class _AddPersonSheetState extends ConsumerState<AddPersonSheet> {
       );
     }
     if (_results.isEmpty) {
-      return const Padding(
+      return Padding(
         padding: EdgeInsets.symmetric(vertical: 24),
         child: Center(
-          child: Text('Aramak için yazmaya başla.',
-              style: TextStyle(color: AppTheme.textSecondary)),
+          child: Text(AppLocalizations.of(context).graphAddPersonSearchPrompt,
+              style: const TextStyle(color: AppTheme.textSecondary)),
         ),
       );
     }

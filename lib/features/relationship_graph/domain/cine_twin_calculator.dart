@@ -1,3 +1,4 @@
+import '../../../l10n/app_localizations.dart';
 import 'dart:math' as math;
 
 /// Single movie/tv watch record input for CineTwin calculation.
@@ -23,17 +24,15 @@ class CineTwinUserRecord {
 
 /// Compatibility status badge based on overall match percentage.
 enum CineTwinBadge {
-  soulmates('Sinematik Ruh İkizi', '🌌', 'Film zevkleriniz ve puanlarınız neredeyse %100 birebir örtüşüyor!'),
-  buddies('Sinema Bilet Ortağı', '🎬', 'Birlikte harika film akşamları yapabileceğiniz yüksek uyum.'),
-  genreMatch('Tür Kardeşi', '🎭', 'Benzer türdeki yapımlardan hoşlanıyorsunuz.'),
-  complements('Karşıt Zevkler', '⚖️', 'Birbirinizi farklı film türleriyle besleyen harika bir denge.'),
-  opposites('Farklı Dünyaların İnsanları', '⚡', 'Zevkleriniz çok farklı veya henüz yeterli ortak veri yok.');
+  soulmates('🌌'),
+  buddies('🎬'),
+  genreMatch('🎭'),
+  complements('⚖️'),
+  opposites('⚡');
 
-  final String title;
   final String emoji;
-  final String description;
 
-  const CineTwinBadge(this.title, this.emoji, this.description);
+  const CineTwinBadge(this.emoji);
 
   factory CineTwinBadge.fromScore(int score) {
     if (score >= 85) return CineTwinBadge.soulmates;
@@ -42,6 +41,24 @@ enum CineTwinBadge {
     if (score >= 25) return CineTwinBadge.complements;
     return CineTwinBadge.opposites;
   }
+}
+
+extension CineTwinBadgeLabels on CineTwinBadge {
+  String title(AppLocalizations l10n) => switch (this) {
+        CineTwinBadge.soulmates => l10n.cineTwinBadgeSoulmatesTitle,
+        CineTwinBadge.buddies => l10n.cineTwinBadgeBuddiesTitle,
+        CineTwinBadge.genreMatch => l10n.cineTwinBadgeGenreMatchTitle,
+        CineTwinBadge.complements => l10n.cineTwinBadgeComplementsTitle,
+        CineTwinBadge.opposites => l10n.cineTwinBadgeOppositesTitle,
+      };
+
+  String description(AppLocalizations l10n) => switch (this) {
+        CineTwinBadge.soulmates => l10n.cineTwinBadgeSoulmatesDescription,
+        CineTwinBadge.buddies => l10n.cineTwinBadgeBuddiesDescription,
+        CineTwinBadge.genreMatch => l10n.cineTwinBadgeGenreMatchDescription,
+        CineTwinBadge.complements => l10n.cineTwinBadgeComplementsDescription,
+        CineTwinBadge.opposites => l10n.cineTwinBadgeOppositesDescription,
+      };
 }
 
 /// Rating disagreement item for shared watch titles.
@@ -106,6 +123,9 @@ class CineTwinCalculator {
     required List<CineTwinUserRecord> userBLogs,
     required String userAName,
     required String userBName,
+    /// Recommendation reasons are sentences, so the calculator needs the
+    /// user's language; the provider resolves it and passes it in.
+    required AppLocalizations l10n,
   }) {
     // If either user has no records, match is 0%
     if (userALogs.isEmpty || userBLogs.isEmpty) {
@@ -204,7 +224,9 @@ class CineTwinCalculator {
           title: recB.title,
           isTv: recB.isTv,
           posterPath: recB.posterPath,
-          reason: '$userBName bu filme ${recB.rating != null ? "${recB.rating!.toStringAsFixed(1)} puan" : "yüksek puan"} verdi',
+          reason: recB.rating != null
+              ? l10n.cineTwinReasonRated(userBName, recB.rating!.toStringAsFixed(1))
+              : l10n.cineTwinReasonRatedHighly(userBName),
           ratingByFriend: recB.rating,
         ));
       }

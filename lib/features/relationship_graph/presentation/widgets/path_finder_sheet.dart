@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../domain/graph_models.dart';
 import '../../domain/graph_path_finder.dart';
@@ -77,7 +78,7 @@ class _PathFinderSheetState extends State<PathFinderSheet> {
               const Icon(Icons.alt_route_rounded, color: AppTheme.accentColor),
               const SizedBox(width: 10),
               Text(
-                'Bağlantı Köprüsü Bul (6 Derece)',
+                AppLocalizations.of(context).pathFinderHeader,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -85,9 +86,9 @@ class _PathFinderSheetState extends State<PathFinderSheet> {
             ],
           ),
           const SizedBox(height: 6),
-          const Text(
-            'Seçeceğin iki yapım veya kişi arasındaki en kısa ortak oyuncu/yönetmen zincirini bulur.',
-            style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+          Text(
+            AppLocalizations.of(context).pathFinderExplain,
+            style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
           ),
           const SizedBox(height: 16),
 
@@ -97,7 +98,7 @@ class _PathFinderSheetState extends State<PathFinderSheet> {
             dropdownColor: AppTheme.surfaceColor,
             style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary),
             decoration: InputDecoration(
-              labelText: '1. Başlangıç (Yapım veya Kişi)',
+              labelText: AppLocalizations.of(context).pathFinderStart,
               labelStyle: const TextStyle(color: AppTheme.textSecondary),
               filled: true,
               fillColor: AppTheme.backgroundColor.withValues(alpha: 0.5),
@@ -126,7 +127,7 @@ class _PathFinderSheetState extends State<PathFinderSheet> {
             dropdownColor: AppTheme.surfaceColor,
             style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary),
             decoration: InputDecoration(
-              labelText: '2. Hedef (Yapım veya Kişi)',
+              labelText: AppLocalizations.of(context).pathFinderTarget,
               labelStyle: const TextStyle(color: AppTheme.textSecondary),
               filled: true,
               fillColor: AppTheme.backgroundColor.withValues(alpha: 0.5),
@@ -169,8 +170,8 @@ class _PathFinderSheetState extends State<PathFinderSheet> {
                 ),
               ),
               icon: const Icon(Icons.search_rounded),
-              label: const Text('Bağlantı Yolunu Bul',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+              label: Text(AppLocalizations.of(context).pathFinderTitle,
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
             ),
           ),
         ],

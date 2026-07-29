@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'support/localized_app.dart';
 import 'package:cinefile/core/database/app_database.dart';
 import 'package:cinefile/core/database/database_provider.dart';
 import 'package:cinefile/features/home/presentation/home_screen.dart';
@@ -64,7 +65,7 @@ void main() {
           // activelyWatchingProvider above.
           allMovieSettingsProvider.overrideWith((ref) => Stream.value(const {})),
         ],
-        child: const MaterialApp(home: HomeScreen()),
+        child: const LocalizedTestApp(locale: Locale('tr'), home: HomeScreen()),
       ),
     );
     await tester.pumpAndSettle();
@@ -105,7 +106,7 @@ void main() {
           // activelyWatchingProvider above.
           allMovieSettingsProvider.overrideWith((ref) => Stream.value(const {})),
         ],
-        child: const MaterialApp(home: HomeScreen()),
+        child: const LocalizedTestApp(locale: Locale('tr'), home: HomeScreen()),
       ),
     );
     await tester.pumpAndSettle();
@@ -141,7 +142,7 @@ void main() {
           // activelyWatchingProvider above.
           allMovieSettingsProvider.overrideWith((ref) => Stream.value(const {})),
         ],
-        child: const MaterialApp(home: HomeScreen()),
+        child: const LocalizedTestApp(locale: Locale('tr'), home: HomeScreen()),
       ),
     );
     await tester.pumpAndSettle();

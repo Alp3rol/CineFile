@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_theme.dart';
@@ -28,7 +29,7 @@ class ActivelyWatchingRow extends ConsumerWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Text(
-            'Aktif İzlediklerin',
+            AppLocalizations.of(context).activelyWatchingTitle,
             style: Theme.of(context).textTheme.titleLarge,
           ),
         ),
@@ -89,7 +90,7 @@ class ActivelyWatchingRow extends ConsumerWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
-                        total != null ? 'Bölüm $next / $total' : 'Bölüm $next',
+                        total != null ? AppLocalizations.of(context).episodeOf(next, total) : AppLocalizations.of(context).episodeSingle(next),
                         style: GoogleFonts.inter(fontSize: 9, color: AppTheme.textSecondary),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,

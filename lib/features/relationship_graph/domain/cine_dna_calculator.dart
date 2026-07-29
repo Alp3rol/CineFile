@@ -1,18 +1,39 @@
 import 'graph_models.dart';
+import '../../../core/constants/tmdb_genres.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// Enum representing the user's cinematic personality / persona.
+///
+/// [title] stays on the enum because it is a fixed English epithet the design
+/// shows verbatim in both languages, like a brand. The subtitle and
+/// description are copy, so they moved to [CineDnaPersonaLabels] — a const
+/// enum cannot localize them.
 enum CineDnaPersona {
-  auteur('The Auteur', 'Yönetmen Odaklı', '🎬', 'Favori yönetmenlerinin tüm filmografisini eksiksiz takip ediyorsun.'),
-  actorHunter('The Actor Hunter', 'Oyuncu Takipçisi', '🎭', 'Sevdiğin oyuncuların izini sürerek yeni yapımlara yelken açıyorsun.'),
-  franchiseExplorer('The Franchise Explorer', 'Evren Kaşifi', '📦', 'Devam yapımları ve sinematik evrenleri eksiksiz tamamlıyorsun.'),
-  critic('The Critic', 'Seçici Eleştirmen', '⚖️', 'Puan ortalaman çok yüksek; sadece en kaliteli yapımları kütüphanene alıyorsun.');
+  auteur('The Auteur', '🎬'),
+  actorHunter('The Actor Hunter', '🎭'),
+  franchiseExplorer('The Franchise Explorer', '📦'),
+  critic('The Critic', '⚖️');
 
   final String title;
-  final String subtitle;
   final String emoji;
-  final String description;
 
-  const CineDnaPersona(this.title, this.subtitle, this.emoji, this.description);
+  const CineDnaPersona(this.title, this.emoji);
+}
+
+extension CineDnaPersonaLabels on CineDnaPersona {
+  String subtitle(AppLocalizations l10n) => switch (this) {
+        CineDnaPersona.auteur => l10n.cineDnaPersonaAuteurTitle,
+        CineDnaPersona.actorHunter => l10n.cineDnaPersonaActorHunterTitle,
+        CineDnaPersona.franchiseExplorer => l10n.cineDnaPersonaFranchiseTitle,
+        CineDnaPersona.critic => l10n.cineDnaPersonaCriticTitle,
+      };
+
+  String description(AppLocalizations l10n) => switch (this) {
+        CineDnaPersona.auteur => l10n.cineDnaPersonaAuteurDescription,
+        CineDnaPersona.actorHunter => l10n.cineDnaPersonaActorHunterDescription,
+        CineDnaPersona.franchiseExplorer => l10n.cineDnaPersonaFranchiseDescription,
+        CineDnaPersona.critic => l10n.cineDnaPersonaCriticDescription,
+      };
 }
 
 /// Computed analytics result for the user's CineDNA.
@@ -22,7 +43,7 @@ class CineDnaResult {
   final int totalTitles;
   final int totalConnections;
   final double averageRating;
-  final Map<String, int> topGenres;
+  final Map<int, int> topGenres;
   final List<GraphNode> topBridgePeople;
 
   const CineDnaResult({
@@ -65,12 +86,15 @@ class CineDnaCalculator {
       persona = CineDnaPersona.critic;
     }
 
-    // Genre count mock/fallback aggregation
-    final genres = <String, int>{
-      'Drama': (titleNodes.length * 0.38).round().clamp(1, 99),
-      'Suç': (titleNodes.length * 0.26).round().clamp(1, 99),
-      'Bilim Kurgu': (titleNodes.length * 0.18).round().clamp(1, 99),
-      'Aksiyon': (titleNodes.length * 0.12).round().clamp(1, 99),
+    // Genre count mock/fallback aggregation. Keyed by TMDb genre id rather
+    // than a Turkish name — these are fabricated numbers, but the key still
+    // has to be language-independent so the screen can render the name in
+    // whatever language the user is reading.
+    final genres = <int, int>{
+      TmdbGenre.drama: (titleNodes.length * 0.38).round().clamp(1, 99),
+      TmdbGenre.crime: (titleNodes.length * 0.26).round().clamp(1, 99),
+      TmdbGenre.scienceFiction: (titleNodes.length * 0.18).round().clamp(1, 99),
+      TmdbGenre.action: (titleNodes.length * 0.12).round().clamp(1, 99),
     };
 
     return CineDnaResult(

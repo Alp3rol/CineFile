@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -24,7 +25,7 @@ class CineTwinRecommendations extends StatelessWidget {
             const Icon(Icons.auto_awesome_rounded, color: AppTheme.accentColor, size: 18),
             const SizedBox(width: 8),
             Text(
-              'Bu Akşam Birlikte Ne İzlemelisiniz?',
+              AppLocalizations.of(context).cineTwinWhatToWatch,
               style: GoogleFonts.outfit(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,

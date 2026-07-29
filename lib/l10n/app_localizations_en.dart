@@ -2077,6 +2077,573 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get graphTitle => 'Connections';
+
+  @override
+  String get graphLoading => 'Analysing connections…';
+
+  @override
+  String get graphLoadFailed =>
+      'Couldn\'t load the connections. Check your internet and try again.';
+
+  @override
+  String get graphEmptyTitle => 'Your graph is empty';
+
+  @override
+  String get graphEmptyBody =>
+      'Add two titles that share an actor or director to your diary, and the hidden links between them start appearing here on their own.';
+
+  @override
+  String get graphNoPathFound => 'No connection found between those two.';
+
+  @override
+  String get graphPositionsReset =>
+      'Node positions reset to the automatic layout.';
+
+  @override
+  String get graphProfileLookupFailed =>
+      'Something went wrong looking up that profile.';
+
+  @override
+  String get graphClusterUnconnected => 'Unconnected';
+
+  @override
+  String get graphNodeMovie => 'Film';
+
+  @override
+  String get graphNodeShow => 'Show';
+
+  @override
+  String get graphNodeActor => 'Actor';
+
+  @override
+  String get graphNodeDirector => 'Director';
+
+  @override
+  String get graphNodeWriter => 'Writer';
+
+  @override
+  String get graphNodeProducer => 'Producer';
+
+  @override
+  String get graphNodeCompany => 'Studio';
+
+  @override
+  String get graphNodeGenre => 'Genre';
+
+  @override
+  String get graphFilterActors => 'Actors';
+
+  @override
+  String get graphFilterDirectors => 'Directors';
+
+  @override
+  String get graphDepthLeads => 'Leads';
+
+  @override
+  String get graphDepthFeatured => 'Featured';
+
+  @override
+  String get graphDepthFullCast => 'Full cast';
+
+  @override
+  String get graphCastDepth => 'Cast depth';
+
+  @override
+  String get graphSearch => 'Search';
+
+  @override
+  String get graphSearchHint => 'Search…';
+
+  @override
+  String get graphSearchInGraphHint => 'Search the graph…';
+
+  @override
+  String get graphFindConnection => 'Find a connection';
+
+  @override
+  String get graphResetPositions => 'Reset positions';
+
+  @override
+  String get graphFitToScreen => 'Fit to screen';
+
+  @override
+  String get graphAddPerson => 'Add Person';
+
+  @override
+  String get graphAddPersonHint => 'Actor or director name…';
+
+  @override
+  String get graphAddPersonRole => 'Role:';
+
+  @override
+  String get graphAddPersonSearchPrompt => 'Start typing to search.';
+
+  @override
+  String get graphHideFromGraph => 'Hide from Graph';
+
+  @override
+  String get graphOpenDetail => 'Open detail';
+
+  @override
+  String get graphOpenProfile => 'Open profile';
+
+  @override
+  String get graphWhyConnected => 'Why connected?';
+
+  @override
+  String get graphWhyConnectedTitle => 'Why Connected?';
+
+  @override
+  String get graphRemoveConnection => 'Remove this connection';
+
+  @override
+  String get graphDiscoverRecommendations => 'Discover (Recommendations)';
+
+  @override
+  String get graphInsightsTitle => 'Insights';
+
+  @override
+  String graphInsightMostCentral(String name, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Most central: $name ($count titles)',
+      one: 'Most central: $name (1 title)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pathFinderTitle => 'Find the Path';
+
+  @override
+  String get pathFinderHeader => 'Find a Bridge (Six Degrees)';
+
+  @override
+  String get pathFinderExplain =>
+      'Finds the shortest chain of shared actors or directors between any two titles or people.';
+
+  @override
+  String get discoverRecommendationsFailed =>
+      'Couldn\'t load the recommendations.';
+
+  @override
+  String get discoverSubtitle =>
+      'What you\'ve watched, and what you shouldn\'t miss';
+
+  @override
+  String discoverWatchedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count titles in your library',
+      one: '1 title in your library',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get discoverAllWatched =>
+      'You\'ve already watched every one of this actor\'s headline projects. Nicely done! 🎉';
+
+  @override
+  String get cineDnaTitle => 'CineDNA';
+
+  @override
+  String cineDnaAnchorSubtitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Connects $count titles in your library.',
+      one: 'Connects 1 title in your library.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cineDnaPersonaAuteurTitle => 'Director-Driven';
+
+  @override
+  String get cineDnaPersonaAuteurDescription =>
+      'You follow your favourite directors\' filmographies all the way through.';
+
+  @override
+  String get cineDnaPersonaActorHunterTitle => 'Actor Follower';
+
+  @override
+  String get cineDnaPersonaActorHunterDescription =>
+      'You find new titles by following the actors you love.';
+
+  @override
+  String get cineDnaPersonaFranchiseTitle => 'Universe Explorer';
+
+  @override
+  String get cineDnaPersonaFranchiseDescription =>
+      'You finish sequels and cinematic universes to the last entry.';
+
+  @override
+  String get cineDnaPersonaCriticTitle => 'Selective Critic';
+
+  @override
+  String get cineDnaPersonaCriticDescription =>
+      'Your average rating is high — only the best makes it into your library.';
+
+  @override
+  String get cineTwinTitle => 'CineTwin Match';
+
+  @override
+  String get cineTwinYou => 'You';
+
+  @override
+  String get cineTwinMatchLabel => 'MATCH';
+
+  @override
+  String get cineTwinNotEnoughData =>
+      'There isn\'t enough watch data yet to work out a match.';
+
+  @override
+  String get cineTwinSharedTitles => 'Shared';
+
+  @override
+  String get cineTwinRatingGap => 'Rating Gap';
+
+  @override
+  String get cineTwinSharedRecommendation => 'Shared Pick';
+
+  @override
+  String get cineTwinShareCard => 'Share Match Card';
+
+  @override
+  String get cineTwinWhatToWatch => 'What Should You Watch Together Tonight?';
+
+  @override
+  String cineTwinCopied(int percentage) {
+    return 'CineTwin match ($percentage%) copied to your clipboard.';
+  }
+
+  @override
+  String get cineTwinBadgeSoulmatesTitle => 'Cinematic Soulmates';
+
+  @override
+  String get cineTwinBadgeSoulmatesDescription =>
+      'Your taste and your ratings line up almost perfectly.';
+
+  @override
+  String get cineTwinBadgeBuddiesTitle => 'Ticket Buddies';
+
+  @override
+  String get cineTwinBadgeBuddiesDescription =>
+      'A strong match — you\'d have great film nights together.';
+
+  @override
+  String get cineTwinBadgeGenreMatchTitle => 'Genre Siblings';
+
+  @override
+  String get cineTwinBadgeGenreMatchDescription =>
+      'You enjoy the same kinds of titles.';
+
+  @override
+  String get cineTwinBadgeComplementsTitle => 'Opposite Tastes';
+
+  @override
+  String get cineTwinBadgeComplementsDescription =>
+      'A nice balance — you\'d each broaden the other\'s watchlist.';
+
+  @override
+  String get cineTwinBadgeOppositesTitle => 'Different Worlds';
+
+  @override
+  String get cineTwinBadgeOppositesDescription =>
+      'Your tastes differ a lot, or there isn\'t enough shared data yet.';
+
+  @override
+  String cineTwinReasonRated(String name, String rating) {
+    return '$name rated this $rating';
+  }
+
+  @override
+  String cineTwinReasonRatedHighly(String name) {
+    return '$name rated this highly';
+  }
+
+  @override
+  String graphClusterNamed(String name) {
+    return '$name cluster';
+  }
+
+  @override
+  String graphPathFound(int steps) {
+    String _temp0 = intl.Intl.pluralLogic(
+      steps,
+      locale: localeName,
+      other: 'Connected in $steps steps',
+      one: 'Connected in 1 step',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String graphSearchingProfile(String name) {
+    return 'Looking up $name…';
+  }
+
+  @override
+  String graphProfileNotFound(String name) {
+    return 'No profile found for $name.';
+  }
+
+  @override
+  String graphSummary(int titles, int people) {
+    return '$titles titles · $people bridges';
+  }
+
+  @override
+  String graphInsightBiggestCluster(String name) {
+    return ' · biggest: $name';
+  }
+
+  @override
+  String graphInsightStrongestPair(String a, String b, int weight) {
+    return 'Strongest link: $a ↔ $b ($weight)';
+  }
+
+  @override
+  String graphConnectedByPeople(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Linked by $count shared people',
+      one: 'Linked by 1 shared person',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String graphConnectsTitles(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Connects $count titles',
+      one: 'Connects 1 title',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String graphSharedPeopleCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count shared people',
+      one: '1 shared person',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String graphPersonAdded(String name, String title) {
+    return '$name was added to \"$title\".';
+  }
+
+  @override
+  String graphAddPersonPrompt(String title) {
+    return 'Search for someone to link to \"$title\".';
+  }
+
+  @override
+  String graphExplainDirector(String person, String title) {
+    return '$person directed $title.';
+  }
+
+  @override
+  String graphExplainActor(String person, String title) {
+    return '$person appears in the cast of $title.';
+  }
+
+  @override
+  String get pathFinderStart => '1. Start (title or person)';
+
+  @override
+  String get pathFinderTarget => '2. Target (title or person)';
+
+  @override
+  String discoverEngineTitle(String name) {
+    return '$name — Discovery';
+  }
+
+  @override
+  String get discoverUnwatchedPopular => '⭐ Popular Titles You Haven\'t Seen';
+
+  @override
+  String get cineDnaBackbone => '👑 The Backbone of Your Library';
+
+  @override
+  String get cineDnaTotalTitles => '🎬 Total Titles';
+
+  @override
+  String get cineDnaConnectionNetwork => '🔗 Connection Network';
+
+  @override
+  String get cineDnaTopBridges => '🌉 Strongest Bridges';
+
+  @override
+  String cineDnaConnectionCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count connections',
+      one: '1 connection',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cineTwinSharedFavorites => '❤️ Titles You Both Love';
+
+  @override
+  String get cineTwinBigDisputes => '⚡ Where You Disagree Most';
+
+  @override
+  String get navHome => 'Home';
+
+  @override
+  String get navDiscover => 'Discover';
+
+  @override
+  String get navDiary => 'Diary';
+
+  @override
+  String get navCommunity => 'Community';
+
+  @override
+  String get navGraph => 'Graph';
+
+  @override
+  String get homeGreetingMorning => 'Good morning, ☀️';
+
+  @override
+  String get homeGreetingDay => 'Hello, 👋';
+
+  @override
+  String get homeGreetingEvening => 'Good evening, 🌙';
+
+  @override
+  String get homeGreetingNight => 'Good night, 🌌';
+
+  @override
+  String get homeRecentlyAdded => 'Recently Added';
+
+  @override
+  String get homeNothingAdded =>
+      'You haven\'t added anything to your library yet.';
+
+  @override
+  String get homeSeeAll => 'See All';
+
+  @override
+  String get homeHeroLastWatched => 'LAST WATCHED';
+
+  @override
+  String get homeHeroWhatToWatch => 'WHAT TO WATCH THIS WEEK?';
+
+  @override
+  String get homeHeroMovieBadge => 'FILM';
+
+  @override
+  String get homeHeroShowBadge => 'SHOW';
+
+  @override
+  String get homeHeroDetails => 'See Details';
+
+  @override
+  String get homeContinueWatching => 'CONTINUE WATCHING';
+
+  @override
+  String get homeContinue => 'Continue';
+
+  @override
+  String homeNextEpisode(int episode) {
+    return 'Up next: episode $episode';
+  }
+
+  @override
+  String homeNextEpisodeOf(int episode, int total) {
+    return 'Up next: episode $episode of $total';
+  }
+
+  @override
+  String get homeStatsHeader => 'SUMMARY & STATS';
+
+  @override
+  String get homeStatsTotalWatches => 'Total Watches';
+
+  @override
+  String get homeStatsTitlesUnit => 'titles';
+
+  @override
+  String get homeStatsAverageRating => 'Average Rating';
+
+  @override
+  String get homeStatsWeeklyGoal => 'Weekly Goal';
+
+  @override
+  String get homeStatsWeeklyGoalCaps => 'WEEKLY GOAL';
+
+  @override
+  String get homeStatsGoalDoneCaps => 'GOAL MET';
+
+  @override
+  String get homeStatsAddFirst => 'Add your first watch to get started.';
+
+  @override
+  String get homeStatsGoalReached => 'You hit this week\'s goal. Nice one! 🎉';
+
+  @override
+  String homeStatsGoalRemaining(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count more this week to hit your goal.',
+      one: '1 more this week to hit your goal.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get activelyWatchingTitle => 'Currently Watching';
+
+  @override
+  String homeStreakDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get homeAddOneEpisode => '+1 episode';
+
+  @override
+  String episodeOf(int episode, int total) {
+    return 'Episode $episode of $total';
+  }
+
+  @override
+  String episodeSingle(int episode) {
+    return 'Episode $episode';
+  }
+
+  @override
+  String get datePickerTitle => 'Pick a Date';
+
+  @override
+  String get commonConfirm => 'Confirm';
+
+  @override
   String get tierLocked => 'Locked';
 
   @override

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/api_constants.dart';
@@ -32,7 +33,7 @@ class CineTwinScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authStateProvider);
-    final currentUserName = authState.value?.displayName ?? 'Sen';
+    final currentUserName = authState.value?.displayName ?? AppLocalizations.of(context).cineTwinYou;
 
     final params = CineTwinParams(targetUsername: targetUsername, targetEntries: targetEntries);
     final result = ref.watch(cineTwinProvider(params));
@@ -40,7 +41,7 @@ class CineTwinScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
-        title: Text('CineTwin Uyum Analizi', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+        title: Text(AppLocalizations.of(context).cineTwinTitle, style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
@@ -53,7 +54,7 @@ class CineTwinScreen extends ConsumerWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(24.0),
                   child: Text(
-                    'Uyum hesabı için henüz yeterli izleme verisi bulunmuyor.',
+                    AppLocalizations.of(context).cineTwinNotEnoughData,
                     textAlign: TextAlign.center,
                     style: GoogleFonts.inter(color: AppTheme.textSecondary, fontSize: 14),
                   ),
@@ -83,19 +84,19 @@ class CineTwinScreen extends ConsumerWidget {
                           _buildStatItem(
                             icon: Icons.movie_outlined,
                             title: '${result.sharedCount}',
-                            subtitle: 'Ortak Film',
+                            subtitle: AppLocalizations.of(context).cineTwinSharedTitles,
                           ),
                           Container(width: 1, height: 28, color: Colors.white12),
                           _buildStatItem(
                             icon: Icons.thumbs_up_down_outlined,
                             title: '${result.ratingDisputes.length}',
-                            subtitle: 'Farklı Puan',
+                            subtitle: AppLocalizations.of(context).cineTwinRatingGap,
                           ),
                           Container(width: 1, height: 28, color: Colors.white12),
                           _buildStatItem(
                             icon: Icons.auto_awesome_rounded,
                             title: '${result.recommendations.length}',
-                            subtitle: 'Ortak Öneri',
+                            subtitle: AppLocalizations.of(context).cineTwinSharedRecommendation,
                           ),
                         ],
                       ),
@@ -106,7 +107,7 @@ class CineTwinScreen extends ConsumerWidget {
                     // Shared Favorites Section ("Ortak Sevilenler")
                     if (result.sharedFavorites.isNotEmpty) ...[
                       Text(
-                        '❤️ İkinizin de Sevdiği Yapımlar',
+                        AppLocalizations.of(context).cineTwinSharedFavorites,
                         style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                       ),
                       const SizedBox(height: 10),
@@ -153,7 +154,7 @@ class CineTwinScreen extends ConsumerWidget {
                     // Rating Disputes Section ("Büyük Tartışmalar")
                     if (result.ratingDisputes.isNotEmpty) ...[
                       Text(
-                        '⚡ Büyük Puan Ayrılıkları',
+                        AppLocalizations.of(context).cineTwinBigDisputes,
                         style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                       ),
                       const SizedBox(height: 10),
@@ -204,7 +205,7 @@ class CineTwinScreen extends ConsumerWidget {
                         onPressed: () {
                           showPremiumToast(
                             context,
-                            'CineTwin Uyum Skoru (%${result.matchPercentage}) panoya kopyalandı!',
+                            AppLocalizations.of(context).cineTwinCopied(result.matchPercentage),
                           );
                         },
                         style: ElevatedButton.styleFrom(
@@ -215,7 +216,7 @@ class CineTwinScreen extends ConsumerWidget {
                         ),
                         icon: const Icon(Icons.share_rounded, size: 18),
                         label: Text(
-                          'Uyum Kartını Paylaş',
+                          AppLocalizations.of(context).cineTwinShareCard,
                           style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 15),
                         ),
                       ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
@@ -87,7 +88,7 @@ class CineTwinHeader extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    'UYUM',
+                    AppLocalizations.of(context).cineTwinMatchLabel,
                     style: GoogleFonts.inter(
                       fontSize: 9,
                       fontWeight: FontWeight.w800,
@@ -146,7 +147,7 @@ class CineTwinHeader extends StatelessWidget {
                   Text(badge.emoji, style: const TextStyle(fontSize: 24)),
                   const SizedBox(width: 8),
                   Text(
-                    badge.title,
+                    badge.title(AppLocalizations.of(context)),
                     style: GoogleFonts.outfit(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -157,7 +158,7 @@ class CineTwinHeader extends StatelessWidget {
               ),
               const SizedBox(height: 6),
               Text(
-                badge.description,
+                badge.description(AppLocalizations.of(context)),
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(
                   fontSize: 12,

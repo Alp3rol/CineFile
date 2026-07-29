@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/widgets/glass_container.dart';
@@ -60,7 +61,7 @@ class GraphInspectorPanel extends StatelessWidget {
                   children: [
                     Icon(GraphStyle.iconFor(node.type), size: 13, color: color),
                     const SizedBox(width: 4),
-                    Text(GraphStyle.labelFor(node.type),
+                    Text(GraphStyle.labelFor(AppLocalizations.of(context), node.type),
                         style: TextStyle(
                             fontSize: 11,
                             color: color,
@@ -113,8 +114,8 @@ class GraphInspectorPanel extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       node.type.isTitle
-                          ? '${neighbors.length} ortak kişi ile bağlı'
-                          : '${neighbors.length} yapımı birbirine bağlıyor',
+                          ? AppLocalizations.of(context).graphConnectedByPeople(neighbors.length)
+                          : AppLocalizations.of(context).graphConnectsTitles(neighbors.length),
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                   ],
@@ -146,7 +147,7 @@ class GraphInspectorPanel extends StatelessWidget {
                       ? Icons.person_add_alt_1_rounded
                       : Icons.visibility_off_rounded,
                   size: 18),
-              label: Text(node.type.isTitle ? 'Kişi Ekle' : 'Grafta Gizle'),
+              label: Text(node.type.isTitle ? AppLocalizations.of(context).graphAddPerson : AppLocalizations.of(context).graphHideFromGraph),
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppTheme.textSecondary,
                 side: const BorderSide(color: AppTheme.borderColor),
@@ -171,7 +172,7 @@ class GraphInspectorPanel extends StatelessWidget {
                     },
                     icon: const Icon(Icons.stars_rounded,
                         size: 16, color: Color(0xFFFFC107)),
-                    label: const Text('Keşfet (Öneriler)'),
+                    label: Text(AppLocalizations.of(context).graphDiscoverRecommendations),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: const Color(0xFFFFC107),
                       side: const BorderSide(color: Color(0xFFFFC107)),
@@ -189,7 +190,7 @@ class GraphInspectorPanel extends StatelessWidget {
                           ? Icons.open_in_new_rounded
                           : Icons.person_search_rounded,
                       size: 16),
-                  label: Text(node.type.isTitle ? 'Detaya git' : 'Profili aç'),
+                  label: Text(node.type.isTitle ? AppLocalizations.of(context).graphOpenDetail : AppLocalizations.of(context).graphOpenProfile),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: color.withValues(alpha: 0.18),
                     foregroundColor: color,
@@ -226,7 +227,7 @@ class GraphInspectorPanel extends StatelessWidget {
             visualDensity: VisualDensity.compact,
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(minWidth: 26, minHeight: 26),
-            tooltip: 'Neden bağlı?',
+            tooltip: AppLocalizations.of(context).graphWhyConnected,
             onPressed: () {
               final title = node.type.isTitle ? node : n;
               final person = node.type.isPerson ? node : n;
@@ -247,7 +248,7 @@ class GraphInspectorPanel extends StatelessWidget {
             visualDensity: VisualDensity.compact,
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(minWidth: 26, minHeight: 26),
-            tooltip: 'Bu bağlantıyı kaldır',
+            tooltip: AppLocalizations.of(context).graphRemoveConnection,
             onPressed: () => onRemoveNeighbor(n),
             icon: const Icon(Icons.close_rounded,
                 size: 15, color: AppTheme.textSecondary),

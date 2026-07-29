@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/tmdb_service.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -104,7 +105,7 @@ class _DiscoverModeSheetState extends ConsumerState<DiscoverModeSheet> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _error = 'Öneriler yüklenemedi.';
+          _error = AppLocalizations.of(context).discoverRecommendationsFailed;
           _loading = false;
         });
       }
@@ -147,13 +148,13 @@ class _DiscoverModeSheetState extends ConsumerState<DiscoverModeSheet> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '${widget.personNode.label} — Keşif Motoru',
+                      AppLocalizations.of(context).discoverEngineTitle(widget.personNode.label),
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                     ),
                     Text(
-                      'İzlediğin yapımlar ve kaçırmaman gereken öneriler',
+                      AppLocalizations.of(context).discoverSubtitle,
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
                             color: AppTheme.textSecondary,
                           ),
@@ -177,7 +178,7 @@ class _DiscoverModeSheetState extends ConsumerState<DiscoverModeSheet> {
                           size: 16, color: AppTheme.accentColor),
                       const SizedBox(width: 6),
                       Text(
-                        'Kütüphanendeki Yapımlar (${widget.watchedNeighbors.length})',
+                        AppLocalizations.of(context).discoverWatchedCount(widget.watchedNeighbors.length),
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 13,
@@ -250,9 +251,9 @@ class _DiscoverModeSheetState extends ConsumerState<DiscoverModeSheet> {
                       const Icon(Icons.stars_rounded,
                           size: 16, color: Color(0xFFFFC107)),
                       const SizedBox(width: 6),
-                      const Text(
-                        '⭐ Henüz İzlemediğin Popüler Yapımları',
-                        style: TextStyle(
+                      Text(
+                        AppLocalizations.of(context).discoverUnwatchedPopular,
+                        style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 13,
                           color: Color(0xFFFFC107),
@@ -289,8 +290,8 @@ class _DiscoverModeSheetState extends ConsumerState<DiscoverModeSheet> {
                         color: AppTheme.backgroundColor.withValues(alpha: 0.4),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Text(
-                        'Bu oyuncunun öne çıkan diğer tüm ana projelerini zaten izlemişsin! Bravo! 🎉',
+                      child: Text(
+                        AppLocalizations.of(context).discoverAllWatched,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                             fontSize: 12, color: AppTheme.textSecondary),

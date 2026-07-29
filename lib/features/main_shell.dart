@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import '../core/theme/app_theme.dart';
@@ -85,11 +86,11 @@ class _MainShellState extends ConsumerState<MainShell> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildNavItem(selectedIndex, 0, Icons.home_rounded, Icons.home_outlined, 'Ana Sayfa'),
-                  _buildNavItem(selectedIndex, 1, Icons.search_rounded, Icons.search_outlined, 'Keşfet'),
-                  _buildNavItem(selectedIndex, 2, Icons.book_rounded, Icons.book_outlined, 'Günlük'),
-                  _buildNavItem(selectedIndex, 3, Icons.people_rounded, Icons.people_outline_rounded, 'Topluluk'),
-                  _buildNavItem(selectedIndex, 4, Icons.hub_rounded, Icons.hub_outlined, 'Ağ'),
+                  _buildNavItem(selectedIndex, 0, Icons.home_rounded, Icons.home_outlined, AppLocalizations.of(context).navHome),
+                  _buildNavItem(selectedIndex, 1, Icons.search_rounded, Icons.search_outlined, AppLocalizations.of(context).navDiscover),
+                  _buildNavItem(selectedIndex, 2, Icons.book_rounded, Icons.book_outlined, AppLocalizations.of(context).navDiary),
+                  _buildNavItem(selectedIndex, 3, Icons.people_rounded, Icons.people_outline_rounded, AppLocalizations.of(context).navCommunity),
+                  _buildNavItem(selectedIndex, 4, Icons.hub_rounded, Icons.hub_outlined, AppLocalizations.of(context).navGraph),
                 ],
               ),
             ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../insights/presentation/insights_provider.dart';
 
@@ -16,10 +17,10 @@ class HomeStatsDashboard extends StatelessWidget {
     final progress = weeklyGoal > 0 ? (thisWeekCount / weeklyGoal).clamp(0.0, 1.0) : 0.0;
     final remaining = (weeklyGoal - thisWeekCount).clamp(0, weeklyGoal);
     final goalText = totalWatchCount == 0
-        ? 'İlk izlemeni kütüphanene ekle!'
+        ? AppLocalizations.of(context).homeStatsAddFirst
         : remaining == 0
-            ? 'Tebrikler, haftalık hedefine ulaştın! 🎉'
-            : 'Bu hafta $remaining film/dizi daha izlemelisin.';
+            ? AppLocalizations.of(context).homeStatsGoalReached
+            : AppLocalizations.of(context).homeStatsGoalRemaining(remaining);
     final textTheme = Theme.of(context).textTheme;
 
     return Container(
@@ -56,7 +57,7 @@ class HomeStatsDashboard extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'ÖZET & İSTATİSTİKLER',
+                    AppLocalizations.of(context).homeStatsHeader,
                     style: textTheme.labelSmall?.copyWith(
                       color: AppTheme.textSecondary,
                       fontWeight: FontWeight.bold,
@@ -78,7 +79,7 @@ class HomeStatsDashboard extends StatelessWidget {
                     ),
                   ),
                   child: Text(
-                    progress >= 1.0 ? 'HEDEF TAMAM' : 'HAFTALIK HEDEF',
+                    progress >= 1.0 ? AppLocalizations.of(context).homeStatsGoalDoneCaps : AppLocalizations.of(context).homeStatsWeeklyGoalCaps,
                     style: TextStyle(
                       color: progress >= 1.0 ? Colors.greenAccent : Colors.white70,
                       fontSize: 10,
@@ -100,16 +101,16 @@ class HomeStatsDashboard extends StatelessWidget {
                 context,
                 icon: Icons.movie_outlined,
                 iconColor: AppTheme.accentColor,
-                label: 'Toplam İzleme',
+                label: AppLocalizations.of(context).homeStatsTotalWatches,
                 value: '$totalWatchCount',
-                unit: 'yapım',
+                unit: AppLocalizations.of(context).homeStatsTitlesUnit,
               );
 
               final ratingCard = _buildStatTile(
                 context,
                 icon: Icons.star_rounded,
                 iconColor: Colors.amberAccent,
-                label: 'Ortalama Puan',
+                label: AppLocalizations.of(context).homeStatsAverageRating,
                 value: totalWatchCount == 0 ? '-' : averageRating.toStringAsFixed(1),
                 unit: totalWatchCount > 0 ? '/ 10' : '',
               );
@@ -149,7 +150,7 @@ class HomeStatsDashboard extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          'Haftalık Hedef',
+                          AppLocalizations.of(context).homeStatsWeeklyGoal,
                           style: textTheme.titleSmall?.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,

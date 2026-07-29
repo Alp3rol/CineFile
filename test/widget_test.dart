@@ -11,6 +11,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:cinefile/features/auth/controllers/auth_controller.dart';
 import 'package:cinefile/features/recommendations/presentation/recommendations_provider.dart';
 import 'package:cinefile/main.dart';
+import 'package:cinefile/core/services/app_settings_store.dart';
+import 'package:cinefile/features/settings/presentation/settings_provider.dart';
 
 void main() {
   testWidgets('App boots and shows bottom navigation tabs', (WidgetTester tester) async {
@@ -34,6 +36,12 @@ void main() {
         // in the app and stays on there; it just has no place in a test.
         retry: (retryCount, error) => null,
         overrides: [
+          // Pinned so the nav-label assertions below read as the screen this
+          // test was written against. Without it the app follows the test
+          // binding's locale, which is en-US.
+          localeProvider.overrideWith(
+            (ref) => LocaleNotifier(AppSettingsStore())..setLocale(const Locale('tr')),
+          ),
           firebaseAuthProvider
               .overrideWithValue(MockFirebaseAuth(signedIn: true, mockUser: MockUser(uid: 'test-uid', email: 'test@test.com'))),
           firestoreProvider.overrideWithValue(firestore),

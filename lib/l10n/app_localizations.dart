@@ -3680,6 +3680,870 @@ abstract class AppLocalizations {
   /// **'{count} kayıt paylaşılacak'**
   String shareEntriesCount(int count);
 
+  /// No description provided for @graphTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'İlişki Ağı'**
+  String get graphTitle;
+
+  /// No description provided for @graphLoading.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağlantılar analiz ediliyor…'**
+  String get graphLoading;
+
+  /// No description provided for @graphLoadFailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağlantılar yüklenemedi. İnternet bağlantını kontrol edip tekrar dene.'**
+  String get graphLoadFailed;
+
+  /// No description provided for @graphEmptyTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'İlişki Ağı henüz boş'**
+  String get graphEmptyTitle;
+
+  /// No description provided for @graphEmptyBody.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ortak oyuncu veya yönetmeni olan en az iki yapımı günlüğüne ekleyince, aralarındaki gizli bağlantılar burada otomatik olarak belirmeye başlar.'**
+  String get graphEmptyBody;
+
+  /// No description provided for @graphNoPathFound.
+  ///
+  /// In tr, this message translates to:
+  /// **'Seçilen iki öğe arasında bağlantı bulunamadı.'**
+  String get graphNoPathFound;
+
+  /// No description provided for @graphPositionsReset.
+  ///
+  /// In tr, this message translates to:
+  /// **'Düğüm konumları otomatik dizilime sıfırlandı.'**
+  String get graphPositionsReset;
+
+  /// No description provided for @graphProfileLookupFailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Profil aranırken bir hata oluştu.'**
+  String get graphProfileLookupFailed;
+
+  /// No description provided for @graphClusterUnconnected.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağlantısız'**
+  String get graphClusterUnconnected;
+
+  /// No description provided for @graphNodeMovie.
+  ///
+  /// In tr, this message translates to:
+  /// **'Film'**
+  String get graphNodeMovie;
+
+  /// No description provided for @graphNodeShow.
+  ///
+  /// In tr, this message translates to:
+  /// **'Dizi'**
+  String get graphNodeShow;
+
+  /// No description provided for @graphNodeActor.
+  ///
+  /// In tr, this message translates to:
+  /// **'Oyuncu'**
+  String get graphNodeActor;
+
+  /// No description provided for @graphNodeDirector.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yönetmen'**
+  String get graphNodeDirector;
+
+  /// No description provided for @graphNodeWriter.
+  ///
+  /// In tr, this message translates to:
+  /// **'Senarist'**
+  String get graphNodeWriter;
+
+  /// No description provided for @graphNodeProducer.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yapımcı'**
+  String get graphNodeProducer;
+
+  /// No description provided for @graphNodeCompany.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yapım Şirketi'**
+  String get graphNodeCompany;
+
+  /// No description provided for @graphNodeGenre.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tür'**
+  String get graphNodeGenre;
+
+  /// No description provided for @graphFilterActors.
+  ///
+  /// In tr, this message translates to:
+  /// **'Oyuncular'**
+  String get graphFilterActors;
+
+  /// No description provided for @graphFilterDirectors.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yönetmenler'**
+  String get graphFilterDirectors;
+
+  /// No description provided for @graphDepthLeads.
+  ///
+  /// In tr, this message translates to:
+  /// **'Başroller'**
+  String get graphDepthLeads;
+
+  /// No description provided for @graphDepthFeatured.
+  ///
+  /// In tr, this message translates to:
+  /// **'Öne çıkanlar'**
+  String get graphDepthFeatured;
+
+  /// No description provided for @graphDepthFullCast.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tüm kadro'**
+  String get graphDepthFullCast;
+
+  /// No description provided for @graphCastDepth.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kadro derinliği'**
+  String get graphCastDepth;
+
+  /// No description provided for @graphSearch.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ara'**
+  String get graphSearch;
+
+  /// No description provided for @graphSearchHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ara…'**
+  String get graphSearchHint;
+
+  /// No description provided for @graphSearchInGraphHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Graf içerisinde ara…'**
+  String get graphSearchInGraphHint;
+
+  /// No description provided for @graphFindConnection.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağlantı bul'**
+  String get graphFindConnection;
+
+  /// No description provided for @graphResetPositions.
+  ///
+  /// In tr, this message translates to:
+  /// **'Konumları sıfırla'**
+  String get graphResetPositions;
+
+  /// No description provided for @graphFitToScreen.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekrana sığdır'**
+  String get graphFitToScreen;
+
+  /// No description provided for @graphAddPerson.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kişi Ekle'**
+  String get graphAddPerson;
+
+  /// No description provided for @graphAddPersonHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Oyuncu / yönetmen adı…'**
+  String get graphAddPersonHint;
+
+  /// No description provided for @graphAddPersonRole.
+  ///
+  /// In tr, this message translates to:
+  /// **'Rol:'**
+  String get graphAddPersonRole;
+
+  /// No description provided for @graphAddPersonSearchPrompt.
+  ///
+  /// In tr, this message translates to:
+  /// **'Aramak için yazmaya başla.'**
+  String get graphAddPersonSearchPrompt;
+
+  /// No description provided for @graphHideFromGraph.
+  ///
+  /// In tr, this message translates to:
+  /// **'Grafta Gizle'**
+  String get graphHideFromGraph;
+
+  /// No description provided for @graphOpenDetail.
+  ///
+  /// In tr, this message translates to:
+  /// **'Detaya git'**
+  String get graphOpenDetail;
+
+  /// No description provided for @graphOpenProfile.
+  ///
+  /// In tr, this message translates to:
+  /// **'Profili aç'**
+  String get graphOpenProfile;
+
+  /// No description provided for @graphWhyConnected.
+  ///
+  /// In tr, this message translates to:
+  /// **'Neden bağlı?'**
+  String get graphWhyConnected;
+
+  /// No description provided for @graphWhyConnectedTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Neden Bağlı?'**
+  String get graphWhyConnectedTitle;
+
+  /// No description provided for @graphRemoveConnection.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu bağlantıyı kaldır'**
+  String get graphRemoveConnection;
+
+  /// No description provided for @graphDiscoverRecommendations.
+  ///
+  /// In tr, this message translates to:
+  /// **'Keşfet (Öneriler)'**
+  String get graphDiscoverRecommendations;
+
+  /// No description provided for @graphInsightsTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'İçgörüler'**
+  String get graphInsightsTitle;
+
+  /// No description provided for @graphInsightMostCentral.
+  ///
+  /// In tr, this message translates to:
+  /// **'En merkezi: {name} ({count} yapım)'**
+  String graphInsightMostCentral(String name, int count);
+
+  /// No description provided for @pathFinderTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağlantı Yolunu Bul'**
+  String get pathFinderTitle;
+
+  /// No description provided for @pathFinderHeader.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağlantı Köprüsü Bul (6 Derece)'**
+  String get pathFinderHeader;
+
+  /// No description provided for @pathFinderExplain.
+  ///
+  /// In tr, this message translates to:
+  /// **'Seçeceğin iki yapım veya kişi arasındaki en kısa ortak oyuncu/yönetmen zincirini bulur.'**
+  String get pathFinderExplain;
+
+  /// No description provided for @discoverRecommendationsFailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Öneriler yüklenemedi.'**
+  String get discoverRecommendationsFailed;
+
+  /// No description provided for @discoverSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'İzlediğin yapımlar ve kaçırmaman gereken öneriler'**
+  String get discoverSubtitle;
+
+  /// No description provided for @discoverWatchedCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kütüphanendeki Yapımlar ({count})'**
+  String discoverWatchedCount(int count);
+
+  /// No description provided for @discoverAllWatched.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu oyuncunun öne çıkan diğer tüm ana projelerini zaten izlemişsin! Bravo! 🎉'**
+  String get discoverAllWatched;
+
+  /// No description provided for @cineDnaTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'CineDNA Analitiği'**
+  String get cineDnaTitle;
+
+  /// No description provided for @cineDnaAnchorSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kütüphanendeki {count} farklı yapımı birbirine bağlıyor.'**
+  String cineDnaAnchorSubtitle(int count);
+
+  /// No description provided for @cineDnaPersonaAuteurTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yönetmen Odaklı'**
+  String get cineDnaPersonaAuteurTitle;
+
+  /// No description provided for @cineDnaPersonaAuteurDescription.
+  ///
+  /// In tr, this message translates to:
+  /// **'Favori yönetmenlerinin tüm filmografisini eksiksiz takip ediyorsun.'**
+  String get cineDnaPersonaAuteurDescription;
+
+  /// No description provided for @cineDnaPersonaActorHunterTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Oyuncu Takipçisi'**
+  String get cineDnaPersonaActorHunterTitle;
+
+  /// No description provided for @cineDnaPersonaActorHunterDescription.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sevdiğin oyuncuların izini sürerek yeni yapımlara yelken açıyorsun.'**
+  String get cineDnaPersonaActorHunterDescription;
+
+  /// No description provided for @cineDnaPersonaFranchiseTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Evren Kaşifi'**
+  String get cineDnaPersonaFranchiseTitle;
+
+  /// No description provided for @cineDnaPersonaFranchiseDescription.
+  ///
+  /// In tr, this message translates to:
+  /// **'Devam yapımları ve sinematik evrenleri eksiksiz tamamlıyorsun.'**
+  String get cineDnaPersonaFranchiseDescription;
+
+  /// No description provided for @cineDnaPersonaCriticTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Seçici Eleştirmen'**
+  String get cineDnaPersonaCriticTitle;
+
+  /// No description provided for @cineDnaPersonaCriticDescription.
+  ///
+  /// In tr, this message translates to:
+  /// **'Puan ortalaman çok yüksek; sadece en kaliteli yapımları kütüphanene alıyorsun.'**
+  String get cineDnaPersonaCriticDescription;
+
+  /// No description provided for @cineTwinTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'CineTwin Uyum Analizi'**
+  String get cineTwinTitle;
+
+  /// No description provided for @cineTwinYou.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sen'**
+  String get cineTwinYou;
+
+  /// No description provided for @cineTwinMatchLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'UYUM'**
+  String get cineTwinMatchLabel;
+
+  /// No description provided for @cineTwinNotEnoughData.
+  ///
+  /// In tr, this message translates to:
+  /// **'Uyum hesabı için henüz yeterli izleme verisi bulunmuyor.'**
+  String get cineTwinNotEnoughData;
+
+  /// No description provided for @cineTwinSharedTitles.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ortak Film'**
+  String get cineTwinSharedTitles;
+
+  /// No description provided for @cineTwinRatingGap.
+  ///
+  /// In tr, this message translates to:
+  /// **'Farklı Puan'**
+  String get cineTwinRatingGap;
+
+  /// No description provided for @cineTwinSharedRecommendation.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ortak Öneri'**
+  String get cineTwinSharedRecommendation;
+
+  /// No description provided for @cineTwinShareCard.
+  ///
+  /// In tr, this message translates to:
+  /// **'Uyum Kartını Paylaş'**
+  String get cineTwinShareCard;
+
+  /// No description provided for @cineTwinWhatToWatch.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu Akşam Birlikte Ne İzlemelisiniz?'**
+  String get cineTwinWhatToWatch;
+
+  /// No description provided for @cineTwinCopied.
+  ///
+  /// In tr, this message translates to:
+  /// **'CineTwin Uyum Skoru (%{percentage}) panoya kopyalandı!'**
+  String cineTwinCopied(int percentage);
+
+  /// No description provided for @cineTwinBadgeSoulmatesTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sinematik Ruh İkizi'**
+  String get cineTwinBadgeSoulmatesTitle;
+
+  /// No description provided for @cineTwinBadgeSoulmatesDescription.
+  ///
+  /// In tr, this message translates to:
+  /// **'Film zevkleriniz ve puanlarınız neredeyse %100 birebir örtüşüyor!'**
+  String get cineTwinBadgeSoulmatesDescription;
+
+  /// No description provided for @cineTwinBadgeBuddiesTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sinema Bilet Ortağı'**
+  String get cineTwinBadgeBuddiesTitle;
+
+  /// No description provided for @cineTwinBadgeBuddiesDescription.
+  ///
+  /// In tr, this message translates to:
+  /// **'Birlikte harika film akşamları yapabileceğiniz yüksek uyum.'**
+  String get cineTwinBadgeBuddiesDescription;
+
+  /// No description provided for @cineTwinBadgeGenreMatchTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tür Kardeşi'**
+  String get cineTwinBadgeGenreMatchTitle;
+
+  /// No description provided for @cineTwinBadgeGenreMatchDescription.
+  ///
+  /// In tr, this message translates to:
+  /// **'Benzer türdeki yapımlardan hoşlanıyorsunuz.'**
+  String get cineTwinBadgeGenreMatchDescription;
+
+  /// No description provided for @cineTwinBadgeComplementsTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Karşıt Zevkler'**
+  String get cineTwinBadgeComplementsTitle;
+
+  /// No description provided for @cineTwinBadgeComplementsDescription.
+  ///
+  /// In tr, this message translates to:
+  /// **'Birbirinizi farklı film türleriyle besleyen harika bir denge.'**
+  String get cineTwinBadgeComplementsDescription;
+
+  /// No description provided for @cineTwinBadgeOppositesTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Farklı Dünyaların İnsanları'**
+  String get cineTwinBadgeOppositesTitle;
+
+  /// No description provided for @cineTwinBadgeOppositesDescription.
+  ///
+  /// In tr, this message translates to:
+  /// **'Zevkleriniz çok farklı veya henüz yeterli ortak veri yok.'**
+  String get cineTwinBadgeOppositesDescription;
+
+  /// No description provided for @cineTwinReasonRated.
+  ///
+  /// In tr, this message translates to:
+  /// **'{name} bu filme {rating} puan verdi'**
+  String cineTwinReasonRated(String name, String rating);
+
+  /// No description provided for @cineTwinReasonRatedHighly.
+  ///
+  /// In tr, this message translates to:
+  /// **'{name} bu filme yüksek puan verdi'**
+  String cineTwinReasonRatedHighly(String name);
+
+  /// No description provided for @graphClusterNamed.
+  ///
+  /// In tr, this message translates to:
+  /// **'{name} kümesi'**
+  String graphClusterNamed(String name);
+
+  /// No description provided for @graphPathFound.
+  ///
+  /// In tr, this message translates to:
+  /// **'{steps} Adımda Bağlantı Bulundu'**
+  String graphPathFound(int steps);
+
+  /// No description provided for @graphSearchingProfile.
+  ///
+  /// In tr, this message translates to:
+  /// **'{name} profili aranıyor…'**
+  String graphSearchingProfile(String name);
+
+  /// No description provided for @graphProfileNotFound.
+  ///
+  /// In tr, this message translates to:
+  /// **'{name} için profil bulunamadı.'**
+  String graphProfileNotFound(String name);
+
+  /// No description provided for @graphSummary.
+  ///
+  /// In tr, this message translates to:
+  /// **'{titles} yapım · {people} köprü'**
+  String graphSummary(int titles, int people);
+
+  /// No description provided for @graphInsightBiggestCluster.
+  ///
+  /// In tr, this message translates to:
+  /// **' · en büyük: {name}'**
+  String graphInsightBiggestCluster(String name);
+
+  /// No description provided for @graphInsightStrongestPair.
+  ///
+  /// In tr, this message translates to:
+  /// **'En bağlı: {a} ↔ {b} ({weight})'**
+  String graphInsightStrongestPair(String a, String b, int weight);
+
+  /// No description provided for @graphConnectedByPeople.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} ortak kişi ile bağlı'**
+  String graphConnectedByPeople(int count);
+
+  /// No description provided for @graphConnectsTitles.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} yapımı birbirine bağlıyor'**
+  String graphConnectsTitles(int count);
+
+  /// No description provided for @graphSharedPeopleCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} ortak kişi'**
+  String graphSharedPeopleCount(int count);
+
+  /// No description provided for @graphPersonAdded.
+  ///
+  /// In tr, this message translates to:
+  /// **'{name}, \"{title}\" yapımına eklendi.'**
+  String graphPersonAdded(String name, String title);
+
+  /// No description provided for @graphAddPersonPrompt.
+  ///
+  /// In tr, this message translates to:
+  /// **'\"{title}\" yapımına bağlanacak kişiyi ara.'**
+  String graphAddPersonPrompt(String title);
+
+  /// No description provided for @graphExplainDirector.
+  ///
+  /// In tr, this message translates to:
+  /// **'{person}, {title} projesine yönetmen koltuğunda imza atmıştır.'**
+  String graphExplainDirector(String person, String title);
+
+  /// No description provided for @graphExplainActor.
+  ///
+  /// In tr, this message translates to:
+  /// **'{person}, {title} projesinin kadrosunda oyuncu olarak yer almaktadır.'**
+  String graphExplainActor(String person, String title);
+
+  /// No description provided for @pathFinderStart.
+  ///
+  /// In tr, this message translates to:
+  /// **'1. Başlangıç (Yapım veya Kişi)'**
+  String get pathFinderStart;
+
+  /// No description provided for @pathFinderTarget.
+  ///
+  /// In tr, this message translates to:
+  /// **'2. Hedef (Yapım veya Kişi)'**
+  String get pathFinderTarget;
+
+  /// No description provided for @discoverEngineTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'{name} — Keşif Motoru'**
+  String discoverEngineTitle(String name);
+
+  /// No description provided for @discoverUnwatchedPopular.
+  ///
+  /// In tr, this message translates to:
+  /// **'⭐ Henüz İzlemediğin Popüler Yapımları'**
+  String get discoverUnwatchedPopular;
+
+  /// No description provided for @cineDnaBackbone.
+  ///
+  /// In tr, this message translates to:
+  /// **'👑 Kütüphanenin Omurgası'**
+  String get cineDnaBackbone;
+
+  /// No description provided for @cineDnaTotalTitles.
+  ///
+  /// In tr, this message translates to:
+  /// **'🎬 Toplam Yapım'**
+  String get cineDnaTotalTitles;
+
+  /// No description provided for @cineDnaConnectionNetwork.
+  ///
+  /// In tr, this message translates to:
+  /// **'🔗 Bağlantı Ağı'**
+  String get cineDnaConnectionNetwork;
+
+  /// No description provided for @cineDnaTopBridges.
+  ///
+  /// In tr, this message translates to:
+  /// **'🌉 En Etkili Bağlantı Köprüleri'**
+  String get cineDnaTopBridges;
+
+  /// No description provided for @cineDnaConnectionCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} Bağlantı'**
+  String cineDnaConnectionCount(int count);
+
+  /// No description provided for @cineTwinSharedFavorites.
+  ///
+  /// In tr, this message translates to:
+  /// **'❤️ İkinizin de Sevdiği Yapımlar'**
+  String get cineTwinSharedFavorites;
+
+  /// No description provided for @cineTwinBigDisputes.
+  ///
+  /// In tr, this message translates to:
+  /// **'⚡ Büyük Puan Ayrılıkları'**
+  String get cineTwinBigDisputes;
+
+  /// No description provided for @navHome.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ana Sayfa'**
+  String get navHome;
+
+  /// No description provided for @navDiscover.
+  ///
+  /// In tr, this message translates to:
+  /// **'Keşfet'**
+  String get navDiscover;
+
+  /// No description provided for @navDiary.
+  ///
+  /// In tr, this message translates to:
+  /// **'Günlük'**
+  String get navDiary;
+
+  /// No description provided for @navCommunity.
+  ///
+  /// In tr, this message translates to:
+  /// **'Topluluk'**
+  String get navCommunity;
+
+  /// No description provided for @navGraph.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ağ'**
+  String get navGraph;
+
+  /// No description provided for @homeGreetingMorning.
+  ///
+  /// In tr, this message translates to:
+  /// **'Günaydın, ☀️'**
+  String get homeGreetingMorning;
+
+  /// No description provided for @homeGreetingDay.
+  ///
+  /// In tr, this message translates to:
+  /// **'İyi Günler, 👋'**
+  String get homeGreetingDay;
+
+  /// No description provided for @homeGreetingEvening.
+  ///
+  /// In tr, this message translates to:
+  /// **'İyi Akşamlar, 🌙'**
+  String get homeGreetingEvening;
+
+  /// No description provided for @homeGreetingNight.
+  ///
+  /// In tr, this message translates to:
+  /// **'İyi Geceler, 🌌'**
+  String get homeGreetingNight;
+
+  /// No description provided for @homeRecentlyAdded.
+  ///
+  /// In tr, this message translates to:
+  /// **'Son Eklediklerim'**
+  String get homeRecentlyAdded;
+
+  /// No description provided for @homeNothingAdded.
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz kütüphanene film eklemedin.'**
+  String get homeNothingAdded;
+
+  /// No description provided for @homeSeeAll.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tümünü Gör'**
+  String get homeSeeAll;
+
+  /// No description provided for @homeHeroLastWatched.
+  ///
+  /// In tr, this message translates to:
+  /// **'SON İZLEDİĞİN'**
+  String get homeHeroLastWatched;
+
+  /// No description provided for @homeHeroWhatToWatch.
+  ///
+  /// In tr, this message translates to:
+  /// **'BU HAFTA NE İZLESEM?'**
+  String get homeHeroWhatToWatch;
+
+  /// No description provided for @homeHeroMovieBadge.
+  ///
+  /// In tr, this message translates to:
+  /// **'FİLM'**
+  String get homeHeroMovieBadge;
+
+  /// No description provided for @homeHeroShowBadge.
+  ///
+  /// In tr, this message translates to:
+  /// **'DİZİ'**
+  String get homeHeroShowBadge;
+
+  /// No description provided for @homeHeroDetails.
+  ///
+  /// In tr, this message translates to:
+  /// **'Detayları İncele'**
+  String get homeHeroDetails;
+
+  /// No description provided for @homeContinueWatching.
+  ///
+  /// In tr, this message translates to:
+  /// **'İZLEMEYE DEVAM ET'**
+  String get homeContinueWatching;
+
+  /// No description provided for @homeContinue.
+  ///
+  /// In tr, this message translates to:
+  /// **'Devam Et'**
+  String get homeContinue;
+
+  /// No description provided for @homeNextEpisode.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sıradaki: Bölüm {episode}'**
+  String homeNextEpisode(int episode);
+
+  /// No description provided for @homeNextEpisodeOf.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sıradaki: Bölüm {episode} / {total}'**
+  String homeNextEpisodeOf(int episode, int total);
+
+  /// No description provided for @homeStatsHeader.
+  ///
+  /// In tr, this message translates to:
+  /// **'ÖZET & İSTATİSTİKLER'**
+  String get homeStatsHeader;
+
+  /// No description provided for @homeStatsTotalWatches.
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplam İzleme'**
+  String get homeStatsTotalWatches;
+
+  /// No description provided for @homeStatsTitlesUnit.
+  ///
+  /// In tr, this message translates to:
+  /// **'yapım'**
+  String get homeStatsTitlesUnit;
+
+  /// No description provided for @homeStatsAverageRating.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ortalama Puan'**
+  String get homeStatsAverageRating;
+
+  /// No description provided for @homeStatsWeeklyGoal.
+  ///
+  /// In tr, this message translates to:
+  /// **'Haftalık Hedef'**
+  String get homeStatsWeeklyGoal;
+
+  /// No description provided for @homeStatsWeeklyGoalCaps.
+  ///
+  /// In tr, this message translates to:
+  /// **'HAFTALIK HEDEF'**
+  String get homeStatsWeeklyGoalCaps;
+
+  /// No description provided for @homeStatsGoalDoneCaps.
+  ///
+  /// In tr, this message translates to:
+  /// **'HEDEF TAMAM'**
+  String get homeStatsGoalDoneCaps;
+
+  /// No description provided for @homeStatsAddFirst.
+  ///
+  /// In tr, this message translates to:
+  /// **'İlk izlemeni kütüphanene ekle!'**
+  String get homeStatsAddFirst;
+
+  /// No description provided for @homeStatsGoalReached.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tebrikler, haftalık hedefine ulaştın! 🎉'**
+  String get homeStatsGoalReached;
+
+  /// No description provided for @homeStatsGoalRemaining.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu hafta {count} film/dizi daha izlemelisin.'**
+  String homeStatsGoalRemaining(int count);
+
+  /// No description provided for @activelyWatchingTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Aktif İzlediklerin'**
+  String get activelyWatchingTitle;
+
+  /// No description provided for @homeStreakDays.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} Gün'**
+  String homeStreakDays(int count);
+
+  /// No description provided for @homeAddOneEpisode.
+  ///
+  /// In tr, this message translates to:
+  /// **'+1 Bölüm'**
+  String get homeAddOneEpisode;
+
+  /// No description provided for @episodeOf.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bölüm {episode} / {total}'**
+  String episodeOf(int episode, int total);
+
+  /// No description provided for @episodeSingle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bölüm {episode}'**
+  String episodeSingle(int episode);
+
+  /// No description provided for @datePickerTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tarih Seçin'**
+  String get datePickerTitle;
+
+  /// No description provided for @commonConfirm.
+  ///
+  /// In tr, this message translates to:
+  /// **'Onayla'**
+  String get commonConfirm;
+
   /// No description provided for @tierLocked.
   ///
   /// In tr, this message translates to:

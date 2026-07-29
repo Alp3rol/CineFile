@@ -2000,6 +2000,512 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String get graphTitle => 'İlişki Ağı';
+
+  @override
+  String get graphLoading => 'Bağlantılar analiz ediliyor…';
+
+  @override
+  String get graphLoadFailed =>
+      'Bağlantılar yüklenemedi. İnternet bağlantını kontrol edip tekrar dene.';
+
+  @override
+  String get graphEmptyTitle => 'İlişki Ağı henüz boş';
+
+  @override
+  String get graphEmptyBody =>
+      'Ortak oyuncu veya yönetmeni olan en az iki yapımı günlüğüne ekleyince, aralarındaki gizli bağlantılar burada otomatik olarak belirmeye başlar.';
+
+  @override
+  String get graphNoPathFound =>
+      'Seçilen iki öğe arasında bağlantı bulunamadı.';
+
+  @override
+  String get graphPositionsReset =>
+      'Düğüm konumları otomatik dizilime sıfırlandı.';
+
+  @override
+  String get graphProfileLookupFailed => 'Profil aranırken bir hata oluştu.';
+
+  @override
+  String get graphClusterUnconnected => 'Bağlantısız';
+
+  @override
+  String get graphNodeMovie => 'Film';
+
+  @override
+  String get graphNodeShow => 'Dizi';
+
+  @override
+  String get graphNodeActor => 'Oyuncu';
+
+  @override
+  String get graphNodeDirector => 'Yönetmen';
+
+  @override
+  String get graphNodeWriter => 'Senarist';
+
+  @override
+  String get graphNodeProducer => 'Yapımcı';
+
+  @override
+  String get graphNodeCompany => 'Yapım Şirketi';
+
+  @override
+  String get graphNodeGenre => 'Tür';
+
+  @override
+  String get graphFilterActors => 'Oyuncular';
+
+  @override
+  String get graphFilterDirectors => 'Yönetmenler';
+
+  @override
+  String get graphDepthLeads => 'Başroller';
+
+  @override
+  String get graphDepthFeatured => 'Öne çıkanlar';
+
+  @override
+  String get graphDepthFullCast => 'Tüm kadro';
+
+  @override
+  String get graphCastDepth => 'Kadro derinliği';
+
+  @override
+  String get graphSearch => 'Ara';
+
+  @override
+  String get graphSearchHint => 'Ara…';
+
+  @override
+  String get graphSearchInGraphHint => 'Graf içerisinde ara…';
+
+  @override
+  String get graphFindConnection => 'Bağlantı bul';
+
+  @override
+  String get graphResetPositions => 'Konumları sıfırla';
+
+  @override
+  String get graphFitToScreen => 'Ekrana sığdır';
+
+  @override
+  String get graphAddPerson => 'Kişi Ekle';
+
+  @override
+  String get graphAddPersonHint => 'Oyuncu / yönetmen adı…';
+
+  @override
+  String get graphAddPersonRole => 'Rol:';
+
+  @override
+  String get graphAddPersonSearchPrompt => 'Aramak için yazmaya başla.';
+
+  @override
+  String get graphHideFromGraph => 'Grafta Gizle';
+
+  @override
+  String get graphOpenDetail => 'Detaya git';
+
+  @override
+  String get graphOpenProfile => 'Profili aç';
+
+  @override
+  String get graphWhyConnected => 'Neden bağlı?';
+
+  @override
+  String get graphWhyConnectedTitle => 'Neden Bağlı?';
+
+  @override
+  String get graphRemoveConnection => 'Bu bağlantıyı kaldır';
+
+  @override
+  String get graphDiscoverRecommendations => 'Keşfet (Öneriler)';
+
+  @override
+  String get graphInsightsTitle => 'İçgörüler';
+
+  @override
+  String graphInsightMostCentral(String name, int count) {
+    return 'En merkezi: $name ($count yapım)';
+  }
+
+  @override
+  String get pathFinderTitle => 'Bağlantı Yolunu Bul';
+
+  @override
+  String get pathFinderHeader => 'Bağlantı Köprüsü Bul (6 Derece)';
+
+  @override
+  String get pathFinderExplain =>
+      'Seçeceğin iki yapım veya kişi arasındaki en kısa ortak oyuncu/yönetmen zincirini bulur.';
+
+  @override
+  String get discoverRecommendationsFailed => 'Öneriler yüklenemedi.';
+
+  @override
+  String get discoverSubtitle =>
+      'İzlediğin yapımlar ve kaçırmaman gereken öneriler';
+
+  @override
+  String discoverWatchedCount(int count) {
+    return 'Kütüphanendeki Yapımlar ($count)';
+  }
+
+  @override
+  String get discoverAllWatched =>
+      'Bu oyuncunun öne çıkan diğer tüm ana projelerini zaten izlemişsin! Bravo! 🎉';
+
+  @override
+  String get cineDnaTitle => 'CineDNA Analitiği';
+
+  @override
+  String cineDnaAnchorSubtitle(int count) {
+    return 'Kütüphanendeki $count farklı yapımı birbirine bağlıyor.';
+  }
+
+  @override
+  String get cineDnaPersonaAuteurTitle => 'Yönetmen Odaklı';
+
+  @override
+  String get cineDnaPersonaAuteurDescription =>
+      'Favori yönetmenlerinin tüm filmografisini eksiksiz takip ediyorsun.';
+
+  @override
+  String get cineDnaPersonaActorHunterTitle => 'Oyuncu Takipçisi';
+
+  @override
+  String get cineDnaPersonaActorHunterDescription =>
+      'Sevdiğin oyuncuların izini sürerek yeni yapımlara yelken açıyorsun.';
+
+  @override
+  String get cineDnaPersonaFranchiseTitle => 'Evren Kaşifi';
+
+  @override
+  String get cineDnaPersonaFranchiseDescription =>
+      'Devam yapımları ve sinematik evrenleri eksiksiz tamamlıyorsun.';
+
+  @override
+  String get cineDnaPersonaCriticTitle => 'Seçici Eleştirmen';
+
+  @override
+  String get cineDnaPersonaCriticDescription =>
+      'Puan ortalaman çok yüksek; sadece en kaliteli yapımları kütüphanene alıyorsun.';
+
+  @override
+  String get cineTwinTitle => 'CineTwin Uyum Analizi';
+
+  @override
+  String get cineTwinYou => 'Sen';
+
+  @override
+  String get cineTwinMatchLabel => 'UYUM';
+
+  @override
+  String get cineTwinNotEnoughData =>
+      'Uyum hesabı için henüz yeterli izleme verisi bulunmuyor.';
+
+  @override
+  String get cineTwinSharedTitles => 'Ortak Film';
+
+  @override
+  String get cineTwinRatingGap => 'Farklı Puan';
+
+  @override
+  String get cineTwinSharedRecommendation => 'Ortak Öneri';
+
+  @override
+  String get cineTwinShareCard => 'Uyum Kartını Paylaş';
+
+  @override
+  String get cineTwinWhatToWatch => 'Bu Akşam Birlikte Ne İzlemelisiniz?';
+
+  @override
+  String cineTwinCopied(int percentage) {
+    return 'CineTwin Uyum Skoru (%$percentage) panoya kopyalandı!';
+  }
+
+  @override
+  String get cineTwinBadgeSoulmatesTitle => 'Sinematik Ruh İkizi';
+
+  @override
+  String get cineTwinBadgeSoulmatesDescription =>
+      'Film zevkleriniz ve puanlarınız neredeyse %100 birebir örtüşüyor!';
+
+  @override
+  String get cineTwinBadgeBuddiesTitle => 'Sinema Bilet Ortağı';
+
+  @override
+  String get cineTwinBadgeBuddiesDescription =>
+      'Birlikte harika film akşamları yapabileceğiniz yüksek uyum.';
+
+  @override
+  String get cineTwinBadgeGenreMatchTitle => 'Tür Kardeşi';
+
+  @override
+  String get cineTwinBadgeGenreMatchDescription =>
+      'Benzer türdeki yapımlardan hoşlanıyorsunuz.';
+
+  @override
+  String get cineTwinBadgeComplementsTitle => 'Karşıt Zevkler';
+
+  @override
+  String get cineTwinBadgeComplementsDescription =>
+      'Birbirinizi farklı film türleriyle besleyen harika bir denge.';
+
+  @override
+  String get cineTwinBadgeOppositesTitle => 'Farklı Dünyaların İnsanları';
+
+  @override
+  String get cineTwinBadgeOppositesDescription =>
+      'Zevkleriniz çok farklı veya henüz yeterli ortak veri yok.';
+
+  @override
+  String cineTwinReasonRated(String name, String rating) {
+    return '$name bu filme $rating puan verdi';
+  }
+
+  @override
+  String cineTwinReasonRatedHighly(String name) {
+    return '$name bu filme yüksek puan verdi';
+  }
+
+  @override
+  String graphClusterNamed(String name) {
+    return '$name kümesi';
+  }
+
+  @override
+  String graphPathFound(int steps) {
+    return '$steps Adımda Bağlantı Bulundu';
+  }
+
+  @override
+  String graphSearchingProfile(String name) {
+    return '$name profili aranıyor…';
+  }
+
+  @override
+  String graphProfileNotFound(String name) {
+    return '$name için profil bulunamadı.';
+  }
+
+  @override
+  String graphSummary(int titles, int people) {
+    return '$titles yapım · $people köprü';
+  }
+
+  @override
+  String graphInsightBiggestCluster(String name) {
+    return ' · en büyük: $name';
+  }
+
+  @override
+  String graphInsightStrongestPair(String a, String b, int weight) {
+    return 'En bağlı: $a ↔ $b ($weight)';
+  }
+
+  @override
+  String graphConnectedByPeople(int count) {
+    return '$count ortak kişi ile bağlı';
+  }
+
+  @override
+  String graphConnectsTitles(int count) {
+    return '$count yapımı birbirine bağlıyor';
+  }
+
+  @override
+  String graphSharedPeopleCount(int count) {
+    return '$count ortak kişi';
+  }
+
+  @override
+  String graphPersonAdded(String name, String title) {
+    return '$name, \"$title\" yapımına eklendi.';
+  }
+
+  @override
+  String graphAddPersonPrompt(String title) {
+    return '\"$title\" yapımına bağlanacak kişiyi ara.';
+  }
+
+  @override
+  String graphExplainDirector(String person, String title) {
+    return '$person, $title projesine yönetmen koltuğunda imza atmıştır.';
+  }
+
+  @override
+  String graphExplainActor(String person, String title) {
+    return '$person, $title projesinin kadrosunda oyuncu olarak yer almaktadır.';
+  }
+
+  @override
+  String get pathFinderStart => '1. Başlangıç (Yapım veya Kişi)';
+
+  @override
+  String get pathFinderTarget => '2. Hedef (Yapım veya Kişi)';
+
+  @override
+  String discoverEngineTitle(String name) {
+    return '$name — Keşif Motoru';
+  }
+
+  @override
+  String get discoverUnwatchedPopular =>
+      '⭐ Henüz İzlemediğin Popüler Yapımları';
+
+  @override
+  String get cineDnaBackbone => '👑 Kütüphanenin Omurgası';
+
+  @override
+  String get cineDnaTotalTitles => '🎬 Toplam Yapım';
+
+  @override
+  String get cineDnaConnectionNetwork => '🔗 Bağlantı Ağı';
+
+  @override
+  String get cineDnaTopBridges => '🌉 En Etkili Bağlantı Köprüleri';
+
+  @override
+  String cineDnaConnectionCount(int count) {
+    return '$count Bağlantı';
+  }
+
+  @override
+  String get cineTwinSharedFavorites => '❤️ İkinizin de Sevdiği Yapımlar';
+
+  @override
+  String get cineTwinBigDisputes => '⚡ Büyük Puan Ayrılıkları';
+
+  @override
+  String get navHome => 'Ana Sayfa';
+
+  @override
+  String get navDiscover => 'Keşfet';
+
+  @override
+  String get navDiary => 'Günlük';
+
+  @override
+  String get navCommunity => 'Topluluk';
+
+  @override
+  String get navGraph => 'Ağ';
+
+  @override
+  String get homeGreetingMorning => 'Günaydın, ☀️';
+
+  @override
+  String get homeGreetingDay => 'İyi Günler, 👋';
+
+  @override
+  String get homeGreetingEvening => 'İyi Akşamlar, 🌙';
+
+  @override
+  String get homeGreetingNight => 'İyi Geceler, 🌌';
+
+  @override
+  String get homeRecentlyAdded => 'Son Eklediklerim';
+
+  @override
+  String get homeNothingAdded => 'Henüz kütüphanene film eklemedin.';
+
+  @override
+  String get homeSeeAll => 'Tümünü Gör';
+
+  @override
+  String get homeHeroLastWatched => 'SON İZLEDİĞİN';
+
+  @override
+  String get homeHeroWhatToWatch => 'BU HAFTA NE İZLESEM?';
+
+  @override
+  String get homeHeroMovieBadge => 'FİLM';
+
+  @override
+  String get homeHeroShowBadge => 'DİZİ';
+
+  @override
+  String get homeHeroDetails => 'Detayları İncele';
+
+  @override
+  String get homeContinueWatching => 'İZLEMEYE DEVAM ET';
+
+  @override
+  String get homeContinue => 'Devam Et';
+
+  @override
+  String homeNextEpisode(int episode) {
+    return 'Sıradaki: Bölüm $episode';
+  }
+
+  @override
+  String homeNextEpisodeOf(int episode, int total) {
+    return 'Sıradaki: Bölüm $episode / $total';
+  }
+
+  @override
+  String get homeStatsHeader => 'ÖZET & İSTATİSTİKLER';
+
+  @override
+  String get homeStatsTotalWatches => 'Toplam İzleme';
+
+  @override
+  String get homeStatsTitlesUnit => 'yapım';
+
+  @override
+  String get homeStatsAverageRating => 'Ortalama Puan';
+
+  @override
+  String get homeStatsWeeklyGoal => 'Haftalık Hedef';
+
+  @override
+  String get homeStatsWeeklyGoalCaps => 'HAFTALIK HEDEF';
+
+  @override
+  String get homeStatsGoalDoneCaps => 'HEDEF TAMAM';
+
+  @override
+  String get homeStatsAddFirst => 'İlk izlemeni kütüphanene ekle!';
+
+  @override
+  String get homeStatsGoalReached => 'Tebrikler, haftalık hedefine ulaştın! 🎉';
+
+  @override
+  String homeStatsGoalRemaining(int count) {
+    return 'Bu hafta $count film/dizi daha izlemelisin.';
+  }
+
+  @override
+  String get activelyWatchingTitle => 'Aktif İzlediklerin';
+
+  @override
+  String homeStreakDays(int count) {
+    return '$count Gün';
+  }
+
+  @override
+  String get homeAddOneEpisode => '+1 Bölüm';
+
+  @override
+  String episodeOf(int episode, int total) {
+    return 'Bölüm $episode / $total';
+  }
+
+  @override
+  String episodeSingle(int episode) {
+    return 'Bölüm $episode';
+  }
+
+  @override
+  String get datePickerTitle => 'Tarih Seçin';
+
+  @override
+  String get commonConfirm => 'Onayla';
+
+  @override
   String get tierLocked => 'Kilitli';
 
   @override

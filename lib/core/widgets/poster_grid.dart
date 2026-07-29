@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_theme.dart';
 import '../constants/api_constants.dart';
@@ -32,7 +33,7 @@ class PosterGrid extends StatelessWidget {
       itemBuilder: (context, index) {
         final movie = items[index];
         final posterPath = movie['poster_path'] as String?;
-        final title = (movie['title'] ?? movie['name'] ?? 'Bilinmeyen Yapım') as String;
+        final title = (movie['title'] ?? movie['name'] ?? AppLocalizations.of(context).titleUnknown) as String;
         final releaseDate = (movie['release_date'] ?? movie['first_air_date'] ?? '') as String;
         final year = releaseDate.split('-').first;
 
@@ -84,7 +85,7 @@ class PosterGrid extends StatelessWidget {
 
               // Year and Rating Info
               Text(
-                year.isNotEmpty ? year : 'Bilinmeyen Yıl',
+                year.isNotEmpty ? year : AppLocalizations.of(context).yearUnknown,
                 style: GoogleFonts.inter(
                   fontSize: 9,
                   color: AppTheme.textSecondary,

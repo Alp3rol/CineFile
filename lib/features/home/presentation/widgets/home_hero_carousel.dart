@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/database/database_provider.dart';
@@ -173,7 +174,7 @@ class _HomeActiveHeroSlide extends ConsumerWidget {
                               const Icon(Icons.play_circle_fill_rounded, color: AppTheme.accentColor, size: 14),
                               const SizedBox(width: 6),
                               Text(
-                                'İZLEMEYE DEVAM ET',
+                                AppLocalizations.of(context).homeContinueWatching,
                                 style: textTheme.labelSmall?.copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
@@ -206,7 +207,7 @@ class _HomeActiveHeroSlide extends ConsumerWidget {
                             border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1),
                           ),
                           child: Text(
-                            total != null ? 'Sıradaki: Bölüm $next / $total' : 'Sıradaki: Bölüm $next',
+                            total != null ? AppLocalizations.of(context).homeNextEpisodeOf(next, total) : AppLocalizations.of(context).homeNextEpisode(next),
                             style: textTheme.labelMedium?.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.w600,
@@ -263,7 +264,7 @@ class _HomeActiveHeroSlide extends ConsumerWidget {
                                       const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 20),
                                       const SizedBox(width: 6),
                                       Text(
-                                        'Devam Et',
+                                        AppLocalizations.of(context).homeContinue,
                                         style: textTheme.labelLarge?.copyWith(
                                           color: Colors.white,
                                           fontWeight: FontWeight.bold,
@@ -292,7 +293,7 @@ class _HomeActiveHeroSlide extends ConsumerWidget {
                                     const Icon(Icons.add_rounded, color: AppTheme.accentColor, size: 18),
                                     const SizedBox(width: 4),
                                     Text(
-                                      '+1 Bölüm',
+                                      AppLocalizations.of(context).homeAddOneEpisode,
                                       style: textTheme.labelMedium?.copyWith(
                                         color: Colors.white,
                                         fontWeight: FontWeight.bold,

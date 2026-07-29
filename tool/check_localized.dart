@@ -19,6 +19,7 @@ import 'dart:io';
 const _localizedPaths = <String>[
   'lib/core/database',
   'lib/core/l10n',
+  'lib/core/widgets',
   'lib/core/navigation',
   'lib/core/network',
   'lib/core/platform',
@@ -27,27 +28,29 @@ const _localizedPaths = <String>[
   'lib/core/utils',
   'lib/features/auth',
   'lib/features/community',
+  'lib/features/home',
   'lib/features/insights',
   'lib/features/journal',
   'lib/features/movie_detail',
   'lib/features/recommendations',
+  'lib/features/relationship_graph',
   'lib/features/search',
   'lib/features/settings',
+];
+
+/// Single files that are localized but do not live under a swept directory.
+const _localizedFiles = <String>[
+  'lib/features/main_shell.dart',
 ];
 
 /// Not yet swept. Listed rather than silently skipped so the remaining work is
 /// visible, and so removing an entry is the deliberate act that turns the check
 /// on for it.
 const _notYetLocalized = <String>[
-  'lib/features/relationship_graph',
-  'lib/features/home',
-  'lib/features/calendar',
-  'lib/features/main_shell.dart',
-  // Shared widgets that are still Turkish-only: the date picker carries its
-  // own month/weekday tables, and these three render copy directly.
-  'lib/core/widgets/premium_date_picker.dart',
-  'lib/core/widgets/actively_watching_row.dart',
-  'lib/core/widgets/poster_grid.dart',
+  // Unreachable: nothing constructs CalendarScreen. Translating a screen no
+  // one can open would be wasted work — it should be wired back into the tabs
+  // or deleted, and localized as part of whichever is chosen.
+  'lib/features/calendar (dead screen)',
   // TmdbService's offline demo payload — user-visible, but only when no API
   // key is set.
   'lib/core/network/tmdb_service.dart (mock data)',
@@ -60,6 +63,32 @@ final _turkishChars = RegExp(r'[çğıöşüÇĞİÖŞÜ]');
 /// A single-quoted Dart string literal. Good enough for a heuristic; it does
 /// not try to understand escaping or interpolation.
 final _stringLiteral = RegExp(r"'[^']*'");
+
+/// Every Dart file the check covers.
+Iterable<File> _filesToCheck() sync* {
+  for (final path in _localizedPaths) {
+    final dir = Directory(path);
+    if (!dir.existsSync()) continue;
+    for (final entity in dir.listSync(recursive: true)) {
+      if (entity is! File || !entity.path.endsWith('.dart')) continue;
+      // Generated code, and the ARB-backed lookups, are the one place Turkish
+      // belongs.
+      if (entity.path.endsWith('.g.dart')) continue;
+      final normalized = entity.path.replaceAll(r'\', '/');
+      if (normalized.contains('lib/l10n/')) continue;
+      // TmdbService's offline demo payload is still Turkish; see
+      // _notYetLocalized. Skipped whole-file rather than by line pattern,
+      // since nothing else in it carries copy any more.
+      if (normalized.endsWith('lib/core/network/tmdb_service.dart')) continue;
+      yield entity;
+    }
+  }
+
+  for (final path in _localizedFiles) {
+    final file = File(path);
+    if (file.existsSync()) yield file;
+  }
+}
 
 /// Lines that legitimately contain Turkish and are not user-facing text.
 bool _isExempt(String line) {
@@ -89,32 +118,16 @@ bool _isExempt(String line) {
 void main() {
   final offenders = <String>[];
 
-  for (final path in _localizedPaths) {
-    final dir = Directory(path);
-    if (!dir.existsSync()) continue;
+  for (final file in _filesToCheck()) {
+    final lines = file.readAsLinesSync();
+    for (var i = 0; i < lines.length; i++) {
+      final line = lines[i];
+      if (_isExempt(line)) continue;
 
-    for (final entity in dir.listSync(recursive: true)) {
-      if (entity is! File || !entity.path.endsWith('.dart')) continue;
-      // Generated code and the ARB-backed lookups are the one place Turkish
-      // belongs.
-      if (entity.path.endsWith('.g.dart')) continue;
-      final normalized = entity.path.replaceAll(r'\', '/');
-      if (normalized.contains('lib/l10n/')) continue;
-      // TmdbService's offline demo payload is still Turkish; see
-      // _notYetLocalized. Skipping the file rather than pattern-matching its
-      // lines, since nothing else in it carries copy any more.
-      if (normalized.endsWith('lib/core/network/tmdb_service.dart')) continue;
-
-      final lines = entity.readAsLinesSync();
-      for (var i = 0; i < lines.length; i++) {
-        final line = lines[i];
-        if (_isExempt(line)) continue;
-
-        for (final match in _stringLiteral.allMatches(line)) {
-          final literal = match.group(0)!;
-          if (_turkishChars.hasMatch(literal)) {
-            offenders.add('${entity.path}:${i + 1}  $literal');
-          }
+      for (final match in _stringLiteral.allMatches(line)) {
+        final literal = match.group(0)!;
+        if (_turkishChars.hasMatch(literal)) {
+          offenders.add('${file.path}:${i + 1}  $literal');
         }
       }
     }

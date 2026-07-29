@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/database/app_database.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -108,7 +109,7 @@ class HomeHeroBanner extends StatelessWidget {
                               ),
                               const SizedBox(width: 6),
                               Text(
-                                isSuggestion ? 'BU HAFTA NE İZLESEM?' : 'SON İZLEDİĞİN',
+                                isSuggestion ? AppLocalizations.of(context).homeHeroWhatToWatch : AppLocalizations.of(context).homeHeroLastWatched,
                                 style: textTheme.labelSmall?.copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
@@ -158,7 +159,7 @@ class HomeHeroBanner extends StatelessWidget {
                                 border: Border.all(color: AppTheme.accentColor.withValues(alpha: 0.5), width: 1),
                               ),
                               child: Text(
-                                movie.isTv ? 'DİZİ' : 'FİLM',
+                                movie.isTv ? AppLocalizations.of(context).homeHeroShowBadge : AppLocalizations.of(context).homeHeroMovieBadge,
                                 style: const TextStyle(
                                   color: AppTheme.accentColor,
                                   fontSize: 10,
@@ -224,7 +225,7 @@ class HomeHeroBanner extends StatelessWidget {
                                   const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 20),
                                   const SizedBox(width: 6),
                                   Text(
-                                    'Detayları İncele',
+                                    AppLocalizations.of(context).homeHeroDetails,
                                     style: textTheme.labelLarge?.copyWith(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold,

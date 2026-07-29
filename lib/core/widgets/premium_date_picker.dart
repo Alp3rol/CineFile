@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../l10n/app_localizations.dart';
+import '../l10n/date_text.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_theme.dart';
 import 'glass_container.dart';
@@ -47,10 +49,8 @@ class _PremiumDatePickerState extends State<PremiumDatePicker> {
   bool _showYearPicker = false;
   final ScrollController _yearScrollController = ScrollController();
 
-  final List<String> _months = [
-    'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
-    'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
-  ];
+  // The Turkish month table that used to live here is gone — intl already
+  // knows the names in every locale. See core/l10n/date_text.dart.
 
   @override
   void initState() {
@@ -165,7 +165,7 @@ class _PremiumDatePickerState extends State<PremiumDatePicker> {
                 const Icon(Icons.calendar_today_rounded, color: AppTheme.accentColor, size: 20),
                 const SizedBox(width: 8),
                 Text(
-                  'Tarih Seçin',
+                  AppLocalizations.of(context).datePickerTitle,
                   style: GoogleFonts.outfit(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -195,7 +195,9 @@ class _PremiumDatePickerState extends State<PremiumDatePicker> {
                       children: [
                         Flexible(
                           child: Text(
-                            _showYearPicker ? '${_focusedMonth.year}' : '${_months[_focusedMonth.month - 1]} ${_focusedMonth.year}',
+                            _showYearPicker
+                                ? '${_focusedMonth.year}'
+                                : formatMonthYear(context, _focusedMonth),
                             style: GoogleFonts.outfit(
                               fontSize: 15,
                               fontWeight: FontWeight.w600,
@@ -263,7 +265,9 @@ class _PremiumDatePickerState extends State<PremiumDatePicker> {
               // Haftanın Günleri Başlıkları (Pzt'den Pazar'a)
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: ['Pt', 'Sa', 'Ça', 'Pe', 'Cu', 'Ct', 'Pz'].map((day) {
+                // Monday-first, from intl rather than a hardcoded Turkish row.
+                children:
+                    List.generate(7, (i) => shortWeekdayName(context, i + 1)).map((day) {
                   return SizedBox(
                     width: 34,
                     child: Text(
@@ -367,7 +371,7 @@ class _PremiumDatePickerState extends State<PremiumDatePicker> {
                       ),
                     ),
                     child: Text(
-                      'İptal',
+                      AppLocalizations.of(context).commonCancel,
                       style: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 13),
                     ),
                   ),
@@ -396,7 +400,7 @@ class _PremiumDatePickerState extends State<PremiumDatePicker> {
                         ),
                       ),
                       child: Text(
-                        'Onayla',
+                        AppLocalizations.of(context).commonConfirm,
                         style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13),
                       ),
                     ),

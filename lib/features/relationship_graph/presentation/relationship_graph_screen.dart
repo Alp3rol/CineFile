@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/tmdb_service.dart';
 import '../../../core/theme/app_theme.dart';
@@ -73,7 +74,7 @@ class _RelationshipGraphScreenState
   }
 
   Widget _loading() {
-    return const Center(
+    return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -81,19 +82,19 @@ class _RelationshipGraphScreenState
             valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentColor),
           ),
           SizedBox(height: 16),
-          Text('Bağlantılar analiz ediliyor…',
-              style: TextStyle(color: AppTheme.textSecondary)),
+          Text(AppLocalizations.of(context).graphLoading,
+              style: const TextStyle(color: AppTheme.textSecondary)),
         ],
       ),
     );
   }
 
   Widget _errorState() {
-    return const Center(
+    return Center(
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 40),
         child: Text(
-          'Bağlantılar yüklenemedi. İnternet bağlantını kontrol edip tekrar dene.',
+          AppLocalizations.of(context).graphLoadFailed,
           textAlign: TextAlign.center,
           style: TextStyle(color: AppTheme.textSecondary),
         ),
@@ -296,7 +297,7 @@ class _RelationshipGraphScreenState
                             color: Color(0xFFFFC107), size: 20),
                         const SizedBox(width: 8),
                         Text(
-                          '${_activePath!.distance} Adımda Bağlantı Bulundu',
+                          AppLocalizations.of(context).graphPathFound(_activePath!.distance),
                           style: const TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 13),
                         ),
@@ -320,9 +321,9 @@ class _RelationshipGraphScreenState
     setState(() => _activePath = res);
     if (res == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Seçilen iki öğe arasında bağlantı bulunamadı.'),
-          duration: Duration(seconds: 2),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).graphNoPathFound),
+          duration: const Duration(seconds: 2),
         ),
       );
     }
@@ -356,9 +357,9 @@ class _RelationshipGraphScreenState
       _fitToContent();
     });
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Düğüm konumları otomatik dizilime sıfırlandı.'),
-        duration: Duration(seconds: 2),
+      SnackBar(
+        content: Text(AppLocalizations.of(context).graphPositionsReset),
+        duration: const Duration(seconds: 2),
       ),
     );
   }
@@ -414,7 +415,7 @@ class _RelationshipGraphScreenState
     final messenger = ScaffoldMessenger.of(context);
     messenger.showSnackBar(
       SnackBar(
-        content: Text('${node.label} profili aranıyor…'),
+        content: Text(AppLocalizations.of(context).graphSearchingProfile(node.label)),
         duration: const Duration(seconds: 2),
       ),
     );
@@ -431,14 +432,14 @@ class _RelationshipGraphScreenState
         ));
       } else {
         messenger.showSnackBar(
-          SnackBar(content: Text('${node.label} için profil bulunamadı.')),
+          SnackBar(content: Text(AppLocalizations.of(context).graphProfileNotFound(node.label))),
         );
       }
     } catch (e) {
       if (!mounted) return;
       messenger.hideCurrentSnackBar();
       messenger.showSnackBar(
-        const SnackBar(content: Text('Profil aranırken bir hata oluştu.')),
+        SnackBar(content: Text(AppLocalizations.of(context).graphProfileLookupFailed)),
       );
     }
   }
@@ -503,13 +504,13 @@ class _RelationshipGraphScreenState
                   color: GraphStyle.colorFor(node.type)),
               title: Text(node.label,
                   maxLines: 1, overflow: TextOverflow.ellipsis),
-              subtitle: Text(GraphStyle.labelFor(node.type)),
+              subtitle: Text(GraphStyle.labelFor(AppLocalizations.of(context), node.type)),
             ),
             const Divider(height: 1),
             if (isTitle)
               ListTile(
                 leading: const Icon(Icons.person_add_alt_1_rounded),
-                title: const Text('Kişi Ekle'),
+                title: Text(AppLocalizations.of(context).graphAddPerson),
                 onTap: () {
                   Navigator.pop(ctx);
                   _addPersonTo(node);
@@ -518,7 +519,7 @@ class _RelationshipGraphScreenState
             else
               ListTile(
                 leading: const Icon(Icons.visibility_off_rounded),
-                title: const Text('Grafta Gizle'),
+                title: Text(AppLocalizations.of(context).graphHideFromGraph),
                 onTap: () {
                   Navigator.pop(ctx);
                   _hidePerson(node);
@@ -528,7 +529,7 @@ class _RelationshipGraphScreenState
               leading: Icon(isTitle
                   ? Icons.open_in_new_rounded
                   : Icons.person_search_rounded),
-              title: Text(isTitle ? 'Detaya git' : 'Profili aç'),
+              title: Text(isTitle ? AppLocalizations.of(context).graphOpenDetail : AppLocalizations.of(context).graphOpenProfile),
               onTap: () {
                 Navigator.pop(ctx);
                 _navigateTo(node);

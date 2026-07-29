@@ -13,6 +13,7 @@ import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'support/localized_app.dart';
 import 'package:cinefile/core/database/database_provider.dart';
 import 'package:cinefile/features/auth/controllers/auth_controller.dart';
 import 'package:cinefile/core/widgets/actively_watching_row.dart';
@@ -104,7 +105,8 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: MaterialApp(
+        child: LocalizedTestApp(
+          locale: const Locale('tr'),
           home: Consumer(builder: (context, ref, _) {
             ref.watch(activelyWatchingProvider);
             return const SizedBox();
@@ -128,7 +130,7 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: const MaterialApp(home: Scaffold(body: SingleChildScrollView(child: ActivelyWatchingRow()))),
+        child: const LocalizedTestApp(locale: Locale('tr'), home: Scaffold(body: SingleChildScrollView(child: ActivelyWatchingRow()))),
       ),
     );
     await tester.pumpAndSettle();

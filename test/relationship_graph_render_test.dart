@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'support/localized_app.dart';
 import 'package:cinefile/core/database/app_database.dart';
 import 'package:cinefile/core/database/database_provider.dart';
 import 'package:cinefile/features/relationship_graph/domain/graph_models.dart';
@@ -70,7 +71,7 @@ Widget _app(List<WatchRecordWithMovie> records) {
       // Avoid touching Firebase auth in tests.
       graphOverridesProvider.overrideWith((ref) => Stream.value(GraphOverrides.empty)),
     ],
-    child: const MaterialApp(home: RelationshipGraphScreen()),
+    child: const LocalizedTestApp(locale: Locale('tr'), home: RelationshipGraphScreen()),
   );
 }
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../auth/presentation/widgets/user_profile_avatar_button.dart';
 import '../../../settings/presentation/settings_screen.dart';
@@ -8,16 +9,16 @@ class HomeHeaderBar extends StatelessWidget {
 
   const HomeHeaderBar({super.key, this.streak = 0});
 
-  String _getGreeting() {
+  String _getGreeting(BuildContext context) {
     final hour = DateTime.now().hour;
     if (hour >= 5 && hour < 12) {
-      return 'Günaydın, ☀️';
+      return AppLocalizations.of(context).homeGreetingMorning;
     } else if (hour >= 12 && hour < 18) {
-      return 'İyi Günler, 👋';
+      return AppLocalizations.of(context).homeGreetingDay;
     } else if (hour >= 18 && hour < 22) {
-      return 'İyi Akşamlar, 🌙';
+      return AppLocalizations.of(context).homeGreetingEvening;
     } else {
-      return 'İyi Geceler, 🌌';
+      return AppLocalizations.of(context).homeGreetingNight;
     }
   }
 
@@ -35,7 +36,7 @@ class HomeHeaderBar extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  _getGreeting(),
+                  _getGreeting(context),
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: AppTheme.textSecondary,
                     fontWeight: FontWeight.w500,
@@ -80,7 +81,7 @@ class HomeHeaderBar extends StatelessWidget {
                             const Icon(Icons.local_fire_department_rounded, size: 16, color: Colors.orangeAccent),
                             const SizedBox(width: 4),
                             Text(
-                              '$streak Gün',
+                              AppLocalizations.of(context).homeStreakDays(streak),
                               style: Theme.of(context).textTheme.labelMedium?.copyWith(
                                 color: Colors.orangeAccent,
                                 fontWeight: FontWeight.bold,
@@ -106,7 +107,7 @@ class HomeHeaderBar extends StatelessWidget {
                   border: Border.all(color: Colors.white.withValues(alpha: 0.1), width: 1),
                 ),
                 child: IconButton(
-                  tooltip: 'Ayarlar',
+                  tooltip: AppLocalizations.of(context).settingsTitle,
                   onPressed: () => Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const SettingsScreen()),

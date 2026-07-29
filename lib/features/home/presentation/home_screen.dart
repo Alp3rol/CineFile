@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -193,12 +194,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
                     // Recently Added Section
                     HomeSectionTitle(
-                      title: 'Son Eklediklerim',
+                      title: AppLocalizations.of(context).homeRecentlyAdded,
                       onSeeAll: () => ref.read(mainShellTabIndexProvider.notifier).state = 2,
                     ),
                     const SizedBox(height: 12),
                      recentlyAdded.isEmpty
-                        ? const HomeEmptySection(message: 'Henüz kütüphanene film eklemedin.')
+                        ? HomeEmptySection(message: AppLocalizations.of(context).homeNothingAdded)
                         : HomeRecentlyAddedList(items: recentlyAdded, onOpenDetail: _openDetail),
 
                     const SizedBox(height: 28),

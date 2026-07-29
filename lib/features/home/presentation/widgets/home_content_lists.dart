@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/database/app_database.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -54,7 +55,7 @@ class HomeSectionTitle extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Tümünü Gör',
+                    AppLocalizations.of(context).homeSeeAll,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: AppTheme.accentColor,
                       fontWeight: FontWeight.w600,
@@ -201,7 +202,7 @@ class HomeRecentlyAddedList extends StatelessWidget {
                   Text(
                     movie.director != null && movie.director!.isNotEmpty
                         ? movie.director!
-                        : (movie.isTv ? 'Dizi' : 'Film'),
+                        : (movie.isTv ? AppLocalizations.of(context).graphNodeShow : AppLocalizations.of(context).graphNodeMovie),
                     style: textTheme.labelSmall?.copyWith(color: AppTheme.textSecondary),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

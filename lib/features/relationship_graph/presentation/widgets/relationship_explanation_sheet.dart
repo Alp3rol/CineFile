@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../domain/graph_models.dart';
 import 'graph_style.dart';
@@ -40,7 +41,7 @@ class RelationshipExplanationSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDirector = edgeType == GraphEdgeType.directed;
-    final roleName = isDirector ? 'Yönetmen' : 'Oyuncu';
+    final roleName = isDirector ? AppLocalizations.of(context).graphNodeDirector : AppLocalizations.of(context).graphNodeActor;
     final roleColor = GraphStyle.colorFor(personNode.type);
 
     return SafeArea(
@@ -67,7 +68,7 @@ class RelationshipExplanationSheet extends StatelessWidget {
                 Icon(Icons.help_outline_rounded, color: roleColor, size: 22),
                 const SizedBox(width: 8),
                 Text(
-                  'Neden Bağlı?',
+                  AppLocalizations.of(context).graphWhyConnectedTitle,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -153,8 +154,8 @@ class RelationshipExplanationSheet extends StatelessWidget {
 
             Text(
               isDirector
-                  ? '${personNode.label}, ${titleNode.label} projesine yönetmen koltuğunda imza atmıştır.'
-                  : '${personNode.label}, ${titleNode.label} projesinin kadrosunda oyuncu olarak yer almaktadır.',
+                  ? AppLocalizations.of(context).graphExplainDirector(personNode.label, titleNode.label)
+                  : AppLocalizations.of(context).graphExplainActor(personNode.label, titleNode.label),
               style: const TextStyle(
                 fontSize: 13,
                 height: 1.4,

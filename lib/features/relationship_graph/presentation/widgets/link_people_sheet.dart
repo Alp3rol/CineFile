@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/app_network_image.dart';
@@ -81,7 +82,7 @@ class LinkPeopleSheet extends StatelessWidget {
                 style: Theme.of(context).textTheme.titleMedium,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis),
-            Text('${people.length} ortak kişi',
+            Text(AppLocalizations.of(context).graphSharedPeopleCount(people.length),
                 style: Theme.of(context).textTheme.bodyMedium),
             const SizedBox(height: 12),
             Flexible(
@@ -89,7 +90,7 @@ class LinkPeopleSheet extends StatelessWidget {
                 shrinkWrap: true,
                 itemCount: people.length,
                 separatorBuilder: (_, _) => const SizedBox(height: 4),
-                itemBuilder: (context, i) => _tile(people[i]),
+                itemBuilder: (context, i) => _tile(context, people[i]),
               ),
             ),
           ],
@@ -98,7 +99,7 @@ class LinkPeopleSheet extends StatelessWidget {
     );
   }
 
-  Widget _tile(PersonRef p) {
+  Widget _tile(BuildContext context, PersonRef p) {
     return ListTile(
       contentPadding: EdgeInsets.zero,
       onTap: () => onOpenProfile(p),
@@ -117,10 +118,10 @@ class LinkPeopleSheet extends StatelessWidget {
       ),
       title: Text(p.name,
           style: const TextStyle(color: AppTheme.textPrimary, fontSize: 14)),
-      subtitle: Text(p.isDirector ? 'Yönetmen' : 'Oyuncu',
+      subtitle: Text(p.isDirector ? AppLocalizations.of(context).graphNodeDirector : AppLocalizations.of(context).graphNodeActor,
           style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
       trailing: IconButton(
-        tooltip: 'Grafta gizle',
+        tooltip: AppLocalizations.of(context).graphHideFromGraph,
         onPressed: () => onHide(p),
         icon: const Icon(Icons.visibility_off_outlined,
             size: 18, color: AppTheme.textSecondary),

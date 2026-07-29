@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../domain/graph_models.dart';
@@ -45,10 +46,10 @@ class _GraphToolbarState extends State<GraphToolbar> {
     super.dispose();
   }
 
-  static String _depthLabel(CastDepth d) => switch (d) {
-        CastDepth.leads => 'Başroller',
-        CastDepth.featured => 'Öne çıkanlar',
-        CastDepth.all => 'Tüm kadro',
+  static String _depthLabel(AppLocalizations l10n, CastDepth d) => switch (d) {
+        CastDepth.leads => l10n.graphDepthLeads,
+        CastDepth.featured => l10n.graphDepthFeatured,
+        CastDepth.all => l10n.graphDepthFullCast,
       };
 
   @override
@@ -77,7 +78,7 @@ class _GraphToolbarState extends State<GraphToolbar> {
                       children: [
                         Flexible(
                           child: Text(
-                            'İlişki Ağı',
+                            AppLocalizations.of(context).graphTitle,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: Theme.of(context).textTheme.titleLarge,
@@ -98,7 +99,7 @@ class _GraphToolbarState extends State<GraphToolbar> {
                       ],
                     ),
                     Text(
-                      '${widget.titleCount} yapım · ${widget.personCount} köprü',
+                      AppLocalizations.of(context).graphSummary(widget.titleCount, widget.personCount),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.labelSmall,
@@ -121,7 +122,7 @@ class _GraphToolbarState extends State<GraphToolbar> {
                     style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary),
                     decoration: InputDecoration(
                       isDense: true,
-                      hintText: 'Ara…',
+                      hintText: AppLocalizations.of(context).graphSearchHint,
                       prefixIcon: const Icon(Icons.search_rounded, size: 16),
                       prefixIconConstraints:
                           const BoxConstraints(minWidth: 30, minHeight: 30),
@@ -144,7 +145,7 @@ class _GraphToolbarState extends State<GraphToolbar> {
               // Action buttons
               if (!isWide)
                 IconButton(
-                  tooltip: 'Ara',
+                  tooltip: AppLocalizations.of(context).graphSearch,
                   constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
                   padding: EdgeInsets.zero,
                   icon: Icon(
@@ -168,7 +169,7 @@ class _GraphToolbarState extends State<GraphToolbar> {
                 ),
 
               PopupMenuButton<CastDepth>(
-                tooltip: 'Kadro derinliği',
+                tooltip: AppLocalizations.of(context).graphCastDepth,
                 initialValue: widget.depth,
                 onSelected: widget.onDepthChanged,
                 icon: const Icon(Icons.tune_rounded, color: AppTheme.textSecondary, size: 20),
@@ -190,7 +191,7 @@ class _GraphToolbarState extends State<GraphToolbar> {
                                 : AppTheme.textSecondary,
                           ),
                           const SizedBox(width: 8),
-                          Text(_depthLabel(d)),
+                          Text(_depthLabel(AppLocalizations.of(context), d)),
                         ],
                       ),
                     ),
@@ -199,7 +200,7 @@ class _GraphToolbarState extends State<GraphToolbar> {
 
               if (widget.onOpenDna != null)
                 IconButton(
-                  tooltip: 'CineDNA Analitiği',
+                  tooltip: AppLocalizations.of(context).cineDnaTitle,
                   constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
                   padding: EdgeInsets.zero,
                   onPressed: widget.onOpenDna,
@@ -208,7 +209,7 @@ class _GraphToolbarState extends State<GraphToolbar> {
 
               if (widget.onFindPath != null)
                 IconButton(
-                  tooltip: 'Bağlantı bul',
+                  tooltip: AppLocalizations.of(context).graphFindConnection,
                   constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
                   padding: EdgeInsets.zero,
                   onPressed: widget.onFindPath,
@@ -218,7 +219,7 @@ class _GraphToolbarState extends State<GraphToolbar> {
 
               if (widget.onResetLayout != null)
                 IconButton(
-                  tooltip: 'Konumları sıfırla',
+                  tooltip: AppLocalizations.of(context).graphResetPositions,
                   constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
                   padding: EdgeInsets.zero,
                   onPressed: widget.onResetLayout,
@@ -227,7 +228,7 @@ class _GraphToolbarState extends State<GraphToolbar> {
                 ),
 
               IconButton(
-                tooltip: 'Ekrana sığdır',
+                tooltip: AppLocalizations.of(context).graphFitToScreen,
                 constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
                 padding: EdgeInsets.zero,
                 onPressed: widget.onFit,
@@ -251,7 +252,7 @@ class _GraphToolbarState extends State<GraphToolbar> {
                 style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary),
                 decoration: InputDecoration(
                   isDense: true,
-                  hintText: 'Graf içerisinde ara…',
+                  hintText: AppLocalizations.of(context).graphSearchInGraphHint,
                   prefixIcon: const Icon(Icons.search_rounded, size: 18),
                   suffixIcon: IconButton(
                     icon: const Icon(Icons.close_rounded, size: 16),

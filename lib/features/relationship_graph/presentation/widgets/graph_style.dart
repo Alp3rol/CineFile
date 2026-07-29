@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../domain/graph_models.dart';
 
@@ -61,24 +62,24 @@ class GraphStyle {
 
   static Color edgeColor(GraphEdgeType type) => colorFor(type.personType);
 
-  static String labelFor(GraphNodeType type) {
+  static String labelFor(AppLocalizations l10n, GraphNodeType type) {
     switch (type) {
       case GraphNodeType.movie:
-        return 'Film';
+        return l10n.graphNodeMovie;
       case GraphNodeType.tv:
-        return 'Dizi';
+        return l10n.graphNodeShow;
       case GraphNodeType.actor:
-        return 'Oyuncu';
+        return l10n.graphNodeActor;
       case GraphNodeType.director:
-        return 'Yönetmen';
+        return l10n.graphNodeDirector;
       case GraphNodeType.writer:
-        return 'Senarist';
+        return l10n.graphNodeWriter;
       case GraphNodeType.producer:
-        return 'Yapımcı';
+        return l10n.graphNodeProducer;
       case GraphNodeType.company:
-        return 'Yapım Şirketi';
+        return l10n.graphNodeCompany;
       case GraphNodeType.genre:
-        return 'Tür';
+        return l10n.graphNodeGenre;
     }
   }
 }

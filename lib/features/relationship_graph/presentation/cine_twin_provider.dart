@@ -1,4 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/l10n/l10n_lookup.dart';
+import '../../settings/presentation/settings_provider.dart';
 import '../../../core/database/database_provider.dart';
 import '../../auth/controllers/auth_controller.dart';
 import '../domain/cine_twin_calculator.dart';
@@ -27,9 +29,12 @@ class CineTwinParams {
 
 /// Provider that converts local user logs and target user logs into CineTwinResult.
 final cineTwinProvider = Provider.family<CineTwinResult?, CineTwinParams>((ref, params) {
+  // Recommendation reasons and the fallback labels below are user-facing, and
+  // this is a provider — there is no BuildContext to read them from.
+  final l10n = lookupL10n(ref.watch(localeProvider));
   final localWatchAsync = ref.watch(allWatchRecordsProvider);
   final authState = ref.watch(authStateProvider);
-  final currentUserName = authState.value?.displayName ?? 'Sen';
+  final currentUserName = authState.value?.displayName ?? l10n.cineTwinYou;
 
   final localRecords = localWatchAsync.value ?? [];
 
@@ -49,7 +54,7 @@ final cineTwinProvider = Provider.family<CineTwinResult?, CineTwinParams>((ref, 
   // Convert target user's public entries
   final userBLogs = params.targetEntries.map((e) {
     final movieId = ((e['movieId'] ?? e['tmdbId'] ?? 0) as num).toInt();
-    final title = (e['title'] ?? e['movieTitle'] ?? 'Film') as String;
+    final title = (e['title'] ?? e['movieTitle'] ?? l10n.graphNodeMovie) as String;
     final isTv = e['isTv'] == true || e['isTv'] == 1;
     final posterPath = e['moviePosterPath'] as String?;
     final rating = (e['rating'] as num?)?.toDouble();
@@ -82,5 +87,6 @@ final cineTwinProvider = Provider.family<CineTwinResult?, CineTwinParams>((ref, 
     userBLogs: userBLogs,
     userAName: currentUserName,
     userBName: '@${params.targetUsername}',
+    l10n: l10n,
   );
 });

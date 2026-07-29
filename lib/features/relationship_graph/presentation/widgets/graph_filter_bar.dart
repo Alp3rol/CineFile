@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../domain/graph_models.dart';
@@ -30,9 +31,9 @@ class GraphFilterBar extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _chip(GraphNodeType.actor, 'Oyuncular', showActors, onActorsChanged),
+          _chip(GraphNodeType.actor, AppLocalizations.of(context).graphFilterActors, showActors, onActorsChanged),
           const SizedBox(width: 6),
-          _chip(GraphNodeType.director, 'Yönetmenler', showDirectors,
+          _chip(GraphNodeType.director, AppLocalizations.of(context).graphFilterDirectors, showDirectors,
               onDirectorsChanged),
         ],
       ),

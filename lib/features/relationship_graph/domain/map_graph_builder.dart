@@ -1,3 +1,4 @@
+import '../../../l10n/app_localizations.dart';
 import '../../../core/constants/api_constants.dart';
 import '../../../core/database/app_database.dart';
 import 'graph_aggregation.dart';
@@ -15,6 +16,9 @@ MapGraph buildMapGraph(
   Map<String, List<CreditPerson>> creditsByTitle,
   GraphOverrides overrides,
   CastDepth depth,
+  // Cluster names are shown to the user, so this otherwise-pure builder needs
+  // the current language; graph_map_provider resolves it and passes it in.
+  AppLocalizations l10n,
 ) {
   if (titles.isEmpty) return MapGraph.empty;
 
@@ -80,7 +84,7 @@ MapGraph buildMapGraph(
     clusters.add(GraphCluster(
       id: cid,
       label: members.length >= 2
-          ? _clusterLabel(members, titles, agg)
+          ? _clusterLabel(members, titles, agg, l10n)
           : '',
       titleIds: members..sort(),
     ));
@@ -120,6 +124,7 @@ String _clusterLabel(
   List<String> memberIds,
   Map<String, Movie> titles,
   Map<String, PersonAggregation> agg,
+  AppLocalizations l10n,
 ) {
   final memberSet = memberIds.toSet();
   PersonAggregation? best;
@@ -148,9 +153,9 @@ String _clusterLabel(
   }
   if (genreCounts.isNotEmpty) {
     final top = genreCounts.entries.reduce((a, b) => a.value >= b.value ? a : b);
-    return '${top.key} kümesi';
+    return l10n.graphClusterNamed(top.key);
   }
-  return 'Bağlantısız';
+  return l10n.graphClusterUnconnected;
 }
 
 String? _imageUrl(String? path) {

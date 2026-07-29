@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/widgets/glass_container.dart';
@@ -34,10 +35,10 @@ class CineDnaScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: Row(
-          children: const [
-            Text('🧬 ', style: TextStyle(fontSize: 20)),
-            Text('CineDNA Analitiği',
-                style: TextStyle(fontWeight: FontWeight.bold)),
+          children: [
+            const Text('🧬 ', style: TextStyle(fontSize: 20)),
+            Text(AppLocalizations.of(context).cineDnaTitle,
+                style: const TextStyle(fontWeight: FontWeight.bold)),
           ],
         ),
         actions: [
@@ -92,7 +93,7 @@ class CineDnaScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    dna.persona.subtitle,
+                    dna.persona.subtitle(AppLocalizations.of(context)),
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -101,7 +102,7 @@ class CineDnaScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    dna.persona.description,
+                    dna.persona.description(AppLocalizations.of(context)),
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       fontSize: 13,
@@ -115,9 +116,9 @@ class CineDnaScreen extends StatelessWidget {
             const SizedBox(height: 24),
 
             // 2. The Anchor Person (Kütüphanenin Omurgası)
-            const Text(
-              '👑 Kütüphanenin Omurgası',
-              style: TextStyle(
+            Text(
+              AppLocalizations.of(context).cineDnaBackbone,
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
                 color: AppTheme.textPrimary,
@@ -170,7 +171,7 @@ class CineDnaScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Kütüphanendeki ${dna.anchorPerson!.degree} farklı yapımı birbirine bağlıyor.',
+                            AppLocalizations.of(context).cineDnaAnchorSubtitle(dna.anchorPerson!.degree),
                             style: const TextStyle(
                               fontSize: 12,
                               color: AppTheme.textSecondary,
@@ -194,8 +195,8 @@ class CineDnaScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('🎬 Toplam Yapım',
-                            style: TextStyle(
+                        Text(AppLocalizations.of(context).cineDnaTotalTitles,
+                            style: const TextStyle(
                                 fontSize: 11, color: AppTheme.textSecondary)),
                         const SizedBox(height: 6),
                         Text(
@@ -218,8 +219,8 @@ class CineDnaScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('🔗 Bağlantı Ağı',
-                            style: TextStyle(
+                        Text(AppLocalizations.of(context).cineDnaConnectionNetwork,
+                            style: const TextStyle(
                                 fontSize: 11, color: AppTheme.textSecondary)),
                         const SizedBox(height: 6),
                         Text(
@@ -239,9 +240,9 @@ class CineDnaScreen extends StatelessWidget {
             const SizedBox(height: 24),
 
             // 4. Top Bridge Connectors
-            const Text(
-              '🌉 En Etkili Bağlantı Köprüleri',
-              style: TextStyle(
+            Text(
+              AppLocalizations.of(context).cineDnaTopBridges,
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
                 color: AppTheme.textPrimary,
@@ -279,7 +280,7 @@ class CineDnaScreen extends StatelessWidget {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
-                            '${person.degree} Bağlantı',
+                            AppLocalizations.of(context).cineDnaConnectionCount(person.degree),
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
