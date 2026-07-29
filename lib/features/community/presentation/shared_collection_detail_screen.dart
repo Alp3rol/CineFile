@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_theme.dart';
@@ -21,7 +22,7 @@ class SharedCollectionDetailScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
-        title: Text('Koleksiyon', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+        title: Text(AppLocalizations.of(context).sharedCollectionTitle, style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
@@ -45,7 +46,7 @@ class SharedCollectionDetailScreen extends ConsumerWidget {
                       Icon(Icons.collections_bookmark_outlined, size: 64, color: AppTheme.textSecondary.withValues(alpha: 0.5)),
                       const SizedBox(height: 12),
                       Text(
-                        'Bu koleksiyon artık paylaşılmıyor',
+                        AppLocalizations.of(context).sharedCollectionUnshared,
                         style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                         textAlign: TextAlign.center,
                       ),
@@ -85,7 +86,7 @@ class SharedCollectionDetailScreen extends ConsumerWidget {
                   child: movies.isEmpty
                       ? Center(
                           child: Text(
-                            'Bu koleksiyonda henüz film yok.',
+                            AppLocalizations.of(context).sharedCollectionEmpty,
                             style: GoogleFonts.inter(color: AppTheme.textSecondary, fontSize: 13),
                           ),
                         )

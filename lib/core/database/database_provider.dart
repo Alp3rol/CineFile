@@ -695,7 +695,7 @@ Future<void> deleteWatchRecord(WidgetRef ref, WatchRecord record) async {
     final logRef = await _resolveLogRef(ref, user.uid, record);
     if (logRef == null) {
       throw Exception(
-          'Firestore üzerinde silinecek eşleşen kayıt bulunamadı. (Film ID: ${record.movieId})');
+          'No matching Firestore log to delete (movieId: ${record.movieId})');
     }
     await logRef.delete();
 
@@ -756,7 +756,7 @@ Future<void> updateWatchRecord(
     final logRef = await _resolveLogRef(ref, user.uid, record);
     if (logRef == null) {
       throw Exception(
-          'Firestore üzerinde güncellenecek eşleşen kayıt bulunamadı. (Film ID: ${record.movieId})');
+          'No matching Firestore log to update (movieId: ${record.movieId})');
     }
 
     final updates = <String, dynamic>{};

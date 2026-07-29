@@ -34,6 +34,23 @@ jobs:
 
       - run: flutter pub get
 
+      # Regenerates AppLocalizations and, via l10n.yaml's
+      # untranslated-messages-file, reports any key present in the template
+      # (app_tr.arb) but missing from a translation. A string can never ship
+      # in one language only.
+      - name: Check for untranslated messages
+        run: |
+          flutter gen-l10n
+          if [ -s l10n_missing.json ] && [ "$(cat l10n_missing.json)" != "{}" ]; then
+            echo "Untranslated messages:"
+            cat l10n_missing.json
+            exit 1
+          fi
+
+      # Backstop against a localized feature quietly hardcoding Turkish again.
+      - name: Check for hardcoded Turkish
+        run: dart run tool/check_localized.dart
+
       - run: flutter analyze
 
       - run: flutter test

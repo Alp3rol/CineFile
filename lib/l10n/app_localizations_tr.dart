@@ -1774,6 +1774,232 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String get timeJustNow => 'Şimdi';
+
+  @override
+  String timeMinutesAgo(int n) {
+    return '$n dk önce';
+  }
+
+  @override
+  String timeHoursAgo(int n) {
+    return '$n sa önce';
+  }
+
+  @override
+  String timeDaysAgo(int n) {
+    return '$n gün önce';
+  }
+
+  @override
+  String get communityTitle => 'Topluluk Akışı';
+
+  @override
+  String get communityFilterAll => 'Tümü';
+
+  @override
+  String get communityFilterFollowing => 'Takip Ettiklerim';
+
+  @override
+  String get communityComposeHint => 'Bir şeyler paylaş...';
+
+  @override
+  String get communityFeedLoadFailed =>
+      'Akış yüklenemedi. Lütfen tekrar deneyin.';
+
+  @override
+  String get communityEmptyTitle => 'Henüz bir gönderi yok';
+
+  @override
+  String get communityEmptyHint =>
+      'Paylaşım kutusunu kullanarak ilk gönderini oluştur!';
+
+  @override
+  String get communityNotFollowingTitle => 'Henüz kimseyi takip etmiyorsunuz';
+
+  @override
+  String get communityNotFollowingHint => 'Yeni kişiler keşfedin';
+
+  @override
+  String get communityFollowingEmpty =>
+      'Takip ettikleriniz henüz paylaşım yapmadı';
+
+  @override
+  String get communitySignInToLike => 'Beğenmek için lütfen giriş yapın.';
+
+  @override
+  String communityPostMood(String mood) {
+    return 'Mod: $mood';
+  }
+
+  @override
+  String get communityPostLoadFailed => 'Gönderi yüklenemedi.';
+
+  @override
+  String get communityShowLabel => 'Dizi';
+
+  @override
+  String get userSearchTitle => 'Kullanıcı Ara';
+
+  @override
+  String get userSearchHint => 'Kullanıcı adına göre ara...';
+
+  @override
+  String get userSearchPrompt => 'Kullanıcı adına göre arama yapın.';
+
+  @override
+  String get userSearchNotFound => 'Kullanıcı Bulunamadı';
+
+  @override
+  String get userSearchFailed => 'Arama tamamlanamadı. Lütfen tekrar deneyin.';
+
+  @override
+  String get userUnknown => 'Bilinmeyen Kullanıcı';
+
+  @override
+  String get followFollow => 'Takip Et';
+
+  @override
+  String get followUnfollow => 'Takibi Bırak';
+
+  @override
+  String get followFailed =>
+      'Takip durumu güncellenemedi. Lütfen tekrar deneyin.';
+
+  @override
+  String get cineTwinSeeMatch => 'CineTwin Uyumunu Gör';
+
+  @override
+  String get commentsTitle => 'Yorumlar';
+
+  @override
+  String commentsTitleWithCount(int count) {
+    return 'Yorumlar ($count)';
+  }
+
+  @override
+  String get commentsLoadFailed => 'Yorumlar yüklenemedi.';
+
+  @override
+  String get commentsEmpty => 'İlk yorumu sen yaz!';
+
+  @override
+  String get commentsHint => 'Yorum yaz...';
+
+  @override
+  String get commentsSignInHint => 'Yorum yazmak için giriş yapın';
+
+  @override
+  String get commentsDeleteTitle => 'Yorumu Sil?';
+
+  @override
+  String get commentsDeleteConfirm =>
+      'Bu yorumu silmek istediğinize emin misiniz?';
+
+  @override
+  String get shareOptionsTitle => 'Ne Paylaşmak İstersin?';
+
+  @override
+  String get shareMovieTitle => 'Film Paylaş';
+
+  @override
+  String get shareMovieSubtitle => 'İzlediğin tek bir film veya diziyi paylaş.';
+
+  @override
+  String get shareDiaryTitle => 'Günlüğünü Paylaş';
+
+  @override
+  String get shareDiarySubtitle => 'Paylaşacağın kayıtları toplu olarak seç.';
+
+  @override
+  String get shareCollectionTitle => 'Koleksiyon Paylaş';
+
+  @override
+  String get shareCollectionSubtitle => 'Koleksiyonunu canlı olarak paylaş.';
+
+  @override
+  String get shareCollectionWebUnavailable =>
+      'Bu özellik web\'de kullanılamıyor.';
+
+  @override
+  String get shareCollectionPickPrompt =>
+      'Toplulukla paylaşmak istediğin koleksiyonu seç.';
+
+  @override
+  String get shareCollectionNone => 'Henüz bir koleksiyonun yok.';
+
+  @override
+  String get shareMoviePickPrompt =>
+      'Toplulukla paylaşmak istediğin bir film/dizi seç.';
+
+  @override
+  String get shareDiaryPickPrompt =>
+      'Bu gönderide paylaşmak istediğin kayıtları işaretle.';
+
+  @override
+  String get shareNoRecords => 'Henüz bir izleme kaydın yok.';
+
+  @override
+  String get shareContinue => 'Devam Et';
+
+  @override
+  String get shareSubmit => 'Paylaş';
+
+  @override
+  String get shareComposeMovieHint => 'Bu film hakkında ne düşünüyorsun?';
+
+  @override
+  String get shareComposeDiaryHint => 'Bu günlük hakkında bir şeyler yaz...';
+
+  @override
+  String get shareComposeCollectionHint =>
+      'Bu koleksiyon hakkında bir şeyler yaz...';
+
+  @override
+  String get shareSignInRequired => 'Lütfen önce giriş yapın.';
+
+  @override
+  String get shareSucceeded => 'Paylaşıldı.';
+
+  @override
+  String get shareFailed => 'Paylaşılamadı. Lütfen tekrar deneyin.';
+
+  @override
+  String get sharedCollectionTitle => 'Koleksiyon';
+
+  @override
+  String get sharedCollectionUnshared => 'Bu koleksiyon artık paylaşılmıyor';
+
+  @override
+  String get sharedCollectionEmpty => 'Bu koleksiyonda henüz film yok.';
+
+  @override
+  String get sharedCollectionLoadFailed => 'Koleksiyon yüklenemedi.';
+
+  @override
+  String get publicDiaryEmpty => 'Paylaşılmış bir kayıt yok.';
+
+  @override
+  String userSearchNoMatch(String query) {
+    return '\"$query\" ile eşleşen bir kullanıcı yok.';
+  }
+
+  @override
+  String userFollowerCount(int count) {
+    return '$count takipçi';
+  }
+
+  @override
+  String communityDiaryEntriesLink(int count) {
+    return '$count film/dizi · Günlüğü gör';
+  }
+
+  @override
+  String shareEntriesCount(int count) {
+    return '$count kayıt paylaşılacak';
+  }
+
+  @override
   String get tierLocked => 'Kilitli';
 
   @override

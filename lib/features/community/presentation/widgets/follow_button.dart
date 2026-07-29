@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -37,7 +38,8 @@ class FollowButton extends ConsumerWidget {
           } catch (e) {
             debugPrint('toggleFollow failed: $e');
             if (context.mounted) {
-              showPremiumToast(context, 'Takip durumu güncellenemedi: $e', isError: true);
+              debugPrint('Toggling follow failed: $e');
+        showPremiumToast(context, AppLocalizations.of(context).followFailed, isError: true);
             }
           }
         },
@@ -54,7 +56,7 @@ class FollowButton extends ConsumerWidget {
           ),
           child: Center(
             child: Text(
-              isFollowing ? 'Takibi Bırak' : 'Takip Et',
+              isFollowing ? AppLocalizations.of(context).followUnfollow : AppLocalizations.of(context).followFollow,
               style: GoogleFonts.outfit(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,

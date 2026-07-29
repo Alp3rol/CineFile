@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../features/auth/controllers/auth_controller.dart';
@@ -101,7 +102,7 @@ Future<void> advanceEpisodeWithToast(BuildContext context, WidgetRef ref, Active
   } catch (e) {
     debugPrint('advanceEpisodeWithToast failed: $e');
     if (context.mounted) {
-      showPremiumToast(context, 'Bölüm kaydedilemedi: $e', isError: true);
+      showPremiumToast(context, AppLocalizations.of(context).episodeMarkFailed, isError: true);
     }
   }
 }

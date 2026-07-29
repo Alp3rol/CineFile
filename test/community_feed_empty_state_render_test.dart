@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'support/localized_app.dart';
 import 'package:cinefile/features/auth/controllers/auth_controller.dart';
 import 'package:cinefile/features/community/models/community_post_model.dart';
 import 'package:cinefile/features/community/presentation/community_feed_provider.dart';
@@ -44,7 +45,7 @@ Widget _app(List<Override> overrides) {
       ),
       ...overrides,
     ],
-    child: const MaterialApp(home: CommunityFeedScreen()),
+    child: const LocalizedTestApp(locale: Locale('tr'), home: CommunityFeedScreen()),
   );
 }
 

@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'support/riverpod_async.dart';
+import 'support/localized_app.dart';
 import 'package:cinefile/core/database/app_database.dart';
 import 'package:cinefile/core/database/database_provider.dart';
 import 'package:cinefile/core/database/movie_repository.dart';
@@ -40,7 +41,7 @@ void main() {
 
     await tester.pumpWidget(UncontrolledProviderScope(
       container: container,
-      child: const MaterialApp(home: Scaffold(body: ShareCollectionPickerSheet())),
+      child: const LocalizedTestApp(locale: Locale('tr'), home: Scaffold(body: ShareCollectionPickerSheet())),
     ));
     await tester.pumpAndSettle();
 

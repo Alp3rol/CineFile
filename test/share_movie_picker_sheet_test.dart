@@ -10,6 +10,7 @@ import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'support/localized_app.dart';
 import 'package:cinefile/features/auth/controllers/auth_controller.dart';
 import 'package:cinefile/features/community/presentation/widgets/share_movie_picker_sheet.dart';
 
@@ -66,7 +67,7 @@ void main() {
         firebaseAuthProvider.overrideWithValue(mockAuth),
         firestoreProvider.overrideWithValue(firestore),
       ],
-      child: MaterialApp(home: Scaffold(body: sheet)),
+      child: LocalizedTestApp(locale: const Locale('tr'), home: Scaffold(body: sheet)),
     );
   }
 

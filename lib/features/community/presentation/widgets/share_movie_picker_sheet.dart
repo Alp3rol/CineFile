@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -62,14 +63,14 @@ class _ShareMoviePickerSheetState extends ConsumerState<ShareMoviePickerSheet> {
           ),
           const SizedBox(height: 16),
           Text(
-            widget.multiSelect ? 'Günlüğünü Paylaş' : 'Film Paylaş',
+            widget.multiSelect ? AppLocalizations.of(context).shareDiaryTitle : AppLocalizations.of(context).shareMovieTitle,
             style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
           ),
           const SizedBox(height: 2),
           Text(
             widget.multiSelect
-                ? 'Bu gönderide paylaşmak istediğin kayıtları işaretle.'
-                : 'Toplulukla paylaşmak istediğin bir film/dizi seç.',
+                ? AppLocalizations.of(context).shareDiaryPickPrompt
+                : AppLocalizations.of(context).shareMoviePickPrompt,
             style: GoogleFonts.inter(fontSize: 11, color: AppTheme.textSecondary),
           ),
           const SizedBox(height: 16),
@@ -83,7 +84,7 @@ class _ShareMoviePickerSheetState extends ConsumerState<ShareMoviePickerSheet> {
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 20),
                   child: Text(
-                    'Henüz bir izleme kaydın yok.',
+                    AppLocalizations.of(context).shareNoRecords,
                     style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary),
                   ),
                 );
@@ -111,7 +112,7 @@ class _ShareMoviePickerSheetState extends ConsumerState<ShareMoviePickerSheet> {
                   disabledBackgroundColor: AppTheme.accentColor.withValues(alpha: 0.3),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                child: Text('Devam Et', style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold)),
+                child: Text(AppLocalizations.of(context).shareContinue, style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold)),
               ),
             ),
         ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -44,12 +45,12 @@ class ShareCollectionPickerSheet extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Koleksiyon Paylaş',
+            AppLocalizations.of(context).shareCollectionTitle,
             style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
           ),
           const SizedBox(height: 2),
           Text(
-            'Toplulukla paylaşmak istediğin koleksiyonu seç.',
+            AppLocalizations.of(context).shareCollectionPickPrompt,
             style: GoogleFonts.inter(fontSize: 11, color: AppTheme.textSecondary),
           ),
           const SizedBox(height: 16),
@@ -63,7 +64,7 @@ class ShareCollectionPickerSheet extends ConsumerWidget {
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 20),
                   child: Text(
-                    'Henüz bir koleksiyonun yok.',
+                    AppLocalizations.of(context).shareCollectionNone,
                     style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary),
                   ),
                 );

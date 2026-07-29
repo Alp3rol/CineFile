@@ -1817,6 +1817,266 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get timeJustNow => 'Just now';
+
+  @override
+  String timeMinutesAgo(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n min ago',
+      one: '1 min ago',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String timeHoursAgo(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n hrs ago',
+      one: '1 hr ago',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String timeDaysAgo(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n days ago',
+      one: '1 day ago',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get communityTitle => 'Community Feed';
+
+  @override
+  String get communityFilterAll => 'All';
+
+  @override
+  String get communityFilterFollowing => 'Following';
+
+  @override
+  String get communityComposeHint => 'Share something...';
+
+  @override
+  String get communityFeedLoadFailed =>
+      'Couldn\'t load the feed. Please try again.';
+
+  @override
+  String get communityEmptyTitle => 'No posts yet';
+
+  @override
+  String get communityEmptyHint => 'Use the box above to write the first one.';
+
+  @override
+  String get communityNotFollowingTitle => 'You aren\'t following anyone yet';
+
+  @override
+  String get communityNotFollowingHint => 'Find some people to follow';
+
+  @override
+  String get communityFollowingEmpty => 'Nobody you follow has posted yet';
+
+  @override
+  String get communitySignInToLike => 'Please sign in to like posts.';
+
+  @override
+  String communityPostMood(String mood) {
+    return 'Mood: $mood';
+  }
+
+  @override
+  String get communityPostLoadFailed => 'Couldn\'t load this post.';
+
+  @override
+  String get communityShowLabel => 'Show';
+
+  @override
+  String get userSearchTitle => 'Find People';
+
+  @override
+  String get userSearchHint => 'Search by username...';
+
+  @override
+  String get userSearchPrompt => 'Search for someone by their username.';
+
+  @override
+  String get userSearchNotFound => 'No Users Found';
+
+  @override
+  String get userSearchFailed =>
+      'The search couldn\'t be completed. Please try again.';
+
+  @override
+  String get userUnknown => 'Unknown User';
+
+  @override
+  String get followFollow => 'Follow';
+
+  @override
+  String get followUnfollow => 'Unfollow';
+
+  @override
+  String get followFailed => 'Couldn\'t update that. Please try again.';
+
+  @override
+  String get cineTwinSeeMatch => 'See Your CineTwin Match';
+
+  @override
+  String get commentsTitle => 'Comments';
+
+  @override
+  String commentsTitleWithCount(int count) {
+    return 'Comments ($count)';
+  }
+
+  @override
+  String get commentsLoadFailed => 'Couldn\'t load the comments.';
+
+  @override
+  String get commentsEmpty => 'Be the first to comment.';
+
+  @override
+  String get commentsHint => 'Write a comment...';
+
+  @override
+  String get commentsSignInHint => 'Sign in to comment';
+
+  @override
+  String get commentsDeleteTitle => 'Delete Comment?';
+
+  @override
+  String get commentsDeleteConfirm =>
+      'Are you sure you want to delete this comment?';
+
+  @override
+  String get shareOptionsTitle => 'What Do You Want to Share?';
+
+  @override
+  String get shareMovieTitle => 'Share a Title';
+
+  @override
+  String get shareMovieSubtitle => 'Share a single film or show you watched.';
+
+  @override
+  String get shareDiaryTitle => 'Share Your Diary';
+
+  @override
+  String get shareDiarySubtitle => 'Pick several records to share at once.';
+
+  @override
+  String get shareCollectionTitle => 'Share a Collection';
+
+  @override
+  String get shareCollectionSubtitle =>
+      'Share a collection that stays in sync.';
+
+  @override
+  String get shareCollectionWebUnavailable =>
+      'This isn\'t available on the web.';
+
+  @override
+  String get shareCollectionPickPrompt =>
+      'Choose the collection you want to share.';
+
+  @override
+  String get shareCollectionNone => 'You don\'t have any collections yet.';
+
+  @override
+  String get shareMoviePickPrompt => 'Choose a film or show to share.';
+
+  @override
+  String get shareDiaryPickPrompt => 'Tick the records you want in this post.';
+
+  @override
+  String get shareNoRecords => 'You haven\'t logged anything yet.';
+
+  @override
+  String get shareContinue => 'Continue';
+
+  @override
+  String get shareSubmit => 'Share';
+
+  @override
+  String get shareComposeMovieHint => 'What did you make of it?';
+
+  @override
+  String get shareComposeDiaryHint => 'Say something about this diary...';
+
+  @override
+  String get shareComposeCollectionHint =>
+      'Say something about this collection...';
+
+  @override
+  String get shareSignInRequired => 'Please sign in first.';
+
+  @override
+  String get shareSucceeded => 'Shared.';
+
+  @override
+  String get shareFailed => 'Couldn\'t share that. Please try again.';
+
+  @override
+  String get sharedCollectionTitle => 'Collection';
+
+  @override
+  String get sharedCollectionUnshared => 'This collection is no longer shared';
+
+  @override
+  String get sharedCollectionEmpty =>
+      'There is nothing in this collection yet.';
+
+  @override
+  String get sharedCollectionLoadFailed => 'Couldn\'t load the collection.';
+
+  @override
+  String get publicDiaryEmpty => 'Nothing has been shared.';
+
+  @override
+  String userSearchNoMatch(String query) {
+    return 'No users match \"$query\".';
+  }
+
+  @override
+  String userFollowerCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count followers',
+      one: '1 follower',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String communityDiaryEntriesLink(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count titles · see the diary',
+      one: '1 title · see the diary',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String shareEntriesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count records will be shared',
+      one: '1 record will be shared',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get tierLocked => 'Locked';
 
   @override

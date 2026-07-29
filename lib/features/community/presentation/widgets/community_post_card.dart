@@ -1,9 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
+import '../../../../core/l10n/date_text.dart';
 import '../../../../core/database/database_provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
@@ -35,21 +36,6 @@ class CommunityPostCard extends ConsumerWidget {
         return _buildCollectionCard(context, ref);
       default:
         return _buildMovieCard(context, ref);
-    }
-  }
-
-  static String _formatRelativeTime(DateTime dateTime) {
-    final difference = DateTime.now().difference(dateTime);
-    if (difference.inMinutes < 1) {
-      return 'Şimdi';
-    } else if (difference.inMinutes < 60) {
-      return '${difference.inMinutes} dk önce';
-    } else if (difference.inHours < 24) {
-      return '${difference.inHours} sa önce';
-    } else if (difference.inDays < 7) {
-      return '${difference.inDays} gün önce';
-    } else {
-      return DateFormat('dd.MM.yyyy').format(dateTime);
     }
   }
 
@@ -95,7 +81,7 @@ class CommunityPostCard extends ConsumerWidget {
                 ),
               ),
               Text(
-                _formatRelativeTime(post.createdAt),
+                formatRelativeTime(context, post.createdAt),
                 style: GoogleFonts.inter(fontSize: 10, color: AppTheme.textSecondary),
               ),
             ],
@@ -112,7 +98,7 @@ class CommunityPostCard extends ConsumerWidget {
           onTap: () {
             if (currentUser == null) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Beğenmek için lütfen giriş yapın.')),
+                SnackBar(content: Text(AppLocalizations.of(context).communitySignInToLike)),
               );
               return;
             }
@@ -245,7 +231,7 @@ class CommunityPostCard extends ConsumerWidget {
                                 border: Border.all(color: AppTheme.accentColor.withValues(alpha: 0.4), width: 0.5),
                               ),
                               child: Text(
-                                'Dizi',
+                                AppLocalizations.of(context).communityShowLabel,
                                 style: GoogleFonts.inter(fontSize: 8, fontWeight: FontWeight.bold, color: AppTheme.accentColor),
                               ),
                             ),
@@ -264,7 +250,7 @@ class CommunityPostCard extends ConsumerWidget {
                             Text('/10', style: GoogleFonts.inter(fontSize: 10, color: AppTheme.textSecondary)),
                             if (post.mood != null) ...[
                               const SizedBox(width: 12),
-                              Text('Mod: ${post.mood}', style: GoogleFonts.inter(fontSize: 12, color: Colors.white70)),
+                              Text(AppLocalizations.of(context).communityPostMood(post.mood!), style: GoogleFonts.inter(fontSize: 12, color: Colors.white70)),
                             ],
                           ],
                         ),
@@ -332,7 +318,7 @@ class CommunityPostCard extends ConsumerWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    '${post.entries.length} film/dizi · Günlüğü gör',
+                    AppLocalizations.of(context).communityDiaryEntriesLink(post.entries.length),
                     style: GoogleFonts.inter(fontSize: 11, color: AppTheme.accentColor, fontWeight: FontWeight.bold),
                   ),
                   if (previewPosters.isNotEmpty) ...[
@@ -387,7 +373,7 @@ class CommunityPostCard extends ConsumerWidget {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Bu koleksiyon artık paylaşılmıyor',
+                          AppLocalizations.of(context).sharedCollectionUnshared,
                           style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary, fontStyle: FontStyle.italic),
                         ),
                       ),

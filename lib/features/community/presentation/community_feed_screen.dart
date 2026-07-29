@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -131,7 +132,7 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32),
           child: Text(
-            'Hata oluştu: $err',
+            AppLocalizations.of(context).userSearchFailed,
             style: GoogleFonts.inter(color: Colors.redAccent),
             textAlign: TextAlign.center,
           ),
@@ -139,17 +140,17 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
       ),
       data: (results) {
         if (query.trim().isEmpty) {
-          return const CommunityEmptyState(
+          return CommunityEmptyState(
             icon: Icons.person_search_rounded,
-            title: 'Kullanıcı Ara',
-            subtitle: 'Kullanıcı adına göre arama yapın.',
+            title: AppLocalizations.of(context).userSearchTitle,
+            subtitle: AppLocalizations.of(context).userSearchPrompt,
           );
         }
         if (results.isEmpty) {
           return CommunityEmptyState(
             icon: Icons.search_off_rounded,
-            title: 'Kullanıcı Bulunamadı',
-            subtitle: '"$query" ile eşleşen bir kullanıcı yok.',
+            title: AppLocalizations.of(context).userSearchNotFound,
+            subtitle: AppLocalizations.of(context).userSearchNoMatch(query),
           );
         }
         return ListView.builder(
@@ -186,7 +187,7 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      'Topluluk Akışı',
+                      AppLocalizations.of(context).communityTitle,
                       style: GoogleFonts.outfit(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
@@ -243,7 +244,7 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
                     autofocus: true,
                     style: GoogleFonts.inter(color: Colors.white),
                     decoration: InputDecoration(
-                      hintText: 'Kullanıcı adına göre ara...',
+                      hintText: AppLocalizations.of(context).userSearchHint,
                       hintStyle: GoogleFonts.inter(color: AppTheme.textSecondary),
                       prefixIcon: const Icon(Icons.search_rounded, color: AppTheme.textSecondary),
                       suffixIcon: _searchController.text.isNotEmpty
@@ -269,9 +270,9 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                   child: Row(
                     children: [
-                      _buildTabButton(FeedTab.all, 'Tümü'),
+                      _buildTabButton(FeedTab.all, AppLocalizations.of(context).communityFilterAll),
                       const SizedBox(width: 12),
-                      _buildTabButton(FeedTab.following, 'Takip Ettiklerim'),
+                      _buildTabButton(FeedTab.following, AppLocalizations.of(context).communityFilterFollowing),
                     ],
                   ),
                 ),
@@ -304,7 +305,7 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
-                              'Bir şeyler paylaş...',
+                              AppLocalizations.of(context).communityComposeHint,
                               style: GoogleFonts.inter(fontSize: 13, color: AppTheme.textSecondary),
                             ),
                           ),
@@ -325,7 +326,7 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
                   ),
                   error: (err, stack) => Center(
                     child: Text(
-                      'Akış yüklenirken hata oluştu: $err',
+                      AppLocalizations.of(context).communityFeedLoadFailed,
                       style: const TextStyle(color: Colors.redAccent),
                     ),
                   ),
@@ -337,18 +338,18 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
 
                     if (filteredPosts.isEmpty) {
                       if (feedTab == FeedTab.all) {
-                        return const CommunityEmptyState(
+                        return CommunityEmptyState(
                           icon: Icons.movie_filter_outlined,
-                          title: 'Henüz bir gönderi yok',
-                          subtitle: 'Paylaşım kutusunu kullanarak ilk gönderini oluştur!',
+                          title: AppLocalizations.of(context).communityEmptyTitle,
+                          subtitle: AppLocalizations.of(context).communityEmptyHint,
                         );
                       }
                       if (followedIds.isEmpty) {
                         return CommunityEmptyState(
                           icon: Icons.person_search_rounded,
-                          title: 'Henüz kimseyi takip etmiyorsunuz',
-                          subtitle: 'Yeni kişiler keşfedin',
-                          ctaLabel: 'Kullanıcı Ara',
+                          title: AppLocalizations.of(context).communityNotFollowingTitle,
+                          subtitle: AppLocalizations.of(context).communityNotFollowingHint,
+                          ctaLabel: AppLocalizations.of(context).userSearchTitle,
                           onCta: () {
                             Navigator.of(context).push(
                               MaterialPageRoute(builder: (_) => const UserSearchScreen()),
@@ -356,9 +357,9 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
                           },
                         );
                       }
-                      return const CommunityEmptyState(
+                      return CommunityEmptyState(
                         icon: Icons.hourglass_empty_rounded,
-                        title: 'Takip ettikleriniz henüz paylaşım yapmadı',
+                        title: AppLocalizations.of(context).communityFollowingEmpty,
                       );
                     }
 

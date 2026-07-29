@@ -71,7 +71,7 @@ class DioClient {
 
           final resolved = await DohResolver.resolve(uri.host);
           if (resolved == null) {
-            throw SocketException('DNS engellendi ve DoH çözümlemesi başarısız: ${uri.host}');
+            throw SocketException('DNS blocked and DoH resolution failed for ${uri.host}');
           }
           final socket = await Socket.connect(resolved, uri.port, timeout: const Duration(seconds: 4));
           return ConnectionTask.fromSocket(Future.value(socket), socket.destroy);

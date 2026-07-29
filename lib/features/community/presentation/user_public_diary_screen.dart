@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../movie_detail/presentation/movie_detail_screen.dart';
@@ -28,7 +29,7 @@ class UserPublicDiaryScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.bolt_rounded, color: AppTheme.accentColor),
-            tooltip: 'CineTwin Uyumunu Gör',
+            tooltip: AppLocalizations.of(context).cineTwinSeeMatch,
             onPressed: () {
               CineTwinScreen.navigate(context, username, entries);
             },
@@ -39,7 +40,7 @@ class UserPublicDiaryScreen extends StatelessWidget {
         child: entries.isEmpty
             ? Center(
                 child: Text(
-                  'Paylaşılmış bir kayıt yok.',
+                  AppLocalizations.of(context).publicDiaryEmpty,
                   style: GoogleFonts.inter(color: AppTheme.textSecondary, fontSize: 13),
                 ),
               )

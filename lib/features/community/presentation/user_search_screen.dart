@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_theme.dart';
@@ -40,7 +41,7 @@ class _UserSearchScreenState extends ConsumerState<UserSearchScreen> {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
-        title: Text('Kullanıcı Ara', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+        title: Text(AppLocalizations.of(context).userSearchTitle, style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
@@ -58,7 +59,7 @@ class _UserSearchScreenState extends ConsumerState<UserSearchScreen> {
                 autofocus: true,
                 style: GoogleFonts.inter(color: Colors.white),
                 decoration: InputDecoration(
-                  hintText: 'Kullanıcı adına göre ara...',
+                  hintText: AppLocalizations.of(context).userSearchHint,
                   hintStyle: GoogleFonts.inter(color: AppTheme.textSecondary),
                   prefixIcon: const Icon(Icons.search_rounded, color: AppTheme.textSecondary),
                   suffixIcon: _controller.text.isNotEmpty
@@ -84,7 +85,7 @@ class _UserSearchScreenState extends ConsumerState<UserSearchScreen> {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 32),
                     child: Text(
-                      'Hata oluştu: $err',
+                      AppLocalizations.of(context).userSearchFailed,
                       style: GoogleFonts.inter(color: Colors.redAccent),
                       textAlign: TextAlign.center,
                     ),
@@ -94,15 +95,15 @@ class _UserSearchScreenState extends ConsumerState<UserSearchScreen> {
                   if (query.trim().isEmpty) {
                     return _buildMessage(
                       icon: Icons.person_search_rounded,
-                      title: 'Kullanıcı Ara',
-                      subtitle: 'Kullanıcı adına göre arama yapın.',
+                      title: AppLocalizations.of(context).userSearchTitle,
+                      subtitle: AppLocalizations.of(context).userSearchPrompt,
                     );
                   }
                   if (results.isEmpty) {
                     return _buildMessage(
                       icon: Icons.search_off_rounded,
-                      title: 'Kullanıcı Bulunamadı',
-                      subtitle: '"$query" ile eşleşen bir kullanıcı yok.',
+                      title: AppLocalizations.of(context).userSearchNotFound,
+                      subtitle: AppLocalizations.of(context).userSearchNoMatch(query),
                     );
                   }
                   return ListView.builder(

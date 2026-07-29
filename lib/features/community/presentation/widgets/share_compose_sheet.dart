@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -95,7 +96,7 @@ class _ShareComposeSheetState extends ConsumerState<ShareComposeSheet> {
           ),
           const SizedBox(height: 16),
           Text(
-            _isMovie ? 'Film Paylaş' : (_isCollection ? 'Koleksiyon Paylaş' : 'Günlüğünü Paylaş'),
+            _isMovie ? AppLocalizations.of(context).shareMovieTitle : (_isCollection ? AppLocalizations.of(context).shareCollectionTitle : AppLocalizations.of(context).shareDiaryTitle),
             style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
           ),
           const SizedBox(height: 12),
@@ -108,8 +109,8 @@ class _ShareComposeSheetState extends ConsumerState<ShareComposeSheet> {
             style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
             decoration: InputDecoration(
               hintText: _isMovie
-                  ? 'Bu film hakkında ne düşünüyorsun?'
-                  : (_isCollection ? 'Bu koleksiyon hakkında bir şeyler yaz...' : 'Bu günlük hakkında bir şeyler yaz...'),
+                  ? AppLocalizations.of(context).shareComposeMovieHint
+                  : (_isCollection ? AppLocalizations.of(context).shareComposeCollectionHint : AppLocalizations.of(context).shareComposeDiaryHint),
               hintStyle: GoogleFonts.inter(color: AppTheme.textSecondary, fontSize: 13),
             ),
             onChanged: (_) => setState(() {}),
@@ -132,7 +133,7 @@ class _ShareComposeSheetState extends ConsumerState<ShareComposeSheet> {
                       height: 16,
                       child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                     )
-                  : Text('Paylaş', style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold)),
+                  : Text(AppLocalizations.of(context).shareSubmit, style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold)),
             ),
           ),
         ],
@@ -188,7 +189,7 @@ class _ShareComposeSheetState extends ConsumerState<ShareComposeSheet> {
     }
 
     return Text(
-      '${widget.entries.length} kayıt paylaşılacak',
+      AppLocalizations.of(context).shareEntriesCount(widget.entries.length),
       style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary),
     );
   }
@@ -196,7 +197,7 @@ class _ShareComposeSheetState extends ConsumerState<ShareComposeSheet> {
   Future<void> _submit() async {
     final currentUser = ref.currentUser;
     if (currentUser == null) {
-      showPremiumToast(context, 'Lütfen önce giriş yapın.', isError: true);
+      showPremiumToast(context, AppLocalizations.of(context).shareSignInRequired, isError: true);
       return;
     }
 
@@ -265,13 +266,14 @@ class _ShareComposeSheetState extends ConsumerState<ShareComposeSheet> {
       await ref.read(firestoreProvider).collection('posts').add(post.toMap());
 
       if (mounted) {
-        showPremiumToast(context, 'Paylaşıldı.');
+        showPremiumToast(context, AppLocalizations.of(context).shareSucceeded);
         Navigator.pop(context);
       }
     } catch (e) {
       debugPrint('post share failed: $e');
       if (mounted) {
-        showPremiumToast(context, 'Paylaşılamadı: $e', isError: true);
+        debugPrint('Sharing failed: $e');
+        showPremiumToast(context, AppLocalizations.of(context).shareFailed, isError: true);
       }
     } finally {
       if (mounted) setState(() => _submitting = false);

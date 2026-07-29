@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
@@ -42,14 +43,14 @@ class ShareOptionsSheet extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Ne Paylaşmak İstersin?',
+            AppLocalizations.of(context).shareOptionsTitle,
             style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
           ),
           const SizedBox(height: 16),
           _OptionRow(
             icon: Icons.movie_outlined,
-            title: 'Film Paylaş',
-            subtitle: 'İzlediğin tek bir film veya diziyi paylaş.',
+            title: AppLocalizations.of(context).shareMovieTitle,
+            subtitle: AppLocalizations.of(context).shareMovieSubtitle,
             onTap: () {
               Navigator.pop(context);
               ShareMoviePickerSheet.show(context);
@@ -58,8 +59,8 @@ class ShareOptionsSheet extends StatelessWidget {
           const SizedBox(height: 8),
           _OptionRow(
             icon: Icons.auto_stories_outlined,
-            title: 'Günlüğünü Paylaş',
-            subtitle: 'Paylaşacağın kayıtları toplu olarak seç.',
+            title: AppLocalizations.of(context).shareDiaryTitle,
+            subtitle: AppLocalizations.of(context).shareDiarySubtitle,
             onTap: () {
               Navigator.pop(context);
               ShareMoviePickerSheet.show(context, multiSelect: true);
@@ -68,11 +69,13 @@ class ShareOptionsSheet extends StatelessWidget {
           const SizedBox(height: 8),
           _OptionRow(
             icon: Icons.collections_bookmark_outlined,
-            title: 'Koleksiyon Paylaş',
+            title: AppLocalizations.of(context).shareCollectionTitle,
             // Collections are only live-mirrored to Firestore from the
             // native (Drift) side today — see movie_repository.dart's
             // WebMovieRepository.setCollectionVisibility no-op.
-            subtitle: kIsWeb ? 'Bu özellik web\'de henüz desteklenmiyor' : 'Koleksiyonunu canlı olarak paylaş.',
+            subtitle: kIsWeb
+                ? AppLocalizations.of(context).shareCollectionWebUnavailable
+                : AppLocalizations.of(context).shareCollectionSubtitle,
             enabled: !kIsWeb,
             onTap: () {
               Navigator.pop(context);

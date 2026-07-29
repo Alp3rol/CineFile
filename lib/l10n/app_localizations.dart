@@ -3284,6 +3284,402 @@ abstract class AppLocalizations {
   /// **'{n} dizinin tüm sezonunu tamamla.'**
   String badgeDescSeasons(int n);
 
+  /// No description provided for @timeJustNow.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şimdi'**
+  String get timeJustNow;
+
+  /// No description provided for @timeMinutesAgo.
+  ///
+  /// In tr, this message translates to:
+  /// **'{n} dk önce'**
+  String timeMinutesAgo(int n);
+
+  /// No description provided for @timeHoursAgo.
+  ///
+  /// In tr, this message translates to:
+  /// **'{n} sa önce'**
+  String timeHoursAgo(int n);
+
+  /// No description provided for @timeDaysAgo.
+  ///
+  /// In tr, this message translates to:
+  /// **'{n} gün önce'**
+  String timeDaysAgo(int n);
+
+  /// No description provided for @communityTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Topluluk Akışı'**
+  String get communityTitle;
+
+  /// No description provided for @communityFilterAll.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tümü'**
+  String get communityFilterAll;
+
+  /// No description provided for @communityFilterFollowing.
+  ///
+  /// In tr, this message translates to:
+  /// **'Takip Ettiklerim'**
+  String get communityFilterFollowing;
+
+  /// No description provided for @communityComposeHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bir şeyler paylaş...'**
+  String get communityComposeHint;
+
+  /// No description provided for @communityFeedLoadFailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Akış yüklenemedi. Lütfen tekrar deneyin.'**
+  String get communityFeedLoadFailed;
+
+  /// No description provided for @communityEmptyTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz bir gönderi yok'**
+  String get communityEmptyTitle;
+
+  /// No description provided for @communityEmptyHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Paylaşım kutusunu kullanarak ilk gönderini oluştur!'**
+  String get communityEmptyHint;
+
+  /// No description provided for @communityNotFollowingTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz kimseyi takip etmiyorsunuz'**
+  String get communityNotFollowingTitle;
+
+  /// No description provided for @communityNotFollowingHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni kişiler keşfedin'**
+  String get communityNotFollowingHint;
+
+  /// No description provided for @communityFollowingEmpty.
+  ///
+  /// In tr, this message translates to:
+  /// **'Takip ettikleriniz henüz paylaşım yapmadı'**
+  String get communityFollowingEmpty;
+
+  /// No description provided for @communitySignInToLike.
+  ///
+  /// In tr, this message translates to:
+  /// **'Beğenmek için lütfen giriş yapın.'**
+  String get communitySignInToLike;
+
+  /// No description provided for @communityPostMood.
+  ///
+  /// In tr, this message translates to:
+  /// **'Mod: {mood}'**
+  String communityPostMood(String mood);
+
+  /// No description provided for @communityPostLoadFailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Gönderi yüklenemedi.'**
+  String get communityPostLoadFailed;
+
+  /// No description provided for @communityShowLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Dizi'**
+  String get communityShowLabel;
+
+  /// No description provided for @userSearchTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kullanıcı Ara'**
+  String get userSearchTitle;
+
+  /// No description provided for @userSearchHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kullanıcı adına göre ara...'**
+  String get userSearchHint;
+
+  /// No description provided for @userSearchPrompt.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kullanıcı adına göre arama yapın.'**
+  String get userSearchPrompt;
+
+  /// No description provided for @userSearchNotFound.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kullanıcı Bulunamadı'**
+  String get userSearchNotFound;
+
+  /// No description provided for @userSearchFailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Arama tamamlanamadı. Lütfen tekrar deneyin.'**
+  String get userSearchFailed;
+
+  /// No description provided for @userUnknown.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bilinmeyen Kullanıcı'**
+  String get userUnknown;
+
+  /// No description provided for @followFollow.
+  ///
+  /// In tr, this message translates to:
+  /// **'Takip Et'**
+  String get followFollow;
+
+  /// No description provided for @followUnfollow.
+  ///
+  /// In tr, this message translates to:
+  /// **'Takibi Bırak'**
+  String get followUnfollow;
+
+  /// No description provided for @followFailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Takip durumu güncellenemedi. Lütfen tekrar deneyin.'**
+  String get followFailed;
+
+  /// No description provided for @cineTwinSeeMatch.
+  ///
+  /// In tr, this message translates to:
+  /// **'CineTwin Uyumunu Gör'**
+  String get cineTwinSeeMatch;
+
+  /// No description provided for @commentsTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yorumlar'**
+  String get commentsTitle;
+
+  /// No description provided for @commentsTitleWithCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yorumlar ({count})'**
+  String commentsTitleWithCount(int count);
+
+  /// No description provided for @commentsLoadFailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yorumlar yüklenemedi.'**
+  String get commentsLoadFailed;
+
+  /// No description provided for @commentsEmpty.
+  ///
+  /// In tr, this message translates to:
+  /// **'İlk yorumu sen yaz!'**
+  String get commentsEmpty;
+
+  /// No description provided for @commentsHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yorum yaz...'**
+  String get commentsHint;
+
+  /// No description provided for @commentsSignInHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yorum yazmak için giriş yapın'**
+  String get commentsSignInHint;
+
+  /// No description provided for @commentsDeleteTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yorumu Sil?'**
+  String get commentsDeleteTitle;
+
+  /// No description provided for @commentsDeleteConfirm.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu yorumu silmek istediğinize emin misiniz?'**
+  String get commentsDeleteConfirm;
+
+  /// No description provided for @shareOptionsTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ne Paylaşmak İstersin?'**
+  String get shareOptionsTitle;
+
+  /// No description provided for @shareMovieTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Film Paylaş'**
+  String get shareMovieTitle;
+
+  /// No description provided for @shareMovieSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'İzlediğin tek bir film veya diziyi paylaş.'**
+  String get shareMovieSubtitle;
+
+  /// No description provided for @shareDiaryTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Günlüğünü Paylaş'**
+  String get shareDiaryTitle;
+
+  /// No description provided for @shareDiarySubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Paylaşacağın kayıtları toplu olarak seç.'**
+  String get shareDiarySubtitle;
+
+  /// No description provided for @shareCollectionTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Koleksiyon Paylaş'**
+  String get shareCollectionTitle;
+
+  /// No description provided for @shareCollectionSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Koleksiyonunu canlı olarak paylaş.'**
+  String get shareCollectionSubtitle;
+
+  /// No description provided for @shareCollectionWebUnavailable.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu özellik web\'de kullanılamıyor.'**
+  String get shareCollectionWebUnavailable;
+
+  /// No description provided for @shareCollectionPickPrompt.
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplulukla paylaşmak istediğin koleksiyonu seç.'**
+  String get shareCollectionPickPrompt;
+
+  /// No description provided for @shareCollectionNone.
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz bir koleksiyonun yok.'**
+  String get shareCollectionNone;
+
+  /// No description provided for @shareMoviePickPrompt.
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplulukla paylaşmak istediğin bir film/dizi seç.'**
+  String get shareMoviePickPrompt;
+
+  /// No description provided for @shareDiaryPickPrompt.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu gönderide paylaşmak istediğin kayıtları işaretle.'**
+  String get shareDiaryPickPrompt;
+
+  /// No description provided for @shareNoRecords.
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz bir izleme kaydın yok.'**
+  String get shareNoRecords;
+
+  /// No description provided for @shareContinue.
+  ///
+  /// In tr, this message translates to:
+  /// **'Devam Et'**
+  String get shareContinue;
+
+  /// No description provided for @shareSubmit.
+  ///
+  /// In tr, this message translates to:
+  /// **'Paylaş'**
+  String get shareSubmit;
+
+  /// No description provided for @shareComposeMovieHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu film hakkında ne düşünüyorsun?'**
+  String get shareComposeMovieHint;
+
+  /// No description provided for @shareComposeDiaryHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu günlük hakkında bir şeyler yaz...'**
+  String get shareComposeDiaryHint;
+
+  /// No description provided for @shareComposeCollectionHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu koleksiyon hakkında bir şeyler yaz...'**
+  String get shareComposeCollectionHint;
+
+  /// No description provided for @shareSignInRequired.
+  ///
+  /// In tr, this message translates to:
+  /// **'Lütfen önce giriş yapın.'**
+  String get shareSignInRequired;
+
+  /// No description provided for @shareSucceeded.
+  ///
+  /// In tr, this message translates to:
+  /// **'Paylaşıldı.'**
+  String get shareSucceeded;
+
+  /// No description provided for @shareFailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Paylaşılamadı. Lütfen tekrar deneyin.'**
+  String get shareFailed;
+
+  /// No description provided for @sharedCollectionTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Koleksiyon'**
+  String get sharedCollectionTitle;
+
+  /// No description provided for @sharedCollectionUnshared.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu koleksiyon artık paylaşılmıyor'**
+  String get sharedCollectionUnshared;
+
+  /// No description provided for @sharedCollectionEmpty.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu koleksiyonda henüz film yok.'**
+  String get sharedCollectionEmpty;
+
+  /// No description provided for @sharedCollectionLoadFailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Koleksiyon yüklenemedi.'**
+  String get sharedCollectionLoadFailed;
+
+  /// No description provided for @publicDiaryEmpty.
+  ///
+  /// In tr, this message translates to:
+  /// **'Paylaşılmış bir kayıt yok.'**
+  String get publicDiaryEmpty;
+
+  /// No description provided for @userSearchNoMatch.
+  ///
+  /// In tr, this message translates to:
+  /// **'\"{query}\" ile eşleşen bir kullanıcı yok.'**
+  String userSearchNoMatch(String query);
+
+  /// No description provided for @userFollowerCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} takipçi'**
+  String userFollowerCount(int count);
+
+  /// No description provided for @communityDiaryEntriesLink.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} film/dizi · Günlüğü gör'**
+  String communityDiaryEntriesLink(int count);
+
+  /// No description provided for @shareEntriesCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} kayıt paylaşılacak'**
+  String shareEntriesCount(int count);
+
   /// No description provided for @tierLocked.
   ///
   /// In tr, this message translates to:

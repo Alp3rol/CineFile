@@ -8,6 +8,7 @@ import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'support/localized_app.dart';
 import 'package:cinefile/features/auth/controllers/auth_controller.dart';
 import 'package:cinefile/features/community/presentation/user_search_screen.dart';
 import 'support/network_image_mock.dart';
@@ -60,7 +61,7 @@ void main() {
         firebaseAuthProvider.overrideWithValue(mockAuth),
         firestoreProvider.overrideWithValue(firestore),
       ],
-      child: const MaterialApp(home: UserSearchScreen()),
+      child: const LocalizedTestApp(locale: Locale('tr'), home: UserSearchScreen()),
     );
   }
 

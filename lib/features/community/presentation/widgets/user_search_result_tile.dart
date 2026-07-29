@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../auth/models/user_model.dart';
@@ -45,7 +46,7 @@ class UserSearchResultTile extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    '${user.followerCount} takipçi',
+                    AppLocalizations.of(context).userFollowerCount(user.followerCount),
                     style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary),
                   ),
                 ],
@@ -54,7 +55,7 @@ class UserSearchResultTile extends StatelessWidget {
             const SizedBox(width: 12),
             IconButton(
               icon: const Icon(Icons.bolt_rounded, color: AppTheme.accentColor, size: 20),
-              tooltip: 'CineTwin Uyumunu Gör',
+              tooltip: AppLocalizations.of(context).cineTwinSeeMatch,
               onPressed: () {
                 CineTwinScreen.navigate(context, user.username, []);
               },

@@ -134,7 +134,17 @@ Movie movieFromTmdbPayload({
 
   return Movie(
     tmdbId: tmdbId,
-    title: (movieData['title'] ?? movieData['name'] ?? 'Bilinmeyen Yapım') as String,
+    // Falls through to the original title rather than a localized "Unknown
+    // Title" placeholder: whatever lands here is written to the database as
+    // the title, and a placeholder in one language becomes wrong data the
+    // moment the user switches — the same leak the director field had. An
+    // empty string is honest, and display sites already substitute their own
+    // placeholder for it.
+    title: (movieData['title'] ??
+            movieData['name'] ??
+            movieData['original_title'] ??
+            movieData['original_name'] ??
+            '') as String,
     originalTitle:
         (movieData['original_title'] ?? movieData['original_name']) as String?,
     posterPath: movieData['poster_path'] as String?,

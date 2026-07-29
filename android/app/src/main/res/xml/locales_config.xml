@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The languages this app ships, declared for Android 13+ per-app language
+  preferences. Referenced by android:localeConfig in AndroidManifest.xml.
+
+  Without it the app never appears under Settings > Apps > CineFile > Language,
+  so a user whose device is in one language but who wants the app in another
+  has to use the app's own picker. Keep in sync with
+  AppLocalizations.supportedLocales.
+-->
+<locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+    <locale android:name="tr" />
+    <locale android:name="en" />
+</locale-config>

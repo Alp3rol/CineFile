@@ -12,6 +12,7 @@ import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'support/localized_app.dart';
 import 'package:cinefile/features/auth/controllers/auth_controller.dart';
 import 'package:cinefile/features/community/models/community_post_model.dart';
 import 'package:cinefile/features/community/presentation/user_public_diary_screen.dart';
@@ -45,7 +46,7 @@ void main() {
         firebaseAuthProvider.overrideWithValue(mockAuth),
         firestoreProvider.overrideWithValue(firestore),
       ],
-      child: const MaterialApp(home: Scaffold(body: ShareMoviePickerSheet(multiSelect: true))),
+      child: const LocalizedTestApp(locale: Locale('tr'), home: Scaffold(body: ShareMoviePickerSheet(multiSelect: true))),
     ));
     await tester.pumpAndSettle();
 
@@ -91,7 +92,8 @@ void main() {
     expect(post.entries.length, 1);
     expect(post.entries.first['movieTitle'], 'Before Movie');
 
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWidget(LocalizedTestApp(
+      locale: const Locale('tr'),
       home: UserPublicDiaryScreen(username: post.username, entries: post.entries),
     ));
     await tester.pumpAndSettle();

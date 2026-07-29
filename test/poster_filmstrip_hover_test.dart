@@ -11,6 +11,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'support/localized_app.dart';
 import 'package:cinefile/features/auth/controllers/auth_controller.dart';
 import 'package:cinefile/features/community/models/community_post_model.dart';
 import 'package:cinefile/features/community/presentation/community_feed_provider.dart';
@@ -58,7 +59,7 @@ void main() {
         communityFeedProvider.overrideWith((ref) => Stream.value([_diarySnapshotPost()])),
         followedUserIdsProvider.overrideWith((ref) => Stream.value(<String>{})),
       ],
-      child: const MaterialApp(home: CommunityFeedScreen()),
+      child: const LocalizedTestApp(locale: Locale('tr'), home: CommunityFeedScreen()),
     ));
     await tester.pumpAndSettle();
 
@@ -101,7 +102,7 @@ void main() {
         communityFeedProvider.overrideWith((ref) => Stream.value([_diarySnapshotPost()])),
         followedUserIdsProvider.overrideWith((ref) => Stream.value(<String>{})),
       ],
-      child: const MaterialApp(home: CommunityFeedScreen()),
+      child: const LocalizedTestApp(locale: Locale('tr'), home: CommunityFeedScreen()),
     ));
     await tester.pumpAndSettle();
 
@@ -155,7 +156,7 @@ void main() {
         communityFeedProvider.overrideWith((ref) => Stream.value([post])),
         followedUserIdsProvider.overrideWith((ref) => Stream.value(<String>{})),
       ],
-      child: const MaterialApp(home: CommunityFeedScreen()),
+      child: const LocalizedTestApp(locale: Locale('tr'), home: CommunityFeedScreen()),
     ));
     await tester.pumpAndSettle();
 

@@ -62,7 +62,7 @@ void main() {
         communityFeedProvider.overrideWith((ref) => Stream.value(const [])),
         followedUserIdsProvider.overrideWith((ref) => Stream.value(<String>{})),
       ],
-      child: const LocalizedTestApp(home: CommunityFeedScreen()),
+      child: const LocalizedTestApp(locale: Locale('tr'), home: CommunityFeedScreen()),
     );
   }
 

@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../../core/l10n/date_text.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../auth/controllers/auth_controller.dart';
@@ -41,21 +42,6 @@ class _CommentsSheetState extends ConsumerState<CommentsSheet> {
     _commentController.dispose();
     _scrollController.dispose();
     super.dispose();
-  }
-
-  String _formatRelativeTime(DateTime dateTime) {
-    final difference = DateTime.now().difference(dateTime);
-    if (difference.inMinutes < 1) {
-      return 'Şimdi';
-    } else if (difference.inMinutes < 60) {
-      return '${difference.inMinutes} dk önce';
-    } else if (difference.inHours < 24) {
-      return '${difference.inHours} sa önce';
-    } else if (difference.inDays < 7) {
-      return '${difference.inDays} gün önce';
-    } else {
-      return DateFormat('dd.MM.yyyy').format(dateTime);
-    }
   }
 
   Future<void> _submitComment(String currentUserId, String username, String avatarUrl) async {
@@ -154,10 +140,10 @@ class _CommentsSheetState extends ConsumerState<CommentsSheet> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 commentsAsync.when(
-                  loading: () => Text('Yorumlar', style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-                  error: (err, stack) => Text('Yorumlar', style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                  loading: () => Text(AppLocalizations.of(context).commentsTitle, style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                  error: (err, stack) => Text(AppLocalizations.of(context).commentsTitle, style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
                   data: (comments) => Text(
-                    'Yorumlar (${comments.length})',
+                    AppLocalizations.of(context).commentsTitleWithCount(comments.length),
                     style: GoogleFonts.outfit(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -177,12 +163,12 @@ class _CommentsSheetState extends ConsumerState<CommentsSheet> {
             Expanded(
               child: commentsAsync.when(
                 loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.accentColor)),
-                error: (err, stack) => Center(child: Text('Yorumlar yüklenemedi: $err', style: const TextStyle(color: Colors.redAccent))),
+                error: (err, stack) => Center(child: Text(AppLocalizations.of(context).commentsLoadFailed, style: const TextStyle(color: Colors.redAccent))),
                 data: (comments) {
                   if (comments.isEmpty) {
                     return Center(
                       child: Text(
-                        'İlk yorumu sen yaz!',
+                        AppLocalizations.of(context).commentsEmpty,
                         style: GoogleFonts.inter(color: AppTheme.textSecondary, fontSize: 13),
                       ),
                     );
@@ -233,7 +219,9 @@ class _CommentsSheetState extends ConsumerState<CommentsSheet> {
                                           );
                                         },
                                         child: Text(
-                                          comment.username,
+                                          comment.username.isEmpty
+                                              ? AppLocalizations.of(context).userUnknown
+                                              : comment.username,
                                           style: GoogleFonts.outfit(
                                             fontSize: 13,
                                             fontWeight: FontWeight.bold,
@@ -243,7 +231,7 @@ class _CommentsSheetState extends ConsumerState<CommentsSheet> {
                                       ),
                                       const SizedBox(width: 8),
                                       Text(
-                                        _formatRelativeTime(comment.createdAt),
+                                        formatRelativeTime(context, comment.createdAt),
                                         style: GoogleFonts.inter(
                                           fontSize: 10,
                                           color: AppTheme.textSecondary,
@@ -272,19 +260,19 @@ class _CommentsSheetState extends ConsumerState<CommentsSheet> {
                                     context: context,
                                     builder: (dialogCtx) => AlertDialog(
                                       backgroundColor: AppTheme.surfaceColor,
-                                      title: Text('Yorumu Sil?', style: GoogleFonts.outfit(color: Colors.white, fontSize: 16)),
-                                      content: Text('Bu yorumu silmek istediğinize emin misiniz?', style: GoogleFonts.inter(color: AppTheme.textSecondary, fontSize: 13)),
+                                      title: Text(AppLocalizations.of(context).commentsDeleteTitle, style: GoogleFonts.outfit(color: Colors.white, fontSize: 16)),
+                                      content: Text(AppLocalizations.of(context).commentsDeleteConfirm, style: GoogleFonts.inter(color: AppTheme.textSecondary, fontSize: 13)),
                                       actions: [
                                         TextButton(
                                           onPressed: () => Navigator.pop(dialogCtx),
-                                          child: Text('İptal', style: GoogleFonts.inter(color: AppTheme.textSecondary)),
+                                          child: Text(AppLocalizations.of(context).commonCancel, style: GoogleFonts.inter(color: AppTheme.textSecondary)),
                                         ),
                                         TextButton(
                                           onPressed: () {
                                             Navigator.pop(dialogCtx);
                                             _deleteComment(comment.id);
                                           },
-                                          child: const Text('Sil', style: TextStyle(color: Colors.redAccent)),
+                                          child: Text(AppLocalizations.of(context).commonDelete, style: TextStyle(color: Colors.redAccent)),
                                         ),
                                       ],
                                     ),
@@ -319,7 +307,7 @@ class _CommentsSheetState extends ConsumerState<CommentsSheet> {
                         controller: _commentController,
                         style: GoogleFonts.inter(color: Colors.white, fontSize: 14),
                         decoration: InputDecoration(
-                          hintText: currentUser != null ? 'Yorum yaz...' : 'Yorum yazmak için giriş yapın',
+                          hintText: currentUser != null ? AppLocalizations.of(context).commentsHint : AppLocalizations.of(context).commentsSignInHint,
                           hintStyle: GoogleFonts.inter(color: Colors.white38, fontSize: 14),
                           border: InputBorder.none,
                         ),

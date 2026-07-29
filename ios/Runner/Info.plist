@@ -6,6 +6,16 @@
 		<true/>
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
+		<!-- The languages this app ships. Without this key iOS treats the app
+		     as supporting only the development region, so a device set to
+		     Turkish would still hand Flutter an English locale — and the
+		     per-app language row in iOS Settings never appears. Keep in sync
+		     with AppLocalizations.supportedLocales. -->
+		<key>CFBundleLocalizations</key>
+		<array>
+			<string>tr</string>
+			<string>en</string>
+		</array>
 		<key>CFBundleDisplayName</key>
 		<string>CineFile</string>
 		<key>CFBundleExecutable</key>

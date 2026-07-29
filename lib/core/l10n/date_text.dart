@@ -9,6 +9,8 @@ library;
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 
+import '../../l10n/app_localizations.dart';
+
 /// The BCP-47 tag of the locale currently in scope, for `intl`.
 String localeTagOf(BuildContext context) => Localizations.localeOf(context).toLanguageTag();
 
@@ -47,6 +49,23 @@ String shortWeekdayName(BuildContext context, int weekday) =>
 /// Any date with the requested weekday. 2024-01-01 was a Monday, so adding
 /// `weekday - 1` days lands on the one asked for.
 DateTime _dateForWeekday(int weekday) => DateTime(2024, 1, weekday);
+
+/// "Now" / "5 min ago" / "3 days ago", falling back to a plain date after a
+/// week.
+///
+/// This existed as two byte-identical private copies (community_post_card and
+/// comments_sheet), each with its own Turkish strings and a hardcoded
+/// `dd.MM.yyyy` tail.
+String formatRelativeTime(BuildContext context, DateTime dateTime) {
+  final l10n = AppLocalizations.of(context);
+  final difference = DateTime.now().difference(dateTime);
+
+  if (difference.inMinutes < 1) return l10n.timeJustNow;
+  if (difference.inMinutes < 60) return l10n.timeMinutesAgo(difference.inMinutes);
+  if (difference.inHours < 24) return l10n.timeHoursAgo(difference.inHours);
+  if (difference.inDays < 7) return l10n.timeDaysAgo(difference.inDays);
+  return formatShortDate(context, dateTime);
+}
 
 /// [String.toUpperCase] with the Turkish dotted-i rule applied.
 ///

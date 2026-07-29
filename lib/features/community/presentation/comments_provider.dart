@@ -35,7 +35,10 @@ class CommentModel {
     return CommentModel(
       id: docId,
       userId: map['userId'] as String? ?? '',
-      username: map['username'] as String? ?? 'Bilinmeyen Kullanıcı',
+      // Left empty rather than defaulted to a placeholder name: this is a data
+      // model, and the placeholder is user-facing text. The comment row
+      // supplies it.
+      username: map['username'] as String? ?? '',
       userAvatarUrl: map['userAvatarUrl'] as String? ?? 'https://api.dicebear.com/7.x/bottts/png?seed=unknown',
       text: map['text'] as String? ?? '',
       createdAt: parseDateTime(map['createdAt']),
