@@ -54,3 +54,32 @@ jobs:
       - run: flutter analyze
 
       - run: flutter test
+
+  # Every authorization decision in this app lives in firestore.rules, and
+  # nothing was exercising it — three real holes (username impersonation,
+  # forged post authorship, pre-stuffed starredBy) shipped because a rules
+  # change has no compiler and no reviewer can hold the whole matrix in their
+  # head. These run against the Firestore emulator, which needs Java.
+  firestore-rules:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: test_rules/package-lock.json
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Install rules-test dependencies
+        working-directory: test_rules
+        run: npm ci
+
+      - name: Run firestore.rules tests
+        working-directory: test_rules
+        run: npm test

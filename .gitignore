@@ -49,8 +49,19 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# Private TMDb API Key configuration
+# Private TMDb API Key configuration.
+# Preferred way to supply a key is --dart-define=TMDB_API_KEY=... (see
+# ApiConstants.tmdbApiKey); this file is the local-development fallback.
 lib/core/constants/api_key.dart
+
+# Dependencies of the firestore.rules test suite (test_rules/). The lockfile
+# IS committed — CI installs from it with `npm ci`.
+test_rules/node_modules/
+# Emulator artefacts, written next to firebase.json when the suite runs.
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+.firebase/
 
 # Report written by `flutter gen-l10n` listing keys present in the template
 # .arb but missing from a translation. Regenerated on every build and checked

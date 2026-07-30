@@ -159,7 +159,22 @@ class AuthController {
     try {
       final doc = await _firestore.collection('users').doc(user.uid).get();
       if (doc.exists) {
-        final model = UserModel.fromMap(doc.data()!, user.uid);
+        var model = UserModel.fromMap(doc.data()!, user.uid);
+
+        // Profiles created before `avatarUrl` was always populated carry null.
+        // Every document this user authors (logs, posts, comments) stamps the
+        // avatar onto itself, and firestore.rules now requires that stamp to
+        // equal the profile's — a null here would make the client fall back to
+        // the generated DiceBear URL and the server would reject the write.
+        // Backfilling once, on sign-in, keeps the two sides in step.
+        if (model.avatarUrl == null || model.avatarUrl!.trim().isEmpty) {
+          model = model.copyWith(avatarUrl: defaultAvatarUrlFor(model.username));
+          await _firestore
+              .collection('users')
+              .doc(user.uid)
+              .set({'avatarUrl': model.avatarUrl}, SetOptions(merge: true));
+        }
+
         _ref.read(userModelProvider.notifier).state = model;
         // Fire-and-forget: sign-in must not wait on (or fail because of) a
         // registry write for a name the user already has.

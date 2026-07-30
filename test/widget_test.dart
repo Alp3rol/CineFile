@@ -2,6 +2,8 @@
 // The app now gates its main shell behind Firebase Auth (AuthGate) — a
 // signed-out user sees the login screen instead, so this needs a mocked
 // signed-in user to reach the bottom nav at all.
+import 'dart:io';
+
 import 'package:flutter/widgets.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
@@ -13,17 +15,25 @@ import 'package:cinefile/features/recommendations/presentation/recommendations_p
 import 'package:cinefile/main.dart';
 import 'package:cinefile/core/services/app_settings_store.dart';
 import 'package:cinefile/features/settings/presentation/settings_provider.dart';
+import 'support/network_image_mock.dart';
 
 void main() {
+  // A profile with no avatar no longer stays that way: AuthController.initUser
+  // backfills the generated DiceBear URL on sign-in, because firestore.rules
+  // requires the avatar stamped onto a user's posts to equal the one on their
+  // profile — and the client falls back to that generated URL when the profile
+  // has none. So the avatar IS rendered here now, and the test needs the
+  // standard fake image transport the other render tests use.
+  setUpAll(() => HttpOverrides.global = FakeImageHttpOverrides());
+
   testWidgets('App boots and shows bottom navigation tabs', (WidgetTester tester) async {
     final firestore = FakeFirebaseFirestore();
     await firestore.collection('users').doc('test-uid').set({
       'id': 'test-uid',
       'email': 'test@test.com',
       'username': 'tester',
-      // avatarUrl intentionally omitted (null) — a non-null value (even
-      // empty string) makes UserProfileAvatarButton attempt a NetworkImage,
-      // which has no real network to resolve against in tests.
+      // avatarUrl deliberately absent: this is the legacy-profile shape that
+      // initUser's backfill exists for.
     });
 
     await tester.pumpWidget(

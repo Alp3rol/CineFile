@@ -3,13 +3,38 @@ echo ========================================================
 echo CineFile Web Sürümü Derleniyor ve GitHub'a Yükleniyor...
 echo ========================================================
 echo.
+REM TMDb anahtari SORGU PARAMETRESI olarak gidiyor, yani web derlemesine
+REM gomulen anahtar main.dart.js icinde herkese acik olarak yayinlaniyor.
+REM Bu yuzden buraya kisisel anahtar DEGIL, yalnizca bu site icin uretilmis,
+REM gerektiginde iptal edilebilir ayri bir anahtar verilmeli.
+REM
+REM Kalici cozum: istekleri bir sunucu tarafi proxy uzerinden gecirmek.
+if "%TMDB_WEB_KEY%"=="" (
+    echo ========================================================
+    echo HATA: TMDB_WEB_KEY ortam degiskeni tanimli degil.
+    echo.
+    echo Bu derlemeye gomulecek anahtar yayinda herkese gorunur olacagi
+    echo icin, kisisel anahtariniz yerine ayri bir web anahtari
+    echo tanimlamalisiniz:
+    echo.
+    echo     setx TMDB_WEB_KEY "buraya_web_icin_uretilen_anahtar"
+    echo.
+    echo Anahtarsiz yayinlamak isterseniz ^(uygulama demo moduna duser^):
+    echo     set TMDB_WEB_KEY=none
+    echo ========================================================
+    pause
+    exit /b 1
+)
+set WEB_KEY=%TMDB_WEB_KEY%
+if "%WEB_KEY%"=="none" set WEB_KEY=
+
 echo Adim 1: Proje web icin derleniyor...
 REM --no-wasm-dry-run: Flutter varsayilan olarak, uygulamayi bir de WASM'a
 REM derlenebiliyor mu diye kontrol eder. Bu ayri bir tam derleme gecisi ve
 REM olculdu: dagitim basina ~22 saniye (toplamin ucte biri). Ciktiyi hic
 REM etkilemiyor - bayrakli ve bayraksiz derlemelerin main.dart.js hash'leri
 REM birebir ayni. WASM'a gecilirse bu bayrak kaldirilmali.
-call flutter build web --release --no-wasm-dry-run --base-href "/CineFile/"
+call flutter build web --release --no-wasm-dry-run --base-href "/CineFile/" --dart-define=TMDB_API_KEY=%WEB_KEY%
 if %errorlevel% neq 0 (
     echo.
     echo HATA: Derleme basarisiz oldu!

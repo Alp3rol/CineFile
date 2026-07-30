@@ -5,8 +5,13 @@ import '../domain/graph_models.dart';
 import '../domain/graph_overrides.dart';
 
 /// Doc id for the single global "hidden people" document (distinct from the
-/// per-title `${tmdbId}_${isTv}` ids).
-const String _kGlobalDocId = '__global__';
+/// per-title `${tmdbId}_${isTv}` ids, which always start with a digit).
+///
+/// NOT `__global__`: Firestore reserves every document id matching `__.*__`
+/// and rejects the write with INVALID_ARGUMENT, so [hidePerson] threw on every
+/// call and "Grafikten gizle" never once worked. No migration is needed —
+/// a document under the old id could never have been created.
+const String _kGlobalDocId = 'global';
 
 String _titleId(int tmdbId, bool isTv) => 'title:$tmdbId:$isTv';
 

@@ -2,18 +2,75 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // --- Social-interaction write guards (shared by `logs` and `posts`) ---
+    // ---------------------------------------------------------------------
+    // Authorship guards (shared by `logs`, `posts`, their comments, and
+    // `shared_collections`).
+    //
+    // All of these denormalise the author's display name and avatar onto the
+    // document so a feed render costs no `users` lookup. Only `userId` used to
+    // be checked, which left the two *displayed* fields as free text: anyone
+    // could publish a post carrying somebody else's username and avatar, and
+    // the feed had no way to tell. These functions pin both to the caller's
+    // own profile document.
+    //
+    // `.get(field, default)` is used throughout this file because documents
+    // written before a field existed simply don't have it.
+    // ---------------------------------------------------------------------
+
+    function ownProfile() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function authorFieldsAreOwn() {
+      return request.resource.data.userId == request.auth.uid
+        && request.resource.data.get('username', '') == ownProfile().get('username', '')
+        && request.resource.data.get('userAvatarUrl', '') == ownProfile().get('avatarUrl', '');
+    }
+
+    // Avatars are rendered with a plain network image on every feed row, so an
+    // arbitrary URL here would make each viewer's device call out to a host of
+    // the author's choosing — handing them the IP and User-Agent of everyone
+    // who scrolled past. The app only ever offers the generated DiceBear set,
+    // so the allowlist costs nothing and closes that.
+    function isAllowedAvatar(url) {
+      return url is string
+        && url.size() <= 300
+        && (url.matches('https://api[.]dicebear[.]com/.*')
+         || url.matches('https://firebasestorage[.]googleapis[.]com/.*'));
+    }
+
+    // Social counters describe how *other* people reacted, so a brand-new
+    // document must start neutral. Without this, a post could be created with
+    // starredBy already stuffed full of uids that never liked it (and
+    // commentCount set to anything at all) — isOwnStarToggle/isCommentCountStep
+    // below only constrain UPDATES, so the create was the way around them.
+    function socialCountersStartEmpty() {
+      return request.resource.data.get('starredBy', []) == []
+        && request.resource.data.get('commentCount', 0) == 0;
+    }
+
+    // Free-text fields are capped so a single document can't be inflated
+    // toward Firestore's 1 MB limit, which costs storage and breaks the feed
+    // layout for everyone who loads it.
+    function withinTextLimits() {
+      return request.resource.data.get('caption', '').size() <= 500
+        && request.resource.data.get('notes', '').size() <= 2000
+        && request.resource.data.get('watchPlace', '').size() <= 100
+        && request.resource.data.get('watchCompanion', '').size() <= 100
+        && request.resource.data.get('tags', '').size() <= 200;
+    }
+
+    // ---------------------------------------------------------------------
+    // Social-interaction write guards (shared by `logs` and `posts`).
     //
     // Both collections let *other* users touch two fields — starredBy (like)
-    // and commentCount — on a document they don't own. Restricting which
-    // KEYS may change (hasOnly) is not enough on its own: it still let anyone
+    // and commentCount — on a document they don't own. Restricting which KEYS
+    // may change (hasOnly) is not enough on its own: it still let anyone
     // replace the whole starredBy array (wiping every other user's like, or
     // stuffing it with uids that never liked anything) or set commentCount to
-    // an arbitrary number. These two functions pin down the allowed *shape* of
-    // the change, not just its field names.
-    //
-    // `.get(field, default)` is used throughout because documents written
-    // before these fields existed simply don't have them.
+    // an arbitrary number. These functions pin down the allowed *shape* of the
+    // change, not just its field names.
+    // ---------------------------------------------------------------------
 
     // A like toggle may only add or remove the caller's own uid: the symmetric
     // difference between the old and new arrays must contain nothing else.
@@ -56,9 +113,12 @@ service cloud.firestore {
     match /logs/{logId} {
       allow read: if resource.data.isPublic == true
                    || (request.auth != null && request.auth.uid == resource.data.userId);
-      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+      allow create: if request.auth != null
+        && authorFieldsAreOwn()
+        && socialCountersStartEmpty()
+        && withinTextLimits();
       allow update: if request.auth != null && (
-        request.auth.uid == resource.data.userId ||
+        (request.auth.uid == resource.data.userId && withinTextLimits()) ||
         isOwnStarToggle() ||
         isCommentCountStep()
       );
@@ -68,7 +128,9 @@ service cloud.firestore {
         allow read: if get(/databases/$(database)/documents/logs/$(logId)).data.isPublic == true ||
                      (request.auth != null &&
                       request.auth.uid == get(/databases/$(database)/documents/logs/$(logId)).data.userId);
-        allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+        allow create: if request.auth != null
+          && authorFieldsAreOwn()
+          && request.resource.data.get('text', '').size() <= 1000;
         allow delete: if request.auth != null && request.auth.uid == resource.data.userId;
         allow update: if false;
       }
@@ -80,9 +142,12 @@ service cloud.firestore {
     // commentCount are updated by *other* users the same way logs' are.
     match /posts/{postId} {
       allow read: if request.auth != null;
-      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+      allow create: if request.auth != null
+        && authorFieldsAreOwn()
+        && socialCountersStartEmpty()
+        && withinTextLimits();
       allow update: if request.auth != null && (
-        request.auth.uid == resource.data.userId ||
+        (request.auth.uid == resource.data.userId && withinTextLimits()) ||
         isOwnStarToggle() ||
         isCommentCountStep()
       );
@@ -90,7 +155,9 @@ service cloud.firestore {
 
       match /comments/{commentId} {
         allow read: if request.auth != null;
-        allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+        allow create: if request.auth != null
+          && authorFieldsAreOwn()
+          && request.resource.data.get('text', '').size() <= 1000;
         allow delete: if request.auth != null && request.auth.uid == resource.data.userId;
         allow update: if false;
       }
@@ -102,10 +169,25 @@ service cloud.firestore {
     // `logs`/`posts`, existence of a doc here always means "currently
     // shared" — the owner deletes it outright to stop sharing, so there's
     // no isPublic branch to check.
+    //
+    // `ownerUsername`/`ownerAvatarUrl` are denormalised here for the same
+    // reason as on posts, and were forgeable the same way — the collection
+    // detail screen renders them verbatim.
+    function collectionOwnerFieldsAreOwn() {
+      return request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.get('ownerUsername', '') == ownProfile().get('username', '')
+        && request.resource.data.get('ownerAvatarUrl', '') == ownProfile().get('avatarUrl', '')
+        && request.resource.data.get('name', '').size() <= 100
+        && request.resource.data.get('description', '').size() <= 500
+        && request.resource.data.get('movies', []).size() <= 500;
+    }
+
     match /shared_collections/{collectionId} {
       allow read: if request.auth != null;
-      allow create: if request.auth != null && request.auth.uid == request.resource.data.ownerId;
-      allow update: if request.auth != null && request.auth.uid == resource.data.ownerId;
+      allow create: if request.auth != null && collectionOwnerFieldsAreOwn();
+      allow update: if request.auth != null
+        && request.auth.uid == resource.data.ownerId
+        && collectionOwnerFieldsAreOwn();
       allow delete: if request.auth != null && request.auth.uid == resource.data.ownerId;
     }
 
@@ -123,11 +205,51 @@ service cloud.firestore {
     // username availability now goes through /usernames below, which is
     // claimed *after* the account is created and therefore never needs an
     // unauthenticated read.
+
+    // The username a profile advertises must be one this account actually
+    // holds in the /usernames registry below. Without this the registry was
+    // advisory only: it is consulted by AuthController before writing, but
+    // nothing stopped a client from calling the SDK directly and setting
+    // `username` to a name someone else had claimed — which is the name shown
+    // in user search, on the profile screen, and (via authorFieldsAreOwn)
+    // stamped onto every post and comment. Impersonation was a one-line
+    // script.
+    //
+    // Leaving the name untouched is always allowed, so avatar/bio/showcase
+    // edits don't pay for a registry lookup.
+    function usernameIsClaimedByOwner(userId) {
+      return request.resource.data.username == resource.data.username
+        || (request.resource.data.usernameLower == request.resource.data.username.lower()
+            && exists(/databases/$(database)/documents/usernames/$(request.resource.data.usernameLower))
+            && get(/databases/$(database)/documents/usernames/$(request.resource.data.usernameLower)).data.uid == userId);
+    }
+
+    // Same lookup for the very first write, where there is no `resource` to
+    // compare against yet.
+    function usernameIsClaimedOnCreate(userId) {
+      return request.resource.data.usernameLower == request.resource.data.username.lower()
+        && exists(/databases/$(database)/documents/usernames/$(request.resource.data.usernameLower))
+        && get(/databases/$(database)/documents/usernames/$(request.resource.data.usernameLower)).data.uid == userId;
+    }
+
+    function profileFieldsAreSane() {
+      return request.resource.data.username.size() >= 1
+        && request.resource.data.username.size() <= 30
+        && request.resource.data.get('bio', '').size() <= 300
+        && isAllowedAvatar(request.resource.data.get('avatarUrl', 'https://api.dicebear.com/'))
+        && request.resource.data.get('featuredMovieIds', []).size() <= 5;
+    }
+
     match /users/{userId} {
       allow read: if request.auth != null;
-      allow create: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null
+        && request.auth.uid == userId
+        && usernameIsClaimedOnCreate(userId)
+        && profileFieldsAreSane();
       allow update: if request.auth != null && (
-        request.auth.uid == userId ||
+        (request.auth.uid == userId
+          && usernameIsClaimedByOwner(userId)
+          && profileFieldsAreSane()) ||
         isFollowCounterStep()
       );
       allow delete: if false;
