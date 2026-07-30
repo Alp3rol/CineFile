@@ -35,6 +35,21 @@ class _MainShellState extends ConsumerState<MainShell> {
     RelationshipGraphScreen(),
   ];
 
+  /// Tabs the user has actually opened.
+  ///
+  /// The body used to be `_screens[selectedIndex]`, which threw the whole
+  /// subtree away on every tab change: scroll position, search text and filter
+  /// selections were lost, and — because Riverpod 3 pauses a provider once
+  /// nothing listens to it — each of that tab's Firestore listeners was torn
+  /// down and re-established, paying for a full snapshot again on the way back.
+  ///
+  /// A plain IndexedStack fixes that but builds all five children up front,
+  /// which is worse in a different way: RelationshipGraphScreen would start
+  /// fetching credits for every watched title at launch, for a tab the user may
+  /// never open. Building a tab only once it has been visited keeps both
+  /// properties — nothing is built early, nothing is discarded afterwards.
+  final Set<int> _visitedTabs = {0};
+
   @override
   void initState() {
     super.initState();
@@ -48,6 +63,11 @@ class _MainShellState extends ConsumerState<MainShell> {
   @override
   Widget build(BuildContext context) {
     final selectedIndex = ref.watch(mainShellTabIndexProvider);
+    // Recorded here rather than in the tap handler so a tab switched to from
+    // elsewhere (Home's "Tümünü Gör" buttons write the provider directly) is
+    // also marked. Adding to a set is idempotent and schedules no rebuild of
+    // its own — this build is already running because the index changed.
+    _visitedTabs.add(selectedIndex);
 
     // Clear dynamic background when switching to tabs that don't use it (Journal, Calendar, Settings)
     ref.listen<int>(mainShellTabIndexProvider, (previous, next) {
@@ -56,16 +76,21 @@ class _MainShellState extends ConsumerState<MainShell> {
       }
     });
 
-    // Re-sync notifications automatically when settings or preferences change
+    // Re-sync notifications when settings change. Debounced and
+    // fingerprint-checked inside the service: this listener fires on every
+    // movie_settings write, including the one behind each quick-add "+", and a
+    // full rebuild costs two TMDb requests per actively-watched show.
     ref.listen(allMovieSettingsProvider, (prev, next) {
       if (next.hasValue) {
-        ref.read(notificationServiceProvider).syncNotifications();
+        ref.read(notificationServiceProvider).requestSync();
       }
     });
 
+    // Toggling the preference is a deliberate user action, so it takes effect
+    // immediately and bypasses the fingerprint check.
     ref.listen(releaseRemindersEnabledProvider, (prev, next) {
       if (next != prev) {
-        ref.read(notificationServiceProvider).syncNotifications();
+        ref.read(notificationServiceProvider).syncNotifications(force: true);
       }
     });
 
@@ -73,7 +98,13 @@ class _MainShellState extends ConsumerState<MainShell> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         extendBody: true, // Crucial for showing blurred content behind the bottom navigation bar
-        body: _screens[selectedIndex],
+        body: IndexedStack(
+          index: selectedIndex,
+          children: [
+            for (var i = 0; i < _screens.length; i++)
+              if (_visitedTabs.contains(i)) _screens[i] else const SizedBox.shrink(),
+          ],
+        ),
         bottomNavigationBar: SafeArea(
           minimum: const EdgeInsets.only(bottom: 20),
           child: Padding(

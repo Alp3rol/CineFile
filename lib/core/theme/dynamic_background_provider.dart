@@ -59,8 +59,36 @@ class DynamicBackgroundNotifier extends StateNotifier<DynamicBackgroundState> {
     }
   }
 
-  // Static cache to store extracted colors across rebuilds and prevent repeated CPU-heavy color extractions.
-  static final Map<String, Color> _colorCache = {};
+  // Extracted colors, cached across rebuilds so ColorScheme.fromImageProvider
+  // (which decodes and quantises the poster) doesn't re-run per scroll.
+  //
+  // Bounded, because it used to be a plain static Map keyed by poster URL that
+  // nothing ever removed from: browsing a large library for a while grew it
+  // without limit for the lifetime of the process, and nothing but killing the
+  // app reclaimed it.
+  //
+  // Eviction is insertion-ordered (Dart maps iterate in insertion order, and
+  // re-caching a key moves it to the end), which is not strictly LRU but is
+  // close enough here — the bound is far larger than the number of posters that
+  // can be on screen at once, so a colour is only ever evicted long after it
+  // stopped being visible. Colours are 4 bytes; the point of the bound is to
+  // cap the keys, which are poster URLs.
+  static const int _maxCachedColors = 256;
+  static final Map<String, Color> _colorCache = <String, Color>{};
+
+  static void _cacheColor(String key, Color color) {
+    _colorCache.remove(key);
+    _colorCache[key] = color;
+    while (_colorCache.length > _maxCachedColors) {
+      _colorCache.remove(_colorCache.keys.first);
+    }
+  }
+
+  @visibleForTesting
+  static int get cachedColorCount => _colorCache.length;
+
+  @visibleForTesting
+  static void clearColorCache() => _colorCache.clear();
 
   // Track currently visible keys on screen (so we don't add colors for images that scrolled off before extraction finished)
   final Set<String> _visibleKeys = {};
@@ -82,7 +110,7 @@ class DynamicBackgroundNotifier extends StateNotifier<DynamicBackgroundState> {
     if (imageUrl == null || imageUrl.isEmpty) {
       if (seed != null) {
         final color = _getPlaceholderColor(seed);
-        _colorCache[key] = color;
+        _cacheColor(key, color);
         _updateActiveColor(key, color);
       }
       return;
@@ -131,13 +159,13 @@ class DynamicBackgroundNotifier extends StateNotifier<DynamicBackgroundState> {
       final color = scheme.primary;
 
       // Store in cache
-      _colorCache[key] = color;
+      _cacheColor(key, color);
       // Apply if still visible
       _updateActiveColor(key, color);
     } catch (e) {
       debugPrint('Error extracting color for key $key: $e. Falling back to HSL color.');
       final fallbackColor = _getPlaceholderColor(key);
-      _colorCache[key] = fallbackColor;
+      _cacheColor(key, fallbackColor);
       _updateActiveColor(key, fallbackColor);
     }
   }
@@ -169,7 +197,7 @@ class DynamicBackgroundNotifier extends StateNotifier<DynamicBackgroundState> {
       } else {
         // Fallback HSL color
         final fallbackColor = _getPlaceholderColor(title);
-        _colorCache[key] = fallbackColor;
+        _cacheColor(key, fallbackColor);
         activeColors[key] = fallbackColor;
 
         if (finalImageUrl != null && finalImageUrl.isNotEmpty) {
@@ -223,7 +251,7 @@ class DynamicBackgroundNotifier extends StateNotifier<DynamicBackgroundState> {
       } else {
         // Fallback HSL color
         final fallbackColor = _getPlaceholderColor(title);
-        _colorCache[key] = fallbackColor;
+        _cacheColor(key, fallbackColor);
         activeColors[key] = fallbackColor;
 
         if (finalImageUrl != null && finalImageUrl.isNotEmpty) {
@@ -231,6 +259,12 @@ class DynamicBackgroundNotifier extends StateNotifier<DynamicBackgroundState> {
         }
       }
     }
+
+    // Same dedupe as updateMoviesFromList — callers invoke this from a
+    // post-frame callback on every build, and reassigning an identical map
+    // restarts DynamicBackgroundWrapper's AnimatedContainer transition (and the
+    // rebuilds behind it) for no visible change. This branch was missing it.
+    if (_colorMapEquals(activeColors, state.activePosterColors)) return;
 
     state = state.copyWith(activePosterColors: activeColors);
   }

@@ -6,7 +6,14 @@ import 'connection/connection.dart';
 
 part 'app_database.g.dart';
 
-@DriftDatabase(tables: [Movies, WatchRecords, UserMovieSettings, CustomLists, CustomListMovies])
+@DriftDatabase(tables: [
+  Movies,
+  WatchRecords,
+  UserMovieSettings,
+  CustomLists,
+  CustomListMovies,
+  TitleCredits,
+])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(createConnection());
 
@@ -14,13 +21,48 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 13;
+  int get schemaVersion => 15;
+
+  /// Indexes the query patterns in database_provider.dart and
+  /// movie_repository.dart actually use. Declared here rather than inline in
+  /// the migration so [_createIndexes] can also run on a freshly created
+  /// database (onCreate), where there is no upgrade step to hang them off.
+  ///
+  /// `IF NOT EXISTS` throughout: onCreate and the v14 upgrade both call this,
+  /// and a database created at v14 must not fail because the index is already
+  /// there.
+  static const List<String> _indexStatements = [
+    // deleteWatchRecordLocal and every "records for this title" lookup filter
+    // on (movie_id, is_tv); without this each one is a full table scan.
+    'CREATE INDEX IF NOT EXISTS idx_watch_records_movie '
+        'ON watch_records (movie_id, is_tv)',
+    // The journal and insights read records newest-first.
+    'CREATE INDEX IF NOT EXISTS idx_watch_records_watch_date '
+        'ON watch_records (watch_date DESC)',
+    // moviesInCustomListProvider and _mirrorSharedCollection both start from
+    // a list id.
+    'CREATE INDEX IF NOT EXISTS idx_custom_list_movies_list '
+        'ON custom_list_movies (list_id)',
+    // listsForMovieProvider goes the other way.
+    'CREATE INDEX IF NOT EXISTS idx_custom_list_movies_movie '
+        'ON custom_list_movies (movie_id, is_tv)',
+  ];
+
+  Future<void> _createIndexes(Migrator m) async {
+    for (final statement in _indexStatements) {
+      await customStatement(statement);
+    }
+  }
 
   @override
   MigrationStrategy get migration {
     return MigrationStrategy(
       beforeOpen: (details) async {
         await customStatement('PRAGMA foreign_keys = ON');
+      },
+      onCreate: (m) async {
+        await m.createAll();
+        await _createIndexes(m);
       },
       onUpgrade: (m, from, to) async {
         if (from < 5) {
@@ -203,6 +245,22 @@ class AppDatabase extends _$AppDatabase {
             }
           });
           from = 13;
+        }
+        if (from < 14) {
+          // v14: indexes. The schema shipped with none, so every lookup by
+          // (movie_id, is_tv) or list_id was a full scan of the table — cheap
+          // on a small library, linear on a large one, and repeated on every
+          // record deletion (deleteWatchRecordLocal issues three of them).
+          // Adding an index changes no data.
+          await _createIndexes(m);
+          from = 14;
+        }
+        if (from < 15) {
+          // v15: persistent cache for the İlişki Ağı's TMDb credits (see
+          // TitleCredits). A new table only — nothing existing is touched, and
+          // an empty cache simply behaves like the old code did.
+          await m.createTable(titleCredits);
+          from = 15;
         }
         if (from != to) {
           throw StateError(

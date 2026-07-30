@@ -116,6 +116,34 @@ class UserMovieSettings extends Table {
   Set<Column> get primaryKey => {tmdbId, isTv};
 }
 
+/// TMDb credits for a watched title, cached so the İlişki Ağı doesn't refetch
+/// the entire library every time the app starts.
+///
+/// [rawTitleCreditsProvider] issues one TMDb detail request per unique watched
+/// title (six at a time). Responses were only held in Dio's in-memory store, so
+/// a 300-title library meant 300 requests on the first open of the graph tab in
+/// every session — slow, and enough traffic to matter against TMDb's rate
+/// limits.
+///
+/// The payload is the already-curated [CreditPerson] list encoded as JSON
+/// rather than the raw TMDb response: it is a fraction of the size, and the
+/// mapping from response to people is the part that would otherwise have to be
+/// repeated anyway.
+@DataClassName('TitleCredit')
+class TitleCredits extends Table {
+  IntColumn get tmdbId => integer()();
+  // See Movies.isTv for why this is part of the key.
+  BoolColumn get isTv => boolean().withDefault(const Constant(false))();
+  // JSON array of CreditPerson maps (see CreditPerson.toMap/fromMap).
+  TextColumn get people => text()();
+  // When this entry was written. Entries older than the TTL are refetched —
+  // casts get corrected and TV episode counts grow.
+  DateTimeColumn get fetchedAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {tmdbId, isTv};
+}
+
 @DataClassName('CustomList')
 class CustomLists extends Table {
   IntColumn get id => integer().autoIncrement()();

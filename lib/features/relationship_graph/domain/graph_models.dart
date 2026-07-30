@@ -161,6 +161,30 @@ class CreditPerson {
         profilePath: m['profilePath'] as String?,
         isDirector: (m['isDirector'] as bool?) ?? false,
       );
+
+  /// Full shape for the TitleCredits cache.
+  ///
+  /// Unlike [toMap], this keeps [order] and [episodeCount]: those are exactly
+  /// what `isProminent` filters on, so a cached entry that dropped them would
+  /// come back from storage failing the prominence check and quietly shrink the
+  /// graph compared to a freshly fetched one.
+  Map<String, dynamic> toCacheMap() => {
+        'id': id,
+        'name': name,
+        'profilePath': profilePath,
+        'isDirector': isDirector,
+        'order': order,
+        'episodeCount': episodeCount,
+      };
+
+  factory CreditPerson.fromCacheMap(Map<String, dynamic> m) => CreditPerson(
+        id: (m['id'] as num?)?.toInt(),
+        name: (m['name'] as String?) ?? '',
+        profilePath: m['profilePath'] as String?,
+        isDirector: (m['isDirector'] as bool?) ?? false,
+        order: (m['order'] as num?)?.toInt(),
+        episodeCount: (m['episodeCount'] as num?)?.toInt(),
+      );
 }
 
 String normalizePersonName(String s) =>

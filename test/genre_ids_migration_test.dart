@@ -40,6 +40,69 @@ CREATE TABLE movies (
 )
 ''';
 
+// A real v12 database has all five tables, not just `movies`. They were left
+// out of this fixture while the only migration under test touched `movies`
+// alone — but the v14 step creates indexes on `watch_records` and
+// `custom_list_movies`, and CREATE INDEX on a missing table is an error. The
+// fixture has to look like the database it stands in for.
+const _v12OtherTablesDdl = <String>[
+  '''
+CREATE TABLE watch_records (
+  id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  movie_id INTEGER NOT NULL,
+  is_tv INTEGER NOT NULL DEFAULT 0,
+  watch_date INTEGER NOT NULL,
+  watch_place TEXT,
+  watch_companion TEXT,
+  rating REAL NOT NULL,
+  mood TEXT,
+  notes TEXT,
+  watch_number INTEGER NOT NULL,
+  tags TEXT,
+  episode_count INTEGER NOT NULL DEFAULT 1,
+  created_at INTEGER NOT NULL DEFAULT 0,
+  is_public INTEGER NOT NULL DEFAULT 0,
+  remote_id TEXT
+)
+''',
+  '''
+CREATE TABLE user_movie_settings (
+  tmdb_id INTEGER NOT NULL,
+  is_tv INTEGER NOT NULL DEFAULT 0,
+  is_favorite INTEGER NOT NULL DEFAULT 0,
+  is_re_watch_list INTEGER NOT NULL DEFAULT 0,
+  personal_ranking INTEGER,
+  personal_notes TEXT,
+  personal_tags TEXT,
+  updated_at INTEGER NOT NULL DEFAULT 0,
+  is_actively_watching INTEGER NOT NULL DEFAULT 0,
+  last_watched_episode INTEGER,
+  last_episode_progress_at INTEGER,
+  PRIMARY KEY (tmdb_id, is_tv)
+)
+''',
+  '''
+CREATE TABLE custom_lists (
+  id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  description TEXT,
+  target_date INTEGER,
+  created_at INTEGER NOT NULL DEFAULT 0,
+  is_public INTEGER NOT NULL DEFAULT 0
+)
+''',
+  '''
+CREATE TABLE custom_list_movies (
+  list_id INTEGER NOT NULL REFERENCES custom_lists (id) ON DELETE CASCADE,
+  movie_id INTEGER NOT NULL,
+  is_tv INTEGER NOT NULL DEFAULT 0,
+  ranking_order INTEGER,
+  added_at INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (list_id, movie_id, is_tv)
+)
+''',
+];
+
 void main() {
   group('genre id helpers', () {
     test('round-trips ids through the stored comma-separated form', () {
@@ -111,6 +174,9 @@ void main() {
       final raw = NativeDatabase(file);
       final db = _RawDb(raw);
       await db.customStatement(_v12MoviesDdl);
+      for (final ddl in _v12OtherTablesDdl) {
+        await db.customStatement(ddl);
+      }
       for (final (tmdbId, isTv, genres) in rows) {
         await db.customStatement(
           'INSERT INTO movies (tmdb_id, title, genres, is_tv, created_at) VALUES (?, ?, ?, ?, 0)',

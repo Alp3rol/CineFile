@@ -4,6 +4,7 @@ import '../../../core/constants/api_constants.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/database/database_provider.dart';
 import '../../../core/network/tmdb_service.dart';
+import '../data/title_credits_cache.dart';
 import '../domain/graph_models.dart';
 import '../domain/graph_overrides.dart';
 import 'graph_overrides_provider.dart';
@@ -46,12 +47,33 @@ final rawTitleCreditsProvider = FutureProvider<
     final credits = <String, List<CreditPerson>>{};
     if (titles.isEmpty) return (titles: titles, credits: credits);
 
+    // Everything already on disk (see TitleCreditsCache) is served without a
+    // request. Before this, opening the graph tab refetched the whole library
+    // once per session — one TMDb call per unique title, every app start.
+    final cache = ref.read(titleCreditsCacheProvider);
+    final keyFor = <String, MovieKey>{
+      for (final e in titles.entries)
+        e.key: (tmdbId: e.value.tmdbId, isTv: e.value.isTv),
+    };
+
+    final cached = await cache.read(keyFor.values);
+    final misses = <MapEntry<String, Movie>>[];
+    for (final e in titles.entries) {
+      final hit = cached[keyFor[e.key]];
+      if (hit != null) {
+        credits[e.key] = hit;
+      } else {
+        misses.add(e);
+      }
+    }
+
     final fetch = ref.read(titleCreditsFetcherProvider);
-    final entries = titles.entries.toList();
-    for (var i = 0; i < entries.length; i += _kFetchConcurrency) {
-      final chunk = entries.skip(i).take(_kFetchConcurrency);
+    for (var i = 0; i < misses.length; i += _kFetchConcurrency) {
+      final chunk = misses.skip(i).take(_kFetchConcurrency);
       await Future.wait(chunk.map((e) async {
-        credits[e.key] = await fetch(e.value);
+        final people = await fetch(e.value);
+        credits[e.key] = people;
+        await cache.write(keyFor[e.key]!, people);
       }));
     }
     return (titles: titles, credits: credits);

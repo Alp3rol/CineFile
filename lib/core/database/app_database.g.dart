@@ -3323,6 +3323,316 @@ class CustomListMoviesCompanion extends UpdateCompanion<CustomListMovie> {
   }
 }
 
+class $TitleCreditsTable extends TitleCredits
+    with TableInfo<$TitleCreditsTable, TitleCredit> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $TitleCreditsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _tmdbIdMeta = const VerificationMeta('tmdbId');
+  @override
+  late final GeneratedColumn<int> tmdbId = GeneratedColumn<int>(
+    'tmdb_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isTvMeta = const VerificationMeta('isTv');
+  @override
+  late final GeneratedColumn<bool> isTv = GeneratedColumn<bool>(
+    'is_tv',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_tv" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _peopleMeta = const VerificationMeta('people');
+  @override
+  late final GeneratedColumn<String> people = GeneratedColumn<String>(
+    'people',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _fetchedAtMeta = const VerificationMeta(
+    'fetchedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> fetchedAt = GeneratedColumn<DateTime>(
+    'fetched_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [tmdbId, isTv, people, fetchedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'title_credits';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<TitleCredit> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('tmdb_id')) {
+      context.handle(
+        _tmdbIdMeta,
+        tmdbId.isAcceptableOrUnknown(data['tmdb_id']!, _tmdbIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_tmdbIdMeta);
+    }
+    if (data.containsKey('is_tv')) {
+      context.handle(
+        _isTvMeta,
+        isTv.isAcceptableOrUnknown(data['is_tv']!, _isTvMeta),
+      );
+    }
+    if (data.containsKey('people')) {
+      context.handle(
+        _peopleMeta,
+        people.isAcceptableOrUnknown(data['people']!, _peopleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_peopleMeta);
+    }
+    if (data.containsKey('fetched_at')) {
+      context.handle(
+        _fetchedAtMeta,
+        fetchedAt.isAcceptableOrUnknown(data['fetched_at']!, _fetchedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_fetchedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {tmdbId, isTv};
+  @override
+  TitleCredit map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return TitleCredit(
+      tmdbId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}tmdb_id'],
+      )!,
+      isTv: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_tv'],
+      )!,
+      people: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}people'],
+      )!,
+      fetchedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}fetched_at'],
+      )!,
+    );
+  }
+
+  @override
+  $TitleCreditsTable createAlias(String alias) {
+    return $TitleCreditsTable(attachedDatabase, alias);
+  }
+}
+
+class TitleCredit extends DataClass implements Insertable<TitleCredit> {
+  final int tmdbId;
+  final bool isTv;
+  final String people;
+  final DateTime fetchedAt;
+  const TitleCredit({
+    required this.tmdbId,
+    required this.isTv,
+    required this.people,
+    required this.fetchedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['tmdb_id'] = Variable<int>(tmdbId);
+    map['is_tv'] = Variable<bool>(isTv);
+    map['people'] = Variable<String>(people);
+    map['fetched_at'] = Variable<DateTime>(fetchedAt);
+    return map;
+  }
+
+  TitleCreditsCompanion toCompanion(bool nullToAbsent) {
+    return TitleCreditsCompanion(
+      tmdbId: Value(tmdbId),
+      isTv: Value(isTv),
+      people: Value(people),
+      fetchedAt: Value(fetchedAt),
+    );
+  }
+
+  factory TitleCredit.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return TitleCredit(
+      tmdbId: serializer.fromJson<int>(json['tmdbId']),
+      isTv: serializer.fromJson<bool>(json['isTv']),
+      people: serializer.fromJson<String>(json['people']),
+      fetchedAt: serializer.fromJson<DateTime>(json['fetchedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'tmdbId': serializer.toJson<int>(tmdbId),
+      'isTv': serializer.toJson<bool>(isTv),
+      'people': serializer.toJson<String>(people),
+      'fetchedAt': serializer.toJson<DateTime>(fetchedAt),
+    };
+  }
+
+  TitleCredit copyWith({
+    int? tmdbId,
+    bool? isTv,
+    String? people,
+    DateTime? fetchedAt,
+  }) => TitleCredit(
+    tmdbId: tmdbId ?? this.tmdbId,
+    isTv: isTv ?? this.isTv,
+    people: people ?? this.people,
+    fetchedAt: fetchedAt ?? this.fetchedAt,
+  );
+  TitleCredit copyWithCompanion(TitleCreditsCompanion data) {
+    return TitleCredit(
+      tmdbId: data.tmdbId.present ? data.tmdbId.value : this.tmdbId,
+      isTv: data.isTv.present ? data.isTv.value : this.isTv,
+      people: data.people.present ? data.people.value : this.people,
+      fetchedAt: data.fetchedAt.present ? data.fetchedAt.value : this.fetchedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TitleCredit(')
+          ..write('tmdbId: $tmdbId, ')
+          ..write('isTv: $isTv, ')
+          ..write('people: $people, ')
+          ..write('fetchedAt: $fetchedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(tmdbId, isTv, people, fetchedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is TitleCredit &&
+          other.tmdbId == this.tmdbId &&
+          other.isTv == this.isTv &&
+          other.people == this.people &&
+          other.fetchedAt == this.fetchedAt);
+}
+
+class TitleCreditsCompanion extends UpdateCompanion<TitleCredit> {
+  final Value<int> tmdbId;
+  final Value<bool> isTv;
+  final Value<String> people;
+  final Value<DateTime> fetchedAt;
+  final Value<int> rowid;
+  const TitleCreditsCompanion({
+    this.tmdbId = const Value.absent(),
+    this.isTv = const Value.absent(),
+    this.people = const Value.absent(),
+    this.fetchedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  TitleCreditsCompanion.insert({
+    required int tmdbId,
+    this.isTv = const Value.absent(),
+    required String people,
+    required DateTime fetchedAt,
+    this.rowid = const Value.absent(),
+  }) : tmdbId = Value(tmdbId),
+       people = Value(people),
+       fetchedAt = Value(fetchedAt);
+  static Insertable<TitleCredit> custom({
+    Expression<int>? tmdbId,
+    Expression<bool>? isTv,
+    Expression<String>? people,
+    Expression<DateTime>? fetchedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (tmdbId != null) 'tmdb_id': tmdbId,
+      if (isTv != null) 'is_tv': isTv,
+      if (people != null) 'people': people,
+      if (fetchedAt != null) 'fetched_at': fetchedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  TitleCreditsCompanion copyWith({
+    Value<int>? tmdbId,
+    Value<bool>? isTv,
+    Value<String>? people,
+    Value<DateTime>? fetchedAt,
+    Value<int>? rowid,
+  }) {
+    return TitleCreditsCompanion(
+      tmdbId: tmdbId ?? this.tmdbId,
+      isTv: isTv ?? this.isTv,
+      people: people ?? this.people,
+      fetchedAt: fetchedAt ?? this.fetchedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (tmdbId.present) {
+      map['tmdb_id'] = Variable<int>(tmdbId.value);
+    }
+    if (isTv.present) {
+      map['is_tv'] = Variable<bool>(isTv.value);
+    }
+    if (people.present) {
+      map['people'] = Variable<String>(people.value);
+    }
+    if (fetchedAt.present) {
+      map['fetched_at'] = Variable<DateTime>(fetchedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TitleCreditsCompanion(')
+          ..write('tmdbId: $tmdbId, ')
+          ..write('isTv: $isTv, ')
+          ..write('people: $people, ')
+          ..write('fetchedAt: $fetchedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -3334,6 +3644,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $CustomListMoviesTable customListMovies = $CustomListMoviesTable(
     this,
   );
+  late final $TitleCreditsTable titleCredits = $TitleCreditsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3344,6 +3655,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     userMovieSettings,
     customLists,
     customListMovies,
+    titleCredits,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -5174,6 +5486,187 @@ typedef $$CustomListMoviesTableProcessedTableManager =
       CustomListMovie,
       PrefetchHooks Function({bool listId})
     >;
+typedef $$TitleCreditsTableCreateCompanionBuilder =
+    TitleCreditsCompanion Function({
+      required int tmdbId,
+      Value<bool> isTv,
+      required String people,
+      required DateTime fetchedAt,
+      Value<int> rowid,
+    });
+typedef $$TitleCreditsTableUpdateCompanionBuilder =
+    TitleCreditsCompanion Function({
+      Value<int> tmdbId,
+      Value<bool> isTv,
+      Value<String> people,
+      Value<DateTime> fetchedAt,
+      Value<int> rowid,
+    });
+
+class $$TitleCreditsTableFilterComposer
+    extends Composer<_$AppDatabase, $TitleCreditsTable> {
+  $$TitleCreditsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get tmdbId => $composableBuilder(
+    column: $table.tmdbId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isTv => $composableBuilder(
+    column: $table.isTv,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get people => $composableBuilder(
+    column: $table.people,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get fetchedAt => $composableBuilder(
+    column: $table.fetchedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$TitleCreditsTableOrderingComposer
+    extends Composer<_$AppDatabase, $TitleCreditsTable> {
+  $$TitleCreditsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get tmdbId => $composableBuilder(
+    column: $table.tmdbId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isTv => $composableBuilder(
+    column: $table.isTv,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get people => $composableBuilder(
+    column: $table.people,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get fetchedAt => $composableBuilder(
+    column: $table.fetchedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$TitleCreditsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $TitleCreditsTable> {
+  $$TitleCreditsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get tmdbId =>
+      $composableBuilder(column: $table.tmdbId, builder: (column) => column);
+
+  GeneratedColumn<bool> get isTv =>
+      $composableBuilder(column: $table.isTv, builder: (column) => column);
+
+  GeneratedColumn<String> get people =>
+      $composableBuilder(column: $table.people, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get fetchedAt =>
+      $composableBuilder(column: $table.fetchedAt, builder: (column) => column);
+}
+
+class $$TitleCreditsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $TitleCreditsTable,
+          TitleCredit,
+          $$TitleCreditsTableFilterComposer,
+          $$TitleCreditsTableOrderingComposer,
+          $$TitleCreditsTableAnnotationComposer,
+          $$TitleCreditsTableCreateCompanionBuilder,
+          $$TitleCreditsTableUpdateCompanionBuilder,
+          (
+            TitleCredit,
+            BaseReferences<_$AppDatabase, $TitleCreditsTable, TitleCredit>,
+          ),
+          TitleCredit,
+          PrefetchHooks Function()
+        > {
+  $$TitleCreditsTableTableManager(_$AppDatabase db, $TitleCreditsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$TitleCreditsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$TitleCreditsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$TitleCreditsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> tmdbId = const Value.absent(),
+                Value<bool> isTv = const Value.absent(),
+                Value<String> people = const Value.absent(),
+                Value<DateTime> fetchedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => TitleCreditsCompanion(
+                tmdbId: tmdbId,
+                isTv: isTv,
+                people: people,
+                fetchedAt: fetchedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required int tmdbId,
+                Value<bool> isTv = const Value.absent(),
+                required String people,
+                required DateTime fetchedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => TitleCreditsCompanion.insert(
+                tmdbId: tmdbId,
+                isTv: isTv,
+                people: people,
+                fetchedAt: fetchedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$TitleCreditsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $TitleCreditsTable,
+      TitleCredit,
+      $$TitleCreditsTableFilterComposer,
+      $$TitleCreditsTableOrderingComposer,
+      $$TitleCreditsTableAnnotationComposer,
+      $$TitleCreditsTableCreateCompanionBuilder,
+      $$TitleCreditsTableUpdateCompanionBuilder,
+      (
+        TitleCredit,
+        BaseReferences<_$AppDatabase, $TitleCreditsTable, TitleCredit>,
+      ),
+      TitleCredit,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -5188,4 +5681,6 @@ class $AppDatabaseManager {
       $$CustomListsTableTableManager(_db, _db.customLists);
   $$CustomListMoviesTableTableManager get customListMovies =>
       $$CustomListMoviesTableTableManager(_db, _db.customListMovies);
+  $$TitleCreditsTableTableManager get titleCredits =>
+      $$TitleCreditsTableTableManager(_db, _db.titleCredits);
 }

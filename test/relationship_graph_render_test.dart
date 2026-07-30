@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'support/localized_app.dart';
 import 'package:cinefile/core/database/app_database.dart';
 import 'package:cinefile/core/database/database_provider.dart';
+import 'package:cinefile/features/relationship_graph/data/title_credits_cache.dart';
 import 'package:cinefile/features/relationship_graph/domain/graph_models.dart';
 import 'package:cinefile/features/relationship_graph/domain/graph_overrides.dart';
 import 'package:cinefile/features/relationship_graph/presentation/graph_overrides_provider.dart';
@@ -68,6 +69,9 @@ Widget _app(List<WatchRecordWithMovie> records) {
       allMovieSettingsProvider.overrideWith((ref) => Stream.value(const {})),
       titleCreditsFetcherProvider
           .overrideWithValue((Movie m) async => _creditsFromMovie(m)),
+      // Credits are persisted to Drift in production; this keeps the test off
+      // a real database file (which would also open a second AppDatabase).
+      titleCreditsCacheProvider.overrideWithValue(MemoryTitleCreditsCache()),
       // Avoid touching Firebase auth in tests.
       graphOverridesProvider.overrideWith((ref) => Stream.value(GraphOverrides.empty)),
     ],

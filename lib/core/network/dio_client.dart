@@ -24,15 +24,22 @@ class DioClient {
       : _dio = Dio(
           BaseOptions(
             baseUrl: baseUrl ?? ApiConstants.baseUrl,
-            connectTimeout: const Duration(milliseconds: 1500), // Fast timeout for quick fallback to the alternate TMDb domain
-            receiveTimeout: const Duration(seconds: 3),
+            // Previously 1.5s connect / 3s receive, chosen to fail over to the
+            // alternate TMDb domain quickly. That is far inside the normal
+            // range for a mobile connection: on a weak 4G or a busy hotel
+            // Wi-Fi it turned working requests into "arama başarısız", and the
+            // failover it was rushing towards cannot help with plain slowness
+            // (the second domain is no faster). The failover still triggers on
+            // an actual connection error, which arrives long before these.
+            connectTimeout: const Duration(seconds: 5),
+            receiveTimeout: const Duration(seconds: 10),
             headers: {
               'Content-Type': 'application/json',
               'Accept': 'application/json',
             },
           ),
         ) {
-    _dio.interceptors.add(FailoverInterceptor());
+    _dio.interceptors.add(FailoverInterceptor(_dio));
     _dio.interceptors.add(DioCacheInterceptor(options: cacheOptions));
     // Debug builds only. TMDb takes the API key as a *query parameter*, so
     // every logged request URI contains the key in plain text — which ended up
@@ -85,10 +92,27 @@ class DioClient {
 }
 
 class FailoverInterceptor extends Interceptor {
+  FailoverInterceptor(this._dio);
+
+  /// The client the failed request came from, so the retry keeps its
+  /// configuration.
+  ///
+  /// This used to build a bare `Dio()` for the retry, which quietly defeated
+  /// the whole mechanism on native: the DNS-over-HTTPS `connectionFactory`
+  /// that DioClient installs lives on the original client, so a retry through
+  /// a fresh instance went back through the same hijacked OS resolver that had
+  /// just failed — in exactly the scenario (a sinkholed TMDb domain) this
+  /// interceptor exists for. It also bypassed the response cache.
+  final Dio _dio;
+
+  /// Marks a request that is already a failover attempt, so a second failure
+  /// can't send it round again.
+  static const String _retriedFlag = 'cinefile.failover.retried';
+
   // Official TMDb domains only. We deliberately do not fall back to
   // third-party CORS proxies (e.g. corsproxy.io): doing so would send the
   // user's TMDb API key, in the request URL, to an untrusted service.
-  final List<String> baseUrls = [
+  static const List<String> baseUrls = [
     'https://api.themoviedb.org/3',
     'https://api.tmdb.org/3',
   ];
@@ -96,29 +120,35 @@ class FailoverInterceptor extends Interceptor {
   @override
   Future<void> onError(DioException err, ErrorInterceptorHandler handler) async {
     // Catch all connection errors, timeouts, and unknown browser errors (CORS/ISP blocks on Web)
-    if (err.type != DioExceptionType.badResponse &&
-        err.type != DioExceptionType.cancel) {
-      final options = err.requestOptions;
-      final currentBaseUrl = options.baseUrl;
-
-      // Try the next official base URL, if there is one left to try.
-      final currentIndex = baseUrls.indexOf(currentBaseUrl);
-      if (currentIndex != -1 && currentIndex < baseUrls.length - 1) {
-        final nextBaseUrl = baseUrls[currentIndex + 1];
-        if (options.path.startsWith('http')) {
-          options.path = options.path.replaceFirst(currentBaseUrl, nextBaseUrl);
-        }
-        options.baseUrl = nextBaseUrl;
-
-        try {
-          final retryDio = Dio();
-          final response = await retryDio.fetch(options);
-          return handler.resolve(response);
-        } on DioException catch (retryErr) {
-          return handler.next(retryErr);
-        }
-      }
+    if (err.type == DioExceptionType.badResponse ||
+        err.type == DioExceptionType.cancel ||
+        err.requestOptions.extra[_retriedFlag] == true) {
+      return handler.next(err);
     }
-    return handler.next(err);
+
+    final options = err.requestOptions;
+    final currentIndex = baseUrls.indexOf(options.baseUrl);
+    if (currentIndex == -1 || currentIndex >= baseUrls.length - 1) {
+      return handler.next(err);
+    }
+
+    final nextBaseUrl = baseUrls[currentIndex + 1];
+    // A copy rather than a mutation of `err.requestOptions`: that object is
+    // the caller's, is what the cache interceptor derives its key from, and is
+    // still referenced by the DioException being propagated if the retry also
+    // fails.
+    final retryOptions = options.copyWith(
+      baseUrl: nextBaseUrl,
+      path: options.path.startsWith('http')
+          ? options.path.replaceFirst(baseUrls[currentIndex], nextBaseUrl)
+          : options.path,
+      extra: {...options.extra, _retriedFlag: true},
+    );
+
+    try {
+      return handler.resolve(await _dio.fetch(retryOptions));
+    } on DioException catch (retryErr) {
+      return handler.next(retryErr);
+    }
   }
 }

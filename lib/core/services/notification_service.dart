@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -6,6 +8,7 @@ import 'package:timezone/data/latest_10y.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import '../navigation/app_navigator.dart';
 import '../../features/movie_detail/presentation/movie_detail_screen.dart';
+import '../database/app_database.dart';
 import '../database/database_provider.dart';
 import '../../features/settings/presentation/settings_provider.dart';
 import '../../features/auth/controllers/auth_controller.dart';
@@ -15,7 +18,9 @@ import '../l10n/l10n_lookup.dart';
 import '../../l10n/app_localizations.dart';
 
 final notificationServiceProvider = Provider<NotificationService>((ref) {
-  return NotificationService(ref);
+  final service = NotificationService(ref);
+  ref.onDispose(service.dispose);
+  return service;
 });
 
 class NotificationService {
@@ -23,6 +28,56 @@ class NotificationService {
   final FlutterLocalNotificationsPlugin _notificationsPlugin = FlutterLocalNotificationsPlugin();
 
   NotificationService(this._ref);
+
+  Timer? _syncDebounce;
+
+  /// Fingerprint of the last schedule actually built, so an unrelated settings
+  /// write doesn't rebuild it. See [requestSync].
+  String? _lastSyncedFingerprint;
+
+  void dispose() {
+    _syncDebounce?.cancel();
+  }
+
+  /// Coalesces sync requests triggered by settings changes.
+  ///
+  /// MainShell re-syncs whenever `allMovieSettingsProvider` emits. That fires
+  /// on *any* write to movie_settings — including the one every quick-add "+"
+  /// makes — and [syncNotifications] cancels every scheduled notification and
+  /// then issues two TMDb requests per actively-watched show to rebuild them.
+  /// Advancing five episodes in a row therefore meant five full rebuilds and
+  /// dozens of network calls, for a schedule that only needed to change once.
+  ///
+  /// Two things stop that: a debounce, so a burst of taps produces one rebuild,
+  /// and the fingerprint check in [syncNotifications], so a settings write that
+  /// doesn't affect the schedule at all (favouriting, ranking, notes) produces
+  /// none.
+  void requestSync({Duration delay = const Duration(seconds: 20)}) {
+    if (kIsWeb || _isTestEnvironment) return;
+    _syncDebounce?.cancel();
+    _syncDebounce = Timer(delay, () => unawaited(syncNotifications()));
+  }
+
+  /// The settings that actually determine what gets scheduled: watchlist
+  /// membership (release reminders) and episode progress on actively-watched
+  /// shows (next-episode reminders). Everything else in a settings document is
+  /// irrelevant here.
+  String _scheduleFingerprint(
+    Map<MovieKey, UserMovieSetting> settings, {
+    required bool remindersEnabled,
+  }) {
+    if (!remindersEnabled) return 'disabled';
+    final parts = <String>[];
+    for (final entry in settings.entries) {
+      final s = entry.value;
+      final relevant = s.isReWatchList || (entry.key.isTv && s.isActivelyWatching);
+      if (!relevant) continue;
+      parts.add('${entry.key.tmdbId}:${entry.key.isTv}:'
+          '${s.isReWatchList}:${s.isActivelyWatching}:${s.lastWatchedEpisode}');
+    }
+    parts.sort();
+    return parts.join('|');
+  }
 
   /// Notification copy in the user's chosen language.
   ///
@@ -299,26 +354,42 @@ class NotificationService {
   /// being present — a show can be actively watched without being on the
   /// watchlist, so both loops run unconditionally rather than early-
   /// returning off just the watchlist check.
-  Future<void> syncNotifications() async {
+  /// Pass [force] to rebuild even when nothing schedule-relevant changed —
+  /// used by the explicit "re-enable reminders" path, where the user expects
+  /// their action to have an effect regardless.
+  Future<void> syncNotifications({bool force = false}) async {
     if (kIsWeb || _isTestEnvironment) return;
 
+    // A pending debounced run would only repeat what this call is about to do.
+    _syncDebounce?.cancel();
+
     final remindersEnabled = _ref.read(releaseRemindersEnabledProvider);
+    // Fetch all movie settings from Firestore (already loaded re-actively)
+    final settingsMap = _ref.read(allMovieSettingsProvider).value ?? {};
+
+    final fingerprint =
+        _scheduleFingerprint(settingsMap, remindersEnabled: remindersEnabled);
+    if (!force && fingerprint == _lastSyncedFingerprint) return;
+    _lastSyncedFingerprint = fingerprint;
+
     if (!remindersEnabled) {
       await cancelAllReminders();
       return;
     }
 
     final user = _ref.currentUser;
-    if (user == null) return;
+    if (user == null) {
+      // Nothing was scheduled for a signed-out user; don't record a
+      // fingerprint that would suppress the first real sync after sign-in.
+      _lastSyncedFingerprint = null;
+      return;
+    }
 
     // Cancel all existing scheduled notifications first to prevent
     // duplicates/ghost schedules, then let both loops below rebuild from
     // scratch (same brute-force dedup strategy the release-reminder sync
     // always used).
     await cancelAllReminders();
-
-    // Fetch all movie settings from Firestore (already loaded re-actively)
-    final settingsMap = _ref.read(allMovieSettingsProvider).value ?? {};
 
     try {
       final hasWatchlist = settingsMap.values.any((s) => s.isReWatchList);

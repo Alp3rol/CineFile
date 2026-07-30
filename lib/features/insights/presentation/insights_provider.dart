@@ -240,12 +240,19 @@ final insightsProvider = Provider<InsightsData?>((ref) {
     }
     longestStreak = currentRun > tempLongest ? currentRun : tempLongest;
 
-    bool hasToday = uniqueDates.contains(today);
-    bool hasYesterday = uniqueDates.contains(yesterday);
+    // Membership is checked once per day of the streak, so it goes through a
+    // Set. `uniqueDates` is a List (it has to be sorted for the longest-run
+    // scan above), and List.contains is a linear scan — walking a 400-day
+    // streak over a 2000-entry list meant 800k comparisons on every rebuild of
+    // this provider, which runs on every watch-record change.
+    final dateSet = uniqueDates.toSet();
+    final streakStart = dateSet.contains(today)
+        ? today
+        : (dateSet.contains(yesterday) ? yesterday : null);
 
-    if (hasToday || hasYesterday) {
-      DateTime checkDate = hasToday ? today : yesterday;
-      while (uniqueDates.contains(checkDate)) {
+    if (streakStart != null) {
+      var checkDate = streakStart;
+      while (dateSet.contains(checkDate)) {
         currentStreak++;
         checkDate = checkDate.subtract(const Duration(days: 1));
       }
