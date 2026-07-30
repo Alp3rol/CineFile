@@ -4,6 +4,7 @@ import 'package:drift/drift.dart';
 import '../../../core/network/tmdb_service.dart';
 import '../../../core/database/database_provider.dart';
 import '../../../core/database/app_database.dart';
+import '../../../core/database/movie_repository.dart';
 import '../../../core/l10n/l10n_lookup.dart';
 import '../../settings/presentation/settings_provider.dart';
 
@@ -55,85 +56,31 @@ final movieDetailProvider = FutureProvider.family<Map<String, dynamic>?, ({int t
       }
     } catch (_) {}
 
-    // 2. If not in local DB, fallback to search in mock movies list
-    final List<Map<String, dynamic>> mockMovies = [
-      {
-        'id': 157336,
-        'title': 'Interstellar',
-        'original_title': 'Interstellar',
-        'poster_path': '/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg',
-        'release_date': '2014-11-05',
-        'vote_average': 8.4,
-        'genre_ids': [878, 18, 12],
-        'overview': 'Mankind was born on Earth. It was never meant to die here.',
-      },
-      {
-        'id': 27205,
-        'title': 'Inception',
-        'original_title': 'Inception',
-        'poster_path': '/8ZTVqvKDQ8emSGUEMjsS4yHAwrp.jpg',
-        'release_date': '2010-07-15',
-        'vote_average': 8.3,
-        'genre_ids': [878, 18, 28, 12, 53],
-        'overview': 'Cobb, a skilled thief who commits corporate espionage by infiltrating the subconscious of his targets.',
-      },
-      {
-        'id': 693134,
-        'title': 'Dune: Part Two',
-        'original_title': 'Dune: Part Two',
-        'poster_path': '/tihf8Trht9zP3scmUQfvGlAY9FU.jpg',
-        'release_date': '2024-02-27',
-        'vote_average': 8.3,
-        'genre_ids': [878, 12, 28],
-        'overview': 'Follow the mythic journey of Paul Atreides as he unites with Chani and the Fremen.',
-      },
-      {
-        'id': 155,
-        'title': 'The Dark Knight',
-        'original_title': 'The Dark Knight',
-        'poster_path': '/7IPCEr7ifdH5CtU97QG7XgAAtOp.jpg',
-        'release_date': '2008-07-16',
-        'vote_average': 8.5,
-        'genre_ids': [28, 80, 18, 53],
-        'overview': 'Batman raises the stakes in his war on crime.',
-      },
-      {
-        'id': 872585,
-        'title': 'Oppenheimer',
-        'original_title': 'Oppenheimer',
-        'poster_path': '/ptpr0kGAckfQkJeJIt8st5dglvd.jpg',
-        'release_date': '2023-07-19',
-        'vote_average': 8.1,
-        'genre_ids': [18, 36],
-        'overview': 'The story of J. Robert Oppenheimer and the atomic bomb project.',
-      },
-      {
-        'id': 569094,
-        'title': 'Spider-Man: Across the Spider-Verse',
-        'original_title': 'Spider-Man: Across the Spider-Verse',
-        'poster_path': '/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg',
-        'release_date': '2023-05-31',
-        'vote_average': 8.4,
-        'genre_ids': [16, 28, 12, 878],
-        'overview': 'Miles Morales catapults across the Multiverse.',
-      },
-    ];
-
-    try {
-      final mock = mockMovies.firstWhere((m) => m['id'] == arg.tmdbId);
-      return {
-        ...mock,
-        'runtime': 148,
-        'genres': [{'name': 'Bilim Kurgu'}, {'name': 'Dram'}],
-        'credits': {
-          'cast': [{'name': 'Matthew McConaughey', 'character': ''}],
-          'crew': [{'name': 'Christopher Nolan', 'job': 'Director'}]
-        }
-      };
-    } catch (_) {}
-
-    // 3. Ultimate fallback: Return a basic template instead of crashing the screen
+    // 2. Ultimate fallback: Return a basic template instead of crashing the screen
+    //
+    // There used to be a step here that matched arg.tmdbId against the six
+    // demo titles and returned them with a FABRICATED payload: runtime 148,
+    // genres "Bilim Kurgu, Dram", and Christopher Nolan as director — for all
+    // six, including Dune: Part Two and Across the Spider-Verse.
+    //
+    // That was not limited to the documented no-API-key demo mode; TmdbService
+    // already answers those from its own mock list without throwing, so this
+    // branch only ran on a REAL failure (DNS block, timeout, 429). And the
+    // payload did not stay on screen: MovieDetailScreen hands it to
+    // cacheMovieMetadata, and AddWatchRecordSheet copies movieDirector/
+    // movieGenres out of it into the Firestore log. A single timeout could
+    // therefore write "Christopher Nolan" into the user's library permanently,
+    // which then fed the Nolan achievement badge, topDirectors, and the
+    // director-based recommendations.
+    //
+    // A network failure is a network failure. The honest fallback carries no
+    // credits at all.
     return {
+      // Marks this payload as "we could not load anything". Every field below
+      // is a placeholder, so the local metadata cache refuses it (see
+      // cacheMovieMetadata) rather than persisting a localized title and an
+      // invented runtime as if they were TMDb data.
+      kOfflinePlaceholderKey: true,
       'id': arg.tmdbId,
       'title': l10n.offlineContentTitle,
       'original_title': 'Offline Content',

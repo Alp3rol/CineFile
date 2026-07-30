@@ -101,6 +101,50 @@ void main() {
     expect(doc.exists, isFalse);
   });
 
+  // Regression: deleteCustomList only removed the local row, so a collection
+  // the owner had shared stayed in shared_collections — readable by every
+  // signed-in user, with its titles, name and description, indefinitely. The
+  // owner had no way to see it, and the 'collection' community post pointing
+  // at it kept rendering.
+  test('deleting a SHARED collection also removes its Firestore mirror', () async {
+    final repo = container.read(movieRepositoryProvider);
+    await repo.createCustomList('Gizli Kalmasi Gereken', 'ozel notlar');
+    final listId = (await db.select(db.customLists).get()).first.id;
+    await repo.addMovieToCustomList(
+      listId,
+      Movie(tmdbId: 7, title: 'Se7en', isTv: false, createdAt: DateTime.now()),
+    );
+    await repo.setCollectionVisibility(listId, true);
+    expect(
+      (await firestore.collection('shared_collections').doc('owner_$listId').get()).exists,
+      isTrue,
+      reason: 'sanity check: sharing should have created the mirror',
+    );
+
+    await repo.deleteCustomList(listId);
+
+    expect(
+      (await firestore.collection('shared_collections').doc('owner_$listId').get()).exists,
+      isFalse,
+      reason: 'deleting the collection must take its public mirror with it',
+    );
+    expect(await (db.select(db.customLists)..where((t) => t.id.equals(listId))).getSingleOrNull(), isNull);
+  });
+
+  test('deleting a PRIVATE collection issues no Firestore write', () async {
+    final repo = container.read(movieRepositoryProvider);
+    await repo.createCustomList('Sadece Bende', null);
+    final listId = (await db.select(db.customLists).get()).first.id;
+
+    await repo.deleteCustomList(listId);
+
+    expect(
+      (await firestore.collection('shared_collections').doc('owner_$listId').get()).exists,
+      isFalse,
+    );
+    expect(await (db.select(db.customLists)..where((t) => t.id.equals(listId))).getSingleOrNull(), isNull);
+  });
+
   test('mirroring correctly separates a movie and a TV show that share the same tmdbId', () async {
     final repo = container.read(movieRepositoryProvider);
     await repo.createCustomList('Mixed List', null);

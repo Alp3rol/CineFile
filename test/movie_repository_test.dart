@@ -4,6 +4,7 @@
 // database; updateWatchRecordRankings writes to Firestore (see
 // NativeMovieRepository.updateWatchRecordRankings) so that one test uses a
 // FakeFirebaseFirestore + mocked signed-in user instead.
+import 'package:drift/drift.dart' show BooleanExpressionOperators;
 import 'package:drift/native.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
@@ -64,6 +65,66 @@ void main() {
     await repo.deleteCustomList(listId);
     final listsAfterDelete = await db.select(db.customLists).get();
     expect(listsAfterDelete, isEmpty);
+  });
+
+  // movie_detail_provider.dart falls back to a placeholder payload when TMDb
+  // can't be reached: its title is a localized string ("Çevrimdışı İçerik") and
+  // its runtime is an invented 120. MovieDetailScreen hands whatever the
+  // provider returned to cacheMovieMetadata, so without a guard a single
+  // timeout would overwrite a real row with that placeholder — and the graph,
+  // statistics and recommendations all read those columns.
+  test('cacheMovieMetadata refuses the offline placeholder payload', () async {
+    final repo = container.read(movieRepositoryProvider);
+
+    await repo.cacheMovieMetadata(
+      tmdbId: 27205,
+      isTv: false,
+      movieData: {
+        'id': 27205,
+        'title': 'Inception',
+        'runtime': 148,
+        'genres': [
+          {'id': 878, 'name': 'Bilim Kurgu'}
+        ],
+      },
+    );
+
+    // The same title, now "loaded" while offline.
+    await repo.cacheMovieMetadata(
+      tmdbId: 27205,
+      isTv: false,
+      movieData: {
+        kOfflinePlaceholderKey: true,
+        'id': 27205,
+        'title': 'Çevrimdışı İçerik',
+        'runtime': 120,
+        'genres': const [],
+        'credits': const {'cast': [], 'crew': []},
+      },
+    );
+
+    final row = await (db.select(db.movies)
+          ..where((t) => t.tmdbId.equals(27205) & t.isTv.equals(false)))
+        .getSingle();
+    expect(row.title, 'Inception', reason: 'the placeholder must not overwrite real data');
+    expect(row.runtime, 148);
+  });
+
+  test('cacheMovieMetadata does not create a row from a placeholder either', () async {
+    final repo = container.read(movieRepositoryProvider);
+
+    await repo.cacheMovieMetadata(
+      tmdbId: 999,
+      isTv: false,
+      movieData: {
+        kOfflinePlaceholderKey: true,
+        'id': 999,
+        'title': 'Çevrimdışı İçerik',
+        'runtime': 120,
+      },
+    );
+
+    expect(await db.select(db.movies).get(), isEmpty);
   });
 
   test('updateWatchRecordRankings writes personalRanking to Firestore for the signed-in user', () async {

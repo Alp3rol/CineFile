@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../features/auth/controllers/auth_controller.dart';
+import '../../features/auth/models/user_model.dart';
 import '../../features/journal/models/diary_log_model.dart';
 import 'movie_repository.dart';
 
@@ -90,20 +91,67 @@ class BackupService {
     if (logs == null && settings == null) return;
 
     final firestore = ref.read(firestoreProvider) as FirebaseFirestore;
+    final identity = resolveUserIdentity(
+      ref.read(userModelProvider) as UserModel?,
+      user,
+    );
 
     if (logs != null) {
       final existing =
           await firestore.collection('logs').where('userId', isEqualTo: user.uid).get();
+
+      // Write the incoming logs FIRST, delete the old ones only once every
+      // write has landed.
+      //
+      // The previous order put the deletions and the writes in one operation
+      // list, committed in chunks of 400. A restore of a few hundred logs is
+      // several chunks, and the first ones are the deletions — so a network
+      // failure partway through left the user with their history deleted and
+      // the replacement never written. There is no transaction spanning that
+      // many documents, so the ordering is the only safety available: the
+      // worst case now is duplicated entries, which the user can see and
+      // delete, rather than silent total loss.
+      //
+      // New document ids on purpose: the backup may have been taken from a
+      // different account, and reusing its ids would collide with, or silently
+      // overwrite, logs that belong to someone else.
+      final incoming = logs.whereType<Map<String, dynamic>>().toList();
+      final restoreBatchId = 'restore-${DateTime.now().microsecondsSinceEpoch}';
       await _commitInChunks(firestore, [
-        for (final doc in existing.docs) (ref: doc.reference, data: null),
-        for (final entry in logs.whereType<Map<String, dynamic>>())
-          // New document ids on purpose: the backup may have been taken from a
-          // different account, and reusing its ids would collide with, or
-          // silently overwrite, logs that belong to someone else.
+        for (final entry in incoming)
           (
             ref: firestore.collection('logs').doc(),
-            data: _logFromJson(entry, user.uid),
+            data: {
+              ..._logFromJson(entry, user.uid, identity),
+              _kRestoreBatchField: restoreBatchId,
+            },
           ),
+      ]);
+
+      // Confirm the new rows are actually queryable before removing the old
+      // ones. A short count mismatch means something did not commit, and the
+      // old history is still the user's only copy — keep it.
+      final written = await firestore
+          .collection('logs')
+          .where('userId', isEqualTo: user.uid)
+          .where(_kRestoreBatchField, isEqualTo: restoreBatchId)
+          .get();
+      if (written.docs.length != incoming.length) {
+        throw StateError(
+          'Restore incomplete: ${written.docs.length}/${incoming.length} logs were '
+          'written. The previous history has been left untouched.',
+        );
+      }
+
+      await _commitInChunks(firestore, [
+        for (final doc in existing.docs) (ref: doc.reference, data: null),
+      ]);
+
+      // The marker has served its purpose; strip it so it doesn't linger on
+      // every restored document forever.
+      await _commitInChunks(firestore, [
+        for (final doc in written.docs)
+          (ref: doc.reference, data: {...doc.data()}..remove(_kRestoreBatchField)),
       ]);
     }
 
@@ -133,6 +181,11 @@ class BackupService {
   }
 
   // --- helpers ---
+
+  /// Temporary marker written on documents created by one restore run, so the
+  /// run can verify its own writes landed before deleting anything. Removed
+  /// again once the old documents are gone.
+  static const String _kRestoreBatchField = 'restoreBatchId';
 
   /// Firestore rejects a batch with more than 500 writes, and a restore can
   /// easily exceed that (delete + recreate of a few hundred logs), so the
@@ -176,12 +229,22 @@ class BackupService {
     };
   }
 
-  static Map<String, dynamic> _logFromJson(Map<String, dynamic> entry, String uid) {
+  static Map<String, dynamic> _logFromJson(
+    Map<String, dynamic> entry,
+    String uid,
+    UserIdentity identity,
+  ) {
     return {
       ...entry,
       // The restoring account owns the restored rows, whoever the file came
       // from — otherwise firestore.rules rejects the write outright.
       'userId': uid,
+      // Likewise for the denormalised author fields: the rules require them to
+      // equal the caller's current profile. Carrying the values from the file
+      // would fail for a backup taken from another account, and equally for
+      // one taken before the user renamed themselves.
+      'username': identity.username,
+      'userAvatarUrl': identity.avatarUrl,
       'watchDate': _timestampFrom(entry['watchDate']),
       'createdAt': _timestampFrom(entry['createdAt']),
       // Social state belongs to the original posting, not to a restored copy.

@@ -254,76 +254,112 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
     final newLastWatchedEpisode = episodeFields.lastWatchedEpisode;
 
     try {
-      // 1. Calculate watch number (how many times they watched this movie)
-      final existingRecordsQuery = await ref.read(firestoreProvider)
-          .collection('logs')
-          .where('userId', isEqualTo: user.uid)
-          .where('movieId', isEqualTo: movieId)
-          .where('isTv', isEqualTo: isTv)
-          .get();
-      final watchNumber = existingRecordsQuery.docs.length + 1;
-
+      final firestore = ref.read(firestoreProvider);
       final movieTitle = (widget.movieData['title'] ?? widget.movieData['name'] ?? l10n.titleUnknown).toString();
 
-      // 2. Generate a new log document
-      final logRef = ref.read(firestoreProvider).collection('logs').doc();
-      final logData = {
-        'id': logRef.id,
-        'userId': user.uid,
-        'username': username,
-        'userAvatarUrl': avatarUrl,
-        'movieId': movieId,
-        'isTv': isTv,
-        'watchDate': Timestamp.fromDate(watchDateTime),
-        'watchPlace': _placeController.text.trim().isEmpty ? null : _placeController.text.trim(),
-        'watchCompanion': _companionController.text.trim().isEmpty ? null : _companionController.text.trim(),
-        'rating': _rating,
-        'mood': _selectedMood,
-        'notes': _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
-        'watchNumber': watchNumber,
-        'tags': _tagsController.text.trim().isEmpty ? null : _tagsController.text.trim(),
-        'episodeCount': episodeCountForRecord,
-        'createdAt': FieldValue.serverTimestamp(),
-        'movieTitle': movieTitle,
-        'movieOriginalTitle': (widget.movieData['original_title'] ?? widget.movieData['original_name']) as String?,
-        'moviePosterPath': widget.movieData['poster_path'] as String?,
-        'movieBackdropPath': widget.movieData['backdrop_path'] as String?,
-        'movieReleaseYear': releaseYear,
-        'movieRuntime': (widget.movieData['runtime'] as num?)?.toInt(),
-        'movieGenres': genresString,
-        'movieDirector': directorName,
-        'movieActors': actorsString,
-        'movieOverview': widget.movieData['overview'] as String?,
-        'movieTotalEpisodes': _totalEpisodes,
-        'starredBy': <String>[],
-        'commentCount': 0,
-        'isPublic': _isPublic,
-      };
-
-      await logRef.set(logData);
-
-      // 3. Update movie settings for favorite/rewatch status
-      final settingsRef = ref.read(firestoreProvider)
+      final logRef = firestore.collection('logs').doc();
+      final settingsRef = firestore
           .collection('users')
           .doc(user.uid)
           .collection('movie_settings')
           .doc('${movieId}_$isTv');
 
-      final settingsDoc = await settingsRef.get();
-      final existingSetting = settingsDoc.data();
+      // The watch number used to be `existingLogs.length + 1`, read with a
+      // separate query. Three problems, all real:
+      //
+      //  * Deleting a record made the next one reuse a number. With records
+      //    1,2,3, deleting #2 left length == 2, so the next save was also #3 —
+      //    and deleteWatchRecord recomputes episode progress by summing
+      //    episodeCount across records sharing the latest watchNumber, so the
+      //    duplicate silently doubled a show's progress and could mark it
+      //    finished.
+      //  * Two devices saving at once both read the same length and both got
+      //    the same number.
+      //  * It cost one document read per existing log, on every save.
+      //
+      // A counter on the settings document, incremented in the same
+      // transaction that writes the log, is exact, costs one read, and cannot
+      // hand out the same number twice.
+      // Accounts that predate the counter have logs but no `watchCount`, and
+      // starting them at 1 would collide with the #1 they already have. Seed
+      // the counter once, from the highest number actually in use. This costs
+      // the old per-save query exactly once per title, and never again.
+      var seed = 0;
+      final settingsBefore = await settingsRef.get();
+      if (settingsBefore.data()?['watchCount'] == null) {
+        final existingLogs = await firestore
+            .collection('logs')
+            .where('userId', isEqualTo: user.uid)
+            .where('movieId', isEqualTo: movieId)
+            .where('isTv', isEqualTo: isTv)
+            .get();
+        for (final d in existingLogs.docs) {
+          final n = (d.data()['watchNumber'] as num?)?.toInt() ?? 0;
+          if (n > seed) seed = n;
+        }
+      }
 
-      await settingsRef.set({
-        'movieId': movieId,
-        'isTv': isTv,
-        'isFavorite': existingSetting?['isFavorite'] == true || existingSetting?['isFavorite'] == 1,
-        'isReWatchList': existingSetting?['isReWatchList'] == true || existingSetting?['isReWatchList'] == 1,
-        'personalRanking': existingSetting?['personalRanking'],
-        'personalNotes': existingSetting?['personalNotes'],
-        'personalTags': existingSetting?['personalTags'],
-        'updatedAt': FieldValue.serverTimestamp(),
-        'isActivelyWatching': newIsActivelyWatching,
-        'lastWatchedEpisode': newLastWatchedEpisode,
-      }, SetOptions(merge: true));
+      final watchNumber = await firestore.runTransaction<int>((tx) async {
+        final settingsSnap = await tx.get(settingsRef);
+        final existing = settingsSnap.data();
+
+        final previous = (existing?['watchCount'] as num?)?.toInt() ?? seed;
+        final next = previous + 1;
+
+        tx.set(logRef, {
+          'id': logRef.id,
+          'userId': user.uid,
+          'username': username,
+          'userAvatarUrl': avatarUrl,
+          'movieId': movieId,
+          'isTv': isTv,
+          'watchDate': Timestamp.fromDate(watchDateTime),
+          'watchPlace': _placeController.text.trim().isEmpty ? null : _placeController.text.trim(),
+          'watchCompanion': _companionController.text.trim().isEmpty ? null : _companionController.text.trim(),
+          'rating': _rating,
+          'mood': _selectedMood,
+          'notes': _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
+          'watchNumber': next,
+          'tags': _tagsController.text.trim().isEmpty ? null : _tagsController.text.trim(),
+          'episodeCount': episodeCountForRecord,
+          'createdAt': FieldValue.serverTimestamp(),
+          'movieTitle': movieTitle,
+          'movieOriginalTitle': (widget.movieData['original_title'] ?? widget.movieData['original_name']) as String?,
+          'moviePosterPath': widget.movieData['poster_path'] as String?,
+          'movieBackdropPath': widget.movieData['backdrop_path'] as String?,
+          'movieReleaseYear': releaseYear,
+          'movieRuntime': (widget.movieData['runtime'] as num?)?.toInt(),
+          'movieGenres': genresString,
+          'movieDirector': directorName,
+          'movieActors': actorsString,
+          'movieOverview': widget.movieData['overview'] as String?,
+          'movieTotalEpisodes': _totalEpisodes,
+          'starredBy': <String>[],
+          'commentCount': 0,
+          'isPublic': _isPublic,
+        });
+
+        // Settings are written in the SAME transaction: the log and the
+        // episode progress it implies were two independent writes before, so a
+        // failure between them left the diary and the "kaldığın bölüm" counter
+        // disagreeing.
+        tx.set(settingsRef, {
+          'movieId': movieId,
+          'isTv': isTv,
+          'watchCount': next,
+          'isFavorite': existing?['isFavorite'] == true || existing?['isFavorite'] == 1,
+          'isReWatchList': existing?['isReWatchList'] == true || existing?['isReWatchList'] == 1,
+          'personalRanking': existing?['personalRanking'],
+          'personalNotes': existing?['personalNotes'],
+          'personalTags': existing?['personalTags'],
+          'updatedAt': FieldValue.serverTimestamp(),
+          'isActivelyWatching': newIsActivelyWatching,
+          'lastWatchedEpisode': newLastWatchedEpisode,
+        }, SetOptions(merge: true));
+
+        return next;
+      });
+      debugPrint('Saved watch record #$watchNumber for "$movieTitle"');
 
       if (mounted) {
         Navigator.pop(context);

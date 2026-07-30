@@ -91,6 +91,15 @@ abstract class MovieRepository {
   });
 }
 
+/// Marker key set on the "nothing could be loaded" payload
+/// movie_detail_provider.dart falls back to. Its title is a localized string
+/// and its runtime is invented, so it must never reach the database — see
+/// [cacheMovieMetadata].
+const String kOfflinePlaceholderKey = '__cinefile_offline_placeholder';
+
+bool isOfflinePlaceholderPayload(Map<String, dynamic> movieData) =>
+    movieData[kOfflinePlaceholderKey] == true;
+
 /// Builds a [Movie] row from a raw TMDb detail payload.
 ///
 /// Shared by every `cacheMovieMetadata` implementation and by
@@ -162,12 +171,67 @@ Movie movieFromTmdbPayload({
   );
 }
 
+// --- Backup compatibility ---------------------------------------------------
+//
+// Drift's generated `fromJson` is strict: a field that is absent reaches a
+// non-nullable constructor argument as null and throws. Backups predate
+// several columns (isTv before the movie/TV id-collision fix, episodeCount
+// before per-record episode counts, isPublic before the community toggle), so
+// every one of them is defaulted here before the row is built.
+//
+// Dates need no special handling — Drift's default serializer already accepts
+// both the millisecond ints it writes and the ISO strings older web backups
+// contain.
+
+bool _backupBool(Object? value, {bool orElse = false}) {
+  if (value is bool) return value;
+  if (value is num) return value != 0;
+  if (value is String) {
+    final lower = value.trim().toLowerCase();
+    if (lower == 'true' || lower == '1') return true;
+    if (lower == 'false' || lower == '0') return false;
+  }
+  return orElse;
+}
+
+Map<String, dynamic> _movieBackupJson(Map<String, dynamic> json) => {
+      ...json,
+      'isTv': _backupBool(json['isTv']),
+    };
+
+Map<String, dynamic> _watchRecordBackupJson(Map<String, dynamic> json) => {
+      ...json,
+      'isTv': _backupBool(json['isTv']),
+      'isPublic': _backupBool(json['isPublic']),
+      'episodeCount': (json['episodeCount'] as num?)?.toInt() ?? 1,
+    };
+
+Map<String, dynamic> _userMovieSettingBackupJson(Map<String, dynamic> json) => {
+      ...json,
+      'isTv': _backupBool(json['isTv']),
+      'isFavorite': _backupBool(json['isFavorite']),
+      'isReWatchList': _backupBool(json['isReWatchList']),
+      'isActivelyWatching': _backupBool(json['isActivelyWatching']),
+    };
+
+Map<String, dynamic> _customListBackupJson(Map<String, dynamic> json) => {
+      ...json,
+      'isPublic': _backupBool(json['isPublic']),
+      'createdAt': json['createdAt'] ?? DateTime.now().millisecondsSinceEpoch,
+    };
+
+Map<String, dynamic> _customListMovieBackupJson(Map<String, dynamic> json) => {
+      ...json,
+      'isTv': _backupBool(json['isTv']),
+      'addedAt': json['addedAt'] ?? DateTime.now().millisecondsSinceEpoch,
+    };
+
 /// [Movie.fromJson] plus recovery of [Movie.genreIds] for backups written
 /// before schema 13, which only carry localized genre names. Without this a
 /// restored library would be invisible to every genre statistic until each
 /// title happened to be opened again.
 Movie _movieFromBackupJson(Map<String, dynamic> json) {
-  final movie = Movie.fromJson(json);
+  final movie = Movie.fromJson(_movieBackupJson(json));
   if (movie.genreIds != null) return movie;
 
   final recovered = formatGenreIds(genreIdsFromLegacyNames(movie.genres));
@@ -215,6 +279,20 @@ class NativeMovieRepository implements MovieRepository {
 
   @override
   Future<void> deleteCustomList(int id) async {
+    // Tear the Firestore mirror down BEFORE the local row disappears.
+    // `isPublic` lives on that row, so once it is gone nothing is left to tell
+    // us the collection had a mirror — and shared_collections/{uid}_{id} would
+    // stay readable by every signed-in user forever, exposing the titles, name
+    // and description of a collection its owner believes they deleted. The
+    // 'collection' community post pointing at it would keep rendering too.
+    //
+    // Reading the row first keeps the (default, common) private case free of
+    // any network call.
+    final list = await (_db.select(_db.customLists)..where((t) => t.id.equals(id)))
+        .getSingleOrNull();
+    if (list != null && list.isPublic) {
+      await _deleteSharedCollectionMirror(id);
+    }
     await (_db.delete(_db.customLists)..where((t) => t.id.equals(id))).go();
   }
 
@@ -336,7 +414,12 @@ class NativeMovieRepository implements MovieRepository {
 
     final identity = resolveUserIdentity(_ref.read(userModelProvider), user);
 
-    unawaited(_ref.read(firestoreProvider).collection('shared_collections').doc('${user.uid}_$listId').set({
+    // Awaited, not fire-and-forget: setCollectionVisibility(true) returns to
+    // ShareComposeSheet, which immediately publishes a post carrying this
+    // document's id. If the mirror write were still in flight (or had failed)
+    // the post would point at a document that does not exist, and the card
+    // would render the "no longer shared" state on a collection just shared.
+    await _ref.read(firestoreProvider).collection('shared_collections').doc('${user.uid}_$listId').set({
       'ownerId': user.uid,
       'ownerUsername': identity.username,
       'ownerAvatarUrl': identity.avatarUrl,
@@ -344,7 +427,7 @@ class NativeMovieRepository implements MovieRepository {
       'description': list.description,
       'movies': movies,
       'updatedAt': FieldValue.serverTimestamp(),
-    }));
+    });
   }
 
   @override
@@ -354,13 +437,28 @@ class NativeMovieRepository implements MovieRepository {
       await (_db.update(_db.customLists)..where((t) => t.id.equals(listId)))
           .write(const CustomListsCompanion(isPublic: Value(true)));
     } else {
+      // Delete the mirror FIRST and await it. Fire-and-forget here meant
+      // "stop sharing" reported success while the document was still public
+      // — and if the write failed (offline, rules), nothing ever retried it,
+      // because the local isPublic flag had already been cleared.
+      await _deleteSharedCollectionMirror(listId);
       await (_db.update(_db.customLists)..where((t) => t.id.equals(listId)))
           .write(const CustomListsCompanion(isPublic: Value(false)));
-      final user = _ref.currentUser;
-      if (user != null) {
-        unawaited(_ref.read(firestoreProvider).collection('shared_collections').doc('${user.uid}_$listId').delete());
-      }
     }
+  }
+
+  /// Removes `shared_collections/{uid}_{listId}` if the signed-in user has one.
+  ///
+  /// Safe to call for a collection that was never shared: deleting a document
+  /// that does not exist is a no-op in Firestore.
+  Future<void> _deleteSharedCollectionMirror(int listId) async {
+    final user = _ref.currentUser;
+    if (user == null) return;
+    await _ref
+        .read(firestoreProvider)
+        .collection('shared_collections')
+        .doc('${user.uid}_$listId')
+        .delete();
   }
 
   @override
@@ -467,6 +565,12 @@ class NativeMovieRepository implements MovieRepository {
     required bool isTv,
     required Map<String, dynamic> movieData,
   }) async {
+    // Caching the offline placeholder would write a localized title ("Çevrimdışı
+    // İçerik") and an invented 120-minute runtime over whatever real row exists,
+    // and those feed the graph, statistics and recommendations. Nothing is a
+    // better cache entry than something fabricated.
+    if (isOfflinePlaceholderPayload(movieData)) return;
+
     final movie = movieFromTmdbPayload(tmdbId: tmdbId, isTv: isTv, movieData: movieData);
     // createdAt is intentionally left absent so re-caching an already-known
     // title doesn't bump its original "added at" timestamp to now (which the
@@ -560,16 +664,20 @@ class NativeMovieRepository implements MovieRepository {
         await _db.into(_db.movies).insertOnConflictUpdate(_movieFromBackupJson(x as Map<String, dynamic>));
       }
       for (final x in settingsList) {
-        await _db.into(_db.userMovieSettings).insertOnConflictUpdate(UserMovieSetting.fromJson(x as Map<String, dynamic>));
+        await _db.into(_db.userMovieSettings).insertOnConflictUpdate(
+            UserMovieSetting.fromJson(_userMovieSettingBackupJson(x as Map<String, dynamic>)));
       }
       for (final x in recordsList) {
-        await _db.into(_db.watchRecords).insertOnConflictUpdate(WatchRecord.fromJson(x as Map<String, dynamic>));
+        await _db.into(_db.watchRecords).insertOnConflictUpdate(
+            WatchRecord.fromJson(_watchRecordBackupJson(x as Map<String, dynamic>)));
       }
       for (final x in customListsList) {
-        await _db.into(_db.customLists).insertOnConflictUpdate(CustomList.fromJson(x as Map<String, dynamic>));
+        await _db.into(_db.customLists).insertOnConflictUpdate(
+            CustomList.fromJson(_customListBackupJson(x as Map<String, dynamic>)));
       }
       for (final x in customListMoviesList) {
-        await _db.into(_db.customListMovies).insertOnConflictUpdate(CustomListMovie.fromJson(x as Map<String, dynamic>));
+        await _db.into(_db.customListMovies).insertOnConflictUpdate(
+            CustomListMovie.fromJson(_customListMovieBackupJson(x as Map<String, dynamic>)));
       }
     });
   }
@@ -808,6 +916,9 @@ class WebMovieRepository implements MovieRepository {
     required bool isTv,
     required Map<String, dynamic> movieData,
   }) async {
+    // Same guard as the native path — see NativeMovieRepository.cacheMovieMetadata.
+    if (isOfflinePlaceholderPayload(movieData)) return;
+
     final key = (tmdbId: tmdbId, isTv: isTv);
     final current = _ref.read(webMoviesProvider);
     final updated = Map<MovieKey, Movie>.from(current);
@@ -857,66 +968,21 @@ class WebMovieRepository implements MovieRepository {
     final customLists = _ref.read(webCustomListsProvider);
     final customListMovies = _ref.read(webCustomListMoviesProvider);
 
+    // Serialised with the same Drift-generated `toJson()` the native path uses,
+    // rather than a hand-written map per table. The hand-written version had
+    // silently drifted from the schema and was dropping four fields on every
+    // web backup — WatchRecords.tags and .remoteId, and UserMovieSettings
+    // .personalRanking and .lastEpisodeProgressAt — so a user who backed up and
+    // restored on web lost every tag they had ever written and their whole
+    // personal ranking, with no error shown. Sharing the serialiser is what
+    // stops that from happening again.
     return {
       'version': 1,
-      'movies': movies.values.map((m) => {
-        'tmdbId': m.tmdbId,
-        'isTv': m.isTv,
-        'title': m.title,
-        'originalTitle': m.originalTitle,
-        'posterPath': m.posterPath,
-        'backdropPath': m.backdropPath,
-        'releaseYear': m.releaseYear,
-        'runtime': m.runtime,
-        'genres': m.genres,
-        'genreIds': m.genreIds,
-        'director': m.director,
-        'actors': m.actors,
-        'overview': m.overview,
-        'createdAt': m.createdAt.toIso8601String(),
-        'totalEpisodes': m.totalEpisodes,
-      }).toList(),
-      'watch_records': records.map((r) => {
-        'id': r.id,
-        'movieId': r.movieId,
-        'isTv': r.isTv,
-        'watchDate': r.watchDate.toIso8601String(),
-        'watchPlace': r.watchPlace,
-        'watchCompanion': r.watchCompanion,
-        'rating': r.rating,
-        'mood': r.mood,
-        'notes': r.notes,
-        'watchNumber': r.watchNumber,
-        'createdAt': r.createdAt.toIso8601String(),
-        'episodeCount': r.episodeCount,
-        'isPublic': r.isPublic,
-      }).toList(),
-      'user_movie_settings': settings.values.map((s) => {
-        'tmdbId': s.tmdbId,
-        'isTv': s.isTv,
-        'isFavorite': s.isFavorite,
-        'isReWatchList': s.isReWatchList,
-        'personalNotes': s.personalNotes,
-        'personalTags': s.personalTags,
-        'updatedAt': s.updatedAt.toIso8601String(),
-        'isActivelyWatching': s.isActivelyWatching,
-        'lastWatchedEpisode': s.lastWatchedEpisode,
-      }).toList(),
-      'custom_lists': customLists.values.map((l) => {
-        'id': l.id,
-        'name': l.name,
-        'description': l.description,
-        'targetDate': l.targetDate?.toIso8601String(),
-        'createdAt': l.createdAt.toIso8601String(),
-        'isPublic': l.isPublic,
-      }).toList(),
-      'custom_list_movies': customListMovies.map((m) => {
-        'listId': m.listId,
-        'movieId': m.movieId,
-        'isTv': m.isTv,
-        'rankingOrder': m.rankingOrder,
-        'addedAt': m.addedAt.toIso8601String(),
-      }).toList(),
+      'movies': movies.values.map((m) => m.toJson()).toList(),
+      'watch_records': records.map((r) => r.toJson()).toList(),
+      'user_movie_settings': settings.values.map((s) => s.toJson()).toList(),
+      'custom_lists': customLists.values.map((l) => l.toJson()).toList(),
+      'custom_list_movies': customListMovies.map((m) => m.toJson()).toList(),
     };
   }
 
@@ -928,100 +994,41 @@ class WebMovieRepository implements MovieRepository {
     final customListsList = json['custom_lists'] as List<dynamic>? ?? [];
     final customListMoviesList = json['custom_list_movies'] as List<dynamic>? ?? [];
 
-    final watchRecords = recordsList.map((x) {
-      final map = x as Map<String, dynamic>;
-      return WatchRecord(
-        id: (map['id'] as num).toInt(),
-        movieId: (map['movieId'] as num).toInt(),
-        // Absent in backups made before the movie/TV id-collision fix.
-        isTv: map['isTv'] == true || map['isTv'] == 1,
-        watchDate: DateTime.parse(map['watchDate'] as String),
-        watchPlace: map['watchPlace'] as String?,
-        watchCompanion: map['watchCompanion'] as String?,
-        rating: (map['rating'] as num).toDouble(),
-        mood: map['mood'] as String?,
-        notes: map['notes'] as String?,
-        watchNumber: (map['watchNumber'] as num).toInt(),
-        createdAt: DateTime.parse(map['createdAt'] as String),
-        // Absent in backups made before episode-count tracking existed.
-        episodeCount: (map['episodeCount'] as num?)?.toInt() ?? 1,
-        // Absent in backups made before the community privacy toggle
-        // existed — treat as private, consistent with the opt-in default.
-        isPublic: map['isPublic'] == true || map['isPublic'] == 1,
-      );
-    }).toList();
+    // Deserialised with the same Drift `fromJson` the native path uses. The
+    // hand-written version this replaces had to be kept in step with the schema
+    // by hand and wasn't: it silently dropped WatchRecords.tags/.remoteId and
+    // UserMovieSettings.personalRanking/.lastEpisodeProgressAt. The
+    // *BackupJson helpers above supply the defaults for columns older files
+    // predate, which is the one thing fromJson can't do on its own.
+    final watchRecords = recordsList
+        .whereType<Map<String, dynamic>>()
+        .map((x) => WatchRecord.fromJson(_watchRecordBackupJson(x)))
+        .toList();
 
     final movieSettings = <MovieKey, UserMovieSetting>{};
-    for (final x in settingsList) {
-      final map = x as Map<String, dynamic>;
-      final id = (map['tmdbId'] as num).toInt();
-      final settingIsTv = map['isTv'] == true || map['isTv'] == 1;
-      movieSettings[(tmdbId: id, isTv: settingIsTv)] = UserMovieSetting(
-        tmdbId: id,
-        isTv: settingIsTv,
-        isFavorite: map['isFavorite'] == true || map['isFavorite'] == 1,
-        isReWatchList: map['isReWatchList'] == true || map['isReWatchList'] == 1,
-        personalNotes: map['personalNotes'] as String?,
-        personalTags: map['personalTags'] as String?,
-        updatedAt: DateTime.parse(map['updatedAt'] as String),
-        // Absent in backups made before "Aktif İzliyorum" tracking existed.
-        isActivelyWatching: map['isActivelyWatching'] == true || map['isActivelyWatching'] == 1,
-        lastWatchedEpisode: (map['lastWatchedEpisode'] as num?)?.toInt(),
-      );
+    for (final x in settingsList.whereType<Map<String, dynamic>>()) {
+      final setting = UserMovieSetting.fromJson(_userMovieSettingBackupJson(x));
+      movieSettings[(tmdbId: setting.tmdbId, isTv: setting.isTv)] = setting;
     }
 
     final movies = <MovieKey, Movie>{};
-    for (final x in moviesList) {
-      final map = x as Map<String, dynamic>;
-      final id = (map['tmdbId'] as num).toInt();
-      final movieIsTv = map['isTv'] == true || map['isTv'] == 1;
-      movies[(tmdbId: id, isTv: movieIsTv)] = Movie(
-        tmdbId: id,
-        title: map['title'] as String,
-        originalTitle: map['originalTitle'] as String?,
-        posterPath: map['posterPath'] as String?,
-        backdropPath: map['backdropPath'] as String?,
-        releaseYear: (map['releaseYear'] as num?)?.toInt(),
-        runtime: (map['runtime'] as num?)?.toInt(),
-        genres: map['genres'] as String?,
-        // Backups taken before schema 13 have no ids; recover them from the
-        // stored names the same way the migration does, so restoring an old
-        // file doesn't leave the library invisible to genre statistics.
-        genreIds: (map['genreIds'] as String?) ??
-            formatGenreIds(genreIdsFromLegacyNames(map['genres'] as String?)),
-        director: map['director'] as String?,
-        actors: map['actors'] as String?,
-        overview: map['overview'] as String?,
-        isTv: movieIsTv,
-        createdAt: DateTime.parse(map['createdAt'] as String),
-        totalEpisodes: (map['totalEpisodes'] as num?)?.toInt(),
-      );
+    for (final x in moviesList.whereType<Map<String, dynamic>>()) {
+      // _movieFromBackupJson also recovers genreIds for pre-schema-13 files,
+      // so a restored library isn't invisible to every genre statistic.
+      final movie = _movieFromBackupJson(x);
+      movies[(tmdbId: movie.tmdbId, isTv: movie.isTv)] = movie;
     }
 
     final customLists = <int, CustomList>{};
-    for (final x in customListsList) {
-      final map = x as Map<String, dynamic>;
-      final id = (map['id'] as num).toInt();
-      customLists[id] = CustomList(
-        id: id,
-        name: map['name'] as String,
-        description: map['description'] as String?,
-        targetDate: map['targetDate'] != null ? DateTime.parse(map['targetDate'] as String) : null,
-        createdAt: map['createdAt'] != null ? DateTime.parse(map['createdAt'] as String) : DateTime.now(),
-        isPublic: map['isPublic'] == true || map['isPublic'] == 1,
-      );
+    for (final x in customListsList.whereType<Map<String, dynamic>>()) {
+      final list = CustomList.fromJson(_customListBackupJson(x));
+      customLists[list.id] = list;
     }
 
-    final customListMovies = customListMoviesList.map((x) {
-      final map = x as Map<String, dynamic>;
-      return CustomListMovie(
-        listId: (map['listId'] as num).toInt(),
-        movieId: (map['movieId'] as num).toInt(),
-        isTv: map['isTv'] == true || map['isTv'] == 1,
-        rankingOrder: (map['rankingOrder'] as num?)?.toInt(),
-        addedAt: map['addedAt'] != null ? DateTime.parse(map['addedAt'] as String) : DateTime.now(),
-      );
-    }).toList();
+    final customListMovies = customListMoviesList
+        .whereType<Map<String, dynamic>>()
+        .map((x) => CustomListMovie.fromJson(_customListMovieBackupJson(x)))
+        .toList();
 
     _ref.read(webWatchRecordsProvider.notifier).state = watchRecords;
     _ref.read(webMovieSettingsProvider.notifier).state = movieSettings;
