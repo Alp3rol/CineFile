@@ -41,7 +41,7 @@ class UserProfileScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
-        title: const Text('Profil'),
+        title: Text(AppLocalizations.of(context).profileTitle),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
@@ -55,7 +55,7 @@ class UserProfileScreen extends ConsumerWidget {
           ),
           error: (err, stack) => Center(
             child: Text(
-              'Hata: $err',
+              AppLocalizations.of(context).commonErrorWithDetail('$err'),
               style: const TextStyle(color: Colors.redAccent),
             ),
           ),
@@ -130,7 +130,7 @@ class UserProfileScreen extends ConsumerWidget {
               loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.accentColor)),
               error: (err, stack) => AlertDialog(
                 backgroundColor: AppTheme.surfaceColor,
-                content: Text('Hata: $err', style: const TextStyle(color: Colors.redAccent)),
+                content: Text(AppLocalizations.of(context).commonErrorWithDetail('$err'), style: const TextStyle(color: Colors.redAccent)),
               ),
               data: (records) {
                 return PremiumFeaturedSelectorDialog(

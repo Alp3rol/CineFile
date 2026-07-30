@@ -967,6 +967,20 @@ class AppLocalizationsTr extends AppLocalizations {
   String get commonOk => 'Tamam';
 
   @override
+  String commonErrorWithDetail(String detail) {
+    return 'Hata: $detail';
+  }
+
+  @override
+  String get profileTitle => 'Profil';
+
+  @override
+  String get profileBioLabel => 'Biyografi';
+
+  @override
+  String get profileBioHint => 'Kendinden bahset...';
+
+  @override
   String get collectionEditTitle => 'Koleksiyonu Düzenle';
 
   @override

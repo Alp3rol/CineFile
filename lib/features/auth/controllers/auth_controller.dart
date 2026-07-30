@@ -277,7 +277,14 @@ class AuthController {
       // the user would be signed in to a broken state on next launch.
       try {
         await createdUser?.delete();
-      } catch (_) {}
+      } catch (rollbackError) {
+        // The rollback itself failing is the worse outcome — it leaves an
+        // orphaned Auth account with no profile document. initUser rebuilds a
+        // profile for it on the next sign-in, so the user is not stuck, but
+        // this should never pass unnoticed.
+        debugPrint('signUp rollback failed; ${createdUser?.uid} is now an '
+            'Auth account with no profile: $rollbackError');
+      }
       debugPrint('signUp failed: $e');
       return AuthFailure.unknown;
     }

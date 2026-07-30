@@ -25,14 +25,20 @@ class ActorProfileScreen extends ConsumerStatefulWidget {
 class _ActorProfileScreenState extends ConsumerState<ActorProfileScreen> {
   @override
   void dispose() {
-    if (widget.parentMovieData != null) {
-      try {
-        ref.read(dynamicBackgroundProvider.notifier).updateMoviesFromMapList([widget.parentMovieData!]);
-      } catch (_) {}
-    } else {
-      try {
-        ref.read(dynamicBackgroundProvider.notifier).clearColors();
-      } catch (_) {}
+    // Restoring the background is cosmetic, and dispose() runs while the
+    // container may already be tearing down — so a failure here must not
+    // propagate out of dispose. It is logged rather than swallowed silently:
+    // an exception on this path means the provider lifetime assumption is
+    // wrong, which is worth seeing in a debug run.
+    try {
+      final background = ref.read(dynamicBackgroundProvider.notifier);
+      if (widget.parentMovieData != null) {
+        background.updateMoviesFromMapList([widget.parentMovieData!]);
+      } else {
+        background.clearColors();
+      }
+    } catch (e) {
+      debugPrint('Restoring the dynamic background on dispose failed: $e');
     }
     super.dispose();
   }

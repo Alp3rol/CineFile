@@ -33,7 +33,7 @@ class SharedCollectionDetailScreen extends ConsumerWidget {
         child: dataAsync.when(
           loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.accentColor)),
           error: (err, stack) => Center(
-            child: Text('Hata: $err', style: const TextStyle(color: Colors.redAccent)),
+            child: Text(AppLocalizations.of(context).commonErrorWithDetail('$err'), style: const TextStyle(color: Colors.redAccent)),
           ),
           data: (data) {
             if (data == null) {

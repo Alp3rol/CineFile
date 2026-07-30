@@ -18,12 +18,13 @@ class _ActorProfileHeaderState extends State<ActorProfileHeader> {
 
   String _formatDate(String? dateStr) {
     if (dateStr == null || dateStr.isEmpty) return 'Bilinmiyor';
-    try {
-      final parts = dateStr.split('-');
-      if (parts.length == 3) {
-        return '${parts[2]}.${parts[1]}.${parts[0]}';
-      }
-    } catch (_) {}
+    // `split` and indexing a length-checked list cannot throw, so there was
+    // nothing for the try/catch here to catch. An unparseable date falls
+    // through to being shown verbatim, which is what the caller wants.
+    final parts = dateStr.split('-');
+    if (parts.length == 3) {
+      return '${parts[2]}.${parts[1]}.${parts[0]}';
+    }
     return dateStr;
   }
 

@@ -58,7 +58,7 @@ class ShareCollectionPickerSheet extends ConsumerWidget {
           const SizedBox(height: 8),
           listsAsync.when(
             loading: () => const Center(child: Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator(color: AppTheme.accentColor))),
-            error: (err, _) => Center(child: Text('Hata: $err', style: const TextStyle(color: Colors.redAccent))),
+            error: (err, _) => Center(child: Text(AppLocalizations.of(context).commonErrorWithDetail('$err'), style: const TextStyle(color: Colors.redAccent))),
             data: (lists) {
               if (lists.isEmpty) {
                 return Padding(

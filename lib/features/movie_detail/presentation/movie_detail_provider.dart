@@ -54,7 +54,13 @@ final movieDetailProvider = FutureProvider.family<Map<String, dynamic>?, ({int t
           }
         };
       }
-    } catch (_) {}
+    } catch (cacheError) {
+      // The local cache is the better answer but not the only one — fall
+      // through to the offline placeholder below. Logged because a failure
+      // here means the database itself is unhealthy, which is worth knowing
+      // and would otherwise look identical to "this title was never cached".
+      debugPrint('Reading the local title cache failed: $cacheError');
+    }
 
     // 2. Ultimate fallback: Return a basic template instead of crashing the screen
     //

@@ -1826,6 +1826,30 @@ abstract class AppLocalizations {
   /// **'Tamam'**
   String get commonOk;
 
+  /// Shown where a failed load renders its raw error text.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hata: {detail}'**
+  String commonErrorWithDetail(String detail);
+
+  /// No description provided for @profileTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Profil'**
+  String get profileTitle;
+
+  /// No description provided for @profileBioLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Biyografi'**
+  String get profileBioLabel;
+
+  /// No description provided for @profileBioHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kendinden bahset...'**
+  String get profileBioHint;
+
   /// No description provided for @collectionEditTitle.
   ///
   /// In tr, this message translates to:

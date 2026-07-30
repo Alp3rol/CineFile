@@ -1,5 +1,5 @@
-// Fails if a Turkish string literal has crept back into a feature that has
-// already been localized.
+// Fails if a hardcoded user-facing string has crept back into a feature that
+// has already been localized.
 //
 // Every localized slice was a one-time sweep; nothing stops the next screen
 // from hardcoding its text again, and by the time anyone notices there is
@@ -8,10 +8,19 @@
 // Run locally with:
 //   dart run tool/check_localized.dart
 //
-// Detection is deliberately crude — a string literal containing a character
-// that only appears in Turkish. It cannot catch a Turkish string that happens
-// to be pure ASCII ("Ayarlar", "Tercihler"), so it is a backstop, not a proof.
-// Reviewing the diff is still the real check.
+// Detection used to be "a string literal containing a character that only
+// appears in Turkish". That missed every Turkish word which happens to be pure
+// ASCII — and it did, in practice: "Biyografi", "Kaydet", "Tamam" and "Profil"
+// all sat in already-swept files for months without the check noticing.
+//
+// So the rule is now about position rather than spelling: a literal appearing
+// where the framework expects user-facing text (a `Text(...)` child, a
+// `hintText:`, a `labelText:`) is an offender regardless of language, because
+// localized code reads those from AppLocalizations. That is language-agnostic
+// and catches the ASCII cases the old heuristic could not.
+//
+// It still is not a proof — `Text(someHelper())` slips through — but it now
+// fails on the shape the mistake actually takes.
 import 'dart:io';
 
 /// Features whose strings have been moved to ARB. Anything under these paths
@@ -56,13 +65,31 @@ const _notYetLocalized = <String>[
   'lib/core/network/tmdb_service.dart (mock data)',
 ];
 
-/// Characters that only occur in Turkish text, never in Dart identifiers,
-/// asset paths or English copy.
-final _turkishChars = RegExp(r'[çğıöşüÇĞİÖŞÜ]');
+/// A string literal sitting in a slot the framework renders to the user.
+///
+/// Covers `Text('...')` (including `const Text`), and the `hintText:`,
+/// `labelText:`, `helperText:`, `errorText:` and `semanticLabel:` arguments.
+/// Deliberately does NOT try to parse Dart — it matches the shape these
+/// mistakes actually take.
+final _userFacingLiteral = RegExp(
+  r"(?:\bText\(\s*|\b(?:hintText|labelText|helperText|errorText|semanticLabel)\s*:\s*)"
+  r"('[^']*')",
+);
 
-/// A single-quoted Dart string literal. Good enough for a heuristic; it does
-/// not try to understand escaping or interpolation.
-final _stringLiteral = RegExp(r"'[^']*'");
+/// Literals that are not copy even though they sit in a text slot: emoji and
+/// symbols, punctuation-only separators, and interpolations that are entirely
+/// made of values (`'@$username'`, `'$a ↔ $b'`).
+bool _isNotCopy(String literal) {
+  final inner = literal.substring(1, literal.length - 1);
+  if (inner.trim().isEmpty) return true;
+
+  // Strip interpolations, then see whether any letters are left. `'/10'`,
+  // `'@$username'` and `'${cat.label} ($n)'` all reduce to punctuation.
+  final withoutInterpolation = inner
+      .replaceAll(RegExp(r'\$\{[^}]*\}'), '')
+      .replaceAll(RegExp(r'\$\w+'), '');
+  return !RegExp(r'\p{L}{2,}', unicode: true).hasMatch(withoutInterpolation);
+}
 
 /// Every Dart file the check covers.
 Iterable<File> _filesToCheck() sync* {
@@ -90,28 +117,22 @@ Iterable<File> _filesToCheck() sync* {
   }
 }
 
-/// Lines that legitimately contain Turkish and are not user-facing text.
+/// Lines that are not user-facing copy despite matching.
+///
+/// Much shorter than it used to be: the old detector matched any literal
+/// containing a Turkish character anywhere in the file, so every
+/// Turkish-language *data* pattern (the genre name→id table, the cinema
+/// filter's `contains('sinema')`, the dotted-i casing rule) had to be listed
+/// here. Matching only literals in text slots excludes all of those by
+/// construction.
 bool _isExempt(String line) {
   final trimmed = line.trimLeft();
-  // Comments, and debugPrint output which never reaches a user.
-  if (trimmed.startsWith('//') || trimmed.startsWith('///') || trimmed.startsWith('*')) return true;
+  // Comments — including ones that quote a `Text('...')` example.
+  if (trimmed.startsWith('//') || trimmed.startsWith('*')) return true;
+  // Diagnostics never reach a user.
   if (trimmed.contains('debugPrint(')) return true;
-  // Data-matching patterns: the Turkish-cinema badge sniffs titles for Turkish
-  // characters, and the journal's cinema filter matches the word itself.
-  if (trimmed.contains("RegExp(r'[ığüşöç]')")) return true;
-  if (trimmed.contains("contains('sinema')")) return true;
-  if (trimmed.contains("contains('türk')")) return true;
-  if (trimmed.contains("contains('şener')")) return true;
-  if (trimmed.contains("contains('çizgi')")) return true;
-  // The legacy name→id table used to recover genre ids from rows written
-  // before ids were stored. Data, and deliberately Turkish.
-  if (trimmed.contains('TmdbGenre.') && trimmed.contains(': \'')) return true;
-  // The Turkish dotted-i casing rule itself.
-  if (trimmed.contains("replaceAll('i', 'İ')")) return true;
-  // Languages are named in themselves in the picker, never translated.
+  // The language picker names each language in itself, never translated.
   if (trimmed.contains("return 'Türkçe'")) return true;
-  // TmdbService's offline demo payload, shown only with no API key set.
-  if (trimmed.contains("'name': genreMap[id]")) return true;
   return false;
 }
 
@@ -124,22 +145,21 @@ void main() {
       final line = lines[i];
       if (_isExempt(line)) continue;
 
-      for (final match in _stringLiteral.allMatches(line)) {
-        final literal = match.group(0)!;
-        if (_turkishChars.hasMatch(literal)) {
-          offenders.add('${file.path}:${i + 1}  $literal');
-        }
+      for (final match in _userFacingLiteral.allMatches(line)) {
+        final literal = match.group(1)!;
+        if (_isNotCopy(literal)) continue;
+        offenders.add('${file.path}:${i + 1}  $literal');
       }
     }
   }
 
   if (offenders.isEmpty) {
-    stdout.writeln('No hardcoded Turkish found in localized features.');
+    stdout.writeln('No hardcoded user-facing text found in localized features.');
     stdout.writeln('Still to sweep: ${_notYetLocalized.join(', ')}');
     return;
   }
 
-  stderr.writeln('Hardcoded Turkish string literals in already-localized code:');
+  stderr.writeln('Literals in user-facing slots inside already-localized code:');
   for (final offender in offenders) {
     stderr.writeln('  $offender');
   }

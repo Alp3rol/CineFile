@@ -8,35 +8,6 @@ import '../../../l10n/app_localizations.dart';
 import '../../settings/presentation/settings_provider.dart';
 import 'widgets/contribution_heatmap_utils.dart';
 
-// Legacy class kept for backward compatibility
-class BadgeState {
-  final String id;
-  final String title;
-  final String description;
-  final String icon;
-  final bool isUnlocked;
-  final double progress; // 0.0 to 1.0
-
-  const BadgeState({
-    required this.id,
-    required this.title,
-    required this.description,
-    required this.icon,
-    required this.isUnlocked,
-    required this.progress,
-  });
-
-  factory BadgeState.fromAchievement(AchievementBadge b) {
-    return BadgeState(
-      id: b.id,
-      title: b.isUnlocked ? b.currentTierTitle : b.title,
-      description: b.description,
-      icon: b.icon,
-      isUnlocked: b.isUnlocked,
-      progress: b.progress,
-    );
-  }
-}
 
 class InsightsData {
   final int totalWatchCount;
@@ -55,7 +26,6 @@ class InsightsData {
   /// lookup silently missed every bucket once the UI spoke another language.
   final Map<TimeOfDayBand, int> timeOfDayTrend;
   final Map<int, int> dayOfWeekTrend;
-  final List<BadgeState> badges;
   final List<AchievementBadge> achievementBadges;
 
   // Heatmap & Streaks
@@ -90,7 +60,6 @@ class InsightsData {
     required this.monthlyWatchTrend,
     required this.timeOfDayTrend,
     required this.dayOfWeekTrend,
-    required this.badges,
     required this.achievementBadges,
     required this.dailyWatchCounts,
     required this.dailyMovieWatchCounts,
@@ -313,7 +282,7 @@ final insightsProvider = Provider<InsightsData?>((ref) {
     l10n: l10n,
   );
 
-  final badges = achievementBadges.map((b) => BadgeState.fromAchievement(b)).toList();
+
 
   return InsightsData(
     totalWatchCount: totalWatchCount,
@@ -326,7 +295,6 @@ final insightsProvider = Provider<InsightsData?>((ref) {
     monthlyWatchTrend: monthlyWatchTrend,
     timeOfDayTrend: timeOfDayTrend,
     dayOfWeekTrend: dayOfWeekTrend,
-    badges: badges,
     achievementBadges: achievementBadges,
     dailyWatchCounts: dailyWatchCounts,
     dailyMovieWatchCounts: dailyMovieWatchCounts,

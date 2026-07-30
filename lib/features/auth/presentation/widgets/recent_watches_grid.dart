@@ -20,7 +20,7 @@ class RecentWatchesGrid extends ConsumerWidget {
         const SizedBox(height: 16),
         ref.watch(watchRecordsForUserProvider(userId)).when(
           loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.accentColor)),
-          error: (err, stack) => Text('Hata: $err', style: const TextStyle(color: Colors.redAccent)),
+          error: (err, stack) => Text(AppLocalizations.of(context).commonErrorWithDetail('$err'), style: const TextStyle(color: Colors.redAccent)),
           data: (records) {
             if (records.isEmpty) {
               return Padding(

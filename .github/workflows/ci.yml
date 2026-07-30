@@ -53,7 +53,24 @@ jobs:
 
       - run: flutter analyze
 
-      - run: flutter test
+      # --coverage so the number is visible on every run. There is deliberately
+      # no failing threshold yet: the suite covers domain logic well and the
+      # widget layer thinly, so a gate set at today's number would mostly
+      # measure how much UI a change touches. Add one once the repository
+      # abstraction lands and the untestable-by-construction code shrinks.
+      - run: flutter test --coverage
+
+      - name: Report coverage
+        run: |
+          # lcov's own summary, without needing lcov installed: count DA lines.
+          total=$(grep -c '^DA:' coverage/lcov.info || true)
+          hit=$(grep '^DA:' coverage/lcov.info | grep -cv ',0$' || true)
+          echo "Covered $hit / $total executable lines ($(( hit * 100 / total ))%)"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage-lcov
+          path: coverage/lcov.info
 
       # Whether the app talks to TMDb directly or through the proxy is a
       # compile-time decision, so the run above only ever exercises one of the

@@ -462,6 +462,16 @@
   "collectionNoneYetHint": "Eklemek için sağ üstteki \"+ Yeni Liste\" butonuna basın.",
   "collectionUpdateFailed": "Liste güncellenemedi, tekrar deneyin.",
   "commonOk": "Tamam",
+  "commonErrorWithDetail": "Hata: {detail}",
+  "@commonErrorWithDetail": {
+    "description": "Shown where a failed load renders its raw error text.",
+    "placeholders": {
+      "detail": { "type": "String" }
+    }
+  },
+  "profileTitle": "Profil",
+  "profileBioLabel": "Biyografi",
+  "profileBioHint": "Kendinden bahset...",
   "collectionEditTitle": "Koleksiyonu Düzenle",
   "collectionCreateTitle": "Yeni Koleksiyon Oluştur",
   "collectionEditExplain": "Koleksiyonunuzun adı, açıklaması ve maraton tarihini güncelleyin.",

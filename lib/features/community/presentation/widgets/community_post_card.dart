@@ -364,7 +364,7 @@ class CommunityPostCard extends ConsumerWidget {
                 padding: EdgeInsets.symmetric(vertical: 12),
                 child: Center(child: CircularProgressIndicator(color: AppTheme.accentColor)),
               ),
-              error: (err, stack) => Text('Hata: $err', style: const TextStyle(color: Colors.redAccent)),
+              error: (err, stack) => Text(AppLocalizations.of(context).commonErrorWithDetail('$err'), style: const TextStyle(color: Colors.redAccent)),
               data: (data) {
                 if (data == null) {
                   return Row(

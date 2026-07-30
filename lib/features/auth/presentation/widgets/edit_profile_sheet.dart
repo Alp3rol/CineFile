@@ -182,7 +182,7 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
 
             // Bio field
             Text(
-              'Biyografi',
+              AppLocalizations.of(context).profileBioLabel,
               style: GoogleFonts.inter(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -195,7 +195,7 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
               style: const TextStyle(color: Colors.white),
               maxLines: 3,
               decoration: InputDecoration(
-                hintText: 'Kendinden bahset...',
+                hintText: AppLocalizations.of(context).profileBioHint,
                 hintStyle: const TextStyle(color: Colors.white38),
                 filled: true,
                 fillColor: Colors.white.withValues(alpha: 0.05),
@@ -258,7 +258,7 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
                       width: 20,
                       child: CircularProgressIndicator(color: Colors.black, strokeWidth: 2),
                     )
-                  : const Text('Kaydet', style: TextStyle(fontWeight: FontWeight.bold)),
+                  : Text(AppLocalizations.of(context).commonSave, style: const TextStyle(fontWeight: FontWeight.bold)),
             ),
           ],
         ),
@@ -277,7 +277,7 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
               loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.accentColor)),
               error: (err, stack) => AlertDialog(
                 backgroundColor: AppTheme.surfaceColor,
-                content: Text('Hata: $err', style: const TextStyle(color: Colors.redAccent)),
+                content: Text(AppLocalizations.of(context).commonErrorWithDetail('$err'), style: const TextStyle(color: Colors.redAccent)),
               ),
               data: (records) {
                 return StatefulBuilder(
@@ -310,7 +310,9 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
                                       style: const TextStyle(color: Colors.white),
                                     ),
                                     subtitle: Text(
-                                      item.movie.isTv ? 'Dizi' : 'Film',
+                                      item.movie.isTv
+                                          ? AppLocalizations.of(context).graphNodeShow
+                                          : AppLocalizations.of(context).graphNodeMovie,
                                       style: const TextStyle(color: Colors.white60),
                                     ),
                                     activeColor: AppTheme.accentColor,
@@ -343,7 +345,7 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(context),
-                          child: const Text('Tamam', style: TextStyle(color: AppTheme.accentColor)),
+                          child: Text(AppLocalizations.of(context).commonOk, style: const TextStyle(color: AppTheme.accentColor)),
                         ),
                       ],
                     );

@@ -50,7 +50,7 @@ class MovieDetailCastList extends ConsumerWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Hata: $e')),
+          SnackBar(content: Text(AppLocalizations.of(context).commonErrorWithDetail('$e'))),
         );
       }
     }

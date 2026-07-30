@@ -976,6 +976,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonOk => 'OK';
 
   @override
+  String commonErrorWithDetail(String detail) {
+    return 'Error: $detail';
+  }
+
+  @override
+  String get profileTitle => 'Profile';
+
+  @override
+  String get profileBioLabel => 'Bio';
+
+  @override
+  String get profileBioHint => 'Tell us about yourself...';
+
+  @override
   String get collectionEditTitle => 'Edit Collection';
 
   @override

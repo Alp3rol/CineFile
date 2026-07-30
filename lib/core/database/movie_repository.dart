@@ -242,6 +242,47 @@ final movieRepositoryProvider = Provider<MovieRepository>((ref) {
   return kIsWeb ? WebMovieRepository(ref) : NativeMovieRepository(ref);
 });
 
+/// Writes personal rankings to `users/{uid}/movie_settings`.
+///
+/// Lives outside the two repository classes because it is not
+/// platform-dependent at all: rankings are Firestore-only, so both
+/// implementations carried a character-for-character identical copy of this.
+/// The interface method on each is now a one-line delegation to here — kept on
+/// the interface so the Journal's call site doesn't have to know that.
+///
+/// One batch rather than a `set()` per entry: reordering a fifty-title list
+/// used to be fifty sequential round trips, each awaited before the next
+/// started.
+Future<void> writeWatchRecordRankings(Ref ref, Map<MovieKey, int?> rankings) async {
+  if (rankings.isEmpty) return;
+  final user = ref.currentUser;
+  if (user == null) return;
+
+  try {
+    final firestore = ref.read(firestoreProvider);
+    final settings =
+        firestore.collection('users').doc(user.uid).collection('movie_settings');
+
+    final batch = firestore.batch();
+    for (final entry in rankings.entries) {
+      batch.set(
+        settings.doc('${entry.key.tmdbId}_${entry.key.isTv}'),
+        {
+          'movieId': entry.key.tmdbId,
+          'isTv': entry.key.isTv,
+          'personalRanking': entry.value,
+          'updatedAt': FieldValue.serverTimestamp(),
+        },
+        SetOptions(merge: true),
+      );
+    }
+    await batch.commit();
+  } catch (e, st) {
+    debugPrint('writeWatchRecordRankings failed: $e\n$st');
+    rethrow;
+  }
+}
+
 class NativeMovieRepository implements MovieRepository {
   NativeMovieRepository(this._ref);
   final Ref _ref;
@@ -462,33 +503,8 @@ class NativeMovieRepository implements MovieRepository {
   }
 
   @override
-  Future<void> updateWatchRecordRankings(Map<MovieKey, int?> rankings) async {
-    try {
-      final user = _ref.currentUser;
-      if (user == null) return;
-
-      for (final entry in rankings.entries) {
-        final key = entry.key;
-        final rank = entry.value;
-
-        final settingsRef = _ref.read(firestoreProvider)
-            .collection('users')
-            .doc(user.uid)
-            .collection('movie_settings')
-            .doc('${key.tmdbId}_${key.isTv}');
-
-        await settingsRef.set({
-          'movieId': key.tmdbId,
-          'isTv': key.isTv,
-          'personalRanking': rank,
-          'updatedAt': FieldValue.serverTimestamp(),
-        }, SetOptions(merge: true));
-      }
-    } catch (e, st) {
-      debugPrint('updateWatchRecordRankings failed: $e\n$st');
-      rethrow;
-    }
-  }
+  Future<void> updateWatchRecordRankings(Map<MovieKey, int?> rankings) =>
+      writeWatchRecordRankings(_ref, rankings);
 
   @override
   Future<void> deleteWatchRecordsByIds(List<int> ids) async {
@@ -826,33 +842,8 @@ class WebMovieRepository implements MovieRepository {
   }
 
   @override
-  Future<void> updateWatchRecordRankings(Map<MovieKey, int?> rankings) async {
-    try {
-      final user = _ref.currentUser;
-      if (user == null) return;
-
-      for (final entry in rankings.entries) {
-        final key = entry.key;
-        final rank = entry.value;
-
-        final settingsRef = _ref.read(firestoreProvider)
-            .collection('users')
-            .doc(user.uid)
-            .collection('movie_settings')
-            .doc('${key.tmdbId}_${key.isTv}');
-
-        await settingsRef.set({
-          'movieId': key.tmdbId,
-          'isTv': key.isTv,
-          'personalRanking': rank,
-          'updatedAt': FieldValue.serverTimestamp(),
-        }, SetOptions(merge: true));
-      }
-    } catch (e, st) {
-      debugPrint('updateWatchRecordRankings failed: $e\n$st');
-      rethrow;
-    }
-  }
+  Future<void> updateWatchRecordRankings(Map<MovieKey, int?> rankings) =>
+      writeWatchRecordRankings(_ref, rankings);
 
   // Web collections stay in-memory only (see webCustomListsProvider) —
   // there's no local persistence to mirror from, and the "Koleksiyon
