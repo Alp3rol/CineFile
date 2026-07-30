@@ -1,0 +1,12 @@
+name = "cinefile-tmdb"
+main = "src/index.js"
+compatibility_date = "2025-01-01"
+
+# The TMDb key is a SECRET, not a var — it must never appear in this file:
+#   npx wrangler secret put TMDB_API_KEY
+#
+# Once the web build has a stable URL, restrict browser callers to it. Leave
+# unset for native-only deployments (apps send no Origin header) — see the
+# `cors` helper in src/index.js.
+# [vars]
+# ALLOWED_ORIGINS = "https://alp3rol.github.io"

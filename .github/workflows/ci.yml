@@ -55,6 +55,14 @@ jobs:
 
       - run: flutter test
 
+      # Whether the app talks to TMDb directly or through the proxy is a
+      # compile-time decision, so the run above only ever exercises one of the
+      # two. Without this the proxy path could stop compiling — or start
+      # serving demo data for everything — and nothing would notice until a
+      # release was built against it.
+      - name: Test the proxy build path
+        run: flutter test --dart-define=TMDB_PROXY_URL=https://proxy.invalid
+
   # Every authorization decision in this app lives in firestore.rules, and
   # nothing was exercising it — three real holes (username impersonation,
   # forged post authorship, pre-stuffed starredBy) shipped because a rules

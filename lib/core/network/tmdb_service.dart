@@ -10,7 +10,12 @@ import 'tmdb_exception.dart';
 import '../../features/settings/presentation/settings_provider.dart';
 
 final dioClientProvider = Provider<DioClient>((ref) {
-  final baseUrl = ref.watch(settingsBaseUrlProvider);
+  // Behind a proxy the user-configurable base URL is ignored: the whole point
+  // is that requests go nowhere except the proxy, which is the only party
+  // holding a TMDb key.
+  final baseUrl = ApiConstants.usesProxy
+      ? ApiConstants.tmdbProxyUrl
+      : ref.watch(settingsBaseUrlProvider);
   return DioClient(baseUrl: baseUrl);
 });
 
@@ -44,9 +49,12 @@ class TmdbService {
 
   TmdbService(this._dio, {this.language = 'tr-TR'});
 
-  // In the future, we can load this from SharedPreferences or Secure Storage.
-  // For now, it uses the constant or a fallback.
-  String get _apiKey => ApiConstants.tmdbApiKey;
+  /// The key appended to every request.
+  ///
+  /// Empty when the build talks to a proxy — the proxy strips whatever arrives
+  /// and appends its own key, so an empty `api_key` parameter travelling over
+  /// the wire is harmless and keeps this class free of proxy branching.
+  String get _apiKey => ApiConstants.usesProxy ? '' : ApiConstants.tmdbApiKey;
 
   static final List<Map<String, dynamic>> _mockMovies = [
     {
@@ -113,7 +121,7 @@ class TmdbService {
 
   /// Search for movies and series by title
   Future<List<Map<String, dynamic>>> searchMovies(String query, {int page = 1, String? language}) async {
-    if (_apiKey.isEmpty) {
+    if (!ApiConstants.hasTmdbAccess) {
       // Return filtered mock results when API key is empty (offline demo mode)
       final lowerQuery = query.toLowerCase();
       return _mockMovies
@@ -162,7 +170,7 @@ class TmdbService {
   }
 
   Future<Map<String, dynamic>?> getMovieDetails(int tmdbId, {bool? isTv, String? language}) async {
-    if (_apiKey.isEmpty) {
+    if (!ApiConstants.hasTmdbAccess) {
       try {
         final basicMovie = _mockMovies.firstWhere((m) => m['id'] == tmdbId);
         final genreIds = basicMovie['genre_ids'] as List<int>;
@@ -299,7 +307,7 @@ class TmdbService {
 
   /// Get popular movies (useful for search home or suggestions)
   Future<List<Map<String, dynamic>>> getPopularMovies({int page = 1, String? language}) async {
-    if (_apiKey.isEmpty) {
+    if (!ApiConstants.hasTmdbAccess) {
       return [];
     }
 
@@ -322,7 +330,7 @@ class TmdbService {
 
   /// Get popular TV shows
   Future<List<Map<String, dynamic>>> getPopularTvShows({int page = 1, String? language}) async {
-    if (_apiKey.isEmpty) {
+    if (!ApiConstants.hasTmdbAccess) {
       return [];
     }
 
@@ -353,7 +361,7 @@ class TmdbService {
 
   /// Get this week's trending movies (TMDb /trending/movie/week)
   Future<List<Map<String, dynamic>>> getTrendingMoviesThisWeek({String? language}) async {
-    if (_apiKey.isEmpty) {
+    if (!ApiConstants.hasTmdbAccess) {
       return [];
     }
 
@@ -379,7 +387,7 @@ class TmdbService {
 
   /// Get this week's trending TV shows (TMDb /trending/tv/week)
   Future<List<Map<String, dynamic>>> getTrendingTvShowsThisWeek({String? language}) async {
-    if (_apiKey.isEmpty) {
+    if (!ApiConstants.hasTmdbAccess) {
       return [];
     }
 
@@ -410,7 +418,7 @@ class TmdbService {
 
   /// Get today's trending movies (TMDb /trending/movie/day)
   Future<List<Map<String, dynamic>>> getTrendingMoviesToday({String? language}) async {
-    if (_apiKey.isEmpty) {
+    if (!ApiConstants.hasTmdbAccess) {
       return [];
     }
 
@@ -436,7 +444,7 @@ class TmdbService {
 
   /// Get today's trending TV shows (TMDb /trending/tv/day)
   Future<List<Map<String, dynamic>>> getTrendingTvShowsToday({String? language}) async {
-    if (_apiKey.isEmpty) {
+    if (!ApiConstants.hasTmdbAccess) {
       return [];
     }
 
@@ -467,7 +475,7 @@ class TmdbService {
 
   /// Get top rated movies (TMDb /movie/top_rated)
   Future<List<Map<String, dynamic>>> getTopRatedMovies({int page = 1, String? language}) async {
-    if (_apiKey.isEmpty) {
+    if (!ApiConstants.hasTmdbAccess) {
       return [];
     }
 
@@ -494,7 +502,7 @@ class TmdbService {
 
   /// Get top rated TV shows (TMDb /tv/top_rated)
   Future<List<Map<String, dynamic>>> getTopRatedTvShows({int page = 1, String? language}) async {
-    if (_apiKey.isEmpty) {
+    if (!ApiConstants.hasTmdbAccess) {
       return [];
     }
 
@@ -526,7 +534,7 @@ class TmdbService {
 
   /// Search for a person to get their TMDb ID
   Future<int?> searchPersonId(String name) async {
-    if (_apiKey.isEmpty) {
+    if (!ApiConstants.hasTmdbAccess) {
       return null;
     }
     try {
@@ -553,7 +561,7 @@ class TmdbService {
   /// picker, where [searchPersonId]'s first-result-only shape isn't enough.
   Future<List<Map<String, dynamic>>> searchPeople(String query,
       {String? language}) async {
-    if (_apiKey.isEmpty || query.trim().isEmpty) {
+    if (!ApiConstants.hasTmdbAccess || query.trim().isEmpty) {
       return [];
     }
     try {
@@ -588,7 +596,7 @@ class TmdbService {
     String? withCast,
     String? language,
   }) async {
-    if (_apiKey.isEmpty) {
+    if (!ApiConstants.hasTmdbAccess) {
       return [];
     }
     try {
@@ -622,7 +630,7 @@ class TmdbService {
     String? withPeople,
     String? language,
   }) async {
-    if (_apiKey.isEmpty) {
+    if (!ApiConstants.hasTmdbAccess) {
       return [];
     }
     try {
@@ -653,7 +661,7 @@ class TmdbService {
 
   /// Get person details (TMDb /person/{id})
   Future<Map<String, dynamic>?> getPersonDetails(int personId, {String? language}) async {
-    if (_apiKey.isEmpty) {
+    if (!ApiConstants.hasTmdbAccess) {
       return null;
     }
     try {
@@ -697,7 +705,7 @@ class TmdbService {
 
   /// Get person combined credits (TMDb /person/$personId/combined_credits)
   Future<List<Map<String, dynamic>>> getPersonCombinedCredits(int personId, {String? language}) async {
-    if (_apiKey.isEmpty) {
+    if (!ApiConstants.hasTmdbAccess) {
       return [];
     }
     try {
@@ -717,7 +725,7 @@ class TmdbService {
 
   /// Get detailed episodes for a specific season of a TV show
   Future<Map<String, dynamic>?> getTvSeasonDetails(int tvId, int seasonNumber, {String? language}) async {
-    if (_apiKey.isEmpty) {
+    if (!ApiConstants.hasTmdbAccess) {
       return null;
     }
     try {

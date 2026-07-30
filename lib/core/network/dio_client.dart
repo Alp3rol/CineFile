@@ -39,7 +39,13 @@ class DioClient {
             },
           ),
         ) {
-    _dio.interceptors.add(FailoverInterceptor(_dio));
+    // Both the domain failover and the DNS-over-HTTPS workaround below exist
+    // to get around TMDb's own domains being blocked or hijacked. Neither
+    // applies to a proxy on a different origin, and trying the alternate TMDb
+    // domain from behind one would send requests somewhere the key isn't.
+    if (!ApiConstants.usesProxy) {
+      _dio.interceptors.add(FailoverInterceptor(_dio));
+    }
     _dio.interceptors.add(DioCacheInterceptor(options: cacheOptions));
     // Debug builds only. TMDb takes the API key as a *query parameter*, so
     // every logged request URI contains the key in plain text — which ended up
@@ -59,7 +65,7 @@ class DioClient {
     // api.themoviedb.org resolving to 127.0.0.1). Web builds can't override
     // socket-level DNS (the browser owns networking), so this only applies
     // to native platforms.
-    if (!kIsWeb && _dio.httpClientAdapter is IOHttpClientAdapter) {
+    if (!kIsWeb && !ApiConstants.usesProxy && _dio.httpClientAdapter is IOHttpClientAdapter) {
       (_dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
         final client = HttpClient();
         client.connectionFactory = (uri, proxyHost, proxyPort) async {

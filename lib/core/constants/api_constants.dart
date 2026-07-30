@@ -29,4 +29,30 @@ class ApiConstants {
     'TMDB_API_KEY',
     defaultValue: defaultTmdbApiKey,
   );
+
+  /// Origin of a server-side TMDb proxy, e.g.
+  /// `--dart-define=TMDB_PROXY_URL=https://cinefile-tmdb.<name>.workers.dev`.
+  ///
+  /// Empty by default, which keeps the direct-to-TMDb behaviour. When set, the
+  /// app talks only to this origin and never carries a TMDb key at all — the
+  /// proxy holds it (see tools/tmdb-proxy/). That is the only way to stop the
+  /// key being published: TMDb takes it as a *query parameter*, so a key
+  /// compiled into the web build is served to every visitor inside
+  /// `main.dart.js`, and a key compiled into a native build can be read out of
+  /// the APK. A proxy also gives the rate limiting the app has nowhere else.
+  static const String tmdbProxyUrl = String.fromEnvironment('TMDB_PROXY_URL');
+
+  static bool get usesProxy => tmdbProxyUrl.isNotEmpty;
+
+  /// Whether TMDb can actually be reached — either this build holds a key, or a
+  /// proxy holds one on its behalf.
+  ///
+  /// Every TmdbService method used to branch on `apiKey.isEmpty` to decide
+  /// whether to fall back to offline demo data. Under a proxy the client
+  /// legitimately has no key while still having full access, so that question
+  /// has to be asked here instead.
+  static bool get hasTmdbAccess => usesProxy || tmdbApiKey.isNotEmpty;
+
+  /// Where TMDb requests should be sent by default.
+  static String get effectiveBaseUrl => usesProxy ? tmdbProxyUrl : baseUrl;
 }

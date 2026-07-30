@@ -5,18 +5,30 @@ echo ========================================================
 echo.
 REM TMDb anahtari SORGU PARAMETRESI olarak gidiyor, yani web derlemesine
 REM gomulen anahtar main.dart.js icinde herkese acik olarak yayinlaniyor.
-REM Bu yuzden buraya kisisel anahtar DEGIL, yalnizca bu site icin uretilmis,
-REM gerektiginde iptal edilebilir ayri bir anahtar verilmeli.
 REM
-REM Kalici cozum: istekleri bir sunucu tarafi proxy uzerinden gecirmek.
+REM TERCIH EDILEN yol: TMDB_PROXY_URL tanimlayin. O zaman derlemeye hicbir
+REM anahtar gomulmez - anahtari yalnizca proxy tutar (bkz. tools/tmdb-proxy).
+REM
+REM Proxy yoksa buraya kisisel anahtar DEGIL, yalnizca bu site icin uretilmis,
+REM gerektiginde iptal edilebilir ayri bir anahtar verilmeli.
+set BUILD_DEFINES=
+if not "%TMDB_PROXY_URL%"=="" (
+    echo Proxy modu: anahtar derlemeye gomulmeyecek.
+    echo   %TMDB_PROXY_URL%
+    set BUILD_DEFINES=--dart-define=TMDB_PROXY_URL=%TMDB_PROXY_URL%
+    goto :build
+)
+
 if "%TMDB_WEB_KEY%"=="" (
     echo ========================================================
-    echo HATA: TMDB_WEB_KEY ortam degiskeni tanimli degil.
+    echo HATA: Ne TMDB_PROXY_URL ne de TMDB_WEB_KEY tanimli.
     echo.
-    echo Bu derlemeye gomulecek anahtar yayinda herkese gorunur olacagi
-    echo icin, kisisel anahtariniz yerine ayri bir web anahtari
-    echo tanimlamalisiniz:
+    echo TERCIH EDILEN - anahtari hic yayinlamayan yol:
+    echo     tools\tmdb-proxy\README.md dosyasini izleyip worker'i kurun,
+    echo     sonra:  setx TMDB_PROXY_URL "https://...workers.dev"
     echo.
+    echo Alternatif - anahtari derlemeye gomer, yayinda herkese gorunur olur.
+    echo Kisisel anahtarinizi DEGIL, ayri bir web anahtari kullanin:
     echo     setx TMDB_WEB_KEY "buraya_web_icin_uretilen_anahtar"
     echo.
     echo Anahtarsiz yayinlamak isterseniz ^(uygulama demo moduna duser^):
@@ -27,14 +39,16 @@ if "%TMDB_WEB_KEY%"=="" (
 )
 set WEB_KEY=%TMDB_WEB_KEY%
 if "%WEB_KEY%"=="none" set WEB_KEY=
+set BUILD_DEFINES=--dart-define=TMDB_API_KEY=%WEB_KEY%
 
+:build
 echo Adim 1: Proje web icin derleniyor...
 REM --no-wasm-dry-run: Flutter varsayilan olarak, uygulamayi bir de WASM'a
 REM derlenebiliyor mu diye kontrol eder. Bu ayri bir tam derleme gecisi ve
 REM olculdu: dagitim basina ~22 saniye (toplamin ucte biri). Ciktiyi hic
 REM etkilemiyor - bayrakli ve bayraksiz derlemelerin main.dart.js hash'leri
 REM birebir ayni. WASM'a gecilirse bu bayrak kaldirilmali.
-call flutter build web --release --no-wasm-dry-run --base-href "/CineFile/" --dart-define=TMDB_API_KEY=%WEB_KEY%
+call flutter build web --release --no-wasm-dry-run --base-href "/CineFile/" %BUILD_DEFINES%
 if %errorlevel% neq 0 (
     echo.
     echo HATA: Derleme basarisiz oldu!
