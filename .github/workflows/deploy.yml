@@ -78,6 +78,24 @@ jobs:
             echo "uses_proxy=false" >> "$GITHUB_OUTPUT"
           fi
 
+      # Optional, unlike the TMDb step above: with no SENTRY_DSN secret the app
+      # compiles Sentry out entirely rather than shipping a broken reporter, so
+      # a fork or a first deploy still builds. A DSN is not a secret — it only
+      # grants the ability to submit events — but it is passed the same way as
+      # the other values so it belongs to the deployment, not the repo.
+      - name: Decide whether this build reports crashes
+        id: sentry
+        env:
+          DSN: ${{ secrets.SENTRY_DSN }}
+        run: |
+          if [ -n "$DSN" ]; then
+            echo "Crashes will be reported to Sentry."
+            echo "defines=--dart-define=SENTRY_DSN=$DSN" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::No SENTRY_DSN set — this build will not report crashes anywhere."
+            echo "defines=" >> "$GITHUB_OUTPUT"
+          fi
+
       # The same gates as CI, because a tag can be pushed without a PR.
       - run: flutter analyze
       - run: flutter test
@@ -85,7 +103,8 @@ jobs:
       - name: Build web
         run: |
           flutter build web --release --no-wasm-dry-run \
-            --base-href "/CineFile/" ${{ steps.tmdb.outputs.defines }}
+            --base-href "/CineFile/" \
+            ${{ steps.tmdb.outputs.defines }} ${{ steps.sentry.outputs.defines }}
 
       # Guard against the exact failure this arrangement exists to prevent: a
       # proxy build that nonetheless shipped a key. Greps for the literal secret

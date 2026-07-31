@@ -53,6 +53,8 @@ CineFile, izlediğiniz her film ve diziyi — hatta aynı yapımı birden fazla 
 
 E-posta adresiniz yalnızca Firebase Authentication'da tutulur, herkese açık profil dokümanınızda **saklanmaz**. Kullanıcı adı benzersizliği `usernames` koleksiyonundaki bir "claim" dokümanıyla sunucu tarafında güvence altına alınır. Verilerinizi istediğiniz zaman JSON formatında (izleme geçmişi + koleksiyonlar) dışa aktarabilir veya bir yedekten geri yükleyebilirsiniz.
 
+Yayınlanan web sürümü çökme raporlarını Sentry'ye gönderir. Gönderilen şey **teknik hata bilgisidir**: hatanın türü, yığın izi ve uygulama sürümü. Kimliğinizi belirleyecek veriler (`sendDefaultPii`) ve ekran görüntüleri kapalıdır, izleme kayıtlarınız hiçbir şekilde gönderilmez, hata metinlerindeki API anahtarı benzeri parametreler gönderilmeden önce temizlenir — bkz. [`error_reporting.dart`](lib/core/observability/error_reporting.dart). Kendi derlemenizde `SENTRY_DSN` tanımlamazsanız Sentry hiç başlatılmaz.
+
 ## 🛠️ Teknolojik Altyapı
 
 | Katman | Teknoloji |
@@ -63,6 +65,7 @@ E-posta adresiniz yalnızca Firebase Authentication'da tutulur, herkese açık p
 | Bulut & Kimlik Doğrulama | Firebase Auth + Cloud Firestore |
 | Ağ İstemcisi | Dio — özel proxy yönlendirme ve DoH entegrasyonu ile |
 | Grafikler | `fl_chart` |
+| Çökme Raporlama | Sentry — Crashlytics'in web desteği olmadığı, yayınlanan sürümün ise web olduğu için |
 | Veri Kaynağı | [The Movie Database (TMDb)](https://www.themoviedb.org) API |
 
 ## 🚀 Yerelde Çalıştırma
@@ -77,6 +80,8 @@ flutter run
 > Uygulamayı çalıştırmak için `lib/core/constants/api_key.dart` içinde bir TMDb API anahtarı gerekir; bu dosya gizlilik nedeniyle `.gitignore`'dadır. `lib/firebase_options.dart` ise repoda mevcuttur — Firebase istemci konfigürasyonu tanım gereği geneldir, erişim `firestore.rules` ile kısıtlanır. Kendi Firebase projenizi kullanacaksanız `flutterfire configure` ile bu dosyayı yeniden üretin.
 >
 > **Not:** TMDb, API anahtarını sorgu parametresi olarak aldığı için web derlemesinde anahtar istemci paketine gömülür ve herkese görünürdür. Bu, tarayıcıda çalışan her istemci uygulaması için geçerlidir; anahtarı gizli tutmanız gerekiyorsa istekleri bir sunucu tarafı proxy üzerinden geçirin.
+>
+> Çökme raporlama isteğe bağlıdır: `--dart-define=SENTRY_DSN=<dsn>` verilmezse Sentry hiç başlatılmaz ve uygulama eskisi gibi yalnızca konsola yazar. Yayın akışı bu değeri `SENTRY_DSN` adlı GitHub secret'ından alır. DSN bir sır değildir — yalnızca olay göndermeye yetki verir — bu yüzden derlemede anahtar arayan `Verify the bundle carries no key` adımı onu kapsamaz.
 
 ## 🗺️ Yol Haritası
 

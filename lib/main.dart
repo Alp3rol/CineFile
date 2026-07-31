@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'core/navigation/app_navigator.dart';
+import 'core/observability/error_reporting.dart';
 import 'core/platform/firebase_web_registrar.dart';
 import 'core/theme/app_theme.dart';
 import 'core/widgets/web_device_frame.dart';
@@ -23,26 +24,43 @@ import 'firebase_options.dart';
 final firebaseInitProvider = FutureProvider<void>((ref) async {
   registerFirebaseWebPlugins();
   if (Firebase.apps.isNotEmpty) return;
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (error, stackTrace) {
+    // Reported here rather than from [_FirebaseInitErrorScreen], which rebuilds
+    // and would send a duplicate each time. This is the one failure that stops
+    // the app from being usable at all, and until now it was only ever shown to
+    // the user — nothing recorded that it had happened. Rethrown so the retry
+    // screen still appears; `ref.invalidate` re-runs this and reports the next
+    // attempt too, which is what you want when diagnosing a flaky one.
+    reportError(error, stackTrace, where: 'firebaseInit');
+    rethrow;
+  }
 });
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  GoogleFonts.config.allowRuntimeFetching = true;
-  // Loads symbols for every locale rather than just tr_TR — the user can switch
-  // languages at runtime, and DateFormat throws if the locale it is handed was
-  // never initialized.
-  await initializeDateFormatting();
 
-  registerFirebaseWebPlugins();
+  // Everything below runs inside the guarded zone runWithErrorReporting sets
+  // up, so a failure in startup itself — not just in a widget that is already
+  // on screen — is reported rather than only printed.
+  await runWithErrorReporting(() async {
+    GoogleFonts.config.allowRuntimeFetching = true;
+    // Loads symbols for every locale rather than just tr_TR — the user can
+    // switch languages at runtime, and DateFormat throws if the locale it is
+    // handed was never initialized.
+    await initializeDateFormatting();
 
-  runApp(
-    const ProviderScope(
-      child: MyApp(),
-    ),
-  );
+    registerFirebaseWebPlugins();
+
+    runApp(
+      const ProviderScope(
+        child: MyApp(),
+      ),
+    );
+  });
 }
 
 class MyApp extends ConsumerWidget {

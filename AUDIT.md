@@ -151,12 +151,14 @@ check_localized     → temiz (yeni, daha sıkı kuralla)
 |---|---|---|
 | **T26** Deploy manuel/Windows/force-push | ✅ Düzeltildi | `deploy.yml`: sürüm etiketiyle tetiklenir, CI kapılarını çalıştırır, geçmişi ezmez, proxy build'inde anahtar sızıntısını doğrular |
 | **T14** Firestore erişimi widget'larda | 🔶 Kısmi | Topluluk yazma yolları `SocialRepository`'ye taşındı (9 test). İzleme kaydı yazma yolu hâlâ widget'ta |
-| **T11** Gözlemlenebilirlik yok | ⏸️ Ortamınızı gerektiriyor | Gerekçe aşağıda |
+| **T11** Gözlemlenebilirlik yok | 🔶 Kısmi | Çökme raporlama **Sentry** ile eklendi (Crashlytics değil — gerekçe aşağıda). App Check hâlâ ortamınızı gerektiriyor |
 | **T33/T34** Firestore yedeği, moderasyon | ⏸️ Ortamınızı gerektiriyor | Gerekçe aşağıda |
 
 ### Neden Faz 4 burada duruyor
 
 **T11 (Crashlytics + App Check).** İkisi de native derleme yapılandırması istiyor (Gradle eklentisi, `google-services` bağlantısı) ve bu makinede Android SDK yok — yani ekleseydim **derlenip derlenmediğini doğrulayamazdım**. Doğrulanmamış native bağımlılık eklemek, olmamasından kötü. App Check ayrıca Firebase Console'da provider kaydı (Play Integrity / DeviceCheck / reCAPTCHA) gerektiriyor; kod tarafı onsuz zaten iş görmez. Bunlar sizin ortamınızda yapılacak işler.
+
+> **Sonradan düzeltme — bu maddedeki öneri yanlıştı.** Bu projenin gerçekten *yayınlanan* sürümü web (`deploy.yml` → gh-pages); `firebase_crashlytics`'in ise **web desteği hiç yok** (Android/iOS/macOS). Yani Crashlytics eklenseydi, bugün yayında olan tek yüzey yine körlükte kalacaktı. Çökme raporlama bunun yerine **Sentry** ile eklendi: web + Android tek SDK, native yapılandırma gerektirmiyor, `--dart-define=SENTRY_DSN=...` verilmezse hiç başlatılmıyor. Ayrıntılar `lib/core/observability/error_reporting.dart`'ta. **Geriye kalan:** Firebase App Check — yanlış yapılandırıldığında yayındaki tüm Firestore isteklerini reddettiği için bilinçli olarak ayrı tutuldu, ve `SENTRY_DSN` secret'ının GitHub'da tanımlanması.
 
 **T33/T34 (Firestore yedeği, moderasyon).** Scheduled Backups ve Cloud Functions'ın ikisi de **Blaze (kullandıkça öde) planı** gerektiriyor. Projenin hangi planda olduğunu bilmiyorum ve faturalandırma planı değiştirmek benim vereceğim bir karar değil.
 

@@ -64,6 +64,16 @@ dependencies:
   meta: ^1.11.0
   flutter_local_notifications: ^22.0.1
   timezone: ^0.11.1
+  # Crash reporting. Sentry rather than Crashlytics because the release this
+  # project actually publishes is the web build (see .github/workflows/
+  # deploy.yml), and firebase_crashlytics has no web support at all — it would
+  # have left the one shipped surface unmonitored.
+  #
+  # Its Android side depends on jni 0.14.x, which holds path_provider_android
+  # at 2.2.x instead of 2.3.x. Both are Android-only plugins the web build
+  # never loads, so the cost lands entirely on a platform that has no release
+  # channel yet; revisit when sentry_flutter moves to jni 1.x.
+  sentry_flutter: ^9.26.0
 
 dev_dependencies:
   flutter_test:
