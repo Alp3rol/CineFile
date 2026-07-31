@@ -130,10 +130,19 @@ export default {
     }
 
     const url = new URL(request.url);
-    if (!url.pathname.startsWith('/3/')) {
-      return json(404, { error: 'Not found' }, corsHeaders);
-    }
-    const tmdbPath = url.pathname.slice(2); // drop the leading "/3"
+
+    // Requests arrive BOTH ways, so both are accepted.
+    //
+    // TMDb's own base URL is `https://api.themoviedb.org/3`, i.e. the version
+    // segment is part of the base rather than of each path. Pointing the app at
+    // a proxy origin with no path therefore produces `/search/person`, not
+    // `/3/search/person` — which an earlier version of this worker rejected
+    // with a 404, breaking every request the app made. Normalising here means
+    // the proxy URL can be configured with or without the `/3` suffix.
+    const tmdbPath = url.pathname.startsWith('/3/')
+      ? url.pathname.slice(2)
+      : url.pathname;
+
     if (!ALLOWED_PATHS.some((re) => re.test(tmdbPath))) {
       return json(404, { error: 'Endpoint not proxied' }, corsHeaders);
     }
@@ -148,7 +157,7 @@ export default {
     // Rebuilt from an allowlist rather than copied: this is what guarantees a
     // client-supplied `api_key` can never be forwarded, and keeps the upstream
     // URL (and therefore the cache key) stable.
-    const upstream = new URL(TMDB_ORIGIN + url.pathname);
+    const upstream = new URL(`${TMDB_ORIGIN}/3${tmdbPath}`);
     for (const [name, value] of url.searchParams) {
       if (ALLOWED_PARAMS.has(name)) upstream.searchParams.append(name, value);
     }
