@@ -115,5 +115,8 @@ jobs:
           # force_orphan defaults to false, so gh-pages keeps its history and a
           # bad deploy can be reverted rather than only overwritten.
           commit_message: 'deploy: ${{ github.sha }}'
-          user_name: 'github-actions[bot]'
-          user_email: 'github-actions[bot]@users.noreply.github.com'
+          # Attributed to the repository owner, matching what yayinla.bat did
+          # when deploys ran locally. Using the default github-actions[bot]
+          # identity instead adds a bot to the repository's contributor list.
+          user_name: 'Alp3rol'
+          user_email: 'alp3rol17@gmail.com'
