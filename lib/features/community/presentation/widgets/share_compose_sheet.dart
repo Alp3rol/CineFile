@@ -8,6 +8,7 @@ import '../../../../core/widgets/premium_toast.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../auth/controllers/auth_controller.dart';
 import '../../../../core/database/database_provider.dart';
+import '../../data/social_repository.dart';
 import '../../models/community_post_model.dart';
 
 // Final step of every share flow — a mandatory caption, then a single write
@@ -263,7 +264,7 @@ class _ShareComposeSheetState extends ConsumerState<ShareComposeSheet> {
         );
       }
 
-      await ref.read(firestoreProvider).collection('posts').add(post.toMap());
+      await ref.read(socialRepositoryProvider).publishPost(post);
 
       if (mounted) {
         showPremiumToast(context, AppLocalizations.of(context).shareSucceeded);

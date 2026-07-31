@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -8,9 +7,9 @@ import '../../../../core/l10n/date_text.dart';
 import '../../../../core/database/database_provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
-import '../../../auth/controllers/auth_controller.dart';
 import '../../../auth/presentation/user_profile_screen.dart';
 import '../../../movie_detail/presentation/movie_detail_screen.dart';
+import '../../data/social_repository.dart';
 import '../../models/community_post_model.dart';
 import '../shared_collection_detail_screen.dart';
 import '../user_public_diary_screen.dart';
@@ -39,18 +38,11 @@ class CommunityPostCard extends ConsumerWidget {
     }
   }
 
-  Future<void> _toggleStar(WidgetRef ref, String postId, List<String> starredBy, String currentUserId) async {
-    final postRef = ref.read(firestoreProvider).collection('posts').doc(postId);
-
-    if (starredBy.contains(currentUserId)) {
-      await postRef.update({
-        'starredBy': FieldValue.arrayRemove([currentUserId]),
-      });
-    } else {
-      await postRef.update({
-        'starredBy': FieldValue.arrayUnion([currentUserId]),
-      });
-    }
+  Future<void> _toggleStar(WidgetRef ref, String postId, List<String> starredBy, String currentUserId) {
+    return ref.read(socialRepositoryProvider).toggleStar(
+          postId: postId,
+          currentlyStarred: starredBy.contains(currentUserId),
+        );
   }
 
   Widget _buildUserHeader(BuildContext context) {

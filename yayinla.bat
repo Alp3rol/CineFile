@@ -1,4 +1,13 @@
 @echo off
+REM ARTIK URETIM YOLU DEGIL. Yayin icin .github/workflows/deploy.yml kullanin:
+REM bir surum etiketi push edin (ornegin `git tag v1.7.3 && git push --tags`)
+REM ya da Actions sekmesinden "Deploy web"i elle calistirin.
+REM
+REM Workflow'un bu scripte gore uc farki var: tek bir makineye bagli degil,
+REM gh-pages gecmisini force-push ile ezmiyor (bozuk bir deploy geri alinabilir),
+REM ve yayindaki surumun hangi commit'ten derlendigi kayitli.
+REM
+REM Bu script hizli bir yerel onizleme icin duruyor.
 echo ========================================================
 echo CineFile Web Sürümü Derleniyor ve GitHub'a Yükleniyor...
 echo ========================================================

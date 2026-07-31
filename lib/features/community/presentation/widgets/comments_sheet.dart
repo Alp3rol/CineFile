@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/l10n/date_text.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../auth/controllers/auth_controller.dart';
 import '../../../auth/presentation/user_profile_screen.dart';
+import '../../data/social_repository.dart';
 import '../comments_provider.dart';
 
 class CommentsSheet extends ConsumerStatefulWidget {
@@ -44,35 +44,19 @@ class _CommentsSheetState extends ConsumerState<CommentsSheet> {
     super.dispose();
   }
 
-  Future<void> _submitComment(String currentUserId, String username, String avatarUrl) async {
+  Future<void> _submitComment() async {
     final text = _commentController.text.trim();
     if (text.isEmpty) return;
 
     _commentController.clear();
 
-    final firestore = ref.read(firestoreProvider);
-    final commentRef = firestore
-        .collection('posts')
-        .doc(widget.postId)
-        .collection('comments')
-        .doc();
-
-    final postRef = firestore.collection('posts').doc(widget.postId);
-
-    final comment = CommentModel(
-      id: commentRef.id,
-      userId: currentUserId,
-      username: username,
-      userAvatarUrl: avatarUrl,
-      text: text,
-      createdAt: DateTime.now(),
-    );
-
-    // Run as batch to ensure atomicity
-    final batch = firestore.batch();
-    batch.set(commentRef, comment.toMap());
-    batch.update(postRef, {'commentCount': FieldValue.increment(1)});
-    await batch.commit();
+    // Identity is resolved by the repository, not passed in: firestore.rules
+    // requires the stamped username/avatar to equal the caller's profile, so
+    // there must be exactly one place that decides what they are.
+    await ref.read(socialRepositoryProvider).addComment(
+          postId: widget.postId,
+          text: text,
+        );
 
     // Scroll to bottom
     if (_scrollController.hasClients) {
@@ -85,19 +69,10 @@ class _CommentsSheetState extends ConsumerState<CommentsSheet> {
   }
 
   Future<void> _deleteComment(String commentId) async {
-    final firestore = ref.read(firestoreProvider);
-    final commentRef = firestore
-        .collection('posts')
-        .doc(widget.postId)
-        .collection('comments')
-        .doc(commentId);
-
-    final postRef = firestore.collection('posts').doc(widget.postId);
-
-    final batch = firestore.batch();
-    batch.delete(commentRef);
-    batch.update(postRef, {'commentCount': FieldValue.increment(-1)});
-    await batch.commit();
+    await ref.read(socialRepositoryProvider).deleteComment(
+          postId: widget.postId,
+          commentId: commentId,
+        );
   }
 
   @override
@@ -106,9 +81,6 @@ class _CommentsSheetState extends ConsumerState<CommentsSheet> {
     final authState = ref.watch(authStateProvider);
     final currentUser = authState.value;
 
-    final identity = resolveUserIdentity(ref.watch(userModelProvider), currentUser);
-    final username = identity.username;
-    final avatarUrl = identity.avatarUrl;
 
     return GlassContainer(
       borderRadius: 24,
@@ -316,7 +288,7 @@ class _CommentsSheetState extends ConsumerState<CommentsSheet> {
                         textInputAction: TextInputAction.send,
                         onSubmitted: (_) {
                           if (currentUser != null) {
-                            _submitComment(currentUser.uid, username, avatarUrl);
+                            _submitComment();
                           }
                         },
                       ),
@@ -325,7 +297,7 @@ class _CommentsSheetState extends ConsumerState<CommentsSheet> {
                   const SizedBox(width: 8),
                   GestureDetector(
                     onTap: currentUser != null 
-                        ? () => _submitComment(currentUser.uid, username, avatarUrl)
+                        ? _submitComment
                         : null,
                     child: CircleAvatar(
                       radius: 22,
