@@ -143,6 +143,33 @@ check_localized     → temiz (yeni, daha sıkı kuralla)
 
 ---
 
+## ⚑ Uygulama Durumu — Faz 4 (kısmi)
+
+| Madde | Durum | Not |
+|---|---|---|
+| **T26** Deploy manuel/Windows/force-push | ✅ Düzeltildi | `deploy.yml`: sürüm etiketiyle tetiklenir, CI kapılarını çalıştırır, geçmişi ezmez, proxy build'inde anahtar sızıntısını doğrular |
+| **T14** Firestore erişimi widget'larda | 🔶 Kısmi | Topluluk yazma yolları `SocialRepository`'ye taşındı (9 test). İzleme kaydı yazma yolu hâlâ widget'ta |
+| **T11** Gözlemlenebilirlik yok | ⏸️ Ortamınızı gerektiriyor | Gerekçe aşağıda |
+| **T33/T34** Firestore yedeği, moderasyon | ⏸️ Ortamınızı gerektiriyor | Gerekçe aşağıda |
+
+### Neden Faz 4 burada duruyor
+
+**T11 (Crashlytics + App Check).** İkisi de native derleme yapılandırması istiyor (Gradle eklentisi, `google-services` bağlantısı) ve bu makinede Android SDK yok — yani ekleseydim **derlenip derlenmediğini doğrulayamazdım**. Doğrulanmamış native bağımlılık eklemek, olmamasından kötü. App Check ayrıca Firebase Console'da provider kaydı (Play Integrity / DeviceCheck / reCAPTCHA) gerektiriyor; kod tarafı onsuz zaten iş görmez. Bunlar sizin ortamınızda yapılacak işler.
+
+**T33/T34 (Firestore yedeği, moderasyon).** Scheduled Backups ve Cloud Functions'ın ikisi de **Blaze (kullandıkça öde) planı** gerektiriyor. Projenin hangi planda olduğunu bilmiyorum ve faturalandırma planı değiştirmek benim vereceğim bir karar değil.
+
+**T14'ün kalanı.** `add_watch_record_sheet`'in yazma yolunu da taşımak doğru olurdu ama onu Faz 1'de transaction'a çevirmiştim; taze kodu hemen yeniden taşımak yerine topluluk tarafını yaptım — orası hem üç ayrı yerde tekrarlanıyordu hem de yeni kuralların en çok bağımlı olduğu yüzey.
+
+**Doğrulama sonuçları (Faz 4 sonrası):**
+```
+flutter analyze     → No issues found!
+flutter test        → 191 passed, 1 skipped
+test_rules npm test → 49/49 passed
+check_localized     → temiz
+```
+
+---
+
 ## 1. Genel Proje Analizi
 
 ### Amaç
