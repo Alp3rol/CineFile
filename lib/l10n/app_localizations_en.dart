@@ -976,6 +976,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonOk => 'OK';
 
   @override
+  String get detailWhereToWatch => 'Where to Watch';
+
+  @override
+  String get detailWatchCategoryFlatrate => 'Streaming';
+
+  @override
+  String get detailWatchCategoryFree => 'Free';
+
+  @override
+  String get detailWatchCategoryRent => 'Rent';
+
+  @override
+  String get detailWatchCategoryBuy => 'Buy';
+
+  @override
+  String get detailWatchProvidersJustWatchAttribution =>
+      'Streaming availability provided by JustWatch.';
+
+  @override
+  String get settingsWatchRegionLabel => 'Streaming Region';
+
+  @override
+  String get settingsWatchRegionTitle => 'Choose Region';
+
+  @override
+  String settingsWatchRegionAutoWith(String region) {
+    return 'Automatic ($region)';
+  }
+
+  @override
   String commonErrorWithDetail(String detail) {
     return 'Error: $detail';
   }

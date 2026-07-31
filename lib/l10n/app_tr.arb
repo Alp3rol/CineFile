@@ -462,6 +462,45 @@
   "collectionNoneYetHint": "Eklemek için sağ üstteki \"+ Yeni Liste\" butonuna basın.",
   "collectionUpdateFailed": "Liste güncellenemedi, tekrar deneyin.",
   "commonOk": "Tamam",
+  "detailWhereToWatch": "Nerede İzlenir?",
+  "@detailWhereToWatch": {
+    "description": "Heading of the streaming-availability section on a title's detail screen."
+  },
+  "detailWatchCategoryFlatrate": "Abonelikle",
+  "@detailWatchCategoryFlatrate": {
+    "description": "Included in a subscription the user may already pay for."
+  },
+  "detailWatchCategoryFree": "Ücretsiz",
+  "@detailWatchCategoryFree": {
+    "description": "Free to watch, possibly with ads. Covers TMDb's 'free' and 'ads' buckets."
+  },
+  "detailWatchCategoryRent": "Kirala",
+  "@detailWatchCategoryRent": {
+    "description": "Available to rent for a single viewing period."
+  },
+  "detailWatchCategoryBuy": "Satın Al",
+  "@detailWatchCategoryBuy": {
+    "description": "Available to buy outright."
+  },
+  "detailWatchProvidersJustWatchAttribution": "Yayın platformu bilgileri JustWatch tarafından sağlanmaktadır.",
+  "@detailWatchProvidersJustWatchAttribution": {
+    "description": "Required credit: TMDb sources watch-provider data from JustWatch and their terms require attributing it."
+  },
+  "settingsWatchRegionLabel": "Yayın Bölgesi",
+  "@settingsWatchRegionLabel": {
+    "description": "Settings row for the country streaming availability is looked up for."
+  },
+  "settingsWatchRegionTitle": "Bölge Seçin",
+  "@settingsWatchRegionTitle": {
+    "description": "Title of the region picker dialog."
+  },
+  "settingsWatchRegionAutoWith": "Otomatik ({region})",
+  "@settingsWatchRegionAutoWith": {
+    "description": "Shown when the region follows the device. Names the country it resolved to, so 'Automatic' isn't a mystery.",
+    "placeholders": {
+      "region": { "type": "String" }
+    }
+  },
   "commonErrorWithDetail": "Hata: {detail}",
   "@commonErrorWithDetail": {
     "description": "Shown where a failed load renders its raw error text.",

@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../../../core/constants/api_constants.dart';
+import '../../../../core/constants/watch_regions.dart';
+import '../../../../core/l10n/l10n_lookup.dart';
 import '../../../../core/services/app_settings_store.dart';
 
 // Re-exported so existing call sites (settings_backup_dialogs.dart) keep
@@ -192,6 +194,76 @@ class LocaleNotifier extends StateNotifier<Locale?> {
     state = locale;
     await _store.write(_key, locale?.languageCode);
   }
+}
+
+/// The country streaming availability is looked up for, as an ISO-3166-1 code,
+/// or `null` to follow the device.
+///
+/// Kept separate from [localeProvider] because the two answer different
+/// questions: language decides what the UI reads like, country decides what
+/// Netflix carries. A Turkish speaker living in Germany wants the German
+/// catalogue.
+final watchRegionProvider = StateNotifierProvider<WatchRegionNotifier, String?>((ref) {
+  return WatchRegionNotifier(ref.watch(appSettingsStoreProvider));
+});
+
+class WatchRegionNotifier extends StateNotifier<String?> {
+  WatchRegionNotifier(this._store) : super(null) {
+    unawaited(_load());
+  }
+
+  final AppSettingsStore _store;
+
+  static const _key = 'watch_region';
+
+  /// Not a [_StoredPreferenceNotifier] subclass, for exactly the reason
+  /// [LocaleNotifier] isn't: that base class reads a stored `null` as "nothing
+  /// saved, keep the default", and here `null` is a value the user can pick
+  /// ("Automatic") which has to survive a restart.
+  Future<void> _load() async {
+    await _store.ensureLoaded();
+    final stored = _store.read<String>(_key);
+    // Validated by shape, not against kWatchRegions: a user whose country was
+    // never in that curated list must not lose their choice if the list is
+    // later edited.
+    if (stored != null && RegExp(r'^[A-Z]{2}$').hasMatch(stored)) {
+      state = stored;
+    }
+  }
+
+  /// [region] of `null` means "follow the device".
+  Future<void> setRegion(String? region) async {
+    state = region;
+    await _store.write(_key, region);
+  }
+}
+
+/// The region actually used for lookups.
+///
+/// Explicit choice wins; then the device's country; then a guess derived from
+/// the *effective app language*. That last step deliberately does not mirror
+/// [resolveAppLocale]'s "fall back to Turkish because it is the template
+/// language" rule — doing so would show Turkish catalogues to an
+/// English-speaking user whose device reports no country at all.
+final effectiveWatchRegionProvider = Provider<String>((ref) {
+  final override = ref.watch(watchRegionProvider);
+  if (override != null) return override;
+
+  final fromDevice = deviceCountryCode();
+  if (fromDevice != null) return fromDevice;
+
+  return resolveAppLocale(ref.watch(localeProvider)).languageCode == 'tr' ? 'TR' : 'US';
+});
+
+/// Codes the picker offers: the curated list plus whatever the device reports,
+/// so a user outside the curated set can still see and keep their own country.
+List<String> watchRegionOptions() {
+  final codes = {...kWatchRegions.keys};
+  final fromDevice = deviceCountryCode();
+  if (fromDevice != null) codes.add(fromDevice);
+  final sorted = codes.toList()
+    ..sort((a, b) => watchRegionLabel(a).toLowerCase().compareTo(watchRegionLabel(b).toLowerCase()));
+  return sorted;
 }
 
 final dynamicBackgroundEnabledProvider =

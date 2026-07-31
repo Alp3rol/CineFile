@@ -723,6 +723,43 @@ class TmdbService {
     }
   }
 
+  /// Where [tmdbId] can be watched, for **every** country at once
+  /// (TMDb `/movie|tv/{id}/watch/providers`).
+  ///
+  /// Returns the raw `results` map, keyed by ISO-3166-1 country code; slicing
+  /// it to one region is [parseWatchProviders]' job. Returning the whole thing
+  /// is what makes changing the region in Settings free: the response is
+  /// identical whatever region the user picks, so the refetch is served from
+  /// Dio's cache rather than the network.
+  ///
+  /// Unlike every other method here this sends **no `language`** — the payload
+  /// holds no translatable text (provider names are brands, `link` is keyed by
+  /// region), and omitting it keeps one cache entry per title instead of one
+  /// per UI language.
+  ///
+  /// `isTv` is required rather than nullable on purpose: [getMovieDetails]
+  /// probes both endpoints when it doesn't know, and doing that here would
+  /// double the cost of a request that exists to be cheap. Every caller has
+  /// the answer already.
+  Future<Map<String, dynamic>> getWatchProviders(int tmdbId, {required bool isTv}) async {
+    if (!ApiConstants.hasTmdbAccess) {
+      return const {};
+    }
+    try {
+      final response = await _dio.get(
+        isTv ? '/tv/$tmdbId/watch/providers' : '/movie/$tmdbId/watch/providers',
+        queryParameters: {'api_key': _apiKey},
+      );
+      return (response.data['results'] as Map<String, dynamic>?) ?? const {};
+    } on DioException catch (e) {
+      // Thrown, not swallowed into an empty result the way getTvSeasonDetails
+      // does: the section widget renders nothing either way, but a test — and
+      // a future caller that wants to show a retry — must be able to tell
+      // "request failed" from "not available here".
+      throw TmdbException.from(e, operation: 'watch providers');
+    }
+  }
+
   /// Get detailed episodes for a specific season of a TV show
   Future<Map<String, dynamic>?> getTvSeasonDetails(int tvId, int seasonNumber, {String? language}) async {
     if (!ApiConstants.hasTmdbAccess) {

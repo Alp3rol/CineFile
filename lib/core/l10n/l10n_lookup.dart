@@ -32,3 +32,25 @@ Locale resolveAppLocale(Locale? locale) {
   }
   return const Locale('tr');
 }
+
+/// The country the device is configured for, as an uppercase ISO-3166-1 code,
+/// or null when it reports none.
+///
+/// [resolveAppLocale] above deliberately throws the country away — the app
+/// ships one translation per *language*, so `en-GB` and `en-US` are the same
+/// thing to it. Streaming availability is the opposite: it is entirely a
+/// question of country, and Netflix's Turkish catalogue is not its German one.
+/// This is the companion accessor for that, kept here because this file is
+/// already the single place that reads [PlatformDispatcher].
+///
+/// Not validated against any list of known countries. TMDb simply has no entry
+/// for a region it doesn't cover, which the parser already treats as "nothing
+/// to show" — whereas filtering here would silently hand a user in an
+/// uncurated country somebody else's catalogue.
+String? deviceCountryCode() {
+  for (final deviceLocale in PlatformDispatcher.instance.locales) {
+    final country = deviceLocale.countryCode;
+    if (country != null && country.length == 2) return country.toUpperCase();
+  }
+  return null;
+}

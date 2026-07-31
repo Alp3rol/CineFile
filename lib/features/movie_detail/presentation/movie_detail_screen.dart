@@ -16,6 +16,7 @@ import 'add_watch_record_sheet.dart';
 import 'widgets/movie_detail_action_widgets.dart';
 import 'widgets/movie_detail_backdrop.dart';
 import 'widgets/movie_detail_cast_list.dart';
+import 'widgets/movie_detail_watch_providers_section.dart';
 import 'widgets/movie_detail_floating_header.dart';
 import 'widgets/movie_detail_header_row.dart';
 import 'widgets/movie_detail_timeline_section.dart';
@@ -427,6 +428,12 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
                           ),
                         ),
                         const SizedBox(height: 28),
+
+                        // Above the cast deliberately: it is the actionable
+                        // thing on this screen. Renders nothing at all when the
+                        // title isn't available in the user's region, so it
+                        // costs no vertical space in that case.
+                        MovieDetailWatchProvidersSection(tmdbId: tmdbId, isTv: isTv),
 
                         MovieDetailCastList(cast: cast, movieData: movieData),
 

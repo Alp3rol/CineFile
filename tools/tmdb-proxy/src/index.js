@@ -38,6 +38,8 @@ const ALLOWED_PATHS = [
   /^\/movie\/\d+$/,
   /^\/tv\/\d+$/,
   /^\/tv\/\d+\/season\/\d+$/,
+  /^\/movie\/\d+\/watch\/providers$/,
+  /^\/tv\/\d+\/watch\/providers$/,
   /^\/person\/\d+$/,
   /^\/person\/\d+\/combined_credits$/,
 ];

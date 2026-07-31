@@ -59,6 +59,32 @@ rebuilt. Do it in this order:
 
 Between 1 and 4 the old key still works, so nothing goes dark.
 
+## Adding a TMDb endpoint
+
+**A new `_dio.get('/...')` in `lib/core/network/tmdb_service.dart` is not enough.**
+`ALLOWED_PATHS` in `src/index.js` is an allowlist — anything not matching returns
+404, so the app's request fails and, because the failure surfaces as an empty
+result, it looks exactly like "TMDb has no data for this title". Nothing turns
+red.
+
+So, in order:
+
+1. Add a regex to `ALLOWED_PATHS` (written against the path with the leading
+   `/3` already stripped — see the normalisation in `fetch`).
+2. Add any new query parameter to `ALLOWED_PARAMS`; the upstream query string is
+   rebuilt from that list, so an unlisted parameter is silently dropped.
+3. `npx wrangler deploy` — **before** the client change reaches anyone on a
+   proxy build. The worker is backwards compatible, so deploying it early is
+   free.
+
+`test/tmdb_proxy_allowlist_test.dart` checks step 1 automatically: it reads both
+files and asserts every path the service requests matches an allowlist entry.
+Step 3 it cannot check.
+
+Note that a build without `TMDB_PROXY_URL` talks to TMDb directly and never
+touches this worker, so a missing allowlist entry works perfectly on a dev
+machine and breaks only the web/proxy build.
+
 ## Restricting browser callers
 
 Once the web build has a stable URL, uncomment `ALLOWED_ORIGINS` in

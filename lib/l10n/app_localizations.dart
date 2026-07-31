@@ -1826,6 +1826,60 @@ abstract class AppLocalizations {
   /// **'Tamam'**
   String get commonOk;
 
+  /// Heading of the streaming-availability section on a title's detail screen.
+  ///
+  /// In tr, this message translates to:
+  /// **'Nerede İzlenir?'**
+  String get detailWhereToWatch;
+
+  /// Included in a subscription the user may already pay for.
+  ///
+  /// In tr, this message translates to:
+  /// **'Abonelikle'**
+  String get detailWatchCategoryFlatrate;
+
+  /// Free to watch, possibly with ads. Covers TMDb's 'free' and 'ads' buckets.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ücretsiz'**
+  String get detailWatchCategoryFree;
+
+  /// Available to rent for a single viewing period.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kirala'**
+  String get detailWatchCategoryRent;
+
+  /// Available to buy outright.
+  ///
+  /// In tr, this message translates to:
+  /// **'Satın Al'**
+  String get detailWatchCategoryBuy;
+
+  /// Required credit: TMDb sources watch-provider data from JustWatch and their terms require attributing it.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yayın platformu bilgileri JustWatch tarafından sağlanmaktadır.'**
+  String get detailWatchProvidersJustWatchAttribution;
+
+  /// Settings row for the country streaming availability is looked up for.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yayın Bölgesi'**
+  String get settingsWatchRegionLabel;
+
+  /// Title of the region picker dialog.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bölge Seçin'**
+  String get settingsWatchRegionTitle;
+
+  /// Shown when the region follows the device. Names the country it resolved to, so 'Automatic' isn't a mystery.
+  ///
+  /// In tr, this message translates to:
+  /// **'Otomatik ({region})'**
+  String settingsWatchRegionAutoWith(String region);
+
   /// Shown where a failed load renders its raw error text.
   ///
   /// In tr, this message translates to:

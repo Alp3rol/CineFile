@@ -8,6 +8,7 @@ import 'support/localized_app.dart';
 import 'package:cinefile/core/database/app_database.dart';
 import 'package:cinefile/core/database/database_provider.dart';
 import 'package:cinefile/features/movie_detail/presentation/movie_detail_provider.dart';
+import 'package:cinefile/features/movie_detail/presentation/watch_providers_provider.dart';
 import 'package:cinefile/features/movie_detail/presentation/movie_detail_screen.dart';
 
 const _movieData = {
@@ -41,6 +42,11 @@ Widget _wrap({required List<WatchRecordWithMovie> watchRecords}) {
       // overridden directly so this render test doesn't need a Firebase
       // test harness.
       movieSettingsProvider((tmdbId: 1, isTv: false)).overrideWith((ref) => Stream.value(null)),
+      // Not optional. CI runs this suite a second time with
+      // --dart-define=TMDB_PROXY_URL=..., under which ApiConstants.hasTmdbAccess
+      // is TRUE — so without this override the section would attempt a real
+      // request to an unreachable host inside pumpAndSettle.
+      watchProvidersProvider((tmdbId: 1, isTv: false)).overrideWith((ref) async => null),
     ],
     child: const LocalizedTestApp(locale: Locale('tr'), home: MovieDetailScreen(tmdbId: 1)),
   );

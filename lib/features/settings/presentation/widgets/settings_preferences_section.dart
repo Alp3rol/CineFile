@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/constants/watch_regions.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/services/notification_service.dart';
@@ -129,6 +130,65 @@ class SettingsPreferencesSection extends ConsumerWidget {
     await ref.read(localeProvider.notifier).setLocale(selection.single);
   }
 
+  /// Label for the streaming-region row: the chosen country, or the one
+  /// "Automatic" actually resolved to. Naming the resolved country is what
+  /// keeps "Automatic" from being a mystery when the catalogue looks wrong.
+  String _regionLabel(AppLocalizations l10n, String? override, String effective) {
+    if (override != null) return watchRegionLabel(override);
+    return l10n.settingsWatchRegionAutoWith(watchRegionLabel(effective));
+  }
+
+  Future<void> _showRegionPicker(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
+    final current = ref.read(watchRegionProvider);
+    final effective = ref.read(effectiveWatchRegionProvider);
+
+    // Same single-element-list wrapper as the language picker, for the same
+    // reason: null is both "Automatic" and "dismissed".
+    final options = <String?>[null, ...watchRegionOptions()];
+
+    final selection = await showDialog<List<String?>>(
+      context: context,
+      builder: (context) => SimpleDialog(
+        backgroundColor: AppTheme.surfaceColor,
+        title: Text(
+          l10n.settingsWatchRegionTitle,
+          style: GoogleFonts.outfit(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.white),
+        ),
+        children: [
+          // Bounded and scrollable — this list is ~35 rows where the language
+          // one is 3, and an unbounded SimpleDialog overflows.
+          SizedBox(
+            width: double.maxFinite,
+            height: 380,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: options.length,
+              itemBuilder: (context, index) {
+                final option = options[index];
+                return ListTile(
+                  onTap: () => Navigator.of(context).pop([option]),
+                  title: Text(
+                    option == null
+                        ? l10n.settingsWatchRegionAutoWith(watchRegionLabel(effective))
+                        : watchRegionLabel(option),
+                    style: GoogleFonts.inter(fontSize: 14, color: Colors.white),
+                  ),
+                  trailing: option == current
+                      ? const Icon(Icons.check_rounded, size: 20, color: AppTheme.accentColor)
+                      : null,
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (selection == null) return;
+    await ref.read(watchRegionProvider.notifier).setRegion(selection.single);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
@@ -184,6 +244,17 @@ class SettingsPreferencesSection extends ConsumerWidget {
                 label: l10n.settingsLanguageLabel,
                 trailingText: _languageLabel(l10n, ref.watch(localeProvider)),
                 onTap: () => _showLanguagePicker(context, ref),
+              ),
+              _divider(),
+              _navRow(
+                icon: Icons.public_rounded,
+                label: l10n.settingsWatchRegionLabel,
+                trailingText: _regionLabel(
+                  l10n,
+                  ref.watch(watchRegionProvider),
+                  ref.watch(effectiveWatchRegionProvider),
+                ),
+                onTap: () => _showRegionPicker(context, ref),
               ),
             ],
           ),

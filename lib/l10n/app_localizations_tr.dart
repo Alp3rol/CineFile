@@ -967,6 +967,36 @@ class AppLocalizationsTr extends AppLocalizations {
   String get commonOk => 'Tamam';
 
   @override
+  String get detailWhereToWatch => 'Nerede İzlenir?';
+
+  @override
+  String get detailWatchCategoryFlatrate => 'Abonelikle';
+
+  @override
+  String get detailWatchCategoryFree => 'Ücretsiz';
+
+  @override
+  String get detailWatchCategoryRent => 'Kirala';
+
+  @override
+  String get detailWatchCategoryBuy => 'Satın Al';
+
+  @override
+  String get detailWatchProvidersJustWatchAttribution =>
+      'Yayın platformu bilgileri JustWatch tarafından sağlanmaktadır.';
+
+  @override
+  String get settingsWatchRegionLabel => 'Yayın Bölgesi';
+
+  @override
+  String get settingsWatchRegionTitle => 'Bölge Seçin';
+
+  @override
+  String settingsWatchRegionAutoWith(String region) {
+    return 'Otomatik ($region)';
+  }
+
+  @override
   String commonErrorWithDetail(String detail) {
     return 'Hata: $detail';
   }
