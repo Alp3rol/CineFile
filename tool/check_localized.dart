@@ -56,10 +56,6 @@ const _localizedFiles = <String>[
 /// visible, and so removing an entry is the deliberate act that turns the check
 /// on for it.
 const _notYetLocalized = <String>[
-  // Unreachable: nothing constructs CalendarScreen. Translating a screen no
-  // one can open would be wasted work — it should be wired back into the tabs
-  // or deleted, and localized as part of whichever is chosen.
-  'lib/features/calendar (dead screen)',
   // TmdbService's offline demo payload — user-visible, but only when no API
   // key is set.
   'lib/core/network/tmdb_service.dart (mock data)',

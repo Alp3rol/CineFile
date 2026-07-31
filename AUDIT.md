@@ -118,13 +118,15 @@ check_localized     → temiz
 | **T32** Coverage ölçümü yok | ✅ Eklendi | CI ölçüp raporluyor; bugün %48 |
 | **T19** `_mockMovies` kopyası | ✅ (Faz 1'de) | — |
 | **T31** Rozet kataloğu kod içinde | ⏸️ Yapılmadı | Gerekçe aşağıda |
-| **T22** Ölü `CalendarScreen` | ⏸️ Sizin kararınız | Gerekçe aşağıda |
+| **T22** Ölü `CalendarScreen` | ✅ Silindi | Ürün kararı; gerekçe aşağıda |
 
-### Yapılmayan iki madde
+### Yapılmayan madde
 
 **T31 (28 rozetin kataloğunu veriye çevirmek).** Saf bir refactor değil: rozet eşikleri ve sayma kuralları kullanıcıların **mevcut ilerlemesini** belirliyor, ve kodda bilinçli tuhaflıklar var — korku/gerilim ayrı ayrı toplanıyor (bir başlık ikisini birden taşıyorsa iki kez sayılıyor), ve bunun "değiştirmek bazı kullanıcıların ilerlemesini geriye dönük düşürür" diye yazılı bir gerekçesi var. 450 satırı veriye çevirirken bu davranışı birebir korumak mümkün ama önce her rozet için karakterizasyon testi yazmayı gerektirir — aksi halde refactor sessizce birinin rozetini geri alır. Testler olmadan yapmadım.
 
-**T22 (ölü `CalendarScreen`).** 372 satır, hiçbir yerden erişilemiyor. Silmek mi bağlamak mı bir **ürün kararı** — takvim görünümü isteyeceğiniz bir özellikse silmek yapılmış işi çöpe atar. Tek taraflı karar vermedim; `check_localized.dart` onu "henüz çevrilmedi" listesinde görünür tutmaya devam ediyor.
+### T22 sonradan kapandı
+
+**T22 (ölü `CalendarScreen`).** 372 satır, hiçbir yerden erişilemiyordu. Silmek mi bağlamak mı bir **ürün kararı** olduğu için tek taraflı karar vermemiştim; karar **silmek** yönünde verildi ve `lib/features/calendar/` kaldırıldı. `check_localized.dart`'taki "henüz çevrilmedi" muafiyeti de birlikte silindi — ekranın gün/ay adları Türkçe sabitti, yani bağlamak yerelleştirme + test işini de beraberinde getirecekti. Kod git geçmişinde duruyor; takvim görünümü ileride istenirse oradan geri alınabilir.
 
 ### Uygulama sırasında ortaya çıkanlar
 
@@ -500,7 +502,7 @@ final _literalInWidget = RegExp(
 Bu, dil bağımsız çalışır ve `AppLocalizations.of(context).x` çağrılarını doğal olarak muaf tutar.
 
 ### 3.11 Diğer kokular
-- **Ölü kod:** `lib/features/calendar/presentation/calendar_screen.dart` — 372 satır, hiçbir yerden `CalendarScreen` construct edilmiyor (`check_localized.dart:53` de bunu belgeliyor). Ya sekmelere bağlanmalı ya silinmeli; "sonra karar veririz" hâli teknik borç.
+- **Ölü kod:** `lib/features/calendar/presentation/calendar_screen.dart` — 372 satır, hiçbir yerden `CalendarScreen` construct edilmiyordu. *(Sonradan silindi — bkz. T22.)*
 - **`avoid_print: true` var ama 64 `debugPrint` çağrısı** yapılandırılmamış log olarak duruyor. Bunlar hata ayıklama için değerli; yapılandırılmış bir logger'a (seviye + kategori) taşınmalı.
 - **`BadgeState`** "legacy, geriye dönük uyumluluk için" notuyla duruyor ama `AchievementBadge`'den türetiliyor ve UI ikisini de kullanıyor. Tek modele indirilmeli.
 
