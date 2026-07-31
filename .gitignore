@@ -54,9 +54,14 @@ app.*.map.json
 # ApiConstants.tmdbApiKey); this file is the local-development fallback.
 lib/core/constants/api_key.dart
 
-# Dependencies of the firestore.rules test suite (test_rules/). The lockfile
-# IS committed — CI installs from it with `npm ci`.
-test_rules/node_modules/
+# Downloaded npm dependencies, anywhere in the repo — the rules test suite
+# (test_rules/) and the TMDb proxy (tools/tmdb-proxy/) both have some. Matched
+# by name rather than by path so a third one added later is covered too; the
+# path-specific rule this replaces silently missed tools/tmdb-proxy.
+#
+# The lockfiles ARE committed — they pin exact versions, and CI installs from
+# them with `npm ci`.
+node_modules/
 # Emulator artefacts, written next to firebase.json when the suite runs.
 firebase-debug.log
 firestore-debug.log
