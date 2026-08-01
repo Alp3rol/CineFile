@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/ui/ui.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/l10n/date_text.dart';
-import '../../../../core/theme/app_theme.dart';
+
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/database/database_provider.dart';
 import '../../../../core/widgets/quick_advance_tag.dart';
@@ -47,11 +47,7 @@ class JournalHeaderCell extends StatelessWidget {
           Flexible(
             child: Text(
               label,
-              style: GoogleFonts.outfit(
-                fontSize: 11,
-                fontWeight: FontWeight.bold,
-                color: isActive ? AppTheme.accentColor : AppTheme.textSecondary,
-              ),
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.bold, color: isActive ? AppColors.accent : AppColors.textSecondary),
               overflow: TextOverflow.ellipsis,
             ),
           ),
@@ -60,7 +56,7 @@ class JournalHeaderCell extends StatelessWidget {
             Icon(
               sortAscending ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded,
               size: 11,
-              color: AppTheme.accentColor,
+              color: AppColors.accent,
             ),
           ],
         ],
@@ -137,7 +133,7 @@ class JournalRecordsTable extends ConsumerWidget {
 
         return Material(
           key: ValueKey(record.id), // Unique value key for reorderable list
-          color: Colors.transparent,
+          color: AppColors.transparent,
           child: InkWell(
             onTap: () {
               Navigator.push(
@@ -161,7 +157,7 @@ class JournalRecordsTable extends ConsumerWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
               decoration: const BoxDecoration(
-                border: Border(bottom: BorderSide(color: Colors.white10, width: 0.5)),
+                border: Border(bottom: BorderSide(color: AppColors.border, width: 0.5)),
               ),
               child: Row(
                 children: [
@@ -172,11 +168,7 @@ class JournalRecordsTable extends ConsumerWidget {
                       alignment: Alignment.centerLeft,
                       child: Text(
                         displayRank != null ? '#$displayRank' : '-',
-                        style: GoogleFonts.outfit(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: displayRank != null ? AppTheme.accentColor : Colors.white30,
-                        ),
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold, color: displayRank != null ? AppColors.accent : AppColors.textTertiary),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -197,10 +189,10 @@ class JournalRecordsTable extends ConsumerWidget {
                             height: 58,
                             fit: BoxFit.cover,
                             errorWidget: (context, url, error) => Container(
-                              color: AppTheme.surfaceColor,
+                              color: AppColors.surface,
                               width: 40,
                               height: 58,
-                              child: const Icon(Icons.movie, size: 18, color: Colors.grey),
+                              child: const Icon(Icons.movie, size: 18, color: AppColors.textSecondary),
                             ),
                           ),
                         ),
@@ -212,18 +204,14 @@ class JournalRecordsTable extends ConsumerWidget {
                             children: [
                               Text(
                                 movie.title,
-                                style: GoogleFonts.inter(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                               ),
                               const SizedBox(height: 3),
                               Text(
                                 AppLocalizations.of(context).recordYearDirector(year.isNotEmpty ? year : AppLocalizations.of(context).yearUnknown, movie.director ?? AppLocalizations.of(context).directorMissing),
-                                style: GoogleFonts.inter(fontSize: 11, color: AppTheme.textSecondary),
+                                style: Theme.of(context).textTheme.labelMedium,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -231,11 +219,7 @@ class JournalRecordsTable extends ConsumerWidget {
                                 const SizedBox(height: 3),
                                 Text(
                                   record.tags!,
-                                  style: GoogleFonts.inter(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppTheme.accentColor.withValues(alpha: 0.85),
-                                  ),
+                                  style: Theme.of(context).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w600, color: AppColors.accent),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -257,7 +241,7 @@ class JournalRecordsTable extends ConsumerWidget {
                       children: [
                         Text(
                           dateStr,
-                          style: GoogleFonts.inter(fontSize: 12, color: Colors.white70),
+                          style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.textSecondary),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -266,7 +250,7 @@ class JournalRecordsTable extends ConsumerWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             if (record.watchPlace != null) ...[
-                              buildPlatformIcon(record.watchPlace),
+                              buildPlatformIcon(context, record.watchPlace),
                               const SizedBox(width: 4),
                             ],
                             Flexible(
@@ -274,18 +258,18 @@ class JournalRecordsTable extends ConsumerWidget {
                                 isMobile
                                     ? AppLocalizations.of(context).watchNumber(record.watchNumber)
                                     : (record.watchPlace ?? ''),
-                                style: GoogleFonts.inter(fontSize: 10, color: AppTheme.textSecondary),
+                                style: Theme.of(context).textTheme.labelSmall,
                                 overflow: TextOverflow.ellipsis,
                                 maxLines: 1,
                               ),
                             ),
                             if (isMobile && record.watchNumber > 1) ...[
                               const SizedBox(width: 3),
-                              const Icon(Icons.sync_rounded, color: Colors.greenAccent, size: 10),
+                              const Icon(Icons.sync_rounded, color: AppColors.success, size: 10),
                             ],
                             if (isMobile && _isShowCompleted(item)) ...[
                               const SizedBox(width: 3),
-                              const Icon(Icons.check_circle_rounded, color: Colors.greenAccent, size: 10),
+                              const Icon(Icons.check_circle_rounded, color: AppColors.success, size: 10),
                             ],
                           ],
                         ),
@@ -302,7 +286,7 @@ class JournalRecordsTable extends ConsumerWidget {
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.05),
+                            color: AppColors.textPrimary.withValues(alpha: AppOpacity.faint),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Row(
@@ -311,18 +295,18 @@ class JournalRecordsTable extends ConsumerWidget {
                               Flexible(
                                 child: Text(
                                   AppLocalizations.of(context).watchNumber(record.watchNumber),
-                                  style: GoogleFonts.inter(fontSize: 10, color: AppTheme.textSecondary),
+                                  style: Theme.of(context).textTheme.labelSmall,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                               if (record.watchNumber > 1) ...[
                                 const SizedBox(width: 4),
-                                const Icon(Icons.sync_rounded, color: Colors.greenAccent, size: 10),
+                                const Icon(Icons.sync_rounded, color: AppColors.success, size: 10),
                               ],
                               if (_isShowCompleted(item)) ...[
                                 const SizedBox(width: 4),
-                                const Icon(Icons.check_circle_rounded, color: Colors.greenAccent, size: 10),
+                                const Icon(Icons.check_circle_rounded, color: AppColors.success, size: 10),
                               ],
                             ],
                           ),
@@ -346,15 +330,11 @@ class JournalRecordsTable extends ConsumerWidget {
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.star_rounded, color: AppTheme.ratingColor, size: 15),
+                            const Icon(Icons.star_rounded, color: AppColors.rating, size: 15),
                             const SizedBox(width: 3),
                             Text(
                               '${record.rating}',
-                              style: GoogleFonts.outfit(
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                             ),
                             if (!(isLatestWatch && item.setting?.isActivelyWatching == true)) ...[
                               const SizedBox(width: 4),

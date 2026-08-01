@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/ui/ui.dart';
 
 // Collapsible search field shown under JournalScreen's tab bar when the
 // search icon in the top banner is toggled on.
@@ -25,34 +25,43 @@ class JournalSearchField extends StatelessWidget {
     return AnimatedCrossFade(
       firstChild: const SizedBox(height: 0),
       secondChild: Padding(
-        padding: const EdgeInsets.only(left: 16, right: 16, bottom: 6),
+        padding: const EdgeInsets.only(
+          left: AppSpacing.lg,
+          right: AppSpacing.lg,
+          bottom: AppSpacing.xs,
+        ),
         child: TextField(
           controller: controller,
           autofocus: true,
-          style: GoogleFonts.inter(fontSize: 13, color: Colors.white),
+          style: Theme.of(context)
+              .textTheme
+              .bodySmall
+              ?.copyWith(color: AppColors.textPrimary),
           onChanged: onChanged,
+          // Fill, border, radius and hint style all come from
+          // inputDecorationTheme now; only what is specific to this field is
+          // stated — its icons and its tighter vertical padding.
           decoration: InputDecoration(
             hintText: AppLocalizations.of(context).journalSearchHint,
-            hintStyle: GoogleFonts.inter(color: Colors.grey.shade600, fontSize: 12),
-            prefixIcon: const Icon(Icons.search_rounded, color: Colors.grey, size: 20),
+            prefixIcon: const Icon(
+              Icons.search_rounded,
+              color: AppColors.textSecondary,
+              size: AppSize.iconMd,
+            ),
             suffixIcon: query.isNotEmpty
                 ? IconButton(
-                    icon: const Icon(Icons.clear_rounded, color: Colors.grey, size: 20),
+                    icon: const Icon(Icons.clear_rounded, size: AppSize.iconMd),
                     onPressed: onClear,
                   )
                 : null,
-            filled: true,
-            fillColor: Colors.black26,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            contentPadding: const EdgeInsets.symmetric(vertical: 10),
+            contentPadding:
+                const EdgeInsets.symmetric(vertical: AppSpacing.sm),
           ),
         ),
       ),
-      crossFadeState: visible ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-      duration: const Duration(milliseconds: 200),
+      crossFadeState:
+          visible ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+      duration: AppDuration.normal,
     );
   }
 }

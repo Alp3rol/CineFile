@@ -142,6 +142,17 @@ abstract final class BrandColors {
   static const Color tmdbNavy = Color(0xFF0D253F);
   static const Color tmdbGreen = Color(0xFF90CEA1);
 
+  /// Streaming services, for the little platform markers on journal entries.
+  ///
+  /// These were approximated with `Colors.red` / `Colors.blue` /
+  /// `Colors.purpleAccent`, which are not any of these brands' actual colours —
+  /// close enough to read as "some red badge", not close enough to read as
+  /// Netflix. Their real values are used here for the same reason the TMDb
+  /// pair is: they identify someone else, so they do not follow our palette.
+  static const Color netflixRed = Color(0xFFE50914);
+  static const Color primeBlue = Color(0xFF00A8E1);
+  static const Color disneyBlue = Color(0xFF113CCF);
+
   /// Light plate placed behind a third-party logo.
   ///
   /// Many streaming-provider logos are dark artwork on a transparent

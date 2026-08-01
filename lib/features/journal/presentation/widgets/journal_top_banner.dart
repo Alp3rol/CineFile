@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
 import '../../../auth/presentation/widgets/user_profile_avatar_button.dart';
 import 'journal_view_mode_toggle.dart';
 
@@ -17,40 +17,56 @@ class JournalTopBanner extends StatelessWidget {
     required this.onToggleSearch,
   });
 
+  static const double _toggleDiameter = 36;
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Padding(
-      padding: const EdgeInsets.only(left: 20, right: 12, top: 16, bottom: 4),
+      padding: const EdgeInsets.only(
+        left: AppSpacing.lg,
+        right: AppSpacing.md,
+        top: AppSpacing.lg,
+        bottom: AppSpacing.xs,
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            AppLocalizations.of(context).journalTitle,
-            style: Theme.of(context).textTheme.displayLarge,
-          ),
+          Text(l10n.journalTitle,
+              style: Theme.of(context).textTheme.displayLarge),
           Row(
             children: [
               // Search toggle button
-              GestureDetector(
+              AppPressable(
                 onTap: onToggleSearch,
+                borderRadius: AppRadius.pill,
+                semanticLabel: l10n.journalSearchHint,
                 child: Container(
-                  width: 36,
-                  height: 36,
+                  width: _toggleDiameter,
+                  height: _toggleDiameter,
                   decoration: BoxDecoration(
-                    color: showSearch ? AppTheme.accentColor.withValues(alpha: 0.2) : Colors.white10,
+                    color: showSearch
+                        ? AppColors.accent.withValues(alpha: AppOpacity.soft)
+                        : AppColors.textPrimary
+                            .withValues(alpha: AppOpacity.subtle),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
-                    showSearch ? Icons.search_off_rounded : Icons.search_rounded,
-                    color: showSearch ? AppTheme.accentColor : Colors.white70,
-                    size: 18,
+                    showSearch
+                        ? Icons.search_off_rounded
+                        : Icons.search_rounded,
+                    color: showSearch
+                        ? AppColors.accent
+                        : AppColors.textSecondary,
+                    size: AppSize.iconSm,
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSpacing.sm),
               // Card/Table view toggle — moved here from filter row
               JournalViewModeToggle(isTableView: isTableView),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.md),
               // Profile Avatar Button
               const UserProfileAvatarButton(),
             ],

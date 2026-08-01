@@ -1,50 +1,33 @@
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
 
 class JournalEmptyState extends StatelessWidget {
   final String activeFilter;
   final String searchQuery;
-  const JournalEmptyState({super.key, required this.activeFilter, required this.searchQuery});
+
+  const JournalEmptyState({
+    super.key,
+    required this.activeFilter,
+    required this.searchQuery,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            activeFilter != 'all' ? Icons.search_off_rounded : Icons.menu_book_rounded,
-            size: 56,
-            color: AppTheme.textSecondary.withValues(alpha: 0.3),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            AppLocalizations.of(context).journalEmptyTitle,
-            style: GoogleFonts.outfit(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.white70,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 42),
-            child: Text(
-              activeFilter != 'all' || searchQuery.isNotEmpty
-                  ? AppLocalizations.of(context).journalEmptyFiltered
-                  : AppLocalizations.of(context).journalEmptyNoRecords,
-              style: GoogleFonts.inter(
-                fontSize: 12,
-                color: AppTheme.textSecondary,
-                height: 1.4,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ],
-      ),
+    final l10n = AppLocalizations.of(context);
+    final isFiltered = activeFilter != 'all' || searchQuery.isNotEmpty;
+
+    return AppEmptyState(
+      // The icon distinguishes "you have written nothing yet" from "your
+      // filter matched nothing" — the second is not really an empty state,
+      // it is a search result.
+      icon: activeFilter != 'all'
+          ? Icons.search_off_rounded
+          : Icons.menu_book_rounded,
+      title: l10n.journalEmptyTitle,
+      subtitle: isFiltered
+          ? l10n.journalEmptyFiltered
+          : l10n.journalEmptyNoRecords,
     );
   }
 }

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../core/ui/ui.dart';
+
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/database/database_provider.dart';
 import '../../../../core/database/movie_repository.dart';
@@ -168,7 +168,7 @@ class _JournalScreenState extends ConsumerState<JournalScreen>
     WidgetsBinding.instance.addPostFrameCallback((_) => _onTabOrScrollChange());
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.transparent,
       body: SafeArea(
         bottom: false,
         child: Column(
@@ -195,17 +195,17 @@ class _JournalScreenState extends ConsumerState<JournalScreen>
                 controller: _tabController,
                 isScrollable: false,
                 indicatorSize: TabBarIndicatorSize.tab,
-                dividerColor: Colors.transparent,
+                dividerColor: AppColors.transparent,
                 splashBorderRadius: BorderRadius.circular(12),
-                overlayColor: WidgetStateProperty.all(Colors.white.withValues(alpha: 0.05)),
+                overlayColor: WidgetStateProperty.all(AppColors.textPrimary.withValues(alpha: AppOpacity.faint)),
                 indicator: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
-                  color: AppTheme.accentColor,
+                  color: AppColors.accent,
                 ),
-                labelColor: Colors.black,
-                unselectedLabelColor: Colors.white70,
-                labelStyle: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 15),
-                unselectedLabelStyle: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 15),
+                labelColor: AppColors.onAccentAlt,
+                unselectedLabelColor: AppColors.textSecondary,
+                labelStyle: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                unselectedLabelStyle: Theme.of(context).textTheme.titleSmall,
                 tabs: [
                   Tab(text: AppLocalizations.of(context).journalTabDiary),
                   Tab(text: AppLocalizations.of(context).journalTabLists),
@@ -236,8 +236,8 @@ class _JournalScreenState extends ConsumerState<JournalScreen>
                       // Table Body Logic & Calculations
                       Expanded(
                         child: watchRecordsAsync.when(
-                          loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.accentColor)),
-                          error: (err, stack) => Center(child: Text(AppLocalizations.of(context).journalLoadFailed, style: const TextStyle(color: Colors.white))),
+                          loading: () => const Center(child: CircularProgressIndicator()),
+                          error: (err, stack) => Center(child: Text(AppLocalizations.of(context).journalLoadFailed, style: Theme.of(context).textTheme.bodyLarge)),
                           data: (records) {
                             if (records.isEmpty) {
                               return JournalEmptyState(activeFilter: _activeFilter, searchQuery: _searchQuery);
@@ -292,7 +292,7 @@ class _JournalScreenState extends ConsumerState<JournalScreen>
                                       );
                                     }
                                   ),
-                                  const Divider(color: Colors.white10, height: 1, indent: 16, endIndent: 16),
+                                  const Divider(height: 1, indent: AppSpacing.lg, endIndent: AppSpacing.lg),
                                   Expanded(
                                     child: JournalRecordsTable(
                                       items: filtered,
@@ -321,16 +321,12 @@ class _JournalScreenState extends ConsumerState<JournalScreen>
                                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                                       child: Row(
                                         children: [
-                                          const Icon(Icons.hourglass_empty_rounded, color: AppTheme.accentColor, size: 16),
+                                          const Icon(Icons.hourglass_empty_rounded, color: AppColors.accent, size: 16),
                                           const SizedBox(width: 8),
                                           Expanded(
                                             child: Text(
                                               AppLocalizations.of(context).journalTotalTimeSpent(stats.totalHours, stats.totalRemainingMinutes),
-                                              style: GoogleFonts.inter(
-                                                fontSize: 11,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.white70,
-                                              ),
+                                              style: Theme.of(context).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.bold),
                                             ),
                                           ),
                                         ],

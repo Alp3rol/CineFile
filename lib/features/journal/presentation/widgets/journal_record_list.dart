@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
 import '../../../../core/widgets/quick_advance_tag.dart';
 import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/constants/api_constants.dart';
@@ -39,7 +38,9 @@ class JournalRecordsList extends ConsumerWidget {
 
     final latestWatchIds = <MovieKey, int>{};
     for (final item in sorted) {
-      latestWatchIds.putIfAbsent((tmdbId: item.movie.tmdbId, isTv: item.movie.isTv), () => item.record.id);
+      latestWatchIds.putIfAbsent(
+          (tmdbId: item.movie.tmdbId, isTv: item.movie.isTv),
+          () => item.record.id);
     }
 
     final groups = <String, List<WatchRecordWithMovie>>{};
@@ -57,58 +58,119 @@ class JournalRecordsList extends ConsumerWidget {
     return ListView.builder(
       controller: scrollController,
       physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.only(left: 16, right: 16, top: 4, bottom: 24),
+      padding: const EdgeInsets.only(
+        left: AppSpacing.lg,
+        right: AppSpacing.lg,
+        top: AppSpacing.xs,
+        bottom: AppSpacing.xl,
+      ),
       itemCount: groupOrder.length,
       itemBuilder: (context, groupIndex) {
         final monthLabel = groupOrder[groupIndex];
         final monthItems = groups[monthLabel]!;
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: EdgeInsets.only(top: groupIndex == 0 ? 4 : 20, bottom: 12),
-              child: Row(
-                children: [
-                  Container(
-                    width: 3,
-                    height: 14,
-                    decoration: BoxDecoration(
-                      color: AppTheme.accentColor,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    monthLabel,
-                    style: GoogleFonts.outfit(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.0,
-                      color: AppTheme.accentColor,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Container(
-                      height: 0.8,
-                      color: Colors.white.withValues(alpha: 0.08),
-                    ),
-                  ),
-                ],
+              padding: EdgeInsets.only(
+                top: groupIndex == 0 ? AppSpacing.xs : AppSpacing.lg,
+                bottom: AppSpacing.md,
+              ),
+              child: _MonthHeading(label: monthLabel),
+            ),
+            ...monthItems.map(
+              (item) => Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                child: _JournalRecordCard(
+                  item: item,
+                  onUpdateRanking: onUpdateRanking,
+                  isLatestWatch: latestWatchIds[
+                          (tmdbId: item.movie.tmdbId, isTv: item.movie.isTv)] ==
+                      item.record.id,
+                ),
               ),
             ),
-            ...monthItems.map((item) => Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: _JournalRecordCard(
-                    item: item,
-                    onUpdateRanking: onUpdateRanking,
-                    isLatestWatch:
-                        latestWatchIds[(tmdbId: item.movie.tmdbId, isTv: item.movie.isTv)] == item.record.id,
-                  ),
-                )),
           ],
         );
       },
+    );
+  }
+}
+
+/// Month separator: an accent rule, the month, and a hairline running out to
+/// the edge.
+class _MonthHeading extends StatelessWidget {
+  const _MonthHeading({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 3,
+          height: 14,
+          decoration: BoxDecoration(
+            color: AppColors.accent,
+            borderRadius: AppRadius.allPill,
+          ),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                color: AppColors.accent,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.0,
+              ),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: Container(
+            height: 0.8,
+            color: AppColors.textPrimary.withValues(alpha: AppOpacity.subtle),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Small labelled pill under a record's title — where it was watched, and
+/// with whom. Written out twice, identically, before this.
+class _MetaPill extends StatelessWidget {
+  const _MetaPill({
+    required this.icon,
+    required this.iconColor,
+    required this.label,
+  });
+
+  final IconData icon;
+  final Color iconColor;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: 3,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.textPrimary.withValues(alpha: AppOpacity.faint),
+        borderRadius: AppRadius.allSm,
+        border: Border.all(color: AppColors.border, width: 0.5),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 10, color: iconColor),
+          const SizedBox(width: 3),
+          Text(label, style: Theme.of(context).textTheme.labelSmall),
+        ],
+      ),
     );
   }
 }
@@ -118,207 +180,154 @@ class _JournalRecordCard extends ConsumerWidget {
   final Future<void> Function(Map<MovieKey, int?> rankings) onUpdateRanking;
   final bool isLatestWatch;
 
-  const _JournalRecordCard({required this.item, required this.onUpdateRanking, required this.isLatestWatch});
+  const _JournalRecordCard({
+    required this.item,
+    required this.onUpdateRanking,
+    required this.isLatestWatch,
+  });
+
+  static const double _posterWidth = 60;
+  static const double _posterHeight = 90;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final movie = item.movie;
     final record = item.record;
+    final textTheme = Theme.of(context).textTheme;
     final dateStr = _formatDayMonthYear(context, record.watchDate);
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(20),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => MovieDetailScreen(tmdbId: movie.tmdbId, isTv: movie.isTv),
-            ),
-          );
-        },
-        onLongPress: () => showWatchRecordPreviewDialog(
+    return AppPressable(
+      borderRadius: AppRadius.xl,
+      semanticLabel: movie.title,
+      onTap: () {
+        Navigator.push(
           context,
-          movie,
-          record,
-          item.setting,
-          onUpdateRanking: onUpdateRanking,
-          onDelete: () => deleteWatchRecord(ref, record),
-          onUpdateDate: (newDate) => updateWatchRecord(ref, record, watchDate: newDate),
-          onUpdateEpisodes: (newCount) => updateWatchRecord(ref, record, episodeCount: newCount),
-          onUpdatePrivacy: (newValue) => updateWatchRecord(ref, record, isPublic: newValue),
-        ),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Colors.white.withValues(alpha: 0.05),
-                Colors.white.withValues(alpha: 0.02),
-              ],
-            ),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.08),
-              width: 1,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.25),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
+          MaterialPageRoute(
+            builder: (context) =>
+                MovieDetailScreen(tmdbId: movie.tmdbId, isTv: movie.isTv),
           ),
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 3D Shadowed Poster Card
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.4),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: AppNetworkImage(
-                    imageUrl: movie.posterPath != null
-                        ? '${ApiConstants.imagePathW185}${movie.posterPath}'
-                        : '',
-                    width: 60,
-                    height: 90,
-                    fit: BoxFit.cover,
-                    seed: movie.title,
-                  ),
+        );
+      },
+      onLongPress: () => showWatchRecordPreviewDialog(
+        context,
+        movie,
+        record,
+        item.setting,
+        onUpdateRanking: onUpdateRanking,
+        onDelete: () => deleteWatchRecord(ref, record),
+        onUpdateDate: (newDate) =>
+            updateWatchRecord(ref, record, watchDate: newDate),
+        onUpdateEpisodes: (newCount) =>
+            updateWatchRecord(ref, record, episodeCount: newCount),
+        onUpdatePrivacy: (newValue) =>
+            updateWatchRecord(ref, record, isPublic: newValue),
+      ),
+      // Was a hand-built gradient from 5% to 2% white. A flat translucent card
+      // at the same starting alpha is indistinguishable at this size and is
+      // the treatment every other card on the screen now uses.
+      child: AppCard(
+        tone: AppCardTone.translucent,
+        borderRadius: AppRadius.xl,
+        padding: const EdgeInsets.all(AppSpacing.md),
+        elevated: true,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 3D Shadowed Poster Card
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: AppRadius.allMd,
+                boxShadow: AppElevation.low(AppColors.shadow),
+              ),
+              child: ClipRRect(
+                borderRadius: AppRadius.allMd,
+                child: AppNetworkImage(
+                  imageUrl: movie.posterPath != null
+                      ? '${ApiConstants.imagePathW185}${movie.posterPath}'
+                      : '',
+                  width: _posterWidth,
+                  height: _posterHeight,
+                  fit: BoxFit.cover,
+                  seed: movie.title,
                 ),
               ),
-              const SizedBox(width: 14),
+            ),
+            const SizedBox(width: AppSpacing.md),
 
-              // Title & Metadata
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            movie.title,
-                            style: GoogleFonts.outfit(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        if (_isShowCompleted(item)) ...[
-                          const SizedBox(width: 6),
-                          const Icon(Icons.check_circle_rounded, color: Colors.greenAccent, size: 14),
-                        ],
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      dateStr,
-                      style: GoogleFonts.inter(fontSize: 11.5, color: AppTheme.textSecondary),
-                    ),
-                    const SizedBox(height: 8),
-
-                    // Pills Row: Place & Companion
-                    Wrap(
-                      spacing: 6,
-                      runSpacing: 4,
-                      children: [
-                        if (record.watchPlace != null && record.watchPlace!.trim().isNotEmpty)
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.05),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.white10, width: 0.5),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(Icons.location_on_rounded, size: 10, color: AppTheme.accentColor),
-                                const SizedBox(width: 3),
-                                Text(
-                                  record.watchPlace!,
-                                  style: GoogleFonts.inter(fontSize: 10, color: Colors.white70),
-                                ),
-                              ],
-                            ),
-                          ),
-                        if (record.watchCompanion != null && record.watchCompanion!.trim().isNotEmpty)
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.05),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.white10, width: 0.5),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(Icons.people_rounded, size: 10, color: Colors.purpleAccent),
-                                const SizedBox(width: 3),
-                                Text(
-                                  record.watchCompanion!,
-                                  style: GoogleFonts.inter(fontSize: 10, color: Colors.white70),
-                                ),
-                              ],
-                            ),
-                          ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(width: 8),
-
-              // Rating Badge Column
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
+            // Title & Metadata
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppTheme.ratingColor.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: AppTheme.ratingColor.withValues(alpha: 0.4), width: 0.8),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.star_rounded, color: AppTheme.ratingColor, size: 14),
-                        const SizedBox(width: 3),
-                        Text(
-                          record.rating.toStringAsFixed(1),
-                          style: GoogleFonts.outfit(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          movie.title,
+                          style: textTheme.titleSmall,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (_isShowCompleted(item)) ...[
+                        const SizedBox(width: AppSpacing.xs),
+                        const Icon(
+                          Icons.check_circle_rounded,
+                          color: AppColors.success,
+                          size: AppSize.iconSm,
                         ),
                       ],
-                    ),
+                    ],
                   ),
-                  if (isLatestWatch && item.setting?.isActivelyWatching == true) ...[
-                    const SizedBox(height: 6),
-                    QuickAdvanceTag(item: item),
-                  ],
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(dateStr, style: textTheme.labelMedium),
+                  const SizedBox(height: AppSpacing.sm),
+
+                  // Pills Row: Place & Companion
+                  Wrap(
+                    spacing: AppSpacing.xs,
+                    runSpacing: AppSpacing.xs,
+                    children: [
+                      if (record.watchPlace != null &&
+                          record.watchPlace!.trim().isNotEmpty)
+                        _MetaPill(
+                          icon: Icons.location_on_rounded,
+                          iconColor: AppColors.accent,
+                          label: record.watchPlace!,
+                        ),
+                      if (record.watchCompanion != null &&
+                          record.watchCompanion!.trim().isNotEmpty)
+                        _MetaPill(
+                          icon: Icons.people_rounded,
+                          iconColor: AppColors.info,
+                          label: record.watchCompanion!,
+                        ),
+                    ],
+                  ),
                 ],
               ),
-            ],
-          ),
+            ),
+
+            const SizedBox(width: AppSpacing.sm),
+
+            // Rating Badge Column
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                AppBadge(
+                  label: record.rating.toStringAsFixed(1),
+                  icon: Icons.star_rounded,
+                  tone: AppBadgeTone.rating,
+                  outlined: true,
+                ),
+                if (isLatestWatch &&
+                    item.setting?.isActivelyWatching == true) ...[
+                  const SizedBox(height: AppSpacing.xs),
+                  QuickAdvanceTag(item: item),
+                ],
+              ],
+            ),
+          ],
         ),
       ),
     );
