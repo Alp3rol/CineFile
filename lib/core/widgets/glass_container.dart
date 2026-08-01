@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import '../theme/app_theme.dart';
+import '../theme/app_colors.dart';
+import '../theme/app_tokens.dart';
 
 class GlassContainer extends StatelessWidget {
   final Widget child;
@@ -27,10 +28,10 @@ class GlassContainer extends StatelessWidget {
   const GlassContainer({
     super.key,
     required this.child,
-    this.blurX = 20.0,
-    this.blurY = 20.0,
-    this.opacity = 0.6,
-    this.borderRadius = 16.0,
+    this.blurX = AppBlur.md,
+    this.blurY = AppBlur.md,
+    this.opacity = AppOpacity.strong,
+    this.borderRadius = AppRadius.lg,
     this.padding,
     this.margin,
     this.border,
@@ -45,11 +46,11 @@ class GlassContainer extends StatelessWidget {
     final content = Container(
       padding: padding,
       decoration: BoxDecoration(
-        color: (color ?? AppTheme.surfaceColor).withValues(alpha: opacity),
+        color: (color ?? AppColors.surface).withValues(alpha: opacity),
         borderRadius: BorderRadius.circular(borderRadius),
         border: border ?? Border.all(
-          color: AppTheme.borderColor,
-          width: 1,
+          color: AppColors.border,
+          width: AppSize.hairline,
         ),
       ),
       // Widgets that paint on "the nearest Material ancestor" (ListTile,
@@ -68,13 +69,7 @@ class GlassContainer extends StatelessWidget {
       height: height,
       margin: margin,
       decoration: BoxDecoration(
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
-            blurRadius: 40,
-            offset: const Offset(0, 20),
-          ),
-        ],
+        boxShadow: AppElevation.high(AppColors.shadow),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(borderRadius),
