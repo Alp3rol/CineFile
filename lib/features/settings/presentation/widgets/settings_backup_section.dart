@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/theme/app_theme.dart';
-import '../../../../core/widgets/glass_container.dart';
+import '../../../../core/ui/ui.dart';
 import 'duplicate_cleanup_screen.dart';
 import 'settings_backup_dialogs.dart';
-import 'settings_section_header.dart';
+import 'settings_section.dart';
 
 // "Veri Yönetimi & Yedekleme" card: export/import JSON backup, plus a link
 // to the duplicate-watch-record cleanup screen.
@@ -15,116 +13,61 @@ class SettingsBackupSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SettingsSectionHeader(title: AppLocalizations.of(context).settingsDataSection),
-        const SizedBox(height: 10),
-        GlassContainer(
-          padding: const EdgeInsets.all(16),
-          borderRadius: 16,
-          opacity: 0.6,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                AppLocalizations.of(context).settingsBackupTitle,
-                style: GoogleFonts.inter(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                AppLocalizations.of(context).settingsBackupDescription,
-                style: GoogleFonts.inter(
-                  fontSize: 11,
-                  color: AppTheme.textSecondary,
-                  height: 1.4,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  // Export Button
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        side: const BorderSide(color: AppTheme.borderColor),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      icon: const Icon(Icons.download_rounded, size: 18),
-                      label: Text(
-                        AppLocalizations.of(context).settingsExport,
-                        style: GoogleFonts.outfit(
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      onPressed: () => exportBackup(context, ref),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
+    final l10n = AppLocalizations.of(context);
 
-                  // Import Button
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppTheme.accentColor,
-                        side: const BorderSide(color: AppTheme.accentColor),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      icon: const Icon(Icons.upload_rounded, size: 18),
-                      label: Text(
-                        AppLocalizations.of(context).settingsRestore,
-                        style: GoogleFonts.outfit(
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      onPressed: () => showImportDialog(context, ref),
-                    ),
-                  ),
-                ],
+    return SettingsSection(
+      title: l10n.settingsDataSection,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SettingsCardIntro(
+            title: l10n.settingsBackupTitle,
+            description: l10n.settingsBackupDescription,
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          // All three actions here are the same kind of thing — a data
+          // operation you start from this card — so they now share one
+          // treatment. Import used to be drawn in the accent colour and the
+          // other two in neutral, which read as a hierarchy that does not
+          // exist; if anything import is the destructive one, since it
+          // overwrites what you already have.
+          Row(
+            children: [
+              Expanded(
+                child: AppButton(
+                  label: l10n.settingsExport,
+                  icon: Icons.download_rounded,
+                  variant: AppButtonVariant.secondary,
+                  size: AppButtonSize.small,
+                  onPressed: () => exportBackup(context, ref),
+                ),
               ),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.white70,
-                    side: const BorderSide(color: AppTheme.borderColor),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  icon: const Icon(Icons.cleaning_services_outlined, size: 18),
-                  label: Text(
-                    AppLocalizations.of(context).settingsCleanDuplicates,
-                    style: GoogleFonts.outfit(
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const DuplicateCleanupScreen()),
-                  ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: AppButton(
+                  label: l10n.settingsRestore,
+                  icon: Icons.upload_rounded,
+                  variant: AppButtonVariant.secondary,
+                  size: AppButtonSize.small,
+                  onPressed: () => showImportDialog(context, ref),
                 ),
               ),
             ],
           ),
-        ),
-      ],
+          const SizedBox(height: AppSpacing.md),
+          AppButton(
+            label: l10n.settingsCleanDuplicates,
+            icon: Icons.cleaning_services_outlined,
+            variant: AppButtonVariant.secondary,
+            size: AppButtonSize.small,
+            isFullWidth: true,
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const DuplicateCleanupScreen()),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

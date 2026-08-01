@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../core/ui/ui.dart';
 import '../../auth/controllers/auth_controller.dart';
 import '../../auth/presentation/widgets/user_profile_avatar_button.dart';
 import 'widgets/settings_backup_section.dart';
@@ -12,30 +11,59 @@ import 'widgets/settings_tmdb_attribution.dart';
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
+  /// Room under the last control so the floating bottom navigation bar never
+  /// covers it. Deliberately off the spacing scale: it tracks the height of
+  /// another widget rather than the layout rhythm.
+  static const double _bottomNavClearance = 100;
+
+  Future<void> _confirmSignOut(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
+
+    final confirmed = await AppDialog.confirm(
+      context: context,
+      title: l10n.profileSignOut,
+      message: l10n.profileSignOutConfirm,
+      confirmLabel: l10n.profileSignOut,
+      cancelLabel: l10n.commonCancel,
+      isDestructive: true,
+    );
+
+    if (confirmed == true && context.mounted) {
+      await ref.read(authControllerProvider).signOut();
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final canPop = Navigator.of(context).canPop();
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.transparent,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Sticky Screen Title with Back Button & Profile Avatar
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg,
+                vertical: AppSpacing.md,
+              ),
               child: Row(
                 children: [
                   if (canPop) ...[
                     IconButton(
-                      icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
+                      icon: const Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        color: AppColors.textPrimary,
+                      ),
                       onPressed: () => Navigator.of(context).pop(),
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: AppSpacing.xs),
                   ],
                   Text(
-                    AppLocalizations.of(context).settingsTitle,
+                    l10n.settingsTitle,
                     style: Theme.of(context).textTheme.displayLarge,
                   ),
                   const Spacer(),
@@ -47,69 +75,32 @@ class SettingsScreen extends ConsumerWidget {
             // Scrollable Content
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.only(left: 20, right: 20, bottom: 100),
+                // Matches the header inset above. These were 20 and 16
+                // respectively, so the title and the cards beneath it did not
+                // line up.
+                padding: const EdgeInsets.only(
+                  left: AppSpacing.lg,
+                  right: AppSpacing.lg,
+                  bottom: _bottomNavClearance,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SettingsPreferencesSection(),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.xl),
 
                     const SettingsBackupSection(),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.xl),
 
                     const SettingsTmdbAttribution(),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: AppSpacing.xxl),
 
-                    // Sign Out (Çıkış Yap) Button
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.redAccent.withValues(alpha: 0.15),
-                          foregroundColor: Colors.redAccent,
-                          elevation: 0,
-                          side: const BorderSide(color: Colors.redAccent, width: 1.2),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                        ),
-                        icon: const Icon(Icons.logout_rounded, size: 20),
-                        label: Text(
-                          AppLocalizations.of(context).profileSignOut,
-                          style: GoogleFonts.outfit(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        onPressed: () async {
-                          final confirm = await showDialog<bool>(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              backgroundColor: AppTheme.surfaceColor,
-                              title: Text(AppLocalizations.of(context).profileSignOut, style: const TextStyle(color: Colors.white)),
-                              content: Text(
-                                AppLocalizations.of(context).profileSignOutConfirm,
-                                style: const TextStyle(color: Colors.white70),
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.of(context).pop(false),
-                                  child: Text(AppLocalizations.of(context).commonCancel, style: const TextStyle(color: Colors.white70)),
-                                ),
-                                TextButton(
-                                  onPressed: () => Navigator.of(context).pop(true),
-                                  child: Text(AppLocalizations.of(context).profileSignOut, style: const TextStyle(color: Colors.redAccent)),
-                                ),
-                              ],
-                            ),
-                          );
-
-                          if (confirm == true && context.mounted) {
-                            await ref.read(authControllerProvider).signOut();
-                          }
-                        },
-                      ),
+                    AppButton(
+                      label: l10n.profileSignOut,
+                      icon: Icons.logout_rounded,
+                      variant: AppButtonVariant.destructive,
+                      isFullWidth: true,
+                      onPressed: () => _confirmSignOut(context, ref),
                     ),
                   ],
                 ),

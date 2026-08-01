@@ -1,78 +1,93 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/watch_regions.dart';
-import '../../../../core/theme/app_theme.dart';
-import '../../../../core/widgets/glass_container.dart';
+import '../../../../core/ui/ui.dart';
 import '../../../../core/services/notification_service.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../settings_provider.dart';
-import 'settings_section_header.dart';
+import 'settings_section.dart';
 
 // "Tercihler" card: release-reminders and dynamic-background toggles.
 class SettingsPreferencesSection extends ConsumerWidget {
   const SettingsPreferencesSection({super.key});
 
+  // Colour and thickness come from dividerTheme; only the inset is stated,
+  // and height stays 1 so the divider adds no vertical space of its own.
   Widget _divider() {
-    return const Divider(height: 1, indent: 16, endIndent: 16, color: AppTheme.borderColor);
+    return const Divider(
+      height: 1,
+      indent: AppSpacing.lg,
+      endIndent: AppSpacing.lg,
+    );
   }
 
-  Widget _toggleRow({
+  Widget _rowLabel(BuildContext context, String label) {
+    return Text(
+      label,
+      style: Theme.of(context)
+          .textTheme
+          .bodySmall
+          ?.copyWith(color: AppColors.textPrimary),
+    );
+  }
+
+  Widget _toggleRow(
+    BuildContext context, {
     required IconData icon,
     required String label,
     required bool value,
     required ValueChanged<bool> onChanged,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.xs,
+      ),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: AppTheme.textSecondary),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              label,
-              style: GoogleFonts.inter(fontSize: 13, color: Colors.white),
-            ),
-          ),
-          Switch(
-            value: value,
-            onChanged: onChanged,
-            activeThumbColor: AppTheme.accentColor,
-          ),
+          Icon(icon, size: AppSize.iconMd, color: AppColors.textSecondary),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(child: _rowLabel(context, label)),
+          // Thumb and track colours come from switchTheme.
+          Switch(value: value, onChanged: onChanged),
         ],
       ),
     );
   }
 
-  Widget _navRow({
+  Widget _navRow(
+    BuildContext context, {
     required IconData icon,
     required String label,
     required String trailingText,
     required VoidCallback onTap,
   }) {
-    return InkWell(
+    return AppPressable(
       onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-        child: Row(
-          children: [
-            Icon(icon, size: 20, color: AppTheme.textSecondary),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                label,
-                style: GoogleFonts.inter(fontSize: 13, color: Colors.white),
-              ),
-            ),
-            Text(
-              trailingText,
-              style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary),
-            ),
-            const SizedBox(width: 4),
-            const Icon(Icons.chevron_right_rounded, size: 18, color: AppTheme.textSecondary),
-          ],
-        ),
+      borderRadius: AppRadius.sm,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.lg,
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: AppSize.iconMd, color: AppColors.textSecondary),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(child: _rowLabel(context, label)),
+          Text(
+            trailingText,
+            style: Theme.of(context)
+                .textTheme
+                .labelLarge
+                ?.copyWith(color: AppColors.textSecondary),
+          ),
+          const SizedBox(width: AppSpacing.xs),
+          const Icon(
+            Icons.chevron_right_rounded,
+            size: AppSize.iconSm,
+            color: AppColors.textSecondary,
+          ),
+        ],
       ),
     );
   }
@@ -92,6 +107,32 @@ class SettingsPreferencesSection extends ConsumerWidget {
     }
   }
 
+  /// Row in one of the two pickers below. Chrome comes from dialogTheme.
+  static Widget _pickerOption({
+    required BuildContext context,
+    required String label,
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      onTap: onTap,
+      title: Text(
+        label,
+        style: Theme.of(context)
+            .textTheme
+            .bodyMedium
+            ?.copyWith(color: AppColors.textPrimary),
+      ),
+      trailing: selected
+          ? const Icon(
+              Icons.check_rounded,
+              size: AppSize.iconMd,
+              color: AppColors.accent,
+            )
+          : null,
+    );
+  }
+
   Future<void> _showLanguagePicker(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context);
     final current = ref.read(localeProvider);
@@ -102,25 +143,17 @@ class SettingsPreferencesSection extends ConsumerWidget {
     // "dismissed, change nothing".
     final options = <Locale?>[null, ...supportedLanguageCodes.map(Locale.new)];
 
-    final selection = await showDialog<List<Locale?>>(
+    final selection = await AppDialog.show<List<Locale?>>(
       context: context,
-      builder: (context) => SimpleDialog(
-        backgroundColor: AppTheme.surfaceColor,
-        title: Text(
-          l10n.settingsLanguageTitle,
-          style: GoogleFonts.outfit(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.white),
-        ),
+      builder: (dialogContext) => SimpleDialog(
+        title: Text(l10n.settingsLanguageTitle),
         children: [
           for (final option in options)
-            ListTile(
-              onTap: () => Navigator.of(context).pop([option]),
-              title: Text(
-                _languageLabel(l10n, option),
-                style: GoogleFonts.inter(fontSize: 14, color: Colors.white),
-              ),
-              trailing: option?.languageCode == current?.languageCode
-                  ? const Icon(Icons.check_rounded, size: 20, color: AppTheme.accentColor)
-                  : null,
+            _pickerOption(
+              context: dialogContext,
+              label: _languageLabel(l10n, option),
+              selected: option?.languageCode == current?.languageCode,
+              onTap: () => Navigator.of(dialogContext).pop([option]),
             ),
         ],
       ),
@@ -147,14 +180,10 @@ class SettingsPreferencesSection extends ConsumerWidget {
     // reason: null is both "Automatic" and "dismissed".
     final options = <String?>[null, ...watchRegionOptions()];
 
-    final selection = await showDialog<List<String?>>(
+    final selection = await AppDialog.show<List<String?>>(
       context: context,
-      builder: (context) => SimpleDialog(
-        backgroundColor: AppTheme.surfaceColor,
-        title: Text(
-          l10n.settingsWatchRegionTitle,
-          style: GoogleFonts.outfit(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.white),
-        ),
+      builder: (dialogContext) => SimpleDialog(
+        title: Text(l10n.settingsWatchRegionTitle),
         children: [
           // Bounded and scrollable — this list is ~35 rows where the language
           // one is 3, and an unbounded SimpleDialog overflows.
@@ -166,17 +195,13 @@ class SettingsPreferencesSection extends ConsumerWidget {
               itemCount: options.length,
               itemBuilder: (context, index) {
                 final option = options[index];
-                return ListTile(
-                  onTap: () => Navigator.of(context).pop([option]),
-                  title: Text(
-                    option == null
-                        ? l10n.settingsWatchRegionAutoWith(watchRegionLabel(effective))
-                        : watchRegionLabel(option),
-                    style: GoogleFonts.inter(fontSize: 14, color: Colors.white),
-                  ),
-                  trailing: option == current
-                      ? const Icon(Icons.check_rounded, size: 20, color: AppTheme.accentColor)
-                      : null,
+                return _pickerOption(
+                  context: dialogContext,
+                  label: option == null
+                      ? l10n.settingsWatchRegionAutoWith(watchRegionLabel(effective))
+                      : watchRegionLabel(option),
+                  selected: option == current,
+                  onTap: () => Navigator.of(dialogContext).pop([option]),
                 );
               },
             ),
@@ -193,73 +218,70 @@ class SettingsPreferencesSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SettingsSectionHeader(title: AppLocalizations.of(context).settingsPreferences),
-        const SizedBox(height: 10),
-        GlassContainer(
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          borderRadius: 16,
-          opacity: 0.6,
-          child: Column(
-            children: [
-              _toggleRow(
-                icon: Icons.notifications_active_outlined,
-                label: AppLocalizations.of(context).settingsReleaseReminders,
-                value: ref.watch(releaseRemindersEnabledProvider),
-                onChanged: (v) async {
-                  if (v) {
-                    final messenger = ScaffoldMessenger.of(context);
-                    // Resolved alongside the messenger, before the await, for
-                    // the same reason: neither may be read from context once
-                    // the permission dialog has returned.
-                    final deniedMessage =
-                        AppLocalizations.of(context).settingsNotificationPermissionDenied;
-                    final granted = await ref.read(notificationServiceProvider).requestPermissions();
-                    if (granted) {
-                      await ref.read(releaseRemindersEnabledProvider.notifier).savePreference(true);
-                      await ref.read(notificationServiceProvider).syncNotifications();
-                    } else {
-                      messenger.showSnackBar(
-                        SnackBar(content: Text(deniedMessage)),
-                      );
-                    }
-                  } else {
-                    await ref.read(releaseRemindersEnabledProvider.notifier).savePreference(false);
-                    await ref.read(notificationServiceProvider).syncNotifications();
-                  }
-                },
-              ),
-              _divider(),
-              _toggleRow(
-                icon: Icons.palette_outlined,
-                label: AppLocalizations.of(context).settingsDynamicBackground,
-                value: ref.watch(dynamicBackgroundEnabledProvider),
-                onChanged: (v) => ref.read(dynamicBackgroundEnabledProvider.notifier).setEnabled(v),
-              ),
-              _divider(),
-              _navRow(
-                icon: Icons.language_rounded,
-                label: l10n.settingsLanguageLabel,
-                trailingText: _languageLabel(l10n, ref.watch(localeProvider)),
-                onTap: () => _showLanguagePicker(context, ref),
-              ),
-              _divider(),
-              _navRow(
-                icon: Icons.public_rounded,
-                label: l10n.settingsWatchRegionLabel,
-                trailingText: _regionLabel(
-                  l10n,
-                  ref.watch(watchRegionProvider),
-                  ref.watch(effectiveWatchRegionProvider),
-                ),
-                onTap: () => _showRegionPicker(context, ref),
-              ),
-            ],
+    return SettingsSection(
+      title: l10n.settingsPreferences,
+      // The rows pad themselves so they can run edge to edge under the
+      // dividers; the card only adds a little breathing room top and bottom.
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+      child: Column(
+        children: [
+          _toggleRow(
+            context,
+            icon: Icons.notifications_active_outlined,
+            label: l10n.settingsReleaseReminders,
+            value: ref.watch(releaseRemindersEnabledProvider),
+            onChanged: (v) async {
+              if (v) {
+                final messenger = ScaffoldMessenger.of(context);
+                // Resolved alongside the messenger, before the await, for
+                // the same reason: neither may be read from context once
+                // the permission dialog has returned.
+                final deniedMessage = l10n.settingsNotificationPermissionDenied;
+                final granted = await ref.read(notificationServiceProvider).requestPermissions();
+                if (granted) {
+                  await ref.read(releaseRemindersEnabledProvider.notifier).savePreference(true);
+                  await ref.read(notificationServiceProvider).syncNotifications();
+                } else {
+                  messenger.showSnackBar(
+                    SnackBar(content: Text(deniedMessage)),
+                  );
+                }
+              } else {
+                await ref.read(releaseRemindersEnabledProvider.notifier).savePreference(false);
+                await ref.read(notificationServiceProvider).syncNotifications();
+              }
+            },
           ),
-        ),
-      ],
+          _divider(),
+          _toggleRow(
+            context,
+            icon: Icons.palette_outlined,
+            label: l10n.settingsDynamicBackground,
+            value: ref.watch(dynamicBackgroundEnabledProvider),
+            onChanged: (v) => ref.read(dynamicBackgroundEnabledProvider.notifier).setEnabled(v),
+          ),
+          _divider(),
+          _navRow(
+            context,
+            icon: Icons.language_rounded,
+            label: l10n.settingsLanguageLabel,
+            trailingText: _languageLabel(l10n, ref.watch(localeProvider)),
+            onTap: () => _showLanguagePicker(context, ref),
+          ),
+          _divider(),
+          _navRow(
+            context,
+            icon: Icons.public_rounded,
+            label: l10n.settingsWatchRegionLabel,
+            trailingText: _regionLabel(
+              l10n,
+              ref.watch(watchRegionProvider),
+              ref.watch(effectiveWatchRegionProvider),
+            ),
+            onTap: () => _showRegionPicker(context, ref),
+          ),
+        ],
+      ),
     );
   }
 }
