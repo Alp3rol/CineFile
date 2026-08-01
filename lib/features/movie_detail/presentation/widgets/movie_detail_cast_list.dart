@@ -2,8 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/network/tmdb_service.dart';
 import '../../../actor_profile/presentation/actor_profile_screen.dart';
@@ -68,7 +67,7 @@ class MovieDetailCastList extends ConsumerWidget {
           AppLocalizations.of(context).detailCast,
           style: Theme.of(context).textTheme.titleLarge,
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.md),
         SizedBox(
           height: 100,
           child: ListView.builder(
@@ -78,7 +77,9 @@ class MovieDetailCastList extends ConsumerWidget {
               final actor = cast[idx];
               final actorId = (actor['id'] as num?)?.toInt();
               final actorName = (actor['name'] ?? '').toString();
-              return GestureDetector(
+              return AppPressable(
+                borderRadius: AppRadius.sm,
+                semanticLabel: actorName,
                 onTap: () async {
                   if (actorId != null) {
                     unawaited(Navigator.push(
@@ -96,24 +97,28 @@ class MovieDetailCastList extends ConsumerWidget {
                 },
                 child: Container(
                   width: 80,
-                  margin: const EdgeInsets.only(right: 12),
+                  margin: const EdgeInsets.only(right: AppSpacing.md),
                   child: Column(
                     children: [
-                      // Avatar Circle
-                      CircleAvatar(
-                        radius: 26,
-                        backgroundColor: AppTheme.surfaceColor,
-                        backgroundImage: actor['profile_path'] != null
-                            ? NetworkImage('${ApiConstants.imagePathW500}${actor['profile_path']}')
+                      // AppAvatar rather than CircleAvatar + NetworkImage: it
+                      // goes through the app's cached, downsampled image path,
+                      // which matters in a horizontally scrolling row, and it
+                      // falls back to initials instead of a generic person
+                      // glyph when a cast member has no photo.
+                      AppAvatar(
+                        imageUrl: actor['profile_path'] != null
+                            ? '${ApiConstants.imagePathW500}${actor['profile_path']}'
                             : null,
-                        child: actor['profile_path'] == null
-                            ? const Icon(Icons.person_rounded, color: Colors.white60)
-                            : null,
+                        name: actorName,
+                        size: AppSize.avatarLg,
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: AppSpacing.xs),
                       Text(
                         actorName,
-                        style: GoogleFonts.inter(fontSize: 10, color: Colors.white),
+                        style: Theme.of(context)
+                            .textTheme
+                            .labelSmall
+                            ?.copyWith(color: AppColors.textPrimary),
                         textAlign: TextAlign.center,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -125,7 +130,7 @@ class MovieDetailCastList extends ConsumerWidget {
             },
           ),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: AppSpacing.xl),
       ],
     );
   }

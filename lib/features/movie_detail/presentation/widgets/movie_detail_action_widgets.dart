@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
+
+/// The gradient carried by the detail screen's diary actions.
+///
+/// Deliberately not the brand accent: logging a title is tied to the rating
+/// vocabulary rather than to the brand red. See [AppColors.accentWarmStart].
+const _warmGradient = LinearGradient(
+  colors: [AppColors.accentWarmStart, AppColors.accentWarmEnd],
+  begin: Alignment.topLeft,
+  end: Alignment.bottomRight,
+);
 
 class MovieInfoCard extends StatelessWidget {
   final IconData icon;
@@ -19,38 +28,46 @@ class MovieInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+      padding: const EdgeInsets.symmetric(
+        vertical: AppSpacing.md,
+        horizontal: AppSpacing.sm,
+      ),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        color: const Color(0xFF1E1B4B).withValues(alpha: 0.6),
+        borderRadius: AppRadius.allLg,
+        color: AppColors.surfaceIndigo.withValues(alpha: AppOpacity.strong),
+        // The border and halo take the card's own icon colour, so a row of
+        // these reads as a set of differently-keyed cards rather than three
+        // identical boxes.
         border: Border.all(
-          color: iconColor.withValues(alpha: 0.4),
-          width: 1,
+          color: iconColor.withValues(alpha: AppOpacity.medium),
+          width: AppSize.hairline,
         ),
         boxShadow: [
           BoxShadow(
-            color: iconColor.withValues(alpha: 0.1),
+            color: iconColor.withValues(alpha: AppOpacity.subtle),
             blurRadius: 10,
           ),
         ],
       ),
       child: Column(
         children: [
-          Icon(icon, color: iconColor, size: 20),
-          const SizedBox(height: 6),
+          Icon(icon, color: iconColor, size: AppSize.iconMd),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             value,
-            style: GoogleFonts.outfit(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
+            style: textTheme.bodySmall?.copyWith(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.bold,
+            ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 2),
-          Text(
-            label,
-            style: GoogleFonts.inter(fontSize: 10, color: AppTheme.textSecondary),
-          ),
+          Text(label, style: textTheme.labelSmall),
         ],
       ),
     );
@@ -71,52 +88,61 @@ class MovieQuickActionButton extends StatelessWidget {
     this.isPrimary = false,
   });
 
+  static const double _diameter = 56;
+
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return AppPressable(
       onTap: onTap,
+      borderRadius: AppRadius.pill,
+      semanticLabel: label,
       child: Column(
         children: [
           Container(
-            width: 56,
-            height: 56,
+            width: _diameter,
+            height: _diameter,
             decoration: BoxDecoration(
-              gradient: isPrimary
-                  ? const LinearGradient(
-                      colors: [Color(0xFFFFB800), Color(0xFFFF8C00)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    )
-                  : null,
-              color: isPrimary ? null : Colors.white.withValues(alpha: 0.08),
+              gradient: isPrimary ? _warmGradient : null,
+              color: isPrimary
+                  ? null
+                  : AppColors.textPrimary.withValues(alpha: AppOpacity.subtle),
               shape: BoxShape.circle,
-              border: isPrimary
-                  ? Border.all(color: Colors.amberAccent, width: 1.5)
-                  : Border.all(color: Colors.white24, width: 1),
+              border: Border.all(
+                color: isPrimary
+                    ? AppColors.accentWarmStart
+                    : AppColors.textPrimary
+                        .withValues(alpha: AppOpacity.muted),
+                width: isPrimary ? 1.5 : AppSize.hairline,
+              ),
               boxShadow: isPrimary
                   ? [
                       BoxShadow(
-                        color: AppTheme.accentColor.withValues(alpha: 0.4),
+                        // Was the brand red under a gold button, which read as
+                        // a mistake rather than a halo. It now matches what it
+                        // is glowing beneath.
+                        color: AppColors.accentWarmEnd
+                            .withValues(alpha: AppOpacity.medium),
                         blurRadius: 16,
                         spreadRadius: 1,
                       ),
                     ]
-                  : [],
+                  : null,
             ),
             child: Icon(
               icon,
-              color: isPrimary ? Colors.black : Colors.white,
-              size: 24,
+              color: isPrimary ? AppColors.onAccentWarm : AppColors.textPrimary,
+              size: AppSize.iconLg,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             label,
-            style: GoogleFonts.inter(
-              fontSize: 11,
-              fontWeight: isPrimary ? FontWeight.bold : FontWeight.w500,
-              color: isPrimary ? AppTheme.accentColor : Colors.white70,
-            ),
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  fontWeight: isPrimary ? FontWeight.bold : FontWeight.w500,
+                  color: isPrimary
+                      ? AppColors.accentWarmStart
+                      : AppColors.textSecondary,
+                ),
           ),
         ],
       ),
@@ -132,39 +158,47 @@ class MovieDetailStickyCta extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          gradient: const LinearGradient(
-            colors: [Color(0xFFFFB800), Color(0xFFFF8C00)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+      padding: const EdgeInsets.only(
+        bottom: AppSpacing.lg,
+        left: AppSpacing.lg,
+        right: AppSpacing.lg,
+      ),
+      child: AppPressable(
+        onTap: onTap,
+        borderRadius: AppRadius.lg,
+        semanticLabel: AppLocalizations.of(context).detailAddToMyDiary,
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+          decoration: BoxDecoration(
+            borderRadius: AppRadius.allLg,
+            gradient: _warmGradient,
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.accentWarmEnd
+                    .withValues(alpha: AppOpacity.medium),
+                blurRadius: 20,
+                offset: const Offset(0, 6),
+              ),
+            ],
           ),
-          boxShadow: [
-            BoxShadow(
-              color: AppTheme.accentColor.withValues(alpha: 0.45),
-              blurRadius: 20,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: ElevatedButton.icon(
-          onPressed: onTap,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.transparent,
-            shadowColor: Colors.transparent,
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          ),
-          icon: const Icon(Icons.add_circle_outline_rounded, color: Colors.black, size: 22),
-          label: Text(
-            AppLocalizations.of(context).detailAddToMyDiary,
-            style: GoogleFonts.outfit(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.add_circle_outline_rounded,
+                color: AppColors.onAccentWarm,
+                size: AppSize.iconLg,
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Text(
+                AppLocalizations.of(context).detailAddToMyDiary,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: AppColors.onAccentWarm,
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+            ],
           ),
         ),
       ),

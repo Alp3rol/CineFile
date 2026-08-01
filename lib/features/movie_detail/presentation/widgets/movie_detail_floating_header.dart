@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
 import '../../../../core/widgets/glass_container.dart';
 
 // The back / watchlist / favorite / rank buttons floating over the backdrop.
@@ -25,79 +24,108 @@ class MovieDetailFloatingHeader extends StatelessWidget {
     required this.personalRanking,
   });
 
+  /// Glass button over the backdrop. All four controls here were the same
+  /// GlassContainer-in-a-GestureDetector written out four times, at the same
+  /// radius and opacity — and none of them gave any press feedback.
+  Widget _glassButton({
+    required VoidCallback onTap,
+    required String semanticLabel,
+    required Widget child,
+    EdgeInsetsGeometry padding = const EdgeInsets.all(AppSpacing.sm),
+  }) {
+    return AppPressable(
+      onTap: onTap,
+      borderRadius: AppRadius.md,
+      semanticLabel: semanticLabel,
+      child: GlassContainer(
+        padding: padding,
+        borderRadius: AppRadius.md,
+        opacity: AppOpacity.strong,
+        child: child,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.md,
+        ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            GestureDetector(
+            _glassButton(
               onTap: onBack,
-              child: GlassContainer(
-                padding: const EdgeInsets.all(8),
-                borderRadius: 12,
-                opacity: 0.7,
-                child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
+              semanticLabel: l10n.commonCancel,
+              child: const Icon(
+                Icons.arrow_back_ios_new_rounded,
+                color: AppColors.textPrimary,
+                size: AppSize.iconMd,
               ),
             ),
             Row(
               children: [
-                // Watchlist toggle button
-                GestureDetector(
+                _glassButton(
                   onTap: onToggleWatchlist,
-                  child: GlassContainer(
-                    padding: const EdgeInsets.all(8),
-                    borderRadius: 12,
-                    opacity: 0.7,
-                    child: Icon(
-                      isReWatchList ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
-                      color: isReWatchList ? AppTheme.accentColor : Colors.white,
-                      size: 20,
-                    ),
+                  semanticLabel: l10n.detailAddToMyDiary,
+                  child: Icon(
+                    isReWatchList
+                        ? Icons.bookmark_rounded
+                        : Icons.bookmark_border_rounded,
+                    color: isReWatchList
+                        ? AppColors.accent
+                        : AppColors.textPrimary,
+                    size: AppSize.iconMd,
                   ),
                 ),
-                const SizedBox(width: 8),
-
-                // Favorite toggle button
-                GestureDetector(
+                const SizedBox(width: AppSpacing.sm),
+                _glassButton(
                   onTap: onToggleFavorite,
-                  child: GlassContainer(
-                    padding: const EdgeInsets.all(8),
-                    borderRadius: 12,
-                    opacity: 0.7,
-                    child: Icon(
-                      isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-                      color: isFavorite ? Colors.red : Colors.white,
-                      size: 20,
-                    ),
+                  semanticLabel: l10n.detailSetRank,
+                  child: Icon(
+                    isFavorite
+                        ? Icons.favorite_rounded
+                        : Icons.favorite_border_rounded,
+                    // Was Colors.red — a fourth red, next to the brand accent,
+                    // the error colour and the accent's subtle variant.
+                    color: isFavorite
+                        ? AppColors.accent
+                        : AppColors.textPrimary,
+                    size: AppSize.iconMd,
                   ),
                 ),
-                const SizedBox(width: 8),
-
-                // Rank button
-                GestureDetector(
+                const SizedBox(width: AppSpacing.sm),
+                _glassButton(
                   onTap: onRankTap,
-                  child: GlassContainer(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                    borderRadius: 12,
-                    opacity: 0.7,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.format_list_numbered_rounded, color: AppTheme.accentColor, size: 16),
-                        const SizedBox(width: 4),
-                        Text(
-                          personalRanking != null ? '#$personalRanking' : AppLocalizations.of(context).detailSetRank,
-                          style: GoogleFonts.outfit(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
+                  semanticLabel: l10n.detailSetRank,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.sm,
+                    vertical: AppSpacing.sm,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.format_list_numbered_rounded,
+                        color: AppColors.accent,
+                        size: AppSize.iconSm,
+                      ),
+                      const SizedBox(width: AppSpacing.xs),
+                      Text(
+                        personalRanking != null
+                            ? '#$personalRanking'
+                            : l10n.detailSetRank,
+                        style: Theme.of(context)
+                            .textTheme
+                            .labelLarge
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                    ],
                   ),
                 ),
               ],

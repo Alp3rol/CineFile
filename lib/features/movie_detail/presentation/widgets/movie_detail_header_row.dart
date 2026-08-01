@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/ui/ui.dart';
 import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/constants/api_constants.dart';
-import '../../../../core/theme/app_theme.dart';
 import '../../../../core/database/app_database.dart';
 import 'movie_watch_status_badge.dart';
 
@@ -38,6 +37,9 @@ class MovieDetailHeaderRow extends StatelessWidget {
     required this.totalEpisodes,
   });
 
+  static const double _posterWidth = 120;
+  static const double _posterHeight = 180;
+
   static String _formatVoteCount(int count) {
     if (count >= 1000) {
       return '${(count / 1000).toStringAsFixed(1)}k';
@@ -47,6 +49,8 @@ class MovieDetailHeaderRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -54,63 +58,66 @@ class MovieDetailHeaderRow extends StatelessWidget {
         Hero(
           tag: 'poster_${tmdbId}_$isTv',
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: AppRadius.allMd,
             child: AppNetworkImage(
-              imageUrl: posterPath != null ? '${ApiConstants.imagePathW500}$posterPath' : '',
+              imageUrl: posterPath != null
+                  ? '${ApiConstants.imagePathW500}$posterPath'
+                  : '',
               seed: title,
-              width: 120,
-              height: 180,
+              width: _posterWidth,
+              height: _posterHeight,
               fit: BoxFit.cover,
             ),
           ),
         ),
-        const SizedBox(width: 16),
+        const SizedBox(width: AppSpacing.lg),
 
         // Movie Metadata
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                title,
-                style: GoogleFonts.outfit(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
+              Text(title, style: textTheme.displayMedium),
               if (tagline.isNotEmpty) ...[
-                const SizedBox(height: 4),
+                const SizedBox(height: AppSpacing.xs),
                 Text(
                   '"$tagline"',
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
+                  style: textTheme.labelLarge?.copyWith(
+                    color: AppColors.textSecondary,
                     fontStyle: FontStyle.italic,
-                    color: AppTheme.textSecondary,
                   ),
                 ),
               ],
-              const SizedBox(height: 6),
+              const SizedBox(height: AppSpacing.xs),
               Text(
                 [
                   if (year.isNotEmpty) year,
                   if (runtime > 0) '$runtime dk',
                   if (genresString.isNotEmpty) genresString,
                 ].join(' • '),
-                style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary),
+                style: textTheme.labelLarge
+                    ?.copyWith(color: AppColors.textSecondary),
               ),
               if (voteAverage != null && voteAverage! > 0) ...[
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 Row(
                   children: [
+                    // TMDb's own colours, from BrandColors rather than
+                    // AppColors: this badge represents someone else's brand,
+                    // so it must not move when ours does.
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.sm,
+                        vertical: AppSpacing.xs,
+                      ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF0d253f).withValues(alpha: 0.7), // TMDb dark blue
-                        borderRadius: BorderRadius.circular(8),
+                        color: BrandColors.tmdbNavy
+                            .withValues(alpha: AppOpacity.heavy),
+                        borderRadius: AppRadius.allSm,
                         border: Border.all(
-                          color: const Color(0xFF90cea1).withValues(alpha: 0.5), // TMDb light green
-                          width: 1,
+                          color: BrandColors.tmdbGreen
+                              .withValues(alpha: AppOpacity.strong),
+                          width: AppSize.hairline,
                         ),
                       ),
                       child: Row(
@@ -118,25 +125,24 @@ class MovieDetailHeaderRow extends StatelessWidget {
                         children: [
                           const Icon(
                             Icons.star_rounded,
-                            color: Color(0xFF90cea1),
-                            size: 14,
+                            color: BrandColors.tmdbGreen,
+                            size: AppSize.iconSm,
                           ),
-                          const SizedBox(width: 4),
+                          const SizedBox(width: AppSpacing.xs),
                           Text(
                             voteAverage!.toStringAsFixed(1),
-                            style: GoogleFonts.outfit(
-                              fontSize: 12,
+                            style: textTheme.labelLarge?.copyWith(
+                              color: AppColors.onImage,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
                             ),
                           ),
                           if (voteCount != null && voteCount! > 0) ...[
-                            const SizedBox(width: 4),
+                            const SizedBox(width: AppSpacing.xs),
                             Text(
                               '(${_formatVoteCount(voteCount!)})',
-                              style: GoogleFonts.inter(
-                                fontSize: 10,
-                                color: Colors.white70,
+                              style: textTheme.labelSmall?.copyWith(
+                                color: AppColors.onImage
+                                    .withValues(alpha: AppOpacity.heavy),
                               ),
                             ),
                           ],
@@ -146,7 +152,11 @@ class MovieDetailHeaderRow extends StatelessWidget {
                   ],
                 ),
               ],
-              if (isTv) MovieWatchStatusBadge(setting: settings, totalEpisodes: totalEpisodes),
+              if (isTv)
+                MovieWatchStatusBadge(
+                  setting: settings,
+                  totalEpisodes: totalEpisodes,
+                ),
             ],
           ),
         ),

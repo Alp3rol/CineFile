@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
 import '../../../../core/widgets/dynamic_background_wrapper.dart';
 import '../../../../core/database/database_provider.dart';
 import '../../../../core/database/movie_repository.dart';
@@ -253,7 +252,7 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
 
     return DynamicBackgroundWrapper(
       child: Scaffold(
-        backgroundColor: Colors.transparent,
+        backgroundColor: AppColors.transparent,
         bottomNavigationBar: detailAsync.maybeWhen(
           data: (movieData) => movieData == null
               ? null
@@ -261,11 +260,21 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
           orElse: () => null,
         ),
         body: detailAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.accentColor)),
-        error: (error, stack) => Center(child: Text(AppLocalizations.of(context).detailLoadFailed, style: const TextStyle(color: Colors.white))),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(
+          child: Text(
+            AppLocalizations.of(context).detailLoadFailed,
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+        ),
         data: (movieData) {
           if (movieData == null) {
-            return Center(child: Text(AppLocalizations.of(context).detailNotFound, style: const TextStyle(color: Colors.white)));
+            return Center(
+              child: Text(
+                AppLocalizations.of(context).detailNotFound,
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+            );
           }
 
           final backdropPath = movieData['backdrop_path'] as String?;
@@ -345,7 +354,7 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
                             Expanded(
                               child: MovieInfoCard(
                                 icon: Icons.star_rounded,
-                                iconColor: AppTheme.ratingColor,
+                                iconColor: AppColors.rating,
                                 value: latestRecord != null ? latestRecord.rating.toStringAsFixed(1) : '—',
                                 label: AppLocalizations.of(context).detailMyRating,
                               ),
@@ -354,7 +363,7 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
                             Expanded(
                               child: MovieInfoCard(
                                 icon: Icons.movie_creation_outlined,
-                                iconColor: Colors.white,
+                                iconColor: AppColors.textPrimary,
                                 value: director,
                                 label: AppLocalizations.of(context).detailDirector,
                               ),
@@ -363,7 +372,7 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
                             Expanded(
                               child: MovieInfoCard(
                                 icon: Icons.location_on_outlined,
-                                iconColor: Colors.white,
+                                iconColor: AppColors.textPrimary,
                                 value: latestRecord?.watchPlace ?? '—',
                                 label: AppLocalizations.of(context).detailPlace,
                               ),
@@ -421,11 +430,10 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
                         const SizedBox(height: 8),
                         Text(
                           overview,
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            color: AppTheme.textSecondary,
-                            height: 1.5,
-                          ),
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(height: 1.5),
                         ),
                         const SizedBox(height: 28),
 
@@ -486,10 +494,7 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
                               const SizedBox(width: 6),
                               Text(
                                 AppLocalizations.of(context).detailTmdbAttribution,
-                                style: GoogleFonts.inter(
-                                  fontSize: 10,
-                                  color: AppTheme.textSecondary,
-                                ),
+                                style: Theme.of(context).textTheme.labelSmall,
                               ),
                             ],
                           ),
@@ -528,7 +533,7 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.transparent,
       builder: (context) => AddWatchRecordSheet(movieData: movieData),
     );
   }

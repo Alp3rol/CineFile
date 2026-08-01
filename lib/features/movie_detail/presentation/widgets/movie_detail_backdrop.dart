@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_tokens.dart';
 import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/constants/api_constants.dart';
 
@@ -30,12 +32,14 @@ class MovieDetailBackdrop extends StatelessWidget {
       opacity: opacity,
       child: ShaderMask(
         shaderCallback: (rect) {
+          // Opaque-to-clear: this drives the alpha channel via dstIn, so the
+          // two colours are a mask rather than a palette choice.
           return const LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Colors.black,
-              Colors.transparent,
+              AppColors.shadow,
+              AppColors.transparent,
             ],
             stops: [0.65, 1.0],
           ).createShader(Rect.fromLTRB(0, 0, rect.width, rect.height));
@@ -67,8 +71,8 @@ class MovieDetailBackdrop extends StatelessWidget {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Colors.black.withValues(alpha: 0.4),
-                  Colors.black.withValues(alpha: 0.85),
+                  AppColors.shadow.withValues(alpha: AppOpacity.medium),
+                  AppColors.shadow.withValues(alpha: AppOpacity.overlay),
                 ],
                 stops: const [0.0, 1.0],
               ),

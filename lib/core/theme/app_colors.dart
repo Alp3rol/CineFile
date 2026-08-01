@@ -31,6 +31,12 @@ abstract final class AppColors {
   /// Below [background] — wells, track backgrounds, inset areas.
   static const Color surfaceSunken = Color(0xFF06070B);
 
+  /// Deep indigo card ground. Not a step on the neutral surface ramp — it is a
+  /// distinct, saturated panel colour used where a card should feel like its
+  /// own object rather than a shade of the background (the detail screen's
+  /// info cards, the achievement grid, the profile header).
+  static const Color surfaceIndigo = Color(0xFF1E1B4B);
+
   // ---------------------------------------------------------------------
   // Brand
   // ---------------------------------------------------------------------
@@ -46,6 +52,21 @@ abstract final class AppColors {
   /// Ratings and scores. Consolidates three near-identical golds that were in
   /// use: this one, `0xFFFFC107` (×9) and `0xFFFFD700`.
   static const Color rating = Color(0xFFE8C468);
+
+  /// A warm second accent, drawn as a gradient, for the "log this to your
+  /// diary" actions on the movie detail screen — its primary call to action
+  /// and its primary quick action.
+  ///
+  /// This is a real second identity colour rather than drift: those actions
+  /// are deliberately gold rather than brand red, tying them to the rating
+  /// vocabulary. It is named here because it had none, so its two stops were
+  /// written out as raw hex at every use.
+  static const Color accentWarmStart = Color(0xFFFFB800);
+  static const Color accentWarmEnd = Color(0xFFFF8C00);
+
+  /// Content on top of the warm accent. It is a light gold, so its content has
+  /// to be dark to stay legible.
+  static const Color onAccentWarm = Color(0xFF0B0D13);
 
   // ---------------------------------------------------------------------
   // Text
