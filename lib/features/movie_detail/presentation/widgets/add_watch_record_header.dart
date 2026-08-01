@@ -26,19 +26,9 @@ class AddWatchRecordHeader extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Sheet handle bar. Drawn here rather than via
-          // bottomSheetTheme.showDragHandle for the gesture reason above —
-          // see the note on that theme entry.
-          Center(
-            child: Container(
-              width: 40,
-              height: AppSpacing.xs,
-              decoration: BoxDecoration(
-                color: AppColors.borderStrong,
-                borderRadius: AppRadius.allPill,
-              ),
-            ),
-          ),
+          // Drawn here rather than via bottomSheetTheme.showDragHandle for the
+          // gesture reason above — see the note on that theme entry.
+          const AppSheetHandle(),
           const SizedBox(height: AppSpacing.lg),
 
           Row(

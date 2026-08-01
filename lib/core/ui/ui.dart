@@ -25,4 +25,5 @@ export 'app_chip.dart';
 export 'app_empty_state.dart';
 export 'app_overlays.dart';
 export 'app_pressable.dart';
+export 'app_sheet_handle.dart';
 export 'app_skeleton.dart';

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/widgets/premium_toast.dart';
 import '../../../../core/constants/api_constants.dart';
@@ -45,7 +44,7 @@ class ShareComposeSheet extends ConsumerStatefulWidget {
   }) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.transparent,
       isScrollControlled: true,
       builder: (context) => Padding(
         padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
@@ -88,17 +87,11 @@ class _ShareComposeSheetState extends ConsumerState<ShareComposeSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2)),
-            ),
-          ),
+          const AppSheetHandle(),
           const SizedBox(height: 16),
           Text(
             _isMovie ? AppLocalizations.of(context).shareMovieTitle : (_isCollection ? AppLocalizations.of(context).shareCollectionTitle : AppLocalizations.of(context).shareDiaryTitle),
-            style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+            style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 12),
           _buildPreview(),
@@ -107,34 +100,22 @@ class _ShareComposeSheetState extends ConsumerState<ShareComposeSheet> {
             controller: _captionController,
             maxLines: 3,
             minLines: 2,
-            style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textPrimary),
             decoration: InputDecoration(
               hintText: _isMovie
                   ? AppLocalizations.of(context).shareComposeMovieHint
                   : (_isCollection ? AppLocalizations.of(context).shareComposeCollectionHint : AppLocalizations.of(context).shareComposeDiaryHint),
-              hintStyle: GoogleFonts.inter(color: AppTheme.textSecondary, fontSize: 13),
+              hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
             ),
             onChanged: (_) => setState(() {}),
           ),
           const SizedBox(height: 16),
           Align(
             alignment: Alignment.centerRight,
-            child: ElevatedButton(
+            child: AppButton(
+              label: AppLocalizations.of(context).shareSubmit,
+              isLoading: _submitting,
               onPressed: canSubmit ? _submit : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.accentColor,
-                foregroundColor: Colors.white,
-                disabledBackgroundColor: AppTheme.accentColor.withValues(alpha: 0.3),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              ),
-              child: _submitting
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                    )
-                  : Text(AppLocalizations.of(context).shareSubmit, style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold)),
             ),
           ),
         ],
@@ -155,14 +136,14 @@ class _ShareComposeSheetState extends ConsumerState<ShareComposeSheet> {
               height: 54,
               child: poster != null && poster.isNotEmpty
                   ? Image.network('${ApiConstants.imagePathW500}$poster', fit: BoxFit.cover)
-                  : Container(color: AppTheme.surfaceColor, child: const Icon(Icons.movie_rounded, color: Colors.white24, size: 16)),
+                  : Container(color: AppColors.surface, child: const Icon(Icons.movie_rounded, color: AppColors.textTertiary, size: 16)),
             ),
           ),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               payload['movieTitle'] as String? ?? '',
-              style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -175,12 +156,12 @@ class _ShareComposeSheetState extends ConsumerState<ShareComposeSheet> {
       final payload = widget.collectionPayload!;
       return Row(
         children: [
-          const Icon(Icons.collections_bookmark_outlined, color: AppTheme.accentColor, size: 20),
+          const Icon(Icons.collections_bookmark_outlined, color: AppColors.accent, size: 20),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               payload['name'] as String? ?? '',
-              style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -191,7 +172,7 @@ class _ShareComposeSheetState extends ConsumerState<ShareComposeSheet> {
 
     return Text(
       AppLocalizations.of(context).shareEntriesCount(widget.entries.length),
-      style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary),
+      style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.textSecondary),
     );
   }
 

@@ -2,8 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
 import 'user_search_provider.dart';
 import 'widgets/user_search_result_tile.dart';
 
@@ -39,9 +38,9 @@ class _UserSearchScreenState extends ConsumerState<UserSearchScreen> {
     final query = ref.watch(userSearchQueryProvider);
 
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context).userSearchTitle, style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+        title: Text(AppLocalizations.of(context).userSearchTitle, style: Theme.of(context).textTheme.titleSmall),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
@@ -57,14 +56,14 @@ class _UserSearchScreenState extends ConsumerState<UserSearchScreen> {
               child: TextField(
                 controller: _controller,
                 autofocus: true,
-                style: GoogleFonts.inter(color: Colors.white),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
                 decoration: InputDecoration(
                   hintText: AppLocalizations.of(context).userSearchHint,
-                  hintStyle: GoogleFonts.inter(color: AppTheme.textSecondary),
-                  prefixIcon: const Icon(Icons.search_rounded, color: AppTheme.textSecondary),
+                  hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+                  prefixIcon: const Icon(Icons.search_rounded, color: AppColors.textSecondary),
                   suffixIcon: _controller.text.isNotEmpty
                       ? IconButton(
-                          icon: const Icon(Icons.clear_rounded, color: AppTheme.textSecondary),
+                          icon: const Icon(Icons.clear_rounded, color: AppColors.textSecondary),
                           onPressed: () {
                             _controller.clear();
                             _onChanged('');
@@ -79,14 +78,14 @@ class _UserSearchScreenState extends ConsumerState<UserSearchScreen> {
             Expanded(
               child: resultsAsync.when(
                 loading: () => const Center(
-                  child: CircularProgressIndicator(color: AppTheme.accentColor),
+                  child: CircularProgressIndicator(color: AppColors.accent),
                 ),
                 error: (err, stack) => Center(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 32),
                     child: Text(
                       AppLocalizations.of(context).userSearchFailed,
-                      style: GoogleFonts.inter(color: Colors.redAccent),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.error),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -125,16 +124,16 @@ class _UserSearchScreenState extends ConsumerState<UserSearchScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 64, color: AppTheme.textSecondary.withValues(alpha: 0.5)),
+          Icon(icon, size: 64, color: AppColors.textSecondary.withValues(alpha: 0.5)),
           const SizedBox(height: 12),
           Text(
             title,
-            style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+            style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 4),
           Text(
             subtitle,
-            style: GoogleFonts.inter(fontSize: 13, color: AppTheme.textSecondary),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
             textAlign: TextAlign.center,
           ),
         ],

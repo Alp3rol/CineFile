@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
 import '../../../core/database/database_provider.dart';
 import '../../movie_detail/presentation/movie_detail_screen.dart';
 
@@ -20,9 +19,9 @@ class SharedCollectionDetailScreen extends ConsumerWidget {
     final dataAsync = ref.watch(sharedCollectionProvider(collectionRefId));
 
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context).sharedCollectionTitle, style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+        title: Text(AppLocalizations.of(context).sharedCollectionTitle, style: Theme.of(context).textTheme.titleSmall),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
@@ -31,9 +30,9 @@ class SharedCollectionDetailScreen extends ConsumerWidget {
       ),
       body: SafeArea(
         child: dataAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.accentColor)),
+          loading: () => const Center(child: CircularProgressIndicator(color: AppColors.accent)),
           error: (err, stack) => Center(
-            child: Text(AppLocalizations.of(context).commonErrorWithDetail('$err'), style: const TextStyle(color: Colors.redAccent)),
+            child: Text(AppLocalizations.of(context).commonErrorWithDetail('$err'), style: const TextStyle(color: AppColors.error)),
           ),
           data: (data) {
             if (data == null) {
@@ -43,11 +42,11 @@ class SharedCollectionDetailScreen extends ConsumerWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.collections_bookmark_outlined, size: 64, color: AppTheme.textSecondary.withValues(alpha: 0.5)),
+                      Icon(Icons.collections_bookmark_outlined, size: 64, color: AppColors.textSecondary.withValues(alpha: 0.5)),
                       const SizedBox(height: 12),
                       Text(
                         AppLocalizations.of(context).sharedCollectionUnshared,
-                        style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                        style: Theme.of(context).textTheme.titleLarge,
                         textAlign: TextAlign.center,
                       ),
                     ],
@@ -70,13 +69,13 @@ class SharedCollectionDetailScreen extends ConsumerWidget {
                     children: [
                       Text(
                         name,
-                        style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
+                        style: Theme.of(context).textTheme.headlineSmall,
                       ),
                       if (description != null && description.trim().isNotEmpty) ...[
                         const SizedBox(height: 4),
                         Text(
                           description,
-                          style: GoogleFonts.inter(fontSize: 13, color: AppTheme.textSecondary),
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
                         ),
                       ],
                     ],
@@ -87,7 +86,7 @@ class SharedCollectionDetailScreen extends ConsumerWidget {
                       ? Center(
                           child: Text(
                             AppLocalizations.of(context).sharedCollectionEmpty,
-                            style: GoogleFonts.inter(color: AppTheme.textSecondary, fontSize: 13),
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
                           ),
                         )
                       : GridView.builder(
@@ -121,8 +120,8 @@ class SharedCollectionDetailScreen extends ConsumerWidget {
                                       : 'https://images.unsplash.com/photo-1594909122845-11baa439b7bf?q=80&w=185',
                                   fit: BoxFit.cover,
                                   errorBuilder: (context, error, stackTrace) => Container(
-                                    color: AppTheme.surfaceColor,
-                                    child: const Icon(Icons.movie_rounded, color: Colors.white24),
+                                    color: AppColors.surface,
+                                    child: const Icon(Icons.movie_rounded, color: AppColors.textTertiary),
                                   ),
                                 ),
                               ),

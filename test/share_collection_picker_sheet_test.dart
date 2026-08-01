@@ -8,6 +8,7 @@ import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:cinefile/core/ui/ui.dart';
 import 'support/riverpod_async.dart';
 import 'support/localized_app.dart';
 import 'package:cinefile/core/database/app_database.dart';
@@ -51,8 +52,8 @@ void main() {
     // The picker closed and the compose sheet opened in its place.
     expect(find.text('Koleksiyon Paylaş'), findsOneWidget);
 
-    final shareButtonFinder = find.widgetWithText(ElevatedButton, 'Paylaş');
-    expect(tester.widget<ElevatedButton>(shareButtonFinder).onPressed, isNull); // disabled, no caption yet
+    final shareButtonFinder = find.widgetWithText(AppButton, 'Paylaş');
+    expect(tester.widget<AppButton>(shareButtonFinder).onPressed, isNull); // disabled, no caption yet
 
     await tester.enterText(find.byType(TextField), 'işte cadılar bayramı listem');
     await tester.pumpAndSettle();

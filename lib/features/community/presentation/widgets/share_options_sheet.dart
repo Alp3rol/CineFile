@@ -1,8 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
 import '../../../../core/widgets/glass_container.dart';
 import 'share_movie_picker_sheet.dart';
 import 'share_collection_picker_sheet.dart';
@@ -18,7 +17,7 @@ class ShareOptionsSheet extends StatelessWidget {
   static void show(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.transparent,
       isScrollControlled: true,
       builder: (context) => const ShareOptionsSheet(),
     );
@@ -34,17 +33,11 @@ class ShareOptionsSheet extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2)),
-            ),
-          ),
+          const AppSheetHandle(),
           const SizedBox(height: 16),
           Text(
             AppLocalizations.of(context).shareOptionsTitle,
-            style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+            style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 16),
           _OptionRow(
@@ -113,13 +106,13 @@ class _OptionRow extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.03),
+            color: AppColors.textPrimary.withValues(alpha: AppOpacity.faint),
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: AppTheme.borderColor),
+            border: Border.all(color: AppColors.border),
           ),
           child: Row(
             children: [
-              Icon(icon, color: AppTheme.accentColor, size: 22),
+              Icon(icon, color: AppColors.accent, size: 22),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
@@ -127,12 +120,12 @@ class _OptionRow extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600, color: AppColors.textPrimary),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
-                      style: GoogleFonts.inter(fontSize: 11, color: AppTheme.textSecondary),
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(color: AppColors.textSecondary),
                     ),
                   ],
                 ),

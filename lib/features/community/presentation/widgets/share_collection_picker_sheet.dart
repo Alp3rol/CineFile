@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/database/database_provider.dart';
 import 'share_compose_sheet.dart';
@@ -18,7 +17,7 @@ class ShareCollectionPickerSheet extends ConsumerWidget {
   static void show(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.transparent,
       isScrollControlled: true,
       builder: (context) => const ShareCollectionPickerSheet(),
     );
@@ -36,36 +35,30 @@ class ShareCollectionPickerSheet extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2)),
-            ),
-          ),
+          const AppSheetHandle(),
           const SizedBox(height: 16),
           Text(
             AppLocalizations.of(context).shareCollectionTitle,
-            style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+            style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 2),
           Text(
             AppLocalizations.of(context).shareCollectionPickPrompt,
-            style: GoogleFonts.inter(fontSize: 11, color: AppTheme.textSecondary),
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(color: AppColors.textSecondary),
           ),
           const SizedBox(height: 16),
-          const Divider(color: Colors.white10, height: 1),
+          const Divider(color: AppColors.border, height: 1),
           const SizedBox(height: 8),
           listsAsync.when(
-            loading: () => const Center(child: Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator(color: AppTheme.accentColor))),
-            error: (err, _) => Center(child: Text(AppLocalizations.of(context).commonErrorWithDetail('$err'), style: const TextStyle(color: Colors.redAccent))),
+            loading: () => const Center(child: Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator(color: AppColors.accent))),
+            error: (err, _) => Center(child: Text(AppLocalizations.of(context).commonErrorWithDetail('$err'), style: const TextStyle(color: AppColors.error))),
             data: (lists) {
               if (lists.isEmpty) {
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 20),
                   child: Text(
                     AppLocalizations.of(context).shareCollectionNone,
-                    style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary),
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.textSecondary),
                   ),
                 );
               }
@@ -79,21 +72,21 @@ class ShareCollectionPickerSheet extends ConsumerWidget {
                     final list = lists[index];
                     return ListTile(
                       contentPadding: EdgeInsets.zero,
-                      leading: const Icon(Icons.collections_bookmark_outlined, color: AppTheme.accentColor),
+                      leading: const Icon(Icons.collections_bookmark_outlined, color: AppColors.accent),
                       title: Text(
                         list.name,
-                        style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                       ),
                       subtitle: list.description != null && list.description!.trim().isNotEmpty
                           ? Text(
                               list.description!,
-                              style: GoogleFonts.inter(fontSize: 10, color: AppTheme.textSecondary),
+                              style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.textSecondary),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             )
                           : null,
                       trailing: list.isPublic
-                          ? const Icon(Icons.public_rounded, color: AppTheme.accentColor, size: 18)
+                          ? const Icon(Icons.public_rounded, color: AppColors.accent, size: 18)
                           : null,
                       onTap: () {
                         Navigator.pop(context);

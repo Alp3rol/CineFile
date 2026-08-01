@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
 
 // The premium film-strip preview shown on both "diary_snapshot" and
 // "collection" post cards (was duplicated identically in both — now
@@ -65,7 +64,7 @@ class _PosterFilmstripState extends State<PosterFilmstrip> {
                           boxShadow: _hoveredIndex == i
                               ? [
                                   BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.45),
+                                    color: AppColors.shadow.withValues(alpha: AppOpacity.strong),
                                     blurRadius: 12,
                                     offset: const Offset(0, 4),
                                   ),
@@ -80,7 +79,7 @@ class _PosterFilmstripState extends State<PosterFilmstrip> {
                             height: _posterHeight,
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) =>
-                                Container(width: _posterWidth, height: _posterHeight, color: AppTheme.surfaceColor),
+                                Container(width: _posterWidth, height: _posterHeight, color: AppColors.surface),
                           ),
                         ),
                       ),
@@ -97,13 +96,13 @@ class _PosterFilmstripState extends State<PosterFilmstrip> {
                   width: _posterWidth,
                   height: _posterHeight,
                   decoration: BoxDecoration(
-                    color: AppTheme.surfaceColor,
+                    color: AppColors.surface,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   alignment: Alignment.center,
                   child: Text(
                     '+${widget.remainingCount}',
-                    style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white70),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppColors.textSecondary),
                   ),
                 ),
               ),

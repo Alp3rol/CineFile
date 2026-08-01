@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
 import '../../../auth/models/user_model.dart';
 import '../../../auth/presentation/user_profile_screen.dart';
 import '../../../relationship_graph/presentation/screens/cine_twin_screen.dart';
@@ -30,7 +29,7 @@ class UserSearchResultTile extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 24,
-              backgroundColor: AppTheme.borderColor,
+              backgroundColor: AppColors.border,
               backgroundImage: NetworkImage(
                 user.avatarUrl ?? 'https://api.dicebear.com/7.x/bottts/png?seed=${user.username}',
               ),
@@ -42,19 +41,19 @@ class UserSearchResultTile extends StatelessWidget {
                 children: [
                   Text(
                     '@${user.username}',
-                    style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppColors.textPrimary),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     AppLocalizations.of(context).userFollowerCount(user.followerCount),
-                    style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary),
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.textSecondary),
                   ),
                 ],
               ),
             ),
             const SizedBox(width: 12),
             IconButton(
-              icon: const Icon(Icons.bolt_rounded, color: AppTheme.accentColor, size: 20),
+              icon: const Icon(Icons.bolt_rounded, color: AppColors.accent, size: 20),
               tooltip: AppLocalizations.of(context).cineTwinSeeMatch,
               onPressed: () {
                 CineTwinScreen.navigate(context, user.username, []);

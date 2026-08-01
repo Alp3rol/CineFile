@@ -3,15 +3,14 @@ import 'package:flutter/material.dart';
 import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
 import '../../../core/widgets/glass_container.dart';
 import '../../../core/widgets/dynamic_background_wrapper.dart';
 import '../../../core/database/database_provider.dart';
 import '../../auth/controllers/auth_controller.dart';
 import '../../auth/presentation/widgets/user_profile_avatar_button.dart';
 import 'community_feed_provider.dart';
-import 'widgets/community_empty_state.dart';
+
 import 'widgets/community_post_card.dart';
 import 'widgets/share_options_sheet.dart';
 import 'widgets/user_search_result_tile.dart';
@@ -100,20 +99,16 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isActive ? AppTheme.accentColor : Colors.white.withValues(alpha: 0.05),
+          color: isActive ? AppColors.accent : AppColors.textPrimary.withValues(alpha: AppOpacity.faint),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isActive ? AppTheme.accentColor : Colors.white10,
+            color: isActive ? AppColors.accent : AppColors.border,
             width: 0.8,
           ),
         ),
         child: Text(
           label,
-          style: GoogleFonts.outfit(
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            color: isActive ? Colors.white : Colors.white60,
-          ),
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold, color: isActive ? AppColors.textPrimary : AppColors.textSecondary),
         ),
       ),
     );
@@ -127,27 +122,27 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
     final query = ref.watch(userSearchQueryProvider);
 
     return resultsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.accentColor)),
+      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.accent)),
       error: (err, stack) => Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32),
           child: Text(
             AppLocalizations.of(context).userSearchFailed,
-            style: GoogleFonts.inter(color: Colors.redAccent),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.error),
             textAlign: TextAlign.center,
           ),
         ),
       ),
       data: (results) {
         if (query.trim().isEmpty) {
-          return CommunityEmptyState(
+          return AppEmptyState(
             icon: Icons.person_search_rounded,
             title: AppLocalizations.of(context).userSearchTitle,
             subtitle: AppLocalizations.of(context).userSearchPrompt,
           );
         }
         if (results.isEmpty) {
-          return CommunityEmptyState(
+          return AppEmptyState(
             icon: Icons.search_off_rounded,
             title: AppLocalizations.of(context).userSearchNotFound,
             subtitle: AppLocalizations.of(context).userSearchNoMatch(query),
@@ -173,7 +168,7 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
 
     return DynamicBackgroundWrapper(
       child: Scaffold(
-        backgroundColor: Colors.transparent,
+        backgroundColor: AppColors.transparent,
         body: SafeArea(
           bottom: false,
           child: Column(
@@ -188,11 +183,7 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
                   children: [
                     Text(
                       AppLocalizations.of(context).communityTitle,
-                      style: GoogleFonts.outfit(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
+                      style: Theme.of(context).textTheme.displayLarge,
                     ),
                     Row(
                       children: [
@@ -214,12 +205,12 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
                             width: 36,
                             height: 36,
                             decoration: BoxDecoration(
-                              color: _showSearch ? AppTheme.accentColor.withValues(alpha: 0.2) : Colors.white10,
+                              color: _showSearch ? AppColors.accent.withValues(alpha: 0.2) : AppColors.border,
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
                               _showSearch ? Icons.search_off_rounded : Icons.search_rounded,
-                              color: _showSearch ? AppTheme.accentColor : Colors.white70,
+                              color: _showSearch ? AppColors.accent : AppColors.textSecondary,
                               size: 18,
                             ),
                           ),
@@ -242,14 +233,14 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
                   child: TextField(
                     controller: _searchController,
                     autofocus: true,
-                    style: GoogleFonts.inter(color: Colors.white),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
                     decoration: InputDecoration(
                       hintText: AppLocalizations.of(context).userSearchHint,
-                      hintStyle: GoogleFonts.inter(color: AppTheme.textSecondary),
-                      prefixIcon: const Icon(Icons.search_rounded, color: AppTheme.textSecondary),
+                      hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+                      prefixIcon: const Icon(Icons.search_rounded, color: AppColors.textSecondary),
                       suffixIcon: _searchController.text.isNotEmpty
                           ? IconButton(
-                              icon: const Icon(Icons.clear_rounded, color: AppTheme.textSecondary),
+                              icon: const Icon(Icons.clear_rounded, color: AppColors.textSecondary),
                               onPressed: () {
                                 _searchController.clear();
                                 _onSearchChanged('');
@@ -294,22 +285,22 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
                         children: [
                           CircleAvatar(
                             radius: 16,
-                            backgroundColor: AppTheme.surfaceColor,
+                            backgroundColor: AppColors.surface,
                             backgroundImage: ref.watch(userModelProvider)?.avatarUrl != null
                                 ? NetworkImage(ref.watch(userModelProvider)!.avatarUrl!)
                                 : null,
                             child: ref.watch(userModelProvider)?.avatarUrl == null
-                                ? const Icon(Icons.person_rounded, color: Colors.white70, size: 18)
+                                ? const Icon(Icons.person_rounded, color: AppColors.textSecondary, size: 18)
                                 : null,
                           ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
                               AppLocalizations.of(context).communityComposeHint,
-                              style: GoogleFonts.inter(fontSize: 13, color: AppTheme.textSecondary),
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
                             ),
                           ),
-                          const Icon(Icons.add_circle_outline_rounded, color: AppTheme.accentColor, size: 22),
+                          const Icon(Icons.add_circle_outline_rounded, color: AppColors.accent, size: 22),
                         ],
                       ),
                     ),
@@ -322,12 +313,12 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
                 Expanded(
                   child: feedAsync.when(
                   loading: () => const Center(
-                    child: CircularProgressIndicator(color: AppTheme.accentColor),
+                    child: CircularProgressIndicator(color: AppColors.accent),
                   ),
                   error: (err, stack) => Center(
                     child: Text(
                       AppLocalizations.of(context).communityFeedLoadFailed,
-                      style: const TextStyle(color: Colors.redAccent),
+                      style: const TextStyle(color: AppColors.error),
                     ),
                   ),
                   data: (posts) {
@@ -338,14 +329,14 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
 
                     if (filteredPosts.isEmpty) {
                       if (feedTab == FeedTab.all) {
-                        return CommunityEmptyState(
+                        return AppEmptyState(
                           icon: Icons.movie_filter_outlined,
                           title: AppLocalizations.of(context).communityEmptyTitle,
                           subtitle: AppLocalizations.of(context).communityEmptyHint,
                         );
                       }
                       if (followedIds.isEmpty) {
-                        return CommunityEmptyState(
+                        return AppEmptyState(
                           icon: Icons.person_search_rounded,
                           title: AppLocalizations.of(context).communityNotFollowingTitle,
                           subtitle: AppLocalizations.of(context).communityNotFollowingHint,
@@ -357,7 +348,7 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
                           },
                         );
                       }
-                      return CommunityEmptyState(
+                      return AppEmptyState(
                         icon: Icons.hourglass_empty_rounded,
                         title: AppLocalizations.of(context).communityFollowingEmpty,
                       );

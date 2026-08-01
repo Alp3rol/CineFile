@@ -2,9 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/ui/ui.dart';
 import '../../../../core/l10n/date_text.dart';
-import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../auth/controllers/auth_controller.dart';
 import '../../../auth/presentation/user_profile_screen.dart';
@@ -18,7 +17,7 @@ class CommentsSheet extends ConsumerStatefulWidget {
   static void show(BuildContext context, String postId) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.transparent,
       isScrollControlled: true,
       builder: (context) {
         return Padding(
@@ -94,54 +93,40 @@ class _CommentsSheetState extends ConsumerState<CommentsSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Drag handle
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.white24,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
+            const AppSheetHandle(),
+            const SizedBox(height: AppSpacing.md),
             
             // Header Row
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 commentsAsync.when(
-                  loading: () => Text(AppLocalizations.of(context).commentsTitle, style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-                  error: (err, stack) => Text(AppLocalizations.of(context).commentsTitle, style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                  loading: () => Text(AppLocalizations.of(context).commentsTitle, style: Theme.of(context).textTheme.titleLarge),
+                  error: (err, stack) => Text(AppLocalizations.of(context).commentsTitle, style: Theme.of(context).textTheme.titleLarge),
                   data: (comments) => Text(
                     AppLocalizations.of(context).commentsTitleWithCount(comments.length),
-                    style: GoogleFonts.outfit(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                    style: Theme.of(context).textTheme.titleLarge,
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close_rounded, color: Colors.white60),
+                  icon: const Icon(Icons.close_rounded, color: AppColors.textSecondary),
                   onPressed: () => Navigator.pop(context),
                 ),
               ],
             ),
-            const Divider(color: Colors.white10),
+            const Divider(color: AppColors.border),
             
             // Comments List
             Expanded(
               child: commentsAsync.when(
-                loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.accentColor)),
-                error: (err, stack) => Center(child: Text(AppLocalizations.of(context).commentsLoadFailed, style: const TextStyle(color: Colors.redAccent))),
+                loading: () => const Center(child: CircularProgressIndicator(color: AppColors.accent)),
+                error: (err, stack) => Center(child: Text(AppLocalizations.of(context).commentsLoadFailed, style: const TextStyle(color: AppColors.error))),
                 data: (comments) {
                   if (comments.isEmpty) {
                     return Center(
                       child: Text(
                         AppLocalizations.of(context).commentsEmpty,
-                        style: GoogleFonts.inter(color: AppTheme.textSecondary, fontSize: 13),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
                       ),
                     );
                   }
@@ -169,7 +154,7 @@ class _CommentsSheetState extends ConsumerState<CommentsSheet> {
                               },
                               child: CircleAvatar(
                                 radius: 16,
-                                backgroundColor: AppTheme.surfaceColor,
+                                backgroundColor: AppColors.surface,
                                 backgroundImage: NetworkImage(comment.userAvatarUrl),
                               ),
                             ),
@@ -194,57 +179,46 @@ class _CommentsSheetState extends ConsumerState<CommentsSheet> {
                                           comment.username.isEmpty
                                               ? AppLocalizations.of(context).userUnknown
                                               : comment.username,
-                                          style: GoogleFonts.outfit(
-                                            fontSize: 13,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white,
-                                          ),
+                                          style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                                         ),
                                       ),
                                       const SizedBox(width: 8),
                                       Text(
                                         formatRelativeTime(context, comment.createdAt),
-                                        style: GoogleFonts.inter(
-                                          fontSize: 10,
-                                          color: AppTheme.textSecondary,
-                                        ),
+                                        style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.textSecondary),
                                       ),
                                     ],
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
                                     comment.text,
-                                    style: GoogleFonts.inter(
-                                      fontSize: 13,
-                                      color: Colors.white70,
-                                      height: 1.3,
-                                    ),
+                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary, height: 1.3),
                                   ),
                                 ],
                               ),
                             ),
                             if (isOwner)
                               IconButton(
-                                icon: const Icon(Icons.delete_outline_rounded, color: Colors.white30, size: 16),
+                                icon: const Icon(Icons.delete_outline_rounded, color: AppColors.textTertiary, size: 16),
                                 onPressed: () {
                                   // Show brief confirm dialog
                                   showDialog(
                                     context: context,
                                     builder: (dialogCtx) => AlertDialog(
-                                      backgroundColor: AppTheme.surfaceColor,
-                                      title: Text(AppLocalizations.of(context).commentsDeleteTitle, style: GoogleFonts.outfit(color: Colors.white, fontSize: 16)),
-                                      content: Text(AppLocalizations.of(context).commentsDeleteConfirm, style: GoogleFonts.inter(color: AppTheme.textSecondary, fontSize: 13)),
+                                      backgroundColor: AppColors.surface,
+                                      title: Text(AppLocalizations.of(context).commentsDeleteTitle, style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppColors.textPrimary)),
+                                      content: Text(AppLocalizations.of(context).commentsDeleteConfirm, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary)),
                                       actions: [
                                         TextButton(
                                           onPressed: () => Navigator.pop(dialogCtx),
-                                          child: Text(AppLocalizations.of(context).commonCancel, style: GoogleFonts.inter(color: AppTheme.textSecondary)),
+                                          child: Text(AppLocalizations.of(context).commonCancel, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary)),
                                         ),
                                         TextButton(
                                           onPressed: () {
                                             Navigator.pop(dialogCtx);
                                             _deleteComment(comment.id);
                                           },
-                                          child: Text(AppLocalizations.of(context).commonDelete, style: TextStyle(color: Colors.redAccent)),
+                                          child: Text(AppLocalizations.of(context).commonDelete, style: TextStyle(color: AppColors.error)),
                                         ),
                                       ],
                                     ),
@@ -260,7 +234,7 @@ class _CommentsSheetState extends ConsumerState<CommentsSheet> {
               ),
             ),
             
-            const Divider(color: Colors.white10),
+            const Divider(color: AppColors.border),
             
             // Text Input Row
             Padding(
@@ -270,17 +244,17 @@ class _CommentsSheetState extends ConsumerState<CommentsSheet> {
                   Expanded(
                     child: Container(
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.05),
+                        color: AppColors.textPrimary.withValues(alpha: AppOpacity.faint),
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.white10),
+                        border: Border.all(color: AppColors.border),
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: 14),
                       child: TextField(
                         controller: _commentController,
-                        style: GoogleFonts.inter(color: Colors.white, fontSize: 14),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
                         decoration: InputDecoration(
                           hintText: currentUser != null ? AppLocalizations.of(context).commentsHint : AppLocalizations.of(context).commentsSignInHint,
-                          hintStyle: GoogleFonts.inter(color: Colors.white38, fontSize: 14),
+                          hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textTertiary),
                           border: InputBorder.none,
                         ),
                         enabled: currentUser != null,
@@ -301,10 +275,10 @@ class _CommentsSheetState extends ConsumerState<CommentsSheet> {
                         : null,
                     child: CircleAvatar(
                       radius: 22,
-                      backgroundColor: currentUser != null ? AppTheme.accentColor : Colors.white10,
+                      backgroundColor: currentUser != null ? AppColors.accent : AppColors.border,
                       child: Icon(
                         Icons.send_rounded, 
-                        color: currentUser != null ? Colors.white : Colors.white30, 
+                        color: currentUser != null ? AppColors.textPrimary : AppColors.textTertiary, 
                         size: 18
                       ),
                     ),

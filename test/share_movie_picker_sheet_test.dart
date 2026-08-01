@@ -10,6 +10,7 @@ import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:cinefile/core/ui/ui.dart';
 import 'support/localized_app.dart';
 import 'package:cinefile/features/auth/controllers/auth_controller.dart';
 import 'package:cinefile/features/community/presentation/widgets/share_movie_picker_sheet.dart';
@@ -82,12 +83,12 @@ void main() {
     expect(find.text('Film Paylaş'), findsOneWidget);
     expect(find.byType(TextField), findsOneWidget);
 
-    final shareButtonFinder = find.widgetWithText(ElevatedButton, 'Paylaş');
-    expect(tester.widget<ElevatedButton>(shareButtonFinder).onPressed, isNull); // disabled, no caption yet
+    final shareButtonFinder = find.widgetWithText(AppButton, 'Paylaş');
+    expect(tester.widget<AppButton>(shareButtonFinder).onPressed, isNull); // disabled, no caption yet
 
     await tester.enterText(find.byType(TextField), 'çok güzel filmdi bitirdim');
     await tester.pumpAndSettle();
-    expect(tester.widget<ElevatedButton>(shareButtonFinder).onPressed, isNotNull);
+    expect(tester.widget<AppButton>(shareButtonFinder).onPressed, isNotNull);
 
     await tester.tap(shareButtonFinder);
     await tester.pumpAndSettle();
@@ -109,13 +110,13 @@ void main() {
     await tester.pumpWidget(app(const ShareMoviePickerSheet(multiSelect: true)));
     await tester.pumpAndSettle();
 
-    final continueButtonFinder = find.widgetWithText(ElevatedButton, 'Devam Et');
-    expect(tester.widget<ElevatedButton>(continueButtonFinder).onPressed, isNull);
+    final continueButtonFinder = find.widgetWithText(AppButton, 'Devam Et');
+    expect(tester.widget<AppButton>(continueButtonFinder).onPressed, isNull);
 
     await tester.tap(find.byType(CheckboxListTile).first);
     await tester.tap(find.byType(CheckboxListTile).last);
     await tester.pumpAndSettle();
-    expect(tester.widget<ElevatedButton>(continueButtonFinder).onPressed, isNotNull);
+    expect(tester.widget<AppButton>(continueButtonFinder).onPressed, isNotNull);
 
     await tester.tap(continueButtonFinder);
     await tester.pumpAndSettle();
@@ -125,7 +126,7 @@ void main() {
 
     await tester.enterText(find.byType(TextField), 'bugüne kadar izlediğim filmler');
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(ElevatedButton, 'Paylaş'));
+    await tester.tap(find.widgetWithText(AppButton, 'Paylaş'));
     await tester.pumpAndSettle();
     await tester.pump(const Duration(seconds: 3));
 

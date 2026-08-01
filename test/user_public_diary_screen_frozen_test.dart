@@ -12,6 +12,7 @@ import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:cinefile/core/ui/ui.dart';
 import 'support/localized_app.dart';
 import 'package:cinefile/features/auth/controllers/auth_controller.dart';
 import 'package:cinefile/features/community/models/community_post_model.dart';
@@ -52,12 +53,12 @@ void main() {
 
     await tester.tap(find.byType(CheckboxListTile).first);
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(ElevatedButton, 'Devam Et'));
+    await tester.tap(find.widgetWithText(AppButton, 'Devam Et'));
     await tester.pumpAndSettle();
 
     await tester.enterText(find.byType(TextField), 'bugüne kadar izlediğim filmler');
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(ElevatedButton, 'Paylaş'));
+    await tester.tap(find.widgetWithText(AppButton, 'Paylaş'));
     await tester.pumpAndSettle();
     await tester.pump(const Duration(seconds: 3));
 

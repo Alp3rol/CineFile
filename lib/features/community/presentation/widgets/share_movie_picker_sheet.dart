@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/database/database_provider.dart';
@@ -22,7 +21,7 @@ class ShareMoviePickerSheet extends ConsumerStatefulWidget {
   static void show(BuildContext context, {bool multiSelect = false}) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.transparent,
       isScrollControlled: true,
       builder: (context) => Padding(
         padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
@@ -54,38 +53,32 @@ class _ShareMoviePickerSheetState extends ConsumerState<ShareMoviePickerSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2)),
-            ),
-          ),
+          const AppSheetHandle(),
           const SizedBox(height: 16),
           Text(
             widget.multiSelect ? AppLocalizations.of(context).shareDiaryTitle : AppLocalizations.of(context).shareMovieTitle,
-            style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+            style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 2),
           Text(
             widget.multiSelect
                 ? AppLocalizations.of(context).shareDiaryPickPrompt
                 : AppLocalizations.of(context).shareMoviePickPrompt,
-            style: GoogleFonts.inter(fontSize: 11, color: AppTheme.textSecondary),
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(color: AppColors.textSecondary),
           ),
           const SizedBox(height: 16),
-          const Divider(color: Colors.white10, height: 1),
+          const Divider(color: AppColors.border, height: 1),
           const SizedBox(height: 8),
           recordsAsync.when(
-            loading: () => const Center(child: Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator(color: AppTheme.accentColor))),
-            error: (err, _) => Center(child: Text(AppLocalizations.of(context).commonErrorWithDetail('$err'), style: const TextStyle(color: Colors.redAccent))),
+            loading: () => const Center(child: Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator(color: AppColors.accent))),
+            error: (err, _) => Center(child: Text(AppLocalizations.of(context).commonErrorWithDetail('$err'), style: const TextStyle(color: AppColors.error))),
             data: (records) {
               if (records.isEmpty) {
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 20),
                   child: Text(
                     AppLocalizations.of(context).shareNoRecords,
-                    style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary),
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.textSecondary),
                   ),
                 );
               }
@@ -104,15 +97,11 @@ class _ShareMoviePickerSheetState extends ConsumerState<ShareMoviePickerSheet> {
           if (widget.multiSelect)
             Align(
               alignment: Alignment.centerRight,
-              child: ElevatedButton(
-                onPressed: hasSelection ? () => _continueWithSelection(recordsAsync.value ?? []) : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.accentColor,
-                  foregroundColor: Colors.white,
-                  disabledBackgroundColor: AppTheme.accentColor.withValues(alpha: 0.3),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                child: Text(AppLocalizations.of(context).shareContinue, style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold)),
+              child: AppButton(
+                label: AppLocalizations.of(context).shareContinue,
+                onPressed: hasSelection
+                    ? () => _continueWithSelection(recordsAsync.value ?? [])
+                    : null,
               ),
             ),
         ],
@@ -131,27 +120,27 @@ class _ShareMoviePickerSheetState extends ConsumerState<ShareMoviePickerSheet> {
             ? Image.network(
                 '${ApiConstants.imagePathW500}$poster',
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(color: AppTheme.surfaceColor),
+                errorBuilder: (context, error, stackTrace) => Container(color: AppColors.surface),
               )
-            : Container(color: AppTheme.surfaceColor, child: const Icon(Icons.movie_rounded, color: Colors.white24, size: 16)),
+            : Container(color: AppColors.surface, child: const Icon(Icons.movie_rounded, color: AppColors.textTertiary, size: 16)),
       ),
     );
 
     final title = Text(
       r.movie.title,
-      style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
+      style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
     );
     final date = Text(
       '${r.record.watchDate.day.toString().padLeft(2, '0')}.${r.record.watchDate.month.toString().padLeft(2, '0')}.${r.record.watchDate.year}',
-      style: GoogleFonts.inter(fontSize: 10, color: AppTheme.textSecondary),
+      style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.textSecondary),
     );
 
     if (widget.multiSelect) {
       return CheckboxListTile(
-        activeColor: AppTheme.accentColor,
-        checkColor: Colors.black,
+        activeColor: AppColors.accent,
+        checkColor: AppColors.onAccentAlt,
         contentPadding: EdgeInsets.zero,
         secondary: posterWidget,
         title: title,

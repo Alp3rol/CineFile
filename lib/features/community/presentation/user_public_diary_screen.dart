@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../l10n/app_localizations.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
 import '../../movie_detail/presentation/movie_detail_screen.dart';
 import '../../relationship_graph/presentation/screens/cine_twin_screen.dart';
 
@@ -18,9 +17,9 @@ class UserPublicDiaryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text('@$username', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+        title: Text('@$username', style: Theme.of(context).textTheme.titleSmall),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
@@ -28,7 +27,7 @@ class UserPublicDiaryScreen extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.bolt_rounded, color: AppTheme.accentColor),
+            icon: const Icon(Icons.bolt_rounded, color: AppColors.accent),
             tooltip: AppLocalizations.of(context).cineTwinSeeMatch,
             onPressed: () {
               CineTwinScreen.navigate(context, username, entries);
@@ -41,7 +40,7 @@ class UserPublicDiaryScreen extends StatelessWidget {
             ? Center(
                 child: Text(
                   AppLocalizations.of(context).publicDiaryEmpty,
-                  style: GoogleFonts.inter(color: AppTheme.textSecondary, fontSize: 13),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
                 ),
               )
             : GridView.builder(
@@ -79,8 +78,8 @@ class UserPublicDiaryScreen extends StatelessWidget {
                                   : 'https://images.unsplash.com/photo-1594909122845-11baa439b7bf?q=80&w=185',
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) => Container(
-                                color: AppTheme.surfaceColor,
-                                child: const Icon(Icons.movie_rounded, color: Colors.white24),
+                                color: AppColors.surface,
+                                child: const Icon(Icons.movie_rounded, color: AppColors.textTertiary),
                               ),
                             ),
                           ),
@@ -92,17 +91,17 @@ class UserPublicDiaryScreen extends StatelessWidget {
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
-                                color: Colors.black.withValues(alpha: 0.75),
+                                color: AppColors.shadow.withValues(alpha: AppOpacity.heavy),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Icon(Icons.star_rounded, color: AppTheme.ratingColor, size: 10),
+                                  const Icon(Icons.star_rounded, color: AppColors.rating, size: 10),
                                   const SizedBox(width: 2),
                                   Text(
                                     rating.toStringAsFixed(1),
-                                    style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.white),
+                                    style: Theme.of(context).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                                   ),
                                 ],
                               ),

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
 import '../../../../core/widgets/premium_toast.dart';
 import '../../../../core/database/database_provider.dart';
 import '../../../auth/controllers/auth_controller.dart';
@@ -23,7 +22,7 @@ class FollowButton extends ConsumerWidget {
       loading: () => const SizedBox(
         height: 20,
         width: 20,
-        child: CircularProgressIndicator(color: AppTheme.accentColor, strokeWidth: 2),
+        child: CircularProgressIndicator(color: AppColors.accent, strokeWidth: 2),
       ),
       error: (err, stack) => const SizedBox(),
       data: (isFollowing) => GestureDetector(
@@ -47,21 +46,17 @@ class FollowButton extends ConsumerWidget {
           width: double.infinity,
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color: isFollowing ? Colors.transparent : AppTheme.accentColor,
+            color: isFollowing ? AppColors.transparent : AppColors.accent,
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: isFollowing ? Colors.white24 : AppTheme.accentColor,
+              color: isFollowing ? AppColors.textTertiary : AppColors.accent,
               width: 1,
             ),
           ),
           child: Center(
             child: Text(
               isFollowing ? AppLocalizations.of(context).followUnfollow : AppLocalizations.of(context).followFollow,
-              style: GoogleFonts.outfit(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(color: AppColors.textPrimary),
             ),
           ),
         ),
