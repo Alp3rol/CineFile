@@ -141,4 +141,13 @@ abstract final class AppColors {
 abstract final class BrandColors {
   static const Color tmdbNavy = Color(0xFF0D253F);
   static const Color tmdbGreen = Color(0xFF90CEA1);
+
+  /// Light plate placed behind a third-party logo.
+  ///
+  /// Many streaming-provider logos are dark artwork on a transparent
+  /// background; dropped straight onto this app's dark surfaces, several major
+  /// services render as an invisible smudge. Belongs here rather than with the
+  /// app's own surfaces: it exists to serve other people's artwork, so it must
+  /// stay light even if the app's theme stops being dark.
+  static const Color logoPlate = Color(0xFFF3F3F5);
 }

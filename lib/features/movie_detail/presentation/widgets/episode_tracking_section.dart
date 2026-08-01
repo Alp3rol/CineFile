@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
+import 'watch_form_label.dart';
 
 // "Aktif İzliyorum" TV episode tracking block (switch + stepper rows +
 // manual episode-count entry) used in the add-watch-record sheet. Purely
@@ -41,47 +41,51 @@ class EpisodeTrackingSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final textTheme = Theme.of(context).textTheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.lg),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              AppLocalizations.of(context).episodeTrackingActive,
-              style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
-            ),
-            Switch(
-              value: isActivelyWatching,
-              activeThumbColor: AppTheme.accentColor,
-              onChanged: onActiveChanged,
-            ),
+            WatchFormLabel(l10n.episodeTrackingActive),
+            // Colours come from switchTheme.
+            Switch(value: isActivelyWatching, onChanged: onActiveChanged),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         if (isActivelyWatching)
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                totalEpisodes != null
-                    ? AppLocalizations.of(context).episodeLabelOf(selectedEpisode, totalEpisodes!)
-                    : AppLocalizations.of(context).episodeLabel(selectedEpisode),
-                style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
+              Expanded(
+                child: WatchFormLabel(
+                  totalEpisodes != null
+                      ? l10n.episodeLabelOf(selectedEpisode, totalEpisodes!)
+                      : l10n.episodeLabel(selectedEpisode),
+                ),
               ),
               Row(
                 children: [
-                  _StepperButton(icon: Icons.remove_rounded, onTap: onSelectedEpisodeDecrement),
+                  _StepperButton(
+                    icon: Icons.remove_rounded,
+                    onTap: onSelectedEpisodeDecrement,
+                  ),
                   SizedBox(
                     width: 36,
                     child: Text(
                       '$selectedEpisode',
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                      style: textTheme.titleLarge,
                     ),
                   ),
-                  _StepperButton(icon: Icons.add_rounded, onTap: onSelectedEpisodeIncrement),
+                  _StepperButton(
+                    icon: Icons.add_rounded,
+                    onTap: onSelectedEpisodeIncrement,
+                  ),
                 ],
               ),
             ],
@@ -95,16 +99,16 @@ class EpisodeTrackingSection extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: _ChoiceChip(
-                    label: AppLocalizations.of(context).episodeTrackingWholeSeason,
+                  child: _ChoiceButton(
+                    label: l10n.episodeTrackingWholeSeason,
                     selected: finishedWholeShow,
                     onTap: () => onFinishedWholeShowChanged(true),
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
                 Expanded(
-                  child: _ChoiceChip(
-                    label: AppLocalizations.of(context).episodeTrackingSpecificCount,
+                  child: _ChoiceButton(
+                    label: l10n.episodeTrackingSpecificCount,
                     selected: !finishedWholeShow,
                     onTap: () => onFinishedWholeShowChanged(false),
                   ),
@@ -112,17 +116,19 @@ class EpisodeTrackingSection extends StatelessWidget {
               ],
             ),
           if (totalEpisodes == null || !finishedWholeShow) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  AppLocalizations.of(context).episodeTrackingCountLabel,
-                  style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
+                Expanded(
+                  child: WatchFormLabel(l10n.episodeTrackingCountLabel),
                 ),
                 Row(
                   children: [
-                    _StepperButton(icon: Icons.remove_rounded, onTap: onEpisodeCountDecrement),
+                    _StepperButton(
+                      icon: Icons.remove_rounded,
+                      onTap: onEpisodeCountDecrement,
+                    ),
                     SizedBox(
                       width: 56,
                       child: TextField(
@@ -130,16 +136,22 @@ class EpisodeTrackingSection extends StatelessWidget {
                         controller: episodeCountController,
                         textAlign: TextAlign.center,
                         keyboardType: TextInputType.number,
-                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                        style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
+                        style: textTheme.titleLarge,
                         decoration: const InputDecoration(
                           isDense: true,
-                          contentPadding: EdgeInsets.symmetric(vertical: 4),
+                          contentPadding:
+                              EdgeInsets.symmetric(vertical: AppSpacing.xs),
                         ),
                         onChanged: onEpisodeCountTextChanged,
                       ),
                     ),
-                    _StepperButton(icon: Icons.add_rounded, onTap: onEpisodeCountIncrement),
+                    _StepperButton(
+                      icon: Icons.add_rounded,
+                      onTap: onEpisodeCountIncrement,
+                    ),
                   ],
                 ),
               ],
@@ -151,32 +163,50 @@ class EpisodeTrackingSection extends StatelessWidget {
   }
 }
 
-class _ChoiceChip extends StatelessWidget {
+/// One of the two mutually exclusive "how much did you watch" options.
+///
+/// Not [AppChip]: these are a segmented choice sized to fill half the row,
+/// where a chip hugs its label. The distinction is worth keeping — a chip that
+/// stretches stops reading as a chip.
+class _ChoiceButton extends StatelessWidget {
   final String label;
   final bool selected;
   final VoidCallback onTap;
 
-  const _ChoiceChip({required this.label, required this.selected, required this.onTap});
+  const _ChoiceButton({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return AppPressable(
       onTap: onTap,
+      borderRadius: AppRadius.sm,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+        padding: const EdgeInsets.symmetric(
+          vertical: AppSpacing.sm,
+          horizontal: AppSpacing.sm,
+        ),
         decoration: BoxDecoration(
-          color: selected ? AppTheme.accentColor.withValues(alpha: 0.2) : Colors.white.withValues(alpha: 0.05),
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: selected ? AppTheme.accentColor : Colors.grey.shade800, width: 1),
+          color: selected
+              ? AppColors.accent.withValues(alpha: AppOpacity.soft)
+              : AppColors.textPrimary.withValues(alpha: AppOpacity.faint),
+          borderRadius: AppRadius.allSm,
+          border: Border.all(
+            color: selected ? AppColors.accent : AppColors.border,
+            width: AppSize.hairline,
+          ),
         ),
         child: Text(
           label,
           textAlign: TextAlign.center,
-          style: GoogleFonts.inter(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: selected ? AppTheme.accentColor : Colors.grey.shade400,
-          ),
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+                color:
+                    selected ? AppColors.accent : AppColors.textSecondary,
+              ),
         ),
       ),
     );
@@ -189,20 +219,30 @@ class _StepperButton extends StatelessWidget {
 
   const _StepperButton({required this.icon, required this.onTap});
 
+  static const double _diameter = 28;
+
   @override
   Widget build(BuildContext context) {
     final isEnabled = onTap != null;
-    return GestureDetector(
+    // Disabled reads as the accent at reduced strength rather than as grey:
+    // grey_800/grey_700 were two more unnamed neutrals, and a dimmed accent
+    // says "this control, unavailable" more clearly than a different colour.
+    final tint = isEnabled
+        ? AppColors.accent
+        : AppColors.accent.withValues(alpha: AppOpacity.muted);
+
+    return AppPressable(
       onTap: onTap,
+      borderRadius: AppRadius.pill,
       child: Container(
-        width: 28,
-        height: 28,
+        width: _diameter,
+        height: _diameter,
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.05),
+          color: AppColors.textPrimary.withValues(alpha: AppOpacity.faint),
           shape: BoxShape.circle,
-          border: Border.all(color: isEnabled ? AppTheme.accentColor : Colors.grey.shade800, width: 1),
+          border: Border.all(color: tint, width: AppSize.hairline),
         ),
-        child: Icon(icon, size: 16, color: isEnabled ? AppTheme.accentColor : Colors.grey.shade700),
+        child: Icon(icon, size: AppSize.iconSm, color: tint),
       ),
     );
   }

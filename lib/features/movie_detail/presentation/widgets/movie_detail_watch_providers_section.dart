@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/ui/ui.dart';
 
 import '../../../../core/constants/api_constants.dart';
-import '../../../../core/theme/app_theme.dart';
+
 import '../../../../core/widgets/app_network_image.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/watch_provider_models.dart';
@@ -64,14 +64,14 @@ class MovieDetailWatchProvidersSection extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(l10n.detailWhereToWatch, style: Theme.of(context).textTheme.titleLarge),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.md),
         for (final category in _categoryOrder)
           if (availability.byCategory[category] case final providers?) ...[
             Text(
               _categoryLabel(l10n, category),
-              style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary),
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.textSecondary),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             SizedBox(
               // Logo (52) + gap (6) + two lines of 10pt label. Tight enough to
               // stay compact, and the label below is Flexible so a larger
@@ -83,13 +83,13 @@ class MovieDetailWatchProvidersSection extends ConsumerWidget {
                 itemBuilder: (context, index) => _ProviderTile(provider: providers[index]),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
           ],
         Text(
           l10n.detailWatchProvidersJustWatchAttribution,
-          style: GoogleFonts.inter(fontSize: 10, color: AppTheme.textSecondary),
+          style: Theme.of(context).textTheme.labelSmall,
         ),
-        const SizedBox(height: 28),
+        const SizedBox(height: AppSpacing.xl),
       ],
     );
   }
@@ -112,7 +112,7 @@ class _ProviderTile extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           ClipRRect(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: AppRadius.allMd,
             child: Container(
               width: _logoSize,
               height: _logoSize,
@@ -120,7 +120,7 @@ class _ProviderTile extends StatelessWidget {
               // on a transparent background — dropped straight onto this app's
               // dark surfaces, several major services render as an invisible
               // smudge.
-              color: const Color(0xFFF3F3F5),
+              color: BrandColors.logoPlate,
               child: logoPath == null || logoPath.isEmpty
                   ? _InitialFallback(name: provider.name)
                   : AppNetworkImage(
@@ -134,11 +134,11 @@ class _ProviderTile extends StatelessWidget {
                     ),
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: AppSpacing.xs),
           Flexible(
             child: Text(
               provider.name,
-              style: GoogleFonts.inter(fontSize: 10, color: Colors.white70),
+              style: Theme.of(context).textTheme.labelSmall,
               maxLines: 2,
               textAlign: TextAlign.center,
               overflow: TextOverflow.ellipsis,
@@ -161,11 +161,10 @@ class _InitialFallback extends StatelessWidget {
     return Center(
       child: Text(
         name.isEmpty ? '?' : name.characters.first.toUpperCase(),
-        style: GoogleFonts.outfit(
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-          color: Colors.black54,
-        ),
+        // Dark on the light logo plate, not on the app's dark surface.
+        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              color: AppColors.background.withValues(alpha: AppOpacity.strong),
+            ),
       ),
     );
   }

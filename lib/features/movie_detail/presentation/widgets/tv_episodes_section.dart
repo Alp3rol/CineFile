@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
+
 import '../../../../core/widgets/premium_toast.dart';
 import '../../../../core/database/app_database.dart';
 import '../../../../core/database/episode_logging.dart';
@@ -86,19 +86,15 @@ class _MovieDetailTvEpisodesSectionState extends ConsumerState<MovieDetailTvEpis
               height: 40,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppTheme.accentColor.withValues(alpha: 0.15),
+                color: AppColors.accent.withValues(alpha: AppOpacity.soft),
               ),
-              child: const Icon(Icons.bookmark_add_rounded, color: AppTheme.accentColor, size: 20),
+              child: const Icon(Icons.bookmark_add_rounded, color: AppColors.accent, size: AppSize.iconMd),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Text(
                 AppLocalizations.of(context).episodeAddShowPrompt,
-                style: GoogleFonts.outfit(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
+                style: Theme.of(context).textTheme.titleMedium,
               ),
             ),
           ],
@@ -127,7 +123,7 @@ class _MovieDetailTvEpisodesSectionState extends ConsumerState<MovieDetailTvEpis
           context,
           header: Text(
             AppLocalizations.of(context).episodeConfirmWatchedTitle,
-            style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+            style: Theme.of(context).textTheme.titleLarge,
           ),
           message:
               AppLocalizations.of(context).episodeBulkWatchConfirm(currentLastWatched + 1, targetEpisodeIndex),
@@ -151,7 +147,7 @@ class _MovieDetailTvEpisodesSectionState extends ConsumerState<MovieDetailTvEpis
           context,
           header: Text(
             AppLocalizations.of(context).episodeUndoProgressTitle,
-            style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+            style: Theme.of(context).textTheme.titleLarge,
           ),
           message:
               AppLocalizations.of(context).episodeBulkUnwatchConfirm(targetEpisodeIndex, currentLastWatched),
@@ -218,35 +214,35 @@ class _MovieDetailTvEpisodesSectionState extends ConsumerState<MovieDetailTvEpis
           AppLocalizations.of(context).episodeGuideTitle,
           style: Theme.of(context).textTheme.titleLarge,
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.md),
 
         TvSeasonChipRow(
           seasons: regularSeasons,
           selectedSeasonNumber: _selectedSeasonNumber,
           onSeasonSelected: (sNum) => setState(() => _selectedSeasonNumber = sNum),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.lg),
 
         seasonAsync.when(
           loading: () => const Padding(
-            padding: EdgeInsets.symmetric(vertical: 24.0),
-            child: Center(child: CircularProgressIndicator(color: AppTheme.accentColor)),
+            padding: EdgeInsets.symmetric(vertical: AppSpacing.xl),
+            child: Center(child: CircularProgressIndicator()),
           ),
           error: (error, stack) => Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
             child: Text(
               AppLocalizations.of(context).episodeGuideLoadFailed,
-              style: const TextStyle(color: Colors.white70, fontSize: 13),
+              style: Theme.of(context).textTheme.bodySmall,
             ),
           ),
           data: (seasonData) {
             final episodes = seasonData?['episodes'] as List<dynamic>? ?? [];
             if (episodes.isEmpty) {
               return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
                 child: Text(
                   AppLocalizations.of(context).episodeGuideEmpty,
-                  style: const TextStyle(color: Colors.white30, fontSize: 13),
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
               );
             }
@@ -264,21 +260,15 @@ class _MovieDetailTvEpisodesSectionState extends ConsumerState<MovieDetailTvEpis
               children: [
                 if (!seasonAlreadyComplete && lastEpisodeNumber > 0)
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 12.0),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton.icon(
-                        onPressed: () => _toggleEpisodeWatched(lastOverallIndex, lastEpisodeNumber),
-                        icon: const Icon(Icons.done_all_rounded, size: 18, color: AppTheme.accentColor),
-                        label: Text(
-                          AppLocalizations.of(context).episodeMarkSeasonWatched,
-                          style: GoogleFonts.inter(fontWeight: FontWeight.w600, color: AppTheme.accentColor),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: AppTheme.accentColor, width: 1),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
+                    padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                    child: AppButton(
+                      label: AppLocalizations.of(context).episodeMarkSeasonWatched,
+                      icon: Icons.done_all_rounded,
+                      variant: AppButtonVariant.secondary,
+                      isFullWidth: true,
+                      onPressed: () => _toggleEpisodeWatched(
+                        lastOverallIndex,
+                        lastEpisodeNumber,
                       ),
                     ),
                   ),

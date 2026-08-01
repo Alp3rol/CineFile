@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/database/app_database.dart';
 
@@ -20,9 +19,44 @@ class MovieDetailTimelineItem extends StatelessWidget {
     required this.onDelete,
   });
 
+  static const double _markerDiameter = 32;
+
+  /// Height of the rule joining one marker to the next. Fixed rather than
+  /// measured, so it is tuned to the card height rather than derived from it.
+  static const double _connectorHeight = 100;
+
+  Future<void> _confirmDelete(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+
+    final confirmed = await AppDialog.confirm(
+      context: context,
+      title: l10n.timelineDeleteTitle,
+      message: l10n.timelineDeleteConfirm,
+      confirmLabel: l10n.commonDelete,
+      cancelLabel: l10n.commonDiscard,
+      isDestructive: true,
+    );
+
+    if (confirmed == true) await onDelete();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final textTheme = Theme.of(context).textTheme;
     final dateStr = DateFormat('dd.MM.yyyy').format(record.watchDate);
+
+    /// Small icon + text pair used for the place and companion lines.
+    Widget meta(IconData icon, String text) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: AppColors.textSecondary, size: 12),
+          const SizedBox(width: 2),
+          Text(text, style: textTheme.labelMedium),
+        ],
+      );
+    }
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -32,19 +66,18 @@ class MovieDetailTimelineItem extends StatelessWidget {
           children: [
             // Circular badge watch order number (e.g. 1, 2)
             Container(
-              width: 32,
-              height: 32,
+              width: _markerDiameter,
+              height: _markerDiameter,
               decoration: const BoxDecoration(
-                color: AppTheme.accentColor,
+                color: AppColors.accent,
                 shape: BoxShape.circle,
               ),
               alignment: Alignment.center,
               child: Text(
                 '${record.watchNumber}',
-                style: GoogleFonts.outfit(
-                  fontSize: 13,
+                style: textTheme.bodySmall?.copyWith(
+                  color: AppColors.onAccent,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
                 ),
               ),
             ),
@@ -52,21 +85,20 @@ class MovieDetailTimelineItem extends StatelessWidget {
             if (!isLast)
               Container(
                 width: 2,
-                height: 100, // Fixed height connecting timeline items
-                color: AppTheme.accentColor.withValues(alpha: 0.5),
+                height: _connectorHeight,
+                color: AppColors.accent.withValues(alpha: AppOpacity.strong),
               ),
           ],
         ),
-        const SizedBox(width: 14),
+        const SizedBox(width: AppSpacing.md),
 
         // Record content card
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.only(bottom: 16),
+            padding: const EdgeInsets.only(bottom: AppSpacing.lg),
             child: GlassContainer(
-              padding: const EdgeInsets.all(14),
-              borderRadius: 16,
-              opacity: 0.6,
+              padding: const EdgeInsets.all(AppSpacing.md),
+              borderRadius: AppRadius.lg,
               useBlur: false, // per-entry card inside the rewatch-history list
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -77,113 +109,78 @@ class MovieDetailTimelineItem extends StatelessWidget {
                     children: [
                       Text(
                         dateStr,
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
+                        style: textTheme.labelLarge?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
                         ),
                       ),
 
                       // Star Rating
                       Row(
                         children: [
-                          const Icon(Icons.star_rounded, color: AppTheme.ratingColor, size: 16),
-                          const SizedBox(width: 4),
+                          const Icon(
+                            Icons.star_rounded,
+                            color: AppColors.rating,
+                            size: AppSize.iconSm,
+                          ),
+                          const SizedBox(width: AppSpacing.xs),
                           Text(
                             '${record.rating}',
-                            style: GoogleFonts.outfit(
-                              fontSize: 13,
+                            style: textTheme.bodySmall?.copyWith(
+                              color: AppColors.textPrimary,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
                             ),
                           ),
-                          Text(
-                            '/10',
-                            style: GoogleFonts.inter(fontSize: 10, color: AppTheme.textSecondary),
-                          ),
+                          Text('/10', style: textTheme.labelSmall),
                         ],
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.sm),
 
                   // Place, companion, mood info
                   Row(
                     children: [
                       Text(
-                        AppLocalizations.of(context).timelineMood(record.mood ?? '🍿'),
-                        style: GoogleFonts.inter(fontSize: 11, color: Colors.white),
+                        l10n.timelineMood(record.mood ?? '🍿'),
+                        style: textTheme.labelMedium?.copyWith(
+                          color: AppColors.textPrimary,
+                        ),
                       ),
                       const Spacer(),
-
-                      // Place / Companion
-                      if (record.watchPlace != null) ...[
-                        Icon(Icons.location_on_outlined, color: AppTheme.textSecondary, size: 12),
-                        const SizedBox(width: 2),
-                        Text(
-                          record.watchPlace!,
-                          style: GoogleFonts.inter(fontSize: 11, color: AppTheme.textSecondary),
-                        ),
-                      ],
+                      if (record.watchPlace != null)
+                        meta(Icons.location_on_outlined, record.watchPlace!),
                       if (record.watchCompanion != null) ...[
-                        const SizedBox(width: 10),
-                        Icon(Icons.people_alt_outlined, color: AppTheme.textSecondary, size: 12),
-                        const SizedBox(width: 2),
-                        Text(
-                          record.watchCompanion!,
-                          style: GoogleFonts.inter(fontSize: 11, color: AppTheme.textSecondary),
-                        ),
+                        const SizedBox(width: AppSpacing.sm),
+                        meta(Icons.people_alt_outlined, record.watchCompanion!),
                       ],
                     ],
                   ),
 
                   // Notes (if any) & delete button
                   if (record.notes != null) ...[
-                    const SizedBox(height: 8),
-                    Divider(color: Colors.white.withValues(alpha: 0.1)),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppSpacing.sm),
+                    const Divider(height: 1),
+                    const SizedBox(height: AppSpacing.xs),
                     Text(
                       record.notes!,
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        color: AppTheme.textSecondary,
+                      style: textTheme.labelLarge?.copyWith(
+                        color: AppColors.textSecondary,
                         fontStyle: FontStyle.italic,
                       ),
                     ),
                   ],
 
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.sm),
                   Align(
                     alignment: Alignment.bottomRight,
                     child: IconButton(
-                      icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 18),
-                      onPressed: () {
-                        // Confirm deletion dialog
-                        showDialog(
-                          context: context,
-                          builder: (dialogCtx) => AlertDialog(
-                            backgroundColor: AppTheme.surfaceColor,
-                            title: Text(AppLocalizations.of(context).timelineDeleteTitle, style: GoogleFonts.outfit(color: Colors.white)),
-                            content: Text(
-                              AppLocalizations.of(context).timelineDeleteConfirm,
-                              style: GoogleFonts.inter(color: AppTheme.textSecondary),
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(dialogCtx),
-                                child: Text(AppLocalizations.of(context).commonDiscard, style: GoogleFonts.inter(color: AppTheme.textSecondary)),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(dialogCtx);
-                                  onDelete();
-                                },
-                                child: Text(AppLocalizations.of(context).commonDelete, style: const TextStyle(color: Colors.redAccent)),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
+                      tooltip: l10n.commonDelete,
+                      color: AppColors.error,
+                      icon: const Icon(
+                        Icons.delete_outline_rounded,
+                        size: AppSize.iconSm,
+                      ),
+                      onPressed: () => _confirmDelete(context),
                     ),
                   ),
                 ],

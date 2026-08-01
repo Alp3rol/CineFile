@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/constants/api_constants.dart';
 
 // Horizontal scrollable row of season-selector chips for the episode guide.
+//
+// Not AppChip: these carry a season poster thumbnail, which that primitive
+// deliberately does not support — a chip with an image in it is a different
+// object, and widening AppChip to cover one call site would blur what it is.
 class TvSeasonChipRow extends StatelessWidget {
   final List<dynamic> seasons;
   final int selectedSeasonNumber;
@@ -18,8 +21,12 @@ class TvSeasonChipRow extends StatelessWidget {
     required this.onSeasonSelected,
   });
 
+  static const double _thumbSize = 24;
+
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
     return SizedBox(
       height: 48,
       child: ListView.builder(
@@ -33,38 +40,49 @@ class TvSeasonChipRow extends StatelessWidget {
           final isSelected = selectedSeasonNumber == sNum;
 
           return Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: GestureDetector(
+            padding: const EdgeInsets.only(right: AppSpacing.sm),
+            child: AppPressable(
               onTap: () => onSeasonSelected(sNum),
+              borderRadius: AppRadius.md,
+              semanticLabel: sName,
               child: GlassContainer(
-                borderRadius: 12,
-                opacity: isSelected ? 0.8 : 0.4,
-                color: isSelected ? AppTheme.accentColor : null,
+                borderRadius: AppRadius.md,
+                opacity: isSelected ? AppOpacity.heavy : AppOpacity.medium,
+                color: isSelected ? AppColors.accent : null,
                 border: Border.all(
-                  color: isSelected ? AppTheme.accentColor : AppTheme.borderColor,
-                  width: isSelected ? 1.5 : 1,
+                  color: isSelected ? AppColors.accent : AppColors.border,
+                  width: isSelected ? 1.5 : AppSize.hairline,
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.sm,
+                  vertical: AppSpacing.xs,
+                ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(6),
+                      borderRadius: AppRadius.allXs,
                       child: AppNetworkImage(
-                        imageUrl: posterPath != null ? '${ApiConstants.imagePathW500}$posterPath' : '',
+                        imageUrl: posterPath != null
+                            ? '${ApiConstants.imagePathW500}$posterPath'
+                            : '',
                         seed: sName,
-                        width: 24,
-                        height: 24,
+                        width: _thumbSize,
+                        height: _thumbSize,
                         fit: BoxFit.cover,
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: AppSpacing.sm),
                     Text(
                       sName,
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                        color: isSelected ? Colors.black : Colors.white,
+                      style: textTheme.labelLarge?.copyWith(
+                        fontWeight:
+                            isSelected ? FontWeight.bold : FontWeight.normal,
+                        // On the accent fill the label has to be dark; off it,
+                        // it sits on glass and stays light.
+                        color: isSelected
+                            ? AppColors.onAccentAlt
+                            : AppColors.textPrimary,
                       ),
                     ),
                   ],

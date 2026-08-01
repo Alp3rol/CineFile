@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/constants/api_constants.dart';
@@ -14,7 +13,7 @@ class TvEpisodeListItem extends StatelessWidget {
   final int episodeNumber;
   final bool isWatched;
   // Whether this is the next unwatched episode in overall watch order —
-  // shows a "Sıradaki" badge and an amber accent border instead of the
+  // shows a "Sıradaki" badge and a warm accent border instead of the
   // default unwatched styling.
   final bool isNextUp;
   final VoidCallback onToggleWatched;
@@ -28,10 +27,17 @@ class TvEpisodeListItem extends StatelessWidget {
     required this.onToggleWatched,
   });
 
+  static const double _stillWidth = 100;
+  static const double _stillHeight = 60;
+  static const double _checkDiameter = 24;
+
   @override
   Widget build(BuildContext context) {
-    final epName = episode['name'] as String? ?? AppLocalizations.of(context).episodeNumbered(episodeNumber);
-    final overview = episode['overview'] as String? ?? AppLocalizations.of(context).episodeNoOverview;
+    final l10n = AppLocalizations.of(context);
+    final textTheme = Theme.of(context).textTheme;
+
+    final epName = episode['name'] as String? ?? l10n.episodeNumbered(episodeNumber);
+    final overview = episode['overview'] as String? ?? l10n.episodeNoOverview;
     final stillPath = episode['still_path'] as String?;
     final airDateStr = episode['air_date'] as String? ?? '';
 
@@ -44,33 +50,37 @@ class TvEpisodeListItem extends StatelessWidget {
     }
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
       child: GlassContainer(
-        borderRadius: 16,
-        padding: const EdgeInsets.all(12),
-        opacity: isWatched ? 0.6 : 0.4,
+        borderRadius: AppRadius.lg,
+        padding: const EdgeInsets.all(AppSpacing.md),
+        opacity: isWatched ? AppOpacity.strong : AppOpacity.medium,
         useBlur: false, // Turn off blur for item rows to optimize list scroll performance
         border: Border.all(
           color: isWatched
-              ? AppTheme.accentColor.withValues(alpha: 0.3)
-              : (isNextUp ? Colors.amberAccent.withValues(alpha: 0.5) : AppTheme.borderColor),
-          width: isWatched || isNextUp ? 1.5 : 1,
+              ? AppColors.accent.withValues(alpha: AppOpacity.muted)
+              : (isNextUp
+                  ? AppColors.rating.withValues(alpha: AppOpacity.strong)
+                  : AppColors.border),
+          width: isWatched || isNextUp ? 1.5 : AppSize.hairline,
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Episode Still Image
             ClipRRect(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: AppRadius.allSm,
               child: AppNetworkImage(
-                imageUrl: stillPath != null ? '${ApiConstants.imagePathW500}$stillPath' : '',
+                imageUrl: stillPath != null
+                    ? '${ApiConstants.imagePathW500}$stillPath'
+                    : '',
                 seed: epName,
-                width: 100,
-                height: 60,
+                width: _stillWidth,
+                height: _stillHeight,
                 fit: BoxFit.cover,
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: AppSpacing.md),
 
             // Title, Date, Overview
             Expanded(
@@ -78,81 +88,65 @@ class TvEpisodeListItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (isNextUp && !isWatched) ...[
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.amberAccent.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        AppLocalizations.of(context).episodeUpNext,
-                        style: GoogleFonts.inter(
-                          fontSize: 9,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.amberAccent,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
+                    AppBadge(
+                      label: l10n.episodeUpNext,
+                      tone: AppBadgeTone.rating,
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppSpacing.xs),
                   ],
                   Text(
                     '$episodeNumber. $epName',
-                    style: GoogleFonts.inter(
-                      fontSize: 13,
+                    style: textTheme.bodySmall?.copyWith(
+                      color: AppColors.textPrimary,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   if (formattedDate.isNotEmpty) ...[
                     const SizedBox(height: 2),
-                    Text(
-                      formattedDate,
-                      style: GoogleFonts.inter(
-                        fontSize: 10,
-                        color: AppTheme.textSecondary,
-                      ),
-                    ),
+                    Text(formattedDate, style: textTheme.labelSmall),
                   ],
-                  const SizedBox(height: 6),
+                  const SizedBox(height: AppSpacing.xs),
                   Text(
                     overview,
-                    style: GoogleFonts.inter(
-                      fontSize: 11,
-                      color: Colors.white54,
-                      height: 1.4,
-                    ),
+                    style: textTheme.labelMedium?.copyWith(height: 1.4),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.sm),
 
             // Checked circle / checkmark toggle button
-            GestureDetector(
+            AppPressable(
               key: ValueKey('episode_check_$episodeNumber'),
               onTap: onToggleWatched,
+              borderRadius: AppRadius.pill,
+              semanticLabel: '$episodeNumber. $epName',
               child: Container(
-                margin: const EdgeInsets.only(top: 4),
-                width: 24,
-                height: 24,
+                margin: const EdgeInsets.only(top: AppSpacing.xs),
+                width: _checkDiameter,
+                height: _checkDiameter,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: isWatched ? AppTheme.accentColor : Colors.white30,
+                    color: isWatched
+                        ? AppColors.accent
+                        : AppColors.textPrimary
+                            .withValues(alpha: AppOpacity.muted),
                     width: 1.5,
                   ),
-                  color: isWatched ? AppTheme.accentColor.withValues(alpha: 0.2) : Colors.transparent,
+                  color: isWatched
+                      ? AppColors.accent.withValues(alpha: AppOpacity.soft)
+                      : AppColors.transparent,
                 ),
                 child: isWatched
                     ? const Icon(
                         Icons.check_rounded,
-                        size: 14,
-                        color: AppTheme.accentColor,
+                        size: AppSize.iconSm,
+                        color: AppColors.accent,
                       )
                     : null,
               ),
