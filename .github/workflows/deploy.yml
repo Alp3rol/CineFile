@@ -128,7 +128,24 @@ jobs:
 
       - uses: peaceiris/actions-gh-pages@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          # Two different identities are at play here, and they are set
+          # separately because GitHub records them separately.
+          #
+          # user_name/user_email below set the *commit author* on gh-pages.
+          # That is the one that matters: it is what keeps a bot off the
+          # repository's contributor list, and it has always been correct.
+          #
+          # The token sets who *pushed*, which is what GitHub attributes the
+          # resulting Pages deployment to on the Deployments page. With
+          # GITHUB_TOKEN the push belongs to the workflow rather than to a
+          # person, so that page reads "github-pages[bot]". Supplying a
+          # personal access token instead makes it read the owner's name.
+          #
+          # The fallback keeps this working when GH_PAGES_PAT is not set:
+          # deploys still run, they are just attributed to the bot as before.
+          # Add the secret and the attribution corrects itself on the next run,
+          # with no further change to this file.
+          personal_token: ${{ secrets.GH_PAGES_PAT || secrets.GITHUB_TOKEN }}
           publish_dir: ./build/web
           publish_branch: gh-pages
           # force_orphan defaults to false, so gh-pages keeps its history and a
