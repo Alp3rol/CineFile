@@ -1,57 +1,48 @@
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
+import 'watch_form_label.dart';
 
 // "Senin Puanın" rating slider used in the add-watch-record sheet.
 class WatchRatingSlider extends StatelessWidget {
   final double rating;
   final ValueChanged<double> onChanged;
 
-  const WatchRatingSlider({super.key, required this.rating, required this.onChanged});
+  const WatchRatingSlider({
+    super.key,
+    required this.rating,
+    required this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              AppLocalizations.of(context).addRecordRatingLabel,
-              style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
-            ),
+            WatchFormLabel(AppLocalizations.of(context).addRecordRatingLabel),
             Text(
               '$rating / 10',
-              style: GoogleFonts.outfit(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.ratingColor,
+              style: theme.textTheme.titleLarge?.copyWith(
+                color: AppColors.rating,
               ),
             ),
           ],
         ),
         SliderTheme(
+          // Colours all come from sliderTheme now; only the geometry of this
+          // particular slider is overridden — a thinner track and a smaller
+          // thumb than the default, which is a deliberate look for a rating
+          // scale rather than a value that drifted.
           data: SliderTheme.of(context).copyWith(
-            trackHeight: 2.0, // Thinner track
-            activeTrackColor: AppTheme.accentColor,
-            inactiveTrackColor: Colors.white.withValues(alpha: 0.08),
-            thumbColor: AppTheme.ratingColor,
-            overlayColor: AppTheme.ratingColor.withValues(alpha: 0.12),
-            valueIndicatorColor: AppTheme.surfaceColor,
-            thumbShape: const RoundSliderThumbShape(
-              enabledThumbRadius: 6.0, // Smaller thumb
-            ),
-            overlayShape: const RoundSliderOverlayShape(
-              overlayRadius: 16.0,
-            ),
-            tickMarkShape: SliderTickMarkShape.noTickMark, // Hide tick marks for a cleaner look
-            valueIndicatorTextStyle: GoogleFonts.outfit(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 12,
-            ),
+            trackHeight: 2.0,
+            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6.0),
+            overlayShape: const RoundSliderOverlayShape(overlayRadius: 16.0),
+            tickMarkShape: SliderTickMarkShape.noTickMark,
           ),
           child: Slider(
             value: rating,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
+import 'watch_form_label.dart';
 
 // "İzleme Modu / Ruh Hali" emoji picker row used in the add-watch-record sheet.
 class MoodSelector extends StatelessWidget {
@@ -16,16 +16,15 @@ class MoodSelector extends StatelessWidget {
     required this.onMoodSelected,
   });
 
+  static const double _diameter = 48;
+
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          AppLocalizations.of(context).addRecordMoodLabel,
-          style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
-        ),
-        const SizedBox(height: 8),
+        WatchFormLabel(AppLocalizations.of(context).addRecordMoodLabel),
+        const SizedBox(height: AppSpacing.sm),
         SizedBox(
           height: 52,
           child: ListView.separated(
@@ -34,39 +33,45 @@ class MoodSelector extends StatelessWidget {
             // sheet's horizontal padding instead of the selected glow
             // shadow bleeding out to the screen/device edge.
             itemCount: moods.length,
-            separatorBuilder: (context, index) => const SizedBox(width: 10),
+            separatorBuilder: (context, index) =>
+                const SizedBox(width: AppSpacing.sm),
             itemBuilder: (context, index) {
               final mood = moods[index];
               final isSelected = selectedMood == mood;
-              return GestureDetector(
+
+              return AppPressable(
                 onTap: () => onMoodSelected(mood),
+                borderRadius: AppRadius.pill,
+                semanticLabel: mood,
                 child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 150),
-                  curve: Curves.easeOut,
-                  width: 48,
-                  height: 48,
+                  duration: AppDuration.fast,
+                  curve: AppDuration.curve,
+                  width: _diameter,
+                  height: _diameter,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: isSelected ? AppTheme.accentColor.withValues(alpha: 0.22) : Colors.white.withValues(alpha: 0.04),
+                    color: isSelected
+                        ? AppColors.accent.withValues(alpha: AppOpacity.soft)
+                        : AppColors.textPrimary
+                            .withValues(alpha: AppOpacity.faint),
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: isSelected ? AppTheme.accentColor : AppTheme.borderColor,
+                      color: isSelected ? AppColors.accent : AppColors.border,
                       width: 1.5,
                     ),
                     boxShadow: isSelected
                         ? [
                             BoxShadow(
-                              color: AppTheme.accentColor.withValues(alpha: 0.35),
+                              color: AppColors.accent
+                                  .withValues(alpha: AppOpacity.muted),
                               blurRadius: 12,
                               spreadRadius: 1,
                             ),
                           ]
                         : null,
                   ),
-                  child: Text(
-                    mood,
-                    style: const TextStyle(fontSize: 22),
-                  ),
+                  // Emoji, so it carries its own colour — only the size is set.
+                  child: Text(mood, style: const TextStyle(fontSize: 22)),
                 ),
               );
             },

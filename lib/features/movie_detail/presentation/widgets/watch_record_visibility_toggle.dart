@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
+import 'watch_form_label.dart';
 
 // Controls ONLY the "Son İzlediklerim" section on the user's own profile
 // screen. Deliberately unrelated to the Community feed: feed posts are
@@ -12,16 +12,22 @@ class WatchRecordVisibilityToggle extends StatelessWidget {
   final bool isPublic;
   final ValueChanged<bool> onChanged;
 
-  const WatchRecordVisibilityToggle({super.key, required this.isPublic, required this.onChanged});
+  const WatchRecordVisibilityToggle({
+    super.key,
+    required this.isPublic,
+    required this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.03),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.borderColor),
+    final l10n = AppLocalizations.of(context);
+
+    return AppCard(
+      tone: AppCardTone.translucent,
+      borderRadius: AppRadius.md,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.md,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -29,27 +35,31 @@ class WatchRecordVisibilityToggle extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  const Icon(Icons.public_rounded, color: AppTheme.accentColor, size: 20),
-                  const SizedBox(width: 10),
-                  Text(
-                    AppLocalizations.of(context).addRecordVisibilityLabel,
-                    style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
-                  ),
-                ],
+              Expanded(
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.public_rounded,
+                      color: AppColors.accent,
+                      size: AppSize.iconMd,
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Flexible(
+                      child: WatchFormLabel(l10n.addRecordVisibilityLabel),
+                    ),
+                  ],
+                ),
               ),
-              Switch(
-                value: isPublic,
-                activeThumbColor: AppTheme.accentColor,
-                onChanged: onChanged,
-              ),
+              // Colours come from switchTheme.
+              Switch(value: isPublic, onChanged: onChanged),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.xs),
           Text(
-            AppLocalizations.of(context).addRecordVisibilityHint,
-            style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary),
+            l10n.addRecordVisibilityHint,
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
           ),
         ],
       ),

@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/database/database_provider.dart';
 import '../../../../core/widgets/premium_date_picker.dart';
@@ -388,8 +387,8 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
     return Container(
       constraints: BoxConstraints(maxHeight: maxSheetHeight),
       decoration: const BoxDecoration(
-        color: AppTheme.backgroundColor,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        color: AppColors.background,
+        borderRadius: AppRadius.topXl,
       ),
       padding: EdgeInsets.only(bottom: bottomInset),
       child: Column(
@@ -409,20 +408,29 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
             Row(
               children: [
                 Expanded(
-                  child: InkWell(
+                  child: AppPressable(
                     onTap: _pickDate,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: AppRadius.md,
                     child: GlassContainer(
-                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                      borderRadius: 12,
-                      opacity: 0.5,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: AppSpacing.md,
+                        horizontal: AppSpacing.lg,
+                      ),
+                      borderRadius: AppRadius.md,
                       child: Row(
                         children: [
-                          const Icon(Icons.calendar_today_rounded, color: AppTheme.accentColor, size: 20),
-                          const SizedBox(width: 10),
+                          const Icon(
+                            Icons.calendar_today_rounded,
+                            color: AppColors.accent,
+                            size: AppSize.iconMd,
+                          ),
+                          const SizedBox(width: AppSpacing.sm),
                           Text(
                             DateFormat('dd.MM.yyyy').format(_selectedDate),
-                            style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(color: AppColors.textPrimary),
                           ),
                         ],
                       ),
@@ -544,27 +552,16 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
           // above so it's always visible without scrolling, regardless of
           // how tall the form above gets (see maxSheetHeight comment).
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-            child: SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: _saveRecord,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.accentColor,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: Text(
-                  AppLocalizations.of(context).addRecordSubmit,
-                  style: GoogleFonts.outfit(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              AppSpacing.md,
+              AppSpacing.lg,
+              AppSpacing.lg,
+            ),
+            child: AppButton(
+              label: AppLocalizations.of(context).addRecordSubmit,
+              isFullWidth: true,
+              onPressed: _saveRecord,
             ),
           ),
         ],

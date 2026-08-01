@@ -395,7 +395,17 @@ class AppTheme {
         modalBarrierColor: AppColors.barrier,
         elevation: 0,
         modalElevation: 0,
-        showDragHandle: true,
+        // Off on purpose. Eight sheets across the app draw their own handle,
+        // and turning this on gives every one of them a second one stacked
+        // above the first. Their handles are also placed deliberately — the
+        // add-watch-record sheet keeps its handle outside the inner scroll
+        // view so a downward drag starting there reaches the sheet's
+        // drag-to-dismiss gesture instead of being swallowed by the scroll.
+        //
+        // Unifying on Flutter's handle means removing those eight by hand and
+        // re-checking that gesture, which is a deliberate change rather than a
+        // side effect of adding a theme.
+        showDragHandle: false,
         dragHandleColor: AppColors.borderStrong,
         clipBehavior: Clip.antiAlias,
         shape: RoundedRectangleBorder(borderRadius: AppRadius.topXl),

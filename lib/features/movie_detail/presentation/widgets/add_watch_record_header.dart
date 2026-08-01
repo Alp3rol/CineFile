@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/ui/ui.dart';
 
 // Handle bar + title + close button for AddWatchRecordSheet. Deliberately
 // outside the sheet's scroll view so it stays visible while scrolling
@@ -13,36 +13,39 @@ class AddWatchRecordHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.lg,
+        AppSpacing.lg,
+        0,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Sheet Handle bar
+          // Sheet handle bar. Drawn here rather than via
+          // bottomSheetTheme.showDragHandle for the gesture reason above —
+          // see the note on that theme entry.
           Center(
             child: Container(
               width: 40,
-              height: 4,
+              height: AppSpacing.xs,
               decoration: BoxDecoration(
-                color: Colors.grey.shade700,
-                borderRadius: BorderRadius.circular(2),
+                color: AppColors.borderStrong,
+                borderRadius: AppRadius.allPill,
               ),
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: AppSpacing.lg),
 
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                AppLocalizations.of(context).addRecordTitle,
-                style: GoogleFonts.outfit(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
+              Text(l10n.addRecordTitle,
+                  style: Theme.of(context).textTheme.headlineSmall),
               // Explicit close affordance — the sheet's content can grow
               // tall enough (esp. with the TV episode-tracking section) to
               // fill the whole screen, leaving no backdrop to tap and
@@ -50,7 +53,8 @@ class AddWatchRecordHeader extends StatelessWidget {
               // Without this, there was no way to back out without saving.
               IconButton(
                 onPressed: onClose,
-                icon: const Icon(Icons.close_rounded, color: Colors.grey),
+                tooltip: l10n.commonCancel,
+                icon: const Icon(Icons.close_rounded),
                 visualDensity: VisualDensity.compact,
               ),
             ],

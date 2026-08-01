@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
+import 'watch_form_label.dart';
 
-// Shared pill-shaped suggestion chip for the fields below, laid out in a
-// single horizontally scrollable row (never wraps to a second line) so a
-// long suggestion list stays compact instead of pushing the rest of the
-// sheet down.
+// Suggestion chips for the fields below, laid out in a single horizontally
+// scrollable row (never wraps to a second line) so a long suggestion list
+// stays compact instead of pushing the rest of the sheet down.
 class _SuggestionChipRow extends StatelessWidget {
   final List<String> suggestions;
   final ValueChanged<String> onTap;
@@ -23,29 +22,15 @@ class _SuggestionChipRow extends StatelessWidget {
         // sheet's horizontal padding instead of bleeding out to the
         // screen/device edge.
         itemCount: suggestions.length,
-        separatorBuilder: (context, index) => const SizedBox(width: 8),
+        separatorBuilder: (context, index) =>
+            const SizedBox(width: AppSpacing.sm),
         itemBuilder: (context, index) {
           final label = suggestions[index];
-          return Material(
-            color: Colors.white.withValues(alpha: 0.04),
-            borderRadius: BorderRadius.circular(100),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(100),
-              onTap: () => onTap(label),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(100),
-                  border: Border.all(color: AppTheme.borderColor),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  label,
-                  style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white70),
-                ),
-              ),
-            ),
-          );
+          // AppChip rather than a hand-rolled Material + InkWell + Container:
+          // these are the same object as the filter chips elsewhere in the
+          // app, and were drawn differently only because nothing shared
+          // existed.
+          return AppChip(label: label, onTap: () => onTap(label));
         },
       ),
     );
@@ -69,21 +54,18 @@ class WatchPlaceField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          AppLocalizations.of(context).addRecordPlaceLabel,
-          style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
-        ),
-        const SizedBox(height: 6),
+        WatchFormLabel(l10n.addRecordPlaceLabel),
+        const SizedBox(height: AppSpacing.xs),
         TextField(
           controller: controller,
-          decoration: InputDecoration(
-            hintText: AppLocalizations.of(context).addRecordPlaceHint,
-          ),
+          decoration: InputDecoration(hintText: l10n.addRecordPlaceHint),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         _SuggestionChipRow(suggestions: suggestions, onTap: onSuggestionTap),
       ],
     );
@@ -105,21 +87,18 @@ class WatchCompanionField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          AppLocalizations.of(context).addRecordCompanionLabel,
-          style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
-        ),
-        const SizedBox(height: 6),
+        WatchFormLabel(l10n.addRecordCompanionLabel),
+        const SizedBox(height: AppSpacing.xs),
         TextField(
           controller: controller,
-          decoration: InputDecoration(
-            hintText: AppLocalizations.of(context).addRecordCompanionHint,
-          ),
+          decoration: InputDecoration(hintText: l10n.addRecordCompanionHint),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         _SuggestionChipRow(suggestions: suggestions, onTap: onSuggestionTap),
       ],
     );
@@ -134,20 +113,17 @@ class WatchNotesField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          AppLocalizations.of(context).addRecordNotesLabel,
-          style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
-        ),
-        const SizedBox(height: 6),
+        WatchFormLabel(l10n.addRecordNotesLabel),
+        const SizedBox(height: AppSpacing.xs),
         TextField(
           controller: controller,
           maxLines: 3,
-          decoration: InputDecoration(
-            hintText: AppLocalizations.of(context).addRecordNotesHint,
-          ),
+          decoration: InputDecoration(hintText: l10n.addRecordNotesHint),
         ),
       ],
     );
@@ -183,21 +159,18 @@ class WatchTagsField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          AppLocalizations.of(context).addRecordTagsLabel,
-          style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
-        ),
-        const SizedBox(height: 6),
+        WatchFormLabel(l10n.addRecordTagsLabel),
+        const SizedBox(height: AppSpacing.xs),
         TextField(
           controller: controller,
-          decoration: InputDecoration(
-            hintText: AppLocalizations.of(context).addRecordTagsHint,
-          ),
+          decoration: InputDecoration(hintText: l10n.addRecordTagsHint),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         _SuggestionChipRow(suggestions: suggestions, onTap: _onSuggestionTap),
       ],
     );
