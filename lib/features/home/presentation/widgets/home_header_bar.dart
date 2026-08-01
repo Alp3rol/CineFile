@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
 import '../../../auth/presentation/widgets/user_profile_avatar_button.dart';
 import '../../../settings/presentation/settings_screen.dart';
 
@@ -24,8 +24,16 @@ class HomeHeaderBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final textTheme = Theme.of(context).textTheme;
+
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.lg,
+        AppSpacing.lg,
+        AppSpacing.md,
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -37,22 +45,21 @@ class HomeHeaderBar extends StatelessWidget {
               children: [
                 Text(
                   _getGreeting(context),
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: AppTheme.textSecondary,
+                  style: textTheme.bodyLarge?.copyWith(
+                    color: AppColors.textSecondary,
                     fontWeight: FontWeight.w500,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: AppSpacing.xs),
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Flexible(
                       child: Text(
                         'CineFile',
-                        style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                          fontSize: 28,
+                        style: textTheme.displayLarge?.copyWith(
                           letterSpacing: -0.5,
                         ),
                         maxLines: 1,
@@ -60,36 +67,13 @@ class HomeHeaderBar extends StatelessWidget {
                       ),
                     ),
                     if (streak > 0) ...[
-                      const SizedBox(width: 10),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.orange.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: Colors.orange.withValues(alpha: 0.4), width: 1),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.orange.withValues(alpha: 0.25),
-                              blurRadius: 10,
-                              spreadRadius: 0,
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.local_fire_department_rounded, size: 16, color: Colors.orangeAccent),
-                            const SizedBox(width: 4),
-                            Text(
-                              AppLocalizations.of(context).homeStreakDays(streak),
-                              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                                color: Colors.orangeAccent,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ),
+                      const SizedBox(width: AppSpacing.sm),
+                      AppBadge(
+                        label: l10n.homeStreakDays(streak),
+                        icon: Icons.local_fire_department_rounded,
+                        tone: AppBadgeTone.warning,
+                        shape: AppBadgeShape.pill,
+                        outlined: true,
                       ),
                     ],
                   ],
@@ -102,32 +86,42 @@ class HomeHeaderBar extends StatelessWidget {
             children: [
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.05),
+                  color: AppColors.textPrimary
+                      .withValues(alpha: AppOpacity.faint),
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.1), width: 1),
+                  border: Border.all(
+                    color: AppColors.textPrimary
+                        .withValues(alpha: AppOpacity.subtle),
+                    width: AppSize.hairline,
+                  ),
                 ),
                 child: IconButton(
-                  tooltip: AppLocalizations.of(context).settingsTitle,
+                  tooltip: l10n.settingsTitle,
                   onPressed: () => Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const SettingsScreen()),
                   ),
-                  icon: const Icon(Icons.settings_outlined, color: AppTheme.textSecondary, size: 22),
+                  icon: const Icon(
+                    Icons.settings_outlined,
+                    color: AppColors.textSecondary,
+                    size: AppSize.iconLg,
+                  ),
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: AppSpacing.sm),
               Container(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: AppTheme.accentColor.withValues(alpha: 0.35),
+                      color: AppColors.accent
+                          .withValues(alpha: AppOpacity.muted),
                       blurRadius: 18,
                       spreadRadius: 1,
                     ),
                   ],
                 ),
-                child: const UserProfileAvatarButton(size: 40),
+                child: const UserProfileAvatarButton(size: AppSize.avatarMd),
               ),
             ],
           ),

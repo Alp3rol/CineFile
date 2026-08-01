@@ -2,10 +2,17 @@ import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/database/app_database.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
 import '../../../../core/widgets/app_network_image.dart';
-import '../../../../core/widgets/glass_container.dart';
 
+/// Section heading on the home screen: an accent rule, the title, and a
+/// "see all" action.
+///
+/// Kept separate from the plain [AppSection] in core/ui because of that accent
+/// rule — home marks its sections with it, settings marks them by colouring
+/// the heading text. Those are two section languages in one app and only one
+/// should survive, but picking which is a design decision rather than a
+/// mechanical one, so both stand for now.
 class HomeSectionTitle extends StatelessWidget {
   final String title;
   final VoidCallback onSeeAll;
@@ -14,8 +21,10 @@ class HomeSectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -23,48 +32,42 @@ class HomeSectionTitle extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 4,
+                width: AppSpacing.xs,
                 height: 18,
                 decoration: BoxDecoration(
-                  color: AppTheme.accentColor,
-                  borderRadius: BorderRadius.circular(2),
+                  color: AppColors.accent,
+                  borderRadius: AppRadius.allXs,
                   boxShadow: [
                     BoxShadow(
-                      color: AppTheme.accentColor.withValues(alpha: 0.5),
+                      color: AppColors.accent
+                          .withValues(alpha: AppOpacity.strong),
                       blurRadius: 6,
                     ),
                   ],
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: AppSpacing.sm),
               Text(
                 title,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
+                style: theme.textTheme.titleLarge?.copyWith(
                   letterSpacing: -0.2,
                 ),
               ),
             ],
           ),
-          InkWell(
-            onTap: onSeeAll,
-            borderRadius: BorderRadius.circular(12),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    AppLocalizations.of(context).homeSeeAll,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppTheme.accentColor,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  const Icon(Icons.arrow_forward_ios_rounded, color: AppTheme.accentColor, size: 12),
-                ],
-              ),
+          TextButton(
+            onPressed: onSeeAll,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(AppLocalizations.of(context).homeSeeAll),
+                const SizedBox(width: AppSpacing.xs),
+                const Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  color: AppColors.accent,
+                  size: 12,
+                ),
+              ],
             ),
           ),
         ],
@@ -82,19 +85,25 @@ class HomeEmptySection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: GlassContainer(
-        padding: const EdgeInsets.all(16),
-        borderRadius: 16,
-        opacity: 0.4,
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      child: AppCard(
+        tone: AppCardTone.translucent,
         child: Row(
           children: [
-            Icon(Icons.movie_filter_outlined, color: AppTheme.textSecondary.withValues(alpha: 0.6), size: 22),
-            const SizedBox(width: 12),
+            Icon(
+              Icons.movie_filter_outlined,
+              color: AppColors.textSecondary
+                  .withValues(alpha: AppOpacity.strong),
+              size: AppSize.iconLg,
+            ),
+            const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Text(
                 message,
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(height: 1.4),
+                style: Theme.of(context)
+                    .textTheme
+                    .labelLarge
+                    ?.copyWith(color: AppColors.textSecondary, height: 1.4),
               ),
             ),
           ],
@@ -110,43 +119,47 @@ class HomeRecentlyAddedList extends StatelessWidget {
 
   const HomeRecentlyAddedList({super.key, required this.items, required this.onOpenDetail});
 
+  static const double _posterWidth = 132;
+  static const double _posterHeight = 185;
+
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+
     return SizedBox(
       height: 245,
       child: ListView.builder(
-        padding: const EdgeInsets.symmetric(horizontal: 14),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
         scrollDirection: Axis.horizontal,
         itemCount: items.length,
         itemBuilder: (context, index) {
           final movie = items[index];
           final tmdbId = movie.tmdbId;
-          return GestureDetector(
+
+          return AppPressable(
             onTap: () => onOpenDetail(tmdbId, movie.isTv),
+            borderRadius: AppRadius.lg,
+            semanticLabel: movie.title,
             child: Container(
-              width: 132,
-              margin: const EdgeInsets.symmetric(horizontal: 6),
+              width: _posterWidth,
+              margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Poster Container with Border & Shadow
                   Hero(
                     tag: 'poster_${tmdbId}_${movie.isTv}',
                     child: Container(
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.white.withValues(alpha: 0.1), width: 1),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.4),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
+                        borderRadius: AppRadius.allLg,
+                        border: Border.all(
+                          color: AppColors.textPrimary
+                              .withValues(alpha: AppOpacity.subtle),
+                          width: AppSize.hairline,
+                        ),
+                        boxShadow: AppElevation.low(AppColors.shadow),
                       ),
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: AppRadius.allLg,
                         child: Stack(
                           children: [
                             AppNetworkImage(
@@ -154,25 +167,32 @@ class HomeRecentlyAddedList extends StatelessWidget {
                                   ? '${ApiConstants.imagePathW500}${movie.posterPath}'
                                   : '',
                               seed: movie.title,
-                              height: 185,
-                              width: 132,
+                              height: _posterHeight,
+                              width: _posterWidth,
                               fit: BoxFit.cover,
                             ),
                             if (movie.releaseYear != null)
                               Positioned(
-                                top: 8,
-                                right: 8,
+                                top: AppSpacing.sm,
+                                right: AppSpacing.sm,
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: AppSpacing.xs,
+                                    vertical: 2,
+                                  ),
                                   decoration: BoxDecoration(
-                                    color: Colors.black.withValues(alpha: 0.65),
-                                    borderRadius: BorderRadius.circular(6),
+                                    // A dark scrim rather than a themed tint:
+                                    // this sits on poster art, where a
+                                    // translucent surface colour would be
+                                    // illegible over a bright frame.
+                                    color: AppColors.shadow
+                                        .withValues(alpha: AppOpacity.heavy),
+                                    borderRadius: AppRadius.allXs,
                                   ),
                                   child: Text(
                                     '${movie.releaseYear}',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 10,
+                                    style: textTheme.labelSmall?.copyWith(
+                                      color: AppColors.onImage,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -183,27 +203,24 @@ class HomeRecentlyAddedList extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 8),
-
-                  // Title
+                  const SizedBox(height: AppSpacing.sm),
                   Text(
                     movie.title,
-                    style: textTheme.labelLarge?.copyWith(
-                      color: Colors.white,
+                    style: textTheme.bodySmall?.copyWith(
+                      color: AppColors.textPrimary,
                       fontWeight: FontWeight.bold,
-                      fontSize: 13,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 2),
-
-                  // Subtitle
                   Text(
                     movie.director != null && movie.director!.isNotEmpty
                         ? movie.director!
-                        : (movie.isTv ? AppLocalizations.of(context).graphNodeShow : AppLocalizations.of(context).graphNodeMovie),
-                    style: textTheme.labelSmall?.copyWith(color: AppTheme.textSecondary),
+                        : (movie.isTv
+                            ? AppLocalizations.of(context).graphNodeShow
+                            : AppLocalizations.of(context).graphNodeMovie),
+                    style: textTheme.labelSmall,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),

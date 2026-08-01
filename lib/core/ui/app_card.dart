@@ -14,6 +14,13 @@ enum AppCardTone {
 
   /// No fill — just the border. For grouping without adding visual weight.
   outline,
+
+  /// A wash of white rather than an opaque fill, so whatever is behind shows
+  /// through. For surfaces that sit on artwork or on the poster-derived
+  /// dynamic background, where an opaque panel would punch a hole in it.
+  /// The home dashboard wrote this three times at three different alpha
+  /// pairs (0.03/0.06, 0.04/0.10, 0.05/0.10) for the same intent.
+  translucent,
 }
 
 /// A bordered, rounded surface.
@@ -53,6 +60,16 @@ class AppCard extends StatelessWidget {
         AppCardTone.surface => AppColors.surface,
         AppCardTone.raised => AppColors.surfaceRaised,
         AppCardTone.outline => AppColors.transparent,
+        AppCardTone.translucent =>
+          AppColors.textPrimary.withValues(alpha: AppOpacity.faint),
+      };
+
+  /// A translucent card needs a brighter hairline than the standard one: at 6%
+  /// the border disappears against the lighter fill it now sits on.
+  Color get _border => switch (tone) {
+        AppCardTone.translucent =>
+          AppColors.textPrimary.withValues(alpha: AppOpacity.subtle),
+        _ => AppColors.border,
       };
 
   @override
@@ -65,7 +82,7 @@ class AppCard extends StatelessWidget {
         color: _fill,
         borderRadius: radius,
         border: Border.all(
-          color: borderColor ?? AppColors.border,
+          color: borderColor ?? _border,
           width: AppSize.hairline,
         ),
         boxShadow: elevated ? AppElevation.low(AppColors.shadow) : null,

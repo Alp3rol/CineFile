@@ -6,6 +6,15 @@ import '../theme/app_tokens.dart';
 /// The meaning a badge carries, which decides its colour.
 enum AppBadgeTone { neutral, accent, rating, success, warning, error }
 
+/// Whether the badge reads as a tag or as a pill.
+enum AppBadgeShape {
+  /// Small radius. For badges that sit tight against other content.
+  tag,
+
+  /// Fully rounded. For standalone status pills.
+  pill,
+}
+
 /// A small, non-interactive status pill.
 ///
 /// Distinct from [AppChip]: a chip is something you tap, a badge is something
@@ -17,11 +26,18 @@ class AppBadge extends StatelessWidget {
     required this.label,
     this.tone = AppBadgeTone.neutral,
     this.icon,
+    this.shape = AppBadgeShape.tag,
+    this.outlined = false,
   });
 
   final String label;
   final AppBadgeTone tone;
   final IconData? icon;
+  final AppBadgeShape shape;
+
+  /// Adds a border in the badge's own tone. Use it where the badge has to hold
+  /// its own against a busy neighbour — a tinted fill alone can wash out.
+  final bool outlined;
 
   Color get _color => switch (tone) {
         AppBadgeTone.neutral => AppColors.textSecondary,
@@ -43,7 +59,16 @@ class AppBadge extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: color.withValues(alpha: AppOpacity.soft),
-        borderRadius: AppRadius.allXs,
+        borderRadius: switch (shape) {
+          AppBadgeShape.tag => AppRadius.allXs,
+          AppBadgeShape.pill => AppRadius.allPill,
+        },
+        border: outlined
+            ? Border.all(
+                color: color.withValues(alpha: AppOpacity.medium),
+                width: AppSize.hairline,
+              )
+            : null,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

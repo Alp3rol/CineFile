@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
 import '../../../../core/theme/dynamic_background_provider.dart';
 import '../../../../core/database/database_provider.dart';
 import '../../../../core/database/app_database.dart';
@@ -15,6 +15,7 @@ import '../../../../core/widgets/scroll_to_top_button.dart';
 import 'widgets/home_header_bar.dart';
 import 'widgets/home_hero_banner.dart';
 import 'widgets/home_hero_carousel.dart';
+import 'widgets/home_hero_shell.dart';
 import 'widgets/home_stats_dashboard.dart';
 import 'widgets/home_content_lists.dart';
 import '../../recommendations/presentation/widgets/home_recommendations_list.dart';
@@ -31,6 +32,11 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
+  /// Room under the last row so the floating bottom navigation bar never
+  /// covers it. Deliberately off the spacing scale: it tracks the height of
+  /// another widget rather than the layout rhythm.
+  static const double _bottomNavClearance = 120;
+
   final ScrollController _scrollController = ScrollController();
   bool _showScrollToTop = false;
 
@@ -123,7 +129,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final heroMovie = suggestion ?? (recentlyWatched.isNotEmpty ? recentlyWatched.first.movie : null);
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.transparent,
       body: SafeArea(
         bottom: false,
         child: Column(
@@ -140,11 +146,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             Expanded(
               child: SingleChildScrollView(
                 controller: _scrollController,
-                padding: const EdgeInsets.only(bottom: 120), // Spacing for floating bottom bar
+                padding: const EdgeInsets.only(bottom: _bottomNavClearance),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppSpacing.xs),
 
                     // Cinematic hero — the screen's top visual anchor.
                     // Highest priority: any actively-watching shows, shown as
@@ -155,18 +161,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     // there's no data at all yet.
                     if ((activeShowsAsync.isLoading && activeShows.isEmpty) ||
                         (watchRecordsAsync.isLoading && recentlyWatched.isEmpty)) ...[
+                      // Reserves exactly the hero's height so the rest of the
+                      // page does not jump when the hero resolves. Colour comes
+                      // from progressIndicatorTheme.
                       const SizedBox(
-                        height: 360,
-                        child: Center(
-                          child: CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentColor),
-                          ),
-                        ),
+                        height: HomeHeroShell.height,
+                        child: Center(child: CircularProgressIndicator()),
                       ),
-                      const SizedBox(height: 28),
+                      const SizedBox(height: AppSpacing.xl),
                     ] else if (activeShows.isNotEmpty) ...[
                       HomeActiveHeroCarousel(shows: activeShows, onTap: _openDetail),
-                      const SizedBox(height: 28),
+                      const SizedBox(height: AppSpacing.xl),
                     ] else if (heroMovie != null) ...[
                       HomeHeroBanner(
                         movie: heroMovie,
@@ -175,7 +180,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             suggestion != null ? () => ref.read(_homeSuggestionSeedProvider.notifier).state++ : null,
                         onTap: () => _openDetail(heroMovie.tmdbId, heroMovie.isTv),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: AppSpacing.xl),
                     ],
 
                     // Premium Redesigned Stats Dashboard
@@ -184,32 +189,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         final insights = ref.watch(insightsProvider);
                         final weeklyGoal = ref.watch(weeklyGoalProvider);
                         return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
                           child: HomeStatsDashboard(insights: insights, weeklyGoal: weeklyGoal),
                         );
                       },
                     ),
 
-                    const SizedBox(height: 28),
+                    const SizedBox(height: AppSpacing.xl),
 
                     // Recently Added Section
                     HomeSectionTitle(
                       title: AppLocalizations.of(context).homeRecentlyAdded,
                       onSeeAll: () => ref.read(mainShellTabIndexProvider.notifier).state = 2,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.md),
                      recentlyAdded.isEmpty
                         ? HomeEmptySection(message: AppLocalizations.of(context).homeNothingAdded)
                         : HomeRecentlyAddedList(items: recentlyAdded, onOpenDetail: _openDetail),
 
-                    const SizedBox(height: 28),
+                    const SizedBox(height: AppSpacing.xl),
                     HomeRecommendationsList(onOpenDetail: _openDetail),
 
                     // "Aktif İzlediklerin" quick-add row (hidden if nothing active).
                     // Intentionally shows all active shows even if one of
                     // them is already highlighted in the hero above.
                     if (activeShows.isNotEmpty) ...[
-                      const SizedBox(height: 28),
+                      const SizedBox(height: AppSpacing.xl),
                       ActivelyWatchingRow(onOpenDetail: _openDetail),
                     ],
                   ],
