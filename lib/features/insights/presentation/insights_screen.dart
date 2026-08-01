@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
 import 'insights_provider.dart';
 import 'widgets/contribution_heatmap.dart';
 import 'widgets/insights_charts.dart';
@@ -105,26 +104,18 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen>
             Icon(
               Icons.analytics_outlined,
               size: 72,
-              color: AppTheme.textSecondary.withValues(alpha: 0.5),
+              color: AppColors.textSecondary.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 20),
             Text(
               AppLocalizations.of(context).insightsInsufficientData,
-              style: GoogleFonts.outfit(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
             ),
             const SizedBox(height: 8),
             Text(
               AppLocalizations.of(context).insightsEmptyBody,
               textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
-                fontSize: 13,
-                color: AppTheme.textSecondary,
-                height: 1.5,
-              ),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary, height: 1.5),
             ),
           ],
         ),

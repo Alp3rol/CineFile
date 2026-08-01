@@ -1,8 +1,8 @@
+import 'insight_palette.dart';
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/ui/ui.dart';
 import '../../domain/insight_buckets.dart';
-import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../insights_provider.dart';
 
@@ -24,17 +24,17 @@ class TimeOfDayCard extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 label,
-                style: GoogleFonts.inter(fontSize: 12, color: Colors.white, fontWeight: FontWeight.w600),
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600, color: AppColors.textPrimary),
               ),
               const SizedBox(width: 4),
               Text(
                 hours,
-                style: GoogleFonts.inter(fontSize: 9, color: AppTheme.textSecondary),
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.textSecondary),
               ),
               const Spacer(),
               Text(
                 AppLocalizations.of(context).insightsWatchesWithPercent(count, percentage.toStringAsFixed(0)),
-                style: GoogleFonts.outfit(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
               ),
             ],
           ),
@@ -43,7 +43,7 @@ class TimeOfDayCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
               value: total > 0 ? count / total : 0,
-              backgroundColor: Colors.white.withValues(alpha: 0.05),
+              backgroundColor: AppColors.textPrimary.withValues(alpha: AppOpacity.faint),
               valueColor: AlwaysStoppedAnimation<Color>(color),
               minHeight: 6,
             ),
@@ -67,13 +67,13 @@ class TimeOfDayCard extends StatelessWidget {
         children: [
           Text(
             AppLocalizations.of(context).insightsTimeOfDayTitle,
-            style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
           ),
           const SizedBox(height: 18),
-          _buildTimeOfDayRow(context, TimeOfDayBand.morning, values[TimeOfDayBand.morning] ?? 0, total, Icons.wb_sunny_rounded, Colors.orangeAccent),
-          _buildTimeOfDayRow(context, TimeOfDayBand.midday, values[TimeOfDayBand.midday] ?? 0, total, Icons.wb_cloudy_rounded, const Color(0xFF29B6F6)),
-          _buildTimeOfDayRow(context, TimeOfDayBand.evening, values[TimeOfDayBand.evening] ?? 0, total, Icons.nights_stay_rounded, Colors.indigoAccent),
-          _buildTimeOfDayRow(context, TimeOfDayBand.night, values[TimeOfDayBand.night] ?? 0, total, Icons.dark_mode_rounded, Colors.purpleAccent),
+          _buildTimeOfDayRow(context, TimeOfDayBand.morning, values[TimeOfDayBand.morning] ?? 0, total, Icons.wb_sunny_rounded, InsightPalette.morning),
+          _buildTimeOfDayRow(context, TimeOfDayBand.midday, values[TimeOfDayBand.midday] ?? 0, total, Icons.wb_cloudy_rounded, InsightPalette.midday),
+          _buildTimeOfDayRow(context, TimeOfDayBand.evening, values[TimeOfDayBand.evening] ?? 0, total, Icons.nights_stay_rounded, InsightPalette.evening),
+          _buildTimeOfDayRow(context, TimeOfDayBand.night, values[TimeOfDayBand.night] ?? 0, total, Icons.dark_mode_rounded, InsightPalette.night),
         ],
       ),
     );

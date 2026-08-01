@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/ui/ui.dart';
 import '../../../../core/l10n/date_text.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../insights_provider.dart';
@@ -82,20 +82,16 @@ class _ContributionHeatmapState extends State<ContributionHeatmap> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: isActive ? HeatmapColors.neonPurple : Colors.white.withValues(alpha: 0.04),
+          color: isActive ? HeatmapColors.neonPurple : AppColors.textPrimary.withValues(alpha: AppOpacity.faint),
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isActive ? Colors.transparent : Colors.white10,
+            color: isActive ? AppColors.transparent : AppColors.border,
             width: 0.5,
           ),
         ),
         child: Text(
           label,
-          style: GoogleFonts.inter(
-            fontSize: 9.5,
-            fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-            color: isActive ? Colors.white : Colors.white70,
-          ),
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(fontWeight: isActive ? FontWeight.bold : FontWeight.normal, color: isActive ? AppColors.textPrimary : AppColors.textSecondary),
         ),
       ),
     );
@@ -136,11 +132,11 @@ class _ContributionHeatmapState extends State<ContributionHeatmap> {
             children: [
               Text(
                 AppLocalizations.of(context).heatmapTitle,
-                style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
               ),
               Text(
                 AppLocalizations.of(context).heatmapYearTotal(selectedYear, yearTotal),
-                style: GoogleFonts.outfit(fontSize: 11, color: HeatmapColors.neonPurple, fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.bold, color: HeatmapColors.neonPurple),
               ),
             ],
           ),
@@ -155,7 +151,7 @@ class _ContributionHeatmapState extends State<ContributionHeatmap> {
                 children: [
                   IconButton(
                     icon: const Icon(Icons.chevron_left_rounded),
-                    color: selectedYear > _minYear ? Colors.white : Colors.white24,
+                    color: selectedYear > _minYear ? AppColors.textPrimary : AppColors.textTertiary,
                     onPressed: selectedYear > _minYear ? () => _changeYear(-1) : null,
                     constraints: const BoxConstraints(),
                     padding: const EdgeInsets.all(4),
@@ -166,12 +162,12 @@ class _ContributionHeatmapState extends State<ContributionHeatmap> {
                     child: Text(
                       '$selectedYear',
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.outfit(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                     ),
                   ),
                   IconButton(
                     icon: const Icon(Icons.chevron_right_rounded),
-                    color: selectedYear < _maxYear ? Colors.white : Colors.white24,
+                    color: selectedYear < _maxYear ? AppColors.textPrimary : AppColors.textTertiary,
                     onPressed: selectedYear < _maxYear ? () => _changeYear(1) : null,
                     constraints: const BoxConstraints(),
                     padding: const EdgeInsets.all(4),
@@ -210,11 +206,11 @@ class _ContributionHeatmapState extends State<ContributionHeatmap> {
               Expanded(
                 child: RichText(
                   text: TextSpan(
-                    style: GoogleFonts.inter(fontSize: 10.5, color: Colors.white70),
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.textSecondary),
                     children: [
                       TextSpan(
                         text: '${formatLongDate(context, selectedDate)} ',
-                        style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                        style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                       ),
                       TextSpan(
                         text: (selectedMovies + selectedTv) == 0 ? AppLocalizations.of(context).heatmapNoRecordOnDay : '• ',

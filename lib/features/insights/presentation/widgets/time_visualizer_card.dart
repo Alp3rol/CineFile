@@ -1,8 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../insights_provider.dart';
 
@@ -64,7 +63,7 @@ class _TimeVisualizerCardState extends State<TimeVisualizerCard> {
         children: [
           Text(
             l10n.timeVisualizerTitle,
-            style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
           ),
           const SizedBox(height: 14),
           Row(
@@ -73,7 +72,7 @@ class _TimeVisualizerCardState extends State<TimeVisualizerCard> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.05),
+                  color: AppColors.textPrimary.withValues(alpha: AppOpacity.faint),
                   shape: BoxShape.circle,
                 ),
                 child: Text(
@@ -88,20 +87,12 @@ class _TimeVisualizerCardState extends State<TimeVisualizerCard> {
                   children: [
                     Text(
                       selected.text,
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.85),
-                        height: 1.4,
-                      ),
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(color: AppColors.textPrimary.withValues(alpha: AppOpacity.overlay), height: 1.4),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       l10n.timeVisualizerFooter,
-                      style: GoogleFonts.inter(
-                        fontSize: 9,
-                        color: AppTheme.textSecondary.withValues(alpha: 0.7),
-                        fontStyle: FontStyle.italic,
-                      ),
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.textSecondary.withValues(alpha: 0.7), fontStyle: FontStyle.italic),
                     ),
                   ],
                 ),

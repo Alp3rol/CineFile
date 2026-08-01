@@ -37,6 +37,17 @@ abstract final class AppColors {
   /// info cards, the achievement grid, the profile header).
   static const Color surfaceIndigo = Color(0xFF1E1B4B);
 
+  /// The other two stops of the indigo → violet → navy panel gradient behind
+  /// the achievement surfaces.
+  ///
+  /// That gradient was written out twice with the same first and last stop and
+  /// a *different* middle one — `0xFF31103F` in the achievements grid,
+  /// `0xFF2E1035` in the badge dialog. Two nearly identical violets is what a
+  /// copy-paste looks like after someone nudges one of them. This is the
+  /// second one; the grid moves to it.
+  static const Color surfaceViolet = Color(0xFF2E1035);
+  static const Color surfaceNavy = Color(0xFF0F172A);
+
   // ---------------------------------------------------------------------
   // Brand
   // ---------------------------------------------------------------------

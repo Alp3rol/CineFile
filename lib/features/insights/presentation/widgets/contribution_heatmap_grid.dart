@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
 import '../../../../core/l10n/date_text.dart';
 import 'contribution_heatmap_utils.dart';
 
@@ -57,11 +56,7 @@ class _ContributionHeatmapGridState extends State<ContributionHeatmapGrid> {
             width: ContributionHeatmapGrid.rowStride * 4, // roughly a month's worth of columns
             child: Text(
               monthName,
-              style: GoogleFonts.inter(
-                fontSize: 9,
-                color: AppTheme.textSecondary,
-                fontWeight: FontWeight.w600,
-              ),
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.w600),
             ),
           ),
         );
@@ -80,11 +75,7 @@ class _ContributionHeatmapGridState extends State<ContributionHeatmapGrid> {
       child: Center(
         child: Text(
           label,
-          style: GoogleFonts.inter(
-            fontSize: 8.5,
-            color: AppTheme.textSecondary,
-            fontWeight: FontWeight.w500,
-          ),
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.w500),
         ),
       ),
     );
@@ -196,8 +187,8 @@ class _ContributionHeatmapGridState extends State<ContributionHeatmapGrid> {
                                       ),
                                       decoration: HeatmapColors.cellDecoration(movies, tv, boosted: isSelected).copyWith(
                                         border: isSelected
-                                            ? Border.all(color: Colors.white, width: 1.0)
-                                            : Border.all(color: Colors.transparent, width: 0.5),
+                                            ? Border.all(color: AppColors.textPrimary, width: 1.0)
+                                            : Border.all(color: AppColors.transparent, width: 0.5),
                                       ),
                                     ),
                                   ),

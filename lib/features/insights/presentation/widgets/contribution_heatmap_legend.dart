@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
 import 'contribution_heatmap_utils.dart';
 
 // The two legend rows (color-intensity swatches + film/tv/both labels)
@@ -21,7 +20,7 @@ class ContributionHeatmapLegend extends StatelessWidget {
     );
   }
 
-  Widget _legendLabel(String label, Color color) {
+  Widget _legendLabel(BuildContext context, String label, Color color) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -36,11 +35,7 @@ class ContributionHeatmapLegend extends StatelessWidget {
         const SizedBox(width: 6),
         Text(
           label,
-          style: GoogleFonts.inter(
-            fontSize: 11,
-            color: AppTheme.textSecondary,
-            fontWeight: FontWeight.w500,
-          ),
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.w500),
         ),
       ],
     );
@@ -55,7 +50,7 @@ class ContributionHeatmapLegend extends StatelessWidget {
           children: [
             Text(
               AppLocalizations.of(context).heatmapLegendLess,
-              style: GoogleFonts.inter(fontSize: 11, color: AppTheme.textSecondary),
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(color: AppColors.textSecondary),
             ),
             const SizedBox(width: 8),
             _legendCell(HeatmapColors.neonCyan, 0.3),
@@ -69,7 +64,7 @@ class ContributionHeatmapLegend extends StatelessWidget {
             const SizedBox(width: 8),
             Text(
               AppLocalizations.of(context).heatmapLegendMore,
-              style: GoogleFonts.inter(fontSize: 11, color: AppTheme.textSecondary),
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(color: AppColors.textSecondary),
             ),
           ],
         ),
@@ -77,11 +72,11 @@ class ContributionHeatmapLegend extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            _legendLabel(AppLocalizations.of(context).heatmapLegendMovie, HeatmapColors.neonCyan),
+            _legendLabel(context, AppLocalizations.of(context).heatmapLegendMovie, HeatmapColors.neonCyan),
             const SizedBox(width: 14),
-            _legendLabel(AppLocalizations.of(context).heatmapLegendShow, HeatmapColors.neonPink),
+            _legendLabel(context, AppLocalizations.of(context).heatmapLegendShow, HeatmapColors.neonPink),
             const SizedBox(width: 14),
-            _legendLabel(AppLocalizations.of(context).heatmapLegendBoth, HeatmapColors.neonPurple),
+            _legendLabel(context, AppLocalizations.of(context).heatmapLegendBoth, HeatmapColors.neonPurple),
           ],
         ),
       ],

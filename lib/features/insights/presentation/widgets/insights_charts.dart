@@ -1,9 +1,9 @@
+import 'insight_palette.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/ui/ui.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../../../core/l10n/date_text.dart';
 import '../../../../core/l10n/genre_names.dart';
-import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../insights_provider.dart';
@@ -26,13 +26,13 @@ class MonthlyChartCard extends StatelessWidget {
           barRods: [
             BarChartRodData(
               toY: value,
-              color: AppTheme.accentColor,
+              color: AppColors.accent,
               width: 10,
               borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
               backDrawRodData: BackgroundBarChartRodData(
                 show: true,
                 toY: 5.0, // default max bar helper background
-                color: Colors.white.withValues(alpha: 0.04),
+                color: AppColors.textPrimary.withValues(alpha: AppOpacity.faint),
               ),
             ),
           ],
@@ -49,7 +49,7 @@ class MonthlyChartCard extends StatelessWidget {
         children: [
           Text(
             AppLocalizations.of(context).insightsMonthlyChartTitle(currentYear),
-            style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
           ),
           const SizedBox(height: 24),
           SizedBox(
@@ -61,14 +61,13 @@ class MonthlyChartCard extends StatelessWidget {
                 barTouchData: BarTouchData(
                   enabled: true,
                   touchTooltipData: BarTouchTooltipData(
-                    getTooltipColor: (_) => AppTheme.surfaceColor,
+                    getTooltipColor: (_) => AppColors.surface,
                     tooltipBorderRadius: BorderRadius.circular(8),
                     tooltipPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     getTooltipItem: (group, groupIndex, rod, rodIndex) {
                       return BarTooltipItem(
                         AppLocalizations.of(context).insightsWatchesCount(rod.toY.toInt()),
-                        GoogleFonts.inter(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
-                      );
+                        Theme.of(context).textTheme.labelMedium!.copyWith(fontWeight: FontWeight.bold, color: AppColors.textPrimary),                      );
                     },
                   ),
                 ),
@@ -85,7 +84,7 @@ class MonthlyChartCard extends StatelessWidget {
                             space: 6,
                             child: Text(
                               shortMonthName(context, index + 1),
-                              style: GoogleFonts.inter(fontSize: 9, color: AppTheme.textSecondary),
+                              style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.textSecondary),
                             ),
                           );
                         }
@@ -130,13 +129,7 @@ class GenreChartCard extends StatelessWidget {
       displayedGenres.add(MapEntry(AppLocalizations.of(context).insightsGenreOther, othersCount));
     }
 
-    final colors = [
-      Colors.redAccent,
-      Colors.blueAccent,
-      Colors.greenAccent,
-      Colors.amberAccent,
-      Colors.purpleAccent,
-    ];
+    const colors = InsightPalette.categorical;
 
     // Compute total values for percentage
     final totalValue = displayedGenres.fold<int>(0, (sum, item) => sum + item.value);
@@ -149,7 +142,7 @@ class GenreChartCard extends StatelessWidget {
         value: item.value.toDouble(),
         title: '${percentage.toStringAsFixed(0)}%',
         radius: 40,
-        titleStyle: GoogleFonts.outfit(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white),
+        titleStyle: Theme.of(context).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
       );
     });
 
@@ -162,7 +155,7 @@ class GenreChartCard extends StatelessWidget {
         children: [
           Text(
             AppLocalizations.of(context).insightsGenreChartTitle,
-            style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
           ),
           const SizedBox(height: 16),
           Row(
@@ -204,13 +197,13 @@ class GenreChartCard extends StatelessWidget {
                           Expanded(
                             child: Text(
                               item.key,
-                              style: GoogleFonts.inter(fontSize: 11, color: Colors.white, fontWeight: FontWeight.w500),
+                              style: Theme.of(context).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w500, color: AppColors.textPrimary),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           Text(
                             '${item.value}',
-                            style: GoogleFonts.outfit(fontSize: 11, color: AppTheme.textSecondary, fontWeight: FontWeight.bold),
+                            style: Theme.of(context).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.bold, color: AppColors.textSecondary),
                           ),
                         ],
                       ),
@@ -253,13 +246,13 @@ class RatingDistributionCard extends StatelessWidget {
           barRods: [
             BarChartRodData(
               toY: val,
-              color: AppTheme.ratingColor,
+              color: AppColors.rating,
               width: 14,
               borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
               backDrawRodData: BackgroundBarChartRodData(
                 show: true,
                 toY: 5.0,
-                color: Colors.white.withValues(alpha: 0.04),
+                color: AppColors.textPrimary.withValues(alpha: AppOpacity.faint),
               ),
             ),
           ],
@@ -276,7 +269,7 @@ class RatingDistributionCard extends StatelessWidget {
         children: [
           Text(
             AppLocalizations.of(context).insightsRatingChartTitle,
-            style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
           ),
           const SizedBox(height: 20),
           SizedBox(
@@ -288,14 +281,13 @@ class RatingDistributionCard extends StatelessWidget {
                 barTouchData: BarTouchData(
                   enabled: true,
                   touchTooltipData: BarTouchTooltipData(
-                    getTooltipColor: (_) => AppTheme.surfaceColor,
+                    getTooltipColor: (_) => AppColors.surface,
                     tooltipBorderRadius: BorderRadius.circular(8),
                     tooltipPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     getTooltipItem: (group, groupIndex, rod, rodIndex) {
                       return BarTooltipItem(
                         '${rod.toY.toInt()} Adet',
-                        GoogleFonts.inter(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
-                      );
+                        Theme.of(context).textTheme.labelMedium!.copyWith(fontWeight: FontWeight.bold, color: AppColors.textPrimary),                      );
                     },
                   ),
                 ),
@@ -310,7 +302,7 @@ class RatingDistributionCard extends StatelessWidget {
                           space: 4,
                           child: Text(
                             '${value.toInt()}★',
-                            style: GoogleFonts.inter(fontSize: 9, color: AppTheme.textSecondary),
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.textSecondary),
                           ),
                         );
                       },
@@ -332,9 +324,9 @@ class RatingDistributionCard extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.03),
+              color: AppColors.textPrimary.withValues(alpha: AppOpacity.faint),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.white10, width: 0.5),
+              border: Border.all(color: AppColors.border, width: 0.5),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -347,12 +339,12 @@ class RatingDistributionCard extends StatelessWidget {
                     children: [
                       Text(
                         AppLocalizations.of(context).insightsCriticProfile,
-                        style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         _criticProfileText(data.averageRating),
-                        style: GoogleFonts.inter(fontSize: 10.5, color: AppTheme.textSecondary, height: 1.4),
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.textSecondary, height: 1.4),
                       ),
                     ],
                   ),

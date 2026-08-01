@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../settings/presentation/settings_provider.dart';
 import '../insights_provider.dart';
@@ -19,31 +18,31 @@ class WeeklyGoalCard extends ConsumerWidget {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              backgroundColor: AppTheme.surfaceColor,
+              backgroundColor: AppColors.surface,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               title: Text(
                 AppLocalizations.of(context).weeklyGoalSetTitle,
-                style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
               ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     AppLocalizations.of(context).weeklyGoalQuestion,
-                    style: GoogleFonts.inter(fontSize: 12, color: Colors.white70),
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.textSecondary),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
                   Text(
                     AppLocalizations.of(context).weeklyGoalItemsCount(tempGoal),
-                    style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold, color: AppTheme.accentColor),
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold, color: AppColors.accent),
                   ),
                   const SizedBox(height: 8),
                   SliderTheme(
                     data: SliderTheme.of(context).copyWith(
-                      activeTrackColor: AppTheme.accentColor,
-                      inactiveTrackColor: Colors.grey.shade800,
-                      thumbColor: AppTheme.ratingColor,
+                      activeTrackColor: AppColors.accent,
+                      inactiveTrackColor: AppColors.border,
+                      thumbColor: AppColors.rating,
                     ),
                     child: Slider(
                       value: tempGoal.toDouble(),
@@ -62,15 +61,15 @@ class WeeklyGoalCard extends ConsumerWidget {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: Text(AppLocalizations.of(context).commonCancel, style: TextStyle(color: Colors.white70)),
+                  child: Text(AppLocalizations.of(context).commonCancel, style: TextStyle(color: AppColors.textSecondary)),
                 ),
                 ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: AppTheme.accentColor),
+                  style: ElevatedButton.styleFrom(backgroundColor: AppColors.accent),
                   onPressed: () {
                     ref.read(weeklyGoalProvider.notifier).saveGoal(tempGoal);
                     Navigator.pop(context);
                   },
-                  child: Text(AppLocalizations.of(context).commonSave, style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                  child: Text(AppLocalizations.of(context).commonSave, style: TextStyle(color: AppColors.onAccentAlt, fontWeight: FontWeight.bold)),
                 ),
               ],
             );
@@ -99,12 +98,12 @@ class WeeklyGoalCard extends ConsumerWidget {
               Expanded(
                 child: Row(
                   children: [
-                    const Icon(Icons.track_changes_rounded, color: AppTheme.accentColor, size: 20),
+                    const Icon(Icons.track_changes_rounded, color: AppColors.accent, size: 20),
                     const SizedBox(width: 8),
                     Flexible(
                       child: Text(
                         AppLocalizations.of(context).weeklyGoalTitle,
-                        style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -113,7 +112,7 @@ class WeeklyGoalCard extends ConsumerWidget {
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.edit_rounded, color: Colors.white60, size: 16),
+                icon: const Icon(Icons.edit_rounded, color: AppColors.textSecondary, size: 16),
                 onPressed: () => _showEditGoalDialog(context, ref, weeklyGoal),
                 constraints: const BoxConstraints(),
                 padding: EdgeInsets.zero,
@@ -134,18 +133,14 @@ class WeeklyGoalCard extends ConsumerWidget {
                     // translated. The bold accent on the numbers is the cost.
                     Text(
                       AppLocalizations.of(context).weeklyGoalProgress(count, weeklyGoal),
-                      style: GoogleFonts.inter(fontSize: 11.5, color: Colors.white70),
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(color: AppColors.textSecondary),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       progress >= 1.0
                           ? AppLocalizations.of(context).weeklyGoalReached
                           : AppLocalizations.of(context).weeklyGoalRemaining(weeklyGoal - count),
-                      style: GoogleFonts.inter(
-                        fontSize: 10,
-                        color: progress >= 1.0 ? Colors.greenAccent : AppTheme.textSecondary,
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(color: progress >= 1.0 ? AppColors.success : AppColors.textSecondary, fontWeight: FontWeight.w500),
                     ),
                   ],
                 ),
@@ -159,20 +154,16 @@ class WeeklyGoalCard extends ConsumerWidget {
                     height: 42,
                     child: CircularProgressIndicator(
                       value: progress,
-                      backgroundColor: Colors.white.withValues(alpha: 0.04),
+                      backgroundColor: AppColors.textPrimary.withValues(alpha: AppOpacity.faint),
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        progress >= 1.0 ? Colors.greenAccent : AppTheme.accentColor,
+                        progress >= 1.0 ? AppColors.success : AppColors.accent,
                       ),
                       strokeWidth: 4,
                     ),
                   ),
                   Text(
                     '%${(progress * 100).toInt()}',
-                    style: GoogleFonts.outfit(
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                   ),
                 ],
               ),

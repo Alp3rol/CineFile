@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../domain/achievement_models.dart';
 import '../insights_provider.dart';
@@ -18,12 +17,12 @@ class LeadersCard extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(headerIcon, size: 16, color: AppTheme.accentColor),
+            Icon(headerIcon, size: 16, color: AppColors.accent),
             const SizedBox(width: 6),
             Flexible(
               child: Text(
                 title,
-                style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -36,7 +35,7 @@ class LeadersCard extends StatelessWidget {
             padding: const EdgeInsets.all(8.0),
             child: Text(
               AppLocalizations.of(context).insightsNoRecords,
-              style: GoogleFonts.inter(fontSize: 11, color: AppTheme.textSecondary),
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(color: AppColors.textSecondary),
             ),
           )
         else
@@ -46,26 +45,26 @@ class LeadersCard extends StatelessWidget {
               margin: const EdgeInsets.only(bottom: 8),
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.03),
+                color: AppColors.textPrimary.withValues(alpha: AppOpacity.faint),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
                 children: [
                   Text(
                     '#${index + 1}',
-                    style: GoogleFonts.outfit(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.accentColor),
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.bold, color: AppColors.accent),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       item.key,
-                      style: GoogleFonts.inter(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold),
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   Text(
                     '${item.value} Kez',
-                    style: GoogleFonts.outfit(fontSize: 11, color: AppTheme.textSecondary, fontWeight: FontWeight.w600),
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w600, color: AppColors.textSecondary),
                   ),
                 ],
               ),
@@ -135,18 +134,18 @@ class _BadgesSectionState extends State<BadgesSection> {
             children: [
               Text(
                 AppLocalizations.of(context).insightsBadgesTitle,
-                style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppTheme.accentColor.withValues(alpha: 0.15),
+                  color: AppColors.accent.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: AppTheme.accentColor.withValues(alpha: 0.4), width: 1),
+                  border: Border.all(color: AppColors.accent.withValues(alpha: 0.4), width: 1),
                 ),
                 child: Text(
                   AppLocalizations.of(context).insightsBadgesEarned(unlockedCount, allBadges.length),
-                  style: GoogleFonts.outfit(fontSize: 11, color: AppTheme.accentColor, fontWeight: FontWeight.bold),
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.bold, color: AppColors.accent),
                 ),
               ),
             ],
@@ -166,12 +165,12 @@ class _BadgesSectionState extends State<BadgesSection> {
                   label: Text(AppLocalizations.of(context).achievementsAllCount(allBadges.length), style: const TextStyle(fontSize: 11)),
                   selected: selectedCategory == null,
                   onSelected: (sel) => setState(() => selectedCategory = null),
-                  selectedColor: AppTheme.accentColor,
+                  selectedColor: AppColors.accent,
                   labelStyle: TextStyle(
-                    color: selectedCategory == null ? Colors.black : Colors.white70,
+                    color: selectedCategory == null ? AppColors.onAccentAlt : AppColors.textSecondary,
                     fontWeight: FontWeight.bold,
                   ),
-                  backgroundColor: Colors.white.withValues(alpha: 0.05),
+                  backgroundColor: AppColors.textPrimary.withValues(alpha: AppOpacity.faint),
                 ),
               ),
               ...AchievementCategory.values.map((cat) {
@@ -180,16 +179,16 @@ class _BadgesSectionState extends State<BadgesSection> {
                 return Padding(
                   padding: const EdgeInsets.only(right: 6),
                   child: FilterChip(
-                    avatar: Icon(cat.icon, size: 14, color: isSelected ? Colors.black : AppTheme.accentColor),
+                    avatar: Icon(cat.icon, size: 14, color: isSelected ? AppColors.onAccentAlt : AppColors.accent),
                     label: Text('${cat.label} ($catCount)', style: const TextStyle(fontSize: 11)),
                     selected: isSelected,
                     onSelected: (sel) => setState(() => selectedCategory = sel ? cat : null),
-                    selectedColor: AppTheme.accentColor,
+                    selectedColor: AppColors.accent,
                     labelStyle: TextStyle(
-                      color: isSelected ? Colors.black : Colors.white70,
+                      color: isSelected ? AppColors.onAccentAlt : AppColors.textSecondary,
                       fontWeight: FontWeight.bold,
                     ),
-                    backgroundColor: Colors.white.withValues(alpha: 0.05),
+                    backgroundColor: AppColors.textPrimary.withValues(alpha: AppOpacity.faint),
                   ),
                 );
               }),
@@ -217,7 +216,7 @@ class _BadgesSectionState extends State<BadgesSection> {
                 borderRadius: 16,
                 opacity: badge.isUnlocked ? 0.65 : 0.25,
                 border: Border.all(
-                  color: badge.isUnlocked ? AppTheme.accentColor.withValues(alpha: 0.6) : Colors.white10,
+                  color: badge.isUnlocked ? AppColors.accent.withValues(alpha: 0.6) : AppColors.border,
                   width: badge.isUnlocked ? 1.5 : 0.5,
                 ),
                 padding: const EdgeInsets.all(12),
@@ -230,24 +229,20 @@ class _BadgesSectionState extends State<BadgesSection> {
                           padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
                             color: badge.isUnlocked
-                                ? AppTheme.accentColor.withValues(alpha: 0.15)
-                                : Colors.white.withValues(alpha: 0.04),
+                                ? AppColors.accent.withValues(alpha: 0.15)
+                                : AppColors.textPrimary.withValues(alpha: AppOpacity.faint),
                             shape: BoxShape.circle,
                           ),
                           child: Text(
                             badge.icon,
-                            style: TextStyle(fontSize: 18, color: badge.isUnlocked ? null : Colors.grey),
+                            style: TextStyle(fontSize: 18, color: badge.isUnlocked ? null : AppColors.textTertiary),
                           ),
                         ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             badge.title,
-                            style: GoogleFonts.outfit(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: badge.isUnlocked ? Colors.white : Colors.white54,
-                            ),
+                            style: Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold, color: badge.isUnlocked ? AppColors.textPrimary : AppColors.textSecondary),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -257,11 +252,7 @@ class _BadgesSectionState extends State<BadgesSection> {
                     Expanded(
                       child: Text(
                         badge.description,
-                        style: GoogleFonts.inter(
-                          fontSize: 9.5,
-                          color: badge.isUnlocked ? AppTheme.textSecondary : Colors.grey.shade600,
-                          height: 1.3,
-                        ),
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(color: badge.isUnlocked ? AppColors.textSecondary : AppColors.textTertiary, height: 1.3),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -274,9 +265,9 @@ class _BadgesSectionState extends State<BadgesSection> {
                             borderRadius: BorderRadius.circular(2),
                             child: LinearProgressIndicator(
                               value: badge.progress,
-                              backgroundColor: Colors.white.withValues(alpha: 0.04),
+                              backgroundColor: AppColors.textPrimary.withValues(alpha: AppOpacity.faint),
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                badge.isUnlocked ? AppTheme.accentColor : Colors.grey.shade700,
+                                badge.isUnlocked ? AppColors.accent : AppColors.textTertiary,
                               ),
                               minHeight: 3,
                             ),
@@ -285,11 +276,7 @@ class _BadgesSectionState extends State<BadgesSection> {
                         const SizedBox(width: 6),
                         Text(
                           '${(badge.progress * 100).toInt()}%',
-                          style: GoogleFonts.outfit(
-                            fontSize: 8.5,
-                            fontWeight: FontWeight.bold,
-                            color: badge.isUnlocked ? AppTheme.accentColor : Colors.grey,
-                          ),
+                          style: Theme.of(context).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.bold, color: badge.isUnlocked ? AppColors.accent : AppColors.textTertiary),
                         ),
                       ],
                     ),
@@ -325,11 +312,11 @@ class TagsSection extends StatelessWidget {
             children: [
               Text(
                 AppLocalizations.of(context).insightsTopTagsTitle,
-                style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
               ),
               Text(
                 AppLocalizations.of(context).insightsDistinctTags(data.topTags.length),
-                style: GoogleFonts.outfit(fontSize: 11, color: AppTheme.accentColor, fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.bold, color: AppColors.accent),
               ),
             ],
           ),
@@ -341,28 +328,21 @@ class TagsSection extends StatelessWidget {
               return Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.04),
+                  color: AppColors.textPrimary.withValues(alpha: AppOpacity.faint),
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Colors.white10, width: 0.5),
+                  border: Border.all(color: AppColors.border, width: 0.5),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       entry.key,
-                      style: GoogleFonts.inter(
-                        fontSize: 11,
-                        color: AppTheme.accentColor,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.accent, fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(width: 4),
                     Text(
                       '(${entry.value})',
-                      style: GoogleFonts.inter(
-                        fontSize: 10,
-                        color: Colors.white60,
-                      ),
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.textSecondary),
                     ),
                   ],
                 ),

@@ -1,7 +1,7 @@
+import 'achievement_surface.dart';
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
 import '../../../../core/widgets/premium_toast.dart';
 import '../../domain/achievement_models.dart';
 
@@ -24,27 +24,19 @@ class BadgeDetailDialog extends StatelessWidget {
     final isMaxTier = badge.isUnlocked && badge.currentTier >= badge.maxTier;
 
     return Dialog(
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.transparent,
       insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(28),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              const Color(0xFF1E1B4B).withValues(alpha: 0.95),
-              const Color(0xFF2E1035).withValues(alpha: 0.95),
-              const Color(0xFF0F172A).withValues(alpha: 0.98),
-            ],
-          ),
+          gradient: achievementPanelGradient,
           border: Border.all(
-            color: badge.isUnlocked ? tier.color.withValues(alpha: 0.8) : Colors.white.withValues(alpha: 0.18),
+            color: badge.isUnlocked ? tier.color.withValues(alpha: 0.8) : AppColors.textPrimary.withValues(alpha: AppOpacity.soft),
             width: badge.isUnlocked ? 2.0 : 1.0,
           ),
           boxShadow: [
             BoxShadow(
-              color: badge.isUnlocked ? tier.color.withValues(alpha: 0.3) : Colors.black45,
+              color: badge.isUnlocked ? tier.color.withValues(alpha: 0.3) : AppColors.shadow.withValues(alpha: AppOpacity.medium),
               blurRadius: 30,
               spreadRadius: 2,
             ),
@@ -62,7 +54,7 @@ class BadgeDetailDialog extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: badge.isUnlocked
                     ? tier.color.withValues(alpha: 0.2)
-                    : Colors.white.withValues(alpha: 0.05),
+                    : AppColors.textPrimary.withValues(alpha: AppOpacity.faint),
                 boxShadow: badge.isUnlocked
                     ? [
                         BoxShadow(
@@ -73,7 +65,7 @@ class BadgeDetailDialog extends StatelessWidget {
                       ]
                     : [],
                 border: Border.all(
-                  color: badge.isUnlocked ? tier.color : Colors.white24,
+                  color: badge.isUnlocked ? tier.color : AppColors.textTertiary,
                   width: 3.0,
                 ),
               ),
@@ -82,7 +74,7 @@ class BadgeDetailDialog extends StatelessWidget {
                   badge.icon,
                   style: TextStyle(
                     fontSize: 46,
-                    color: badge.isUnlocked ? null : Colors.grey.shade600,
+                    color: badge.isUnlocked ? null : AppColors.textTertiary,
                   ),
                 ),
               ),
@@ -100,7 +92,7 @@ class BadgeDetailDialog extends StatelessWidget {
                     child: Icon(
                       Icons.star_rounded,
                       size: 22,
-                      color: index < badge.currentTier ? tier.color : Colors.white24,
+                      color: index < badge.currentTier ? tier.color : AppColors.textTertiary,
                     ),
                   ),
                 ),
@@ -117,21 +109,17 @@ class BadgeDetailDialog extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.08),
+                    color: AppColors.textPrimary.withValues(alpha: AppOpacity.subtle),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(badge.category.icon, size: 13, color: AppTheme.accentColor),
+                      Icon(badge.category.icon, size: 13, color: AppColors.accent),
                       const SizedBox(width: 5),
                       Text(
                         badge.category.label(AppLocalizations.of(context)),
-                        style: GoogleFonts.inter(
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.accentColor,
-                        ),
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.bold, color: AppColors.accent),
                       ),
                     ],
                   ),
@@ -146,11 +134,7 @@ class BadgeDetailDialog extends StatelessWidget {
                     ),
                     child: Text(
                       AppLocalizations.of(context).badgeTierLevel(tier.symbol, tier.label(AppLocalizations.of(context)), badge.currentTier, badge.maxTier),
-                      style: GoogleFonts.inter(
-                        fontSize: 10.5,
-                        fontWeight: FontWeight.bold,
-                        color: tier.color,
-                      ),
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.bold, color: tier.color),
                     ),
                   ),
               ],
@@ -161,11 +145,7 @@ class BadgeDetailDialog extends StatelessWidget {
             Text(
               badge.isUnlocked ? badge.currentTierTitle : badge.title,
               textAlign: TextAlign.center,
-              style: GoogleFonts.outfit(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
             ),
             const SizedBox(height: 8),
 
@@ -173,11 +153,7 @@ class BadgeDetailDialog extends StatelessWidget {
             Text(
               badge.description,
               textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
-                fontSize: 13,
-                color: AppTheme.textSecondary,
-                height: 1.4,
-              ),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary, height: 1.4),
             ),
             const SizedBox(height: 22),
 
@@ -185,9 +161,9 @@ class BadgeDetailDialog extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.04),
+                color: AppColors.textPrimary.withValues(alpha: AppOpacity.faint),
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: Colors.white10, width: 0.6),
+                border: Border.all(color: AppColors.border, width: 0.6),
               ),
               child: Column(
                 children: [
@@ -200,21 +176,13 @@ class BadgeDetailDialog extends StatelessWidget {
                             : badge.isUnlocked
                                 ? AppLocalizations.of(context).badgeNextLevelProgress
                                 : AppLocalizations.of(context).badgeUnlockProgress,
-                        style: GoogleFonts.inter(
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.bold,
-                          color: isMaxTier ? tier.color : Colors.white70,
-                        ),
+                        style: Theme.of(context).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.bold, color: isMaxTier ? tier.color : AppColors.textSecondary),
                       ),
                       Text(
                         isMaxTier
                             ? AppLocalizations.of(context).badgeCurrentCount(badge.currentValue)
                             : '${badge.currentValue} / ${badge.nextTargetValue} (%$pct)',
-                        style: GoogleFonts.outfit(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: isMaxTier ? tier.color : Colors.white70,
-                        ),
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold, color: isMaxTier ? tier.color : AppColors.textSecondary),
                       ),
                     ],
                   ),
@@ -224,9 +192,9 @@ class BadgeDetailDialog extends StatelessWidget {
                     child: LinearProgressIndicator(
                       value: badge.progress,
                       minHeight: 7,
-                      backgroundColor: Colors.white.withValues(alpha: 0.08),
+                      backgroundColor: AppColors.textPrimary.withValues(alpha: AppOpacity.subtle),
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        badge.isUnlocked ? tier.color : Colors.grey.shade600,
+                        badge.isUnlocked ? tier.color : AppColors.textTertiary,
                       ),
                     ),
                   ),
@@ -235,11 +203,7 @@ class BadgeDetailDialog extends StatelessWidget {
                     Text(
                       AppLocalizations.of(context).badgeNextTier(badge.nextTargetValue - badge.currentValue, badge.nextTierTitle!),
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.inter(
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w600,
-                        color: AppTheme.accentColor,
-                      ),
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w600, color: AppColors.accent),
                     ),
                   ],
                 ],
@@ -260,8 +224,8 @@ class BadgeDetailDialog extends StatelessWidget {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: badge.isUnlocked ? tier.color : Colors.white12,
-                  foregroundColor: badge.isUnlocked ? Colors.black : Colors.white70,
+                  backgroundColor: badge.isUnlocked ? tier.color : AppColors.border,
+                  foregroundColor: badge.isUnlocked ? AppColors.onAccentAlt : AppColors.textSecondary,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   elevation: badge.isUnlocked ? 4 : 0,
@@ -269,7 +233,7 @@ class BadgeDetailDialog extends StatelessWidget {
                 icon: const Icon(Icons.share_rounded, size: 18),
                 label: Text(
                   AppLocalizations.of(context).badgeShare,
-                  style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 14.5),
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ),
             ),

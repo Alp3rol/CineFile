@@ -1,8 +1,8 @@
+import '../widgets/achievement_surface.dart';
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
 import '../../domain/achievement_models.dart';
 import '../insights_provider.dart';
 import '../widgets/badge_detail_dialog.dart';
@@ -34,17 +34,17 @@ class _AchievementsGridScreenState extends ConsumerState<AchievementsGridScreen>
     final insights = ref.watch(insightsProvider);
 
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: AppColors.transparent,
         elevation: 0,
         title: Text(
           AppLocalizations.of(context).achievementsTitle,
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 19, color: Colors.white),
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
         ),
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -56,7 +56,7 @@ class _AchievementsGridScreenState extends ConsumerState<AchievementsGridScreen>
                   child: Text(
                     AppLocalizations.of(context).achievementsNeedRecords,
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.inter(color: AppTheme.textSecondary, fontSize: 14),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
                   ),
                 ),
               )
@@ -106,24 +106,16 @@ class _AchievementsGridScreenState extends ConsumerState<AchievementsGridScreen>
             width: double.infinity,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(24),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  const Color(0xFF1E1B4B).withValues(alpha: 0.85),
-                  const Color(0xFF31103F).withValues(alpha: 0.85),
-                  const Color(0xFF0F172A).withValues(alpha: 0.95),
-                ],
-              ),
+              gradient: achievementPanelGradient,
               boxShadow: [
                 BoxShadow(
-                  color: AppTheme.accentColor.withValues(alpha: 0.15),
+                  color: AppColors.accent.withValues(alpha: 0.15),
                   blurRadius: 25,
                   spreadRadius: 1,
                 ),
               ],
               border: Border.all(
-                color: AppTheme.accentColor.withValues(alpha: 0.4),
+                color: AppColors.accent.withValues(alpha: 0.4),
                 width: 1.5,
               ),
             ),
@@ -138,7 +130,7 @@ class _AchievementsGridScreenState extends ConsumerState<AchievementsGridScreen>
                     height: 130,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: AppTheme.accentColor.withValues(alpha: 0.12),
+                      color: AppColors.accent.withValues(alpha: 0.12),
                     ),
                   ),
                 ),
@@ -154,12 +146,10 @@ class _AchievementsGridScreenState extends ConsumerState<AchievementsGridScreen>
                             height: 60,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              gradient: const LinearGradient(
-                                colors: [Color(0xFFFFD700), Color(0xFFFF8C00)],
-                              ),
+                              gradient: achievementHighlightGradient,
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFFFFD700).withValues(alpha: 0.4),
+                                  color: AppColors.accentWarmStart.withValues(alpha: AppOpacity.medium),
                                   blurRadius: 16,
                                   spreadRadius: 2,
                                 ),
@@ -179,46 +169,30 @@ class _AchievementsGridScreenState extends ConsumerState<AchievementsGridScreen>
                                     Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                       decoration: BoxDecoration(
-                                        color: AppTheme.accentColor.withValues(alpha: 0.2),
+                                        color: AppColors.accent.withValues(alpha: 0.2),
                                         borderRadius: BorderRadius.circular(6),
-                                        border: Border.all(color: AppTheme.accentColor.withValues(alpha: 0.5), width: 0.8),
+                                        border: Border.all(color: AppColors.accent.withValues(alpha: 0.5), width: 0.8),
                                       ),
                                       child: Text(
                                         AppLocalizations.of(context).achievementsCurrentRank,
-                                        style: GoogleFonts.outfit(
-                                          fontSize: 9,
-                                          fontWeight: FontWeight.bold,
-                                          color: AppTheme.accentColor,
-                                          letterSpacing: 1.2,
-                                        ),
+                                        style: Theme.of(context).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.bold, color: AppColors.accent, letterSpacing: 1.2),
                                       ),
                                     ),
                                     const Spacer(),
                                     Text(
                                       '%$percentage',
-                                      style: GoogleFonts.outfit(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w900,
-                                        color: AppTheme.accentColor,
-                                      ),
+                                      style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900, color: AppColors.accent),
                                     ),
                                   ],
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
                                   rankTitle,
-                                  style: GoogleFonts.outfit(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
+                                  style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                                 ),
                                 Text(
                                   rankSub,
-                                  style: GoogleFonts.inter(
-                                    fontSize: 11,
-                                    color: AppTheme.textSecondary,
-                                  ),
+                                  style: Theme.of(context).textTheme.labelMedium?.copyWith(color: AppColors.textSecondary),
                                 ),
                               ],
                             ),
@@ -234,11 +208,11 @@ class _AchievementsGridScreenState extends ConsumerState<AchievementsGridScreen>
                             children: [
                               Text(
                                 AppLocalizations.of(context).achievementsProgress,
-                                style: GoogleFonts.inter(fontSize: 11, color: Colors.white70, fontWeight: FontWeight.w600),
+                                style: Theme.of(context).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w600, color: AppColors.textSecondary),
                               ),
                               Text(
                                 '$unlockedCount / $totalCount Rozet Serisi',
-                                style: GoogleFonts.outfit(fontSize: 12, color: AppTheme.accentColor, fontWeight: FontWeight.bold),
+                                style: Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold, color: AppColors.accent),
                               ),
                             ],
                           ),
@@ -248,8 +222,8 @@ class _AchievementsGridScreenState extends ConsumerState<AchievementsGridScreen>
                             child: LinearProgressIndicator(
                               value: ratio,
                               minHeight: 8,
-                              backgroundColor: Colors.white.withValues(alpha: 0.08),
-                              valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.accentColor),
+                              backgroundColor: AppColors.textPrimary.withValues(alpha: AppOpacity.subtle),
+                              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.accent),
                             ),
                           ),
                         ],
@@ -276,15 +250,15 @@ class _AchievementsGridScreenState extends ConsumerState<AchievementsGridScreen>
                     label: Text(AppLocalizations.of(context).achievementsAllCount(totalCount), style: const TextStyle(fontSize: 11.5)),
                     selected: selectedCategory == null,
                     onSelected: (_) => setState(() => selectedCategory = null),
-                    selectedColor: AppTheme.accentColor,
-                    checkmarkColor: Colors.black,
+                    selectedColor: AppColors.accent,
+                    checkmarkColor: AppColors.onAccentAlt,
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     labelStyle: TextStyle(
-                      color: selectedCategory == null ? Colors.black : Colors.white70,
+                      color: selectedCategory == null ? AppColors.onAccentAlt : AppColors.textSecondary,
                       fontWeight: FontWeight.bold,
                     ),
-                    backgroundColor: Colors.white.withValues(alpha: 0.06),
+                    backgroundColor: AppColors.textPrimary.withValues(alpha: AppOpacity.faint),
                   ),
                 ),
                 ...AchievementCategory.values.map((cat) {
@@ -293,19 +267,19 @@ class _AchievementsGridScreenState extends ConsumerState<AchievementsGridScreen>
                   return Padding(
                     padding: const EdgeInsets.only(right: 8),
                     child: FilterChip(
-                      avatar: Icon(cat.icon, size: 14, color: isSelected ? Colors.black : AppTheme.accentColor),
+                      avatar: Icon(cat.icon, size: 14, color: isSelected ? AppColors.onAccentAlt : AppColors.accent),
                       label: Text(AppLocalizations.of(context).achievementsCategoryCount(cat.label(AppLocalizations.of(context)), catCount), style: const TextStyle(fontSize: 11.5)),
                       selected: isSelected,
                       onSelected: (sel) => setState(() => selectedCategory = sel ? cat : null),
-                      selectedColor: AppTheme.accentColor,
-                      checkmarkColor: Colors.black,
+                      selectedColor: AppColors.accent,
+                      checkmarkColor: AppColors.onAccentAlt,
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       labelStyle: TextStyle(
-                        color: isSelected ? Colors.black : Colors.white70,
+                        color: isSelected ? AppColors.onAccentAlt : AppColors.textSecondary,
                         fontWeight: FontWeight.bold,
                       ),
-                      backgroundColor: Colors.white.withValues(alpha: 0.06),
+                      backgroundColor: AppColors.textPrimary.withValues(alpha: AppOpacity.faint),
                     ),
                   );
                 }),
@@ -321,13 +295,13 @@ class _AchievementsGridScreenState extends ConsumerState<AchievementsGridScreen>
             children: [
               Text(
                 AppLocalizations.of(context).achievementsShowing(filtered.length),
-                style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary, fontWeight: FontWeight.w500),
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w500, color: AppColors.textSecondary),
               ),
               Row(
                 children: [
                   Text(
                     AppLocalizations.of(context).achievementsUnlocked,
-                    style: GoogleFonts.inter(fontSize: 11.5, color: Colors.white70, fontWeight: FontWeight.w600),
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w600, color: AppColors.textSecondary),
                   ),
                   const SizedBox(width: 4),
                   Transform.scale(
@@ -335,7 +309,7 @@ class _AchievementsGridScreenState extends ConsumerState<AchievementsGridScreen>
                     child: Switch(
                       value: showUnlockedOnly,
                       onChanged: (v) => setState(() => showUnlockedOnly = v),
-                      activeThumbColor: AppTheme.accentColor,
+                      activeThumbColor: AppColors.accent,
                     ),
                   ),
                 ],
@@ -352,7 +326,7 @@ class _AchievementsGridScreenState extends ConsumerState<AchievementsGridScreen>
                     padding: const EdgeInsets.symmetric(vertical: 40),
                     child: Text(
                       AppLocalizations.of(context).achievementsNoneForFilter,
-                      style: GoogleFonts.inter(color: AppTheme.textSecondary, fontSize: 13),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary, fontSize: 13),
                     ),
                   ),
                 )
@@ -382,17 +356,17 @@ class _AchievementsGridScreenState extends ConsumerState<AchievementsGridScreen>
                             colors: badge.isUnlocked
                                 ? [
                                     tier.color.withValues(alpha: 0.25),
-                                    const Color(0xFF1E1E2E).withValues(alpha: 0.85),
+                                    AppColors.surfaceNavy.withValues(alpha: AppOpacity.overlay),
                                   ]
                                 : [
-                                    Colors.white.withValues(alpha: 0.04),
-                                    Colors.white.withValues(alpha: 0.02),
+                                    AppColors.textPrimary.withValues(alpha: AppOpacity.faint),
+                                    AppColors.textPrimary.withValues(alpha: AppOpacity.faint),
                                   ],
                           ),
                           border: Border.all(
                             color: badge.isUnlocked
                                 ? tier.color.withValues(alpha: 0.7)
-                                : Colors.white12,
+                                : AppColors.border,
                             width: badge.isUnlocked ? 1.5 : 0.8,
                           ),
                           boxShadow: badge.isUnlocked
@@ -417,7 +391,7 @@ class _AchievementsGridScreenState extends ConsumerState<AchievementsGridScreen>
                                 shape: BoxShape.circle,
                                 color: badge.isUnlocked
                                     ? tier.color.withValues(alpha: 0.2)
-                                    : Colors.white.withValues(alpha: 0.05),
+                                    : AppColors.textPrimary.withValues(alpha: AppOpacity.faint),
                                 boxShadow: badge.isUnlocked
                                     ? [
                                         BoxShadow(
@@ -428,7 +402,7 @@ class _AchievementsGridScreenState extends ConsumerState<AchievementsGridScreen>
                                       ]
                                     : [],
                                 border: Border.all(
-                                  color: badge.isUnlocked ? tier.color : Colors.white24,
+                                  color: badge.isUnlocked ? tier.color : AppColors.textTertiary,
                                   width: 2,
                                 ),
                               ),
@@ -437,7 +411,7 @@ class _AchievementsGridScreenState extends ConsumerState<AchievementsGridScreen>
                                   badge.icon,
                                   style: TextStyle(
                                     fontSize: 28,
-                                    color: badge.isUnlocked ? null : Colors.grey.shade600,
+                                    color: badge.isUnlocked ? null : AppColors.textTertiary,
                                   ),
                                 ),
                               ),
@@ -448,12 +422,7 @@ class _AchievementsGridScreenState extends ConsumerState<AchievementsGridScreen>
                             Text(
                               badge.isUnlocked ? badge.currentTierTitle : badge.title,
                               textAlign: TextAlign.center,
-                              style: GoogleFonts.outfit(
-                                fontSize: 13.5,
-                                fontWeight: FontWeight.bold,
-                                color: badge.isUnlocked ? Colors.white : Colors.white60,
-                                height: 1.2,
-                              ),
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold, color: badge.isUnlocked ? AppColors.textPrimary : AppColors.textSecondary, height: 1.2),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -466,22 +435,14 @@ class _AchievementsGridScreenState extends ConsumerState<AchievementsGridScreen>
                                 children: [
                                   Text(
                                     '${tier.symbol} Lev ${badge.currentTier}/${badge.maxTier}',
-                                    style: GoogleFonts.inter(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                      color: tier.color,
-                                    ),
+                                    style: Theme.of(context).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.bold, color: tier.color),
                                   ),
                                 ],
                               )
                             else
                               Text(
                                 AppLocalizations.of(context).badgeLockedLabel,
-                                style: GoogleFonts.inter(
-                                  fontSize: 10,
-                                  color: Colors.grey.shade500,
-                                  fontWeight: FontWeight.w500,
-                                ),
+                                style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.textTertiary, fontWeight: FontWeight.w500),
                               ),
 
                             const Spacer(),
@@ -490,11 +451,7 @@ class _AchievementsGridScreenState extends ConsumerState<AchievementsGridScreen>
                             Text(
                               badge.description,
                               textAlign: TextAlign.center,
-                              style: GoogleFonts.inter(
-                                fontSize: 9.5,
-                                color: badge.isUnlocked ? AppTheme.textSecondary : Colors.grey.shade600,
-                                height: 1.2,
-                              ),
+                              style: Theme.of(context).textTheme.labelSmall?.copyWith(color: badge.isUnlocked ? AppColors.textSecondary : AppColors.textTertiary, height: 1.2),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -508,9 +465,9 @@ class _AchievementsGridScreenState extends ConsumerState<AchievementsGridScreen>
                                     borderRadius: BorderRadius.circular(4),
                                     child: LinearProgressIndicator(
                                       value: badge.progress,
-                                      backgroundColor: Colors.white.withValues(alpha: 0.06),
+                                      backgroundColor: AppColors.textPrimary.withValues(alpha: AppOpacity.faint),
                                       valueColor: AlwaysStoppedAnimation<Color>(
-                                        badge.isUnlocked ? tier.color : Colors.grey.shade700,
+                                        badge.isUnlocked ? tier.color : AppColors.textTertiary,
                                       ),
                                       minHeight: 5,
                                     ),
@@ -519,11 +476,7 @@ class _AchievementsGridScreenState extends ConsumerState<AchievementsGridScreen>
                                 const SizedBox(width: 8),
                                 Text(
                                   '%$pct',
-                                  style: GoogleFonts.outfit(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                    color: badge.isUnlocked ? tier.color : Colors.grey,
-                                  ),
+                                  style: Theme.of(context).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.bold, color: badge.isUnlocked ? tier.color : AppColors.textTertiary),
                                 ),
                               ],
                             ),

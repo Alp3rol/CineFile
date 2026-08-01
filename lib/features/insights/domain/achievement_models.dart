@@ -1,3 +1,4 @@
+import '../../../core/ui/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../../l10n/app_localizations.dart';
@@ -34,8 +35,15 @@ extension AchievementCategoryLabel on AchievementCategory {
 }
 
 /// Badge Tier rank enum
+///
+/// The metal colours stay as literals rather than moving to [AppColors], and
+/// deliberately so: bronze, silver, gold and platinum are a fixed, universally
+/// recognised vocabulary. They are not this app's palette and must not follow
+/// it — a gold medal rendered in the brand accent is no longer a gold medal.
+/// Only `locked` takes an app colour, because "unearned" is a UI state rather
+/// than a metal.
 enum BadgeTier {
-  locked(0, Colors.grey, ''),
+  locked(0, AppColors.textTertiary, ''),
   bronze(1, Color(0xFFCD7F32), '🥉'),
   silver(2, Color(0xFFC0C0C0), '🥈'),
   gold(3, Color(0xFFFFD700), '🥇'),
