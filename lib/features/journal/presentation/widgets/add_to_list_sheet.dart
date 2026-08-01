@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/database/database_provider.dart';
 import '../../../../core/database/app_database.dart';
@@ -16,7 +15,7 @@ class AddToListSheet extends ConsumerWidget {
   static void show(BuildContext context, Movie movie) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.transparent,
       isScrollControlled: true,
       builder: (context) {
         return Padding(
@@ -47,7 +46,7 @@ class AddToListSheet extends ConsumerWidget {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.white24,
+                color: AppColors.textTertiary,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -63,42 +62,35 @@ class AddToListSheet extends ConsumerWidget {
                 children: [
                   Text(
                     AppLocalizations.of(context).collectionAddTo,
-                    style: GoogleFonts.outfit(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppColors.textPrimary),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     movieData.title,
-                    style: GoogleFonts.inter(
-                      fontSize: 11,
-                      color: AppTheme.textSecondary,
-                    ),
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(color: AppColors.textSecondary),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
               TextButton.icon(
-                icon: const Icon(Icons.add_rounded, size: 16, color: AppTheme.accentColor),
+                icon: const Icon(Icons.add_rounded, size: 16, color: AppColors.accent),
                 label: Text(
                   AppLocalizations.of(context).collectionNewList,
-                  style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.accentColor),
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold, color: AppColors.accent),
                 ),
                 onPressed: () => _showCreateListDialog(context, ref),
               ),
             ],
           ),
           const SizedBox(height: 16),
-          const Divider(color: Colors.white10, height: 1),
+          const Divider(color: AppColors.border, height: 1),
           const SizedBox(height: 12),
 
           // Lists items Grid/ListView
           listsAsync.when(
             loading: () => const Center(child: Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator())),
-            error: (err, _) => Center(child: Text(AppLocalizations.of(context).collectionsLoadFailed, style: const TextStyle(color: Colors.white))),
+            error: (err, _) => Center(child: Text(AppLocalizations.of(context).collectionsLoadFailed, style: const TextStyle(color: AppColors.textPrimary))),
             data: (lists) {
               if (lists.isEmpty) {
                 return _buildEmptyState(context, ref);
@@ -116,16 +108,16 @@ class AddToListSheet extends ConsumerWidget {
                     final isAdded = selectedListIds.contains(list.id);
 
                     return CheckboxListTile(
-                      activeColor: AppTheme.accentColor,
-                      checkColor: Colors.black,
+                      activeColor: AppColors.accent,
+                      checkColor: AppColors.onAccentAlt,
                       title: Text(
                         list.name,
-                        style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                       ),
                       subtitle: list.description != null && list.description!.trim().isNotEmpty
                           ? Text(
                               list.description!,
-                              style: GoogleFonts.inter(fontSize: 10, color: AppTheme.textSecondary),
+                              style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.textSecondary),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             )
@@ -160,11 +152,7 @@ class AddToListSheet extends ConsumerWidget {
               onPressed: () => Navigator.pop(context),
               child: Text(
                 AppLocalizations.of(context).commonOk,
-                style: GoogleFonts.outfit(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.accentColor,
-                ),
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(color: AppColors.accent),
               ),
             ),
           ),
@@ -189,12 +177,12 @@ class AddToListSheet extends ConsumerWidget {
           children: [
             Text(
               AppLocalizations.of(context).collectionNoneYet,
-              style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary),
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.textSecondary),
             ),
             const SizedBox(height: 8),
             Text(
               AppLocalizations.of(context).collectionNoneYetHint,
-              style: GoogleFonts.inter(fontSize: 10, color: Colors.white54),
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.textSecondary),
             ),
           ],
         ),

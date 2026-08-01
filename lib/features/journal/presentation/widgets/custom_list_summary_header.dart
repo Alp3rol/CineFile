@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
 import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/constants/api_constants.dart';
@@ -53,10 +52,10 @@ class CustomListSummaryHeader extends StatelessWidget {
                           fit: BoxFit.cover,
                         )
                       : Container(
-                          color: Colors.white12,
+                          color: AppColors.border,
                           width: 50,
                           height: 75,
-                          child: const Icon(Icons.collections_bookmark_rounded, color: Colors.white24, size: 24),
+                          child: const Icon(Icons.collections_bookmark_rounded, color: AppColors.textTertiary, size: 24),
                         ),
                 ),
                 const SizedBox(width: 16),
@@ -68,17 +67,13 @@ class CustomListSummaryHeader extends StatelessWidget {
                     children: [
                       Text(
                         list.name,
-                        style: GoogleFonts.outfit(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppColors.textPrimary),
                       ),
                       if (list.description != null && list.description!.trim().isNotEmpty) ...[
                         const SizedBox(height: 2),
                         Text(
                           list.description!,
-                          style: GoogleFonts.inter(fontSize: 11, color: AppTheme.textSecondary),
+                          style: Theme.of(context).textTheme.labelMedium?.copyWith(color: AppColors.textSecondary),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -91,15 +86,11 @@ class CustomListSummaryHeader extends StatelessWidget {
                         children: [
                           Text(
                             AppLocalizations.of(context).collectionTotalWatched(totalCount, watchedCount),
-                            style: GoogleFonts.inter(fontSize: 10, color: Colors.white70, fontWeight: FontWeight.bold),
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.bold),
                           ),
                           Text(
                             '%${(progress * 100).toInt()}',
-                            style: GoogleFonts.outfit(
-                              fontSize: 11,
-                              color: progress == 1.0 ? Colors.greenAccent : AppTheme.accentColor,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: Theme.of(context).textTheme.labelMedium?.copyWith(color: progress == 1.0 ? AppColors.success : AppColors.accent, fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
@@ -109,9 +100,9 @@ class CustomListSummaryHeader extends StatelessWidget {
                         child: LinearProgressIndicator(
                           value: progress,
                           minHeight: 4,
-                          backgroundColor: Colors.white12,
+                          backgroundColor: AppColors.border,
                           valueColor: AlwaysStoppedAnimation<Color>(
-                            progress == 1.0 ? Colors.greenAccent : AppTheme.accentColor,
+                            progress == 1.0 ? AppColors.success : AppColors.accent,
                           ),
                         ),
                       ),
@@ -132,11 +123,11 @@ class CustomListSummaryHeader extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
             child: Row(
               children: [
-                Icon(Icons.public_rounded, color: AppTheme.accentColor, size: 14),
+                Icon(Icons.public_rounded, color: AppColors.accent, size: 14),
                 const SizedBox(width: 6),
                 Text(
                   AppLocalizations.of(context).collectionShared,
-                  style: GoogleFonts.inter(fontSize: 11, color: AppTheme.accentColor, fontWeight: FontWeight.bold),
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(color: AppColors.accent, fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
                 TextButton(
@@ -144,7 +135,7 @@ class CustomListSummaryHeader extends StatelessWidget {
                   style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero),
                   child: Text(
                     AppLocalizations.of(context).collectionStopSharing,
-                    style: GoogleFonts.inter(fontSize: 11, color: AppTheme.textSecondary, decoration: TextDecoration.underline),
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(color: AppColors.textSecondary, decoration: TextDecoration.underline),
                   ),
                 ),
               ],

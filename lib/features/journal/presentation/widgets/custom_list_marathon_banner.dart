@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/l10n/date_text.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
 
 // "Maraton Mücadelesi" banner shown when the collection has a targetDate
 // (v0.9.0). Only rendered by the caller when list.targetDate != null.
@@ -20,23 +19,25 @@ class CustomListMarathonBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final textTheme = Theme.of(context).textTheme;
+    final isComplete = progress == 1.0;
+
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.accentColor.withValues(alpha: 0.4), width: 1.5),
-        gradient: LinearGradient(
-          colors: [
-            AppTheme.accentColor.withValues(alpha: 0.08),
-            Colors.purple.withValues(alpha: 0.04),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+        borderRadius: AppRadius.allLg,
+        border: Border.all(
+          color: AppColors.accent.withValues(alpha: AppOpacity.medium),
+          width: 1.5,
         ),
+        // A faint accent wash rather than a two-hue gradient — the second stop
+        // was Colors.purple, which appears nowhere else in the app.
+        color: AppColors.accent.withValues(alpha: AppOpacity.faint),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.accentColor.withValues(alpha: 0.05),
+            color: AppColors.accent.withValues(alpha: AppOpacity.faint),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -44,8 +45,12 @@ class CustomListMarathonBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.timer_outlined, color: AppTheme.accentColor, size: 24),
-          const SizedBox(width: 12),
+          const Icon(
+            Icons.timer_outlined,
+            color: AppColors.accent,
+            size: AppSize.iconLg,
+          ),
+          const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -54,40 +59,39 @@ class CustomListMarathonBanner extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      AppLocalizations.of(context).marathonTitle,
-                      style: GoogleFonts.outfit(
-                        fontSize: 12,
+                      l10n.marathonTitle,
+                      style: textTheme.labelLarge?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
                       ),
                     ),
                     Text(
                       formatShortDate(context, targetDate),
-                      style: GoogleFonts.inter(
-                        fontSize: 10,
+                      style: textTheme.labelSmall?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: AppTheme.accentColor,
+                        color: AppColors.accent,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: AppSpacing.xs),
                 Text(
                   targetDate.isBefore(DateTime.now())
-                      ? AppLocalizations.of(context).marathonExpired
-                      : AppLocalizations.of(context).marathonDaysLeft(targetDate.difference(DateTime.now()).inDays + 1),
-                  style: GoogleFonts.inter(
-                    fontSize: 11,
-                    color: Colors.white70,
-                  ),
+                      ? l10n.marathonExpired
+                      : l10n.marathonDaysLeft(
+                          targetDate.difference(DateTime.now()).inDays + 1,
+                        ),
+                  style: textTheme.labelMedium,
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  progress == 1.0 ? AppLocalizations.of(context).marathonCompleted : AppLocalizations.of(context).marathonRemaining(remainingCount),
-                  style: GoogleFonts.inter(
-                    fontSize: 9.5,
+                  isComplete
+                      ? l10n.marathonCompleted
+                      : l10n.marathonRemaining(remainingCount),
+                  style: textTheme.labelSmall?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: progress == 1.0 ? Colors.greenAccent : AppTheme.textSecondary,
+                    color: isComplete
+                        ? AppColors.success
+                        : AppColors.textSecondary,
                   ),
                 ),
               ],

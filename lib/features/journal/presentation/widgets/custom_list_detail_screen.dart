@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/database/database_provider.dart';
 import '../../../../core/database/app_database.dart';
@@ -89,19 +88,19 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
                       padding: const EdgeInsets.all(8),
                       borderRadius: 12,
                       opacity: 0.7,
-                      child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
+                      child: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary, size: 20),
                     ),
                   ),
                   Row(
                     children: [
                       // Edit List Button
                       IconButton(
-                        icon: const Icon(Icons.edit_note_rounded, color: Colors.white70, size: 24),
+                        icon: const Icon(Icons.edit_note_rounded, color: AppColors.textSecondary, size: 24),
                         onPressed: () => _showEditListDialog(context),
                       ),
                       // Delete List Button
                       IconButton(
-                        icon: const Icon(Icons.delete_sweep_rounded, color: Colors.redAccent, size: 24),
+                        icon: const Icon(Icons.delete_sweep_rounded, color: AppColors.error, size: 24),
                         onPressed: () => _showDeleteConfirmDialog(context),
                       ),
                     ],
@@ -111,8 +110,8 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
             ),
 
             moviesAsync.when(
-              loading: () => const Expanded(child: Center(child: CircularProgressIndicator(color: AppTheme.accentColor))),
-              error: (err, _) => Expanded(child: Center(child: Text(AppLocalizations.of(context).collectionsLoadFailed, style: const TextStyle(color: Colors.white)))),
+              loading: () => const Expanded(child: Center(child: CircularProgressIndicator(color: AppColors.accent))),
+              error: (err, _) => Expanded(child: Center(child: Text(AppLocalizations.of(context).collectionsLoadFailed, style: const TextStyle(color: AppColors.textPrimary)))),
               data: (movies) {
                 final totalCount = movies.length;
                 final watchedCount =
@@ -200,36 +199,26 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
   }
 
   // Delete confirm
-  void _showDeleteConfirmDialog(BuildContext context) {
-    showDialog(
+  Future<void> _showDeleteConfirmDialog(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    final navigator = Navigator.of(context);
+
+    final confirmed = await AppDialog.confirm(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: AppTheme.surfaceColor,
-          title: Text(AppLocalizations.of(context).collectionDeleteTitle, style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold)),
-          content: Text(
-            AppLocalizations.of(context).collectionDeleteConfirm,
-            style: const TextStyle(color: Colors.white70, fontSize: 13, height: 1.4),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(AppLocalizations.of(context).commonCancel, style: const TextStyle(color: Colors.white70)),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
-              onPressed: () async {
-                await deleteCustomList(ref, widget.list.id);
-                if (context.mounted) {
-                  Navigator.pop(context); // Close dialog
-                  Navigator.pop(context); // Go back to collections grid
-                }
-              },
-              child: Text(AppLocalizations.of(context).commonDelete, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-            ),
-          ],
-        );
-      },
+      title: l10n.collectionDeleteTitle,
+      message: l10n.collectionDeleteConfirm,
+      confirmLabel: l10n.commonDelete,
+      cancelLabel: l10n.commonCancel,
+      isDestructive: true,
     );
+
+    if (confirmed != true) return;
+
+    await deleteCustomList(ref, widget.list.id);
+    // Only one pop now: AppDialog.confirm has already closed the dialog by the
+    // time it returns, where the old inline version popped it itself and then
+    // popped the screen. Popping twice from here would take the user back past
+    // the collections grid.
+    navigator.pop();
   }
 }

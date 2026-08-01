@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/ui/ui.dart';
 import '../../../../core/l10n/date_text.dart';
-import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/database/database_provider.dart';
 import '../../../../core/database/app_database.dart';
@@ -88,7 +87,7 @@ class _CreateCollectionDialogState extends ConsumerState<CreateCollectionDialog>
   Widget build(BuildContext context) {
     final isEditMode = widget.list != null;
     return Dialog(
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.transparent,
       elevation: 0,
       insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
       child: GlassContainer(
@@ -96,7 +95,7 @@ class _CreateCollectionDialogState extends ConsumerState<CreateCollectionDialog>
         borderRadius: 24,
         padding: const EdgeInsets.all(24),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.08),
+          color: AppColors.textPrimary.withValues(alpha: AppOpacity.subtle),
           width: 1.5,
         ),
         child: Column(
@@ -111,27 +110,27 @@ class _CreateCollectionDialogState extends ConsumerState<CreateCollectionDialog>
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
                     colors: [
-                      AppTheme.accentColor.withValues(alpha: 0.2),
-                      AppTheme.ratingColor.withValues(alpha: 0.1),
+                      AppColors.accent.withValues(alpha: 0.2),
+                      AppColors.rating.withValues(alpha: 0.1),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: AppTheme.accentColor.withValues(alpha: 0.15),
+                      color: AppColors.accent.withValues(alpha: 0.15),
                       blurRadius: 15,
                       spreadRadius: 2,
                     ),
                   ],
                   border: Border.all(
-                    color: AppTheme.accentColor.withValues(alpha: 0.3),
+                    color: AppColors.accent.withValues(alpha: 0.3),
                     width: 1.5,
                   ),
                 ),
                 child: Icon(
                   isEditMode ? Icons.edit_note_rounded : Icons.collections_bookmark_rounded,
-                  color: AppTheme.accentColor,
+                  color: AppColors.accent,
                   size: 28,
                 ),
               ),
@@ -142,12 +141,7 @@ class _CreateCollectionDialogState extends ConsumerState<CreateCollectionDialog>
             Text(
               isEditMode ? AppLocalizations.of(context).collectionEditTitle : AppLocalizations.of(context).collectionCreateTitle,
               textAlign: TextAlign.center,
-              style: GoogleFonts.outfit(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                letterSpacing: -0.2,
-              ),
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: AppColors.textPrimary),
             ),
             const SizedBox(height: 6),
             Text(
@@ -155,11 +149,7 @@ class _CreateCollectionDialogState extends ConsumerState<CreateCollectionDialog>
                   ? AppLocalizations.of(context).collectionEditExplain
                   : AppLocalizations.of(context).collectionCreateExplain,
               textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
-                fontSize: 12,
-                color: AppTheme.textSecondary,
-                height: 1.4,
-              ),
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.textSecondary, height: 1.4),
             ),
             const SizedBox(height: 24),
 
@@ -167,12 +157,12 @@ class _CreateCollectionDialogState extends ConsumerState<CreateCollectionDialog>
             TextField(
               controller: _nameController,
               autofocus: !isEditMode,
-              style: GoogleFonts.inter(color: Colors.white, fontSize: 14),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
               decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.bookmark_border_rounded, color: Colors.white54, size: 20),
+                prefixIcon: const Icon(Icons.bookmark_border_rounded, color: AppColors.textSecondary, size: 20),
                 hintText: AppLocalizations.of(context).collectionNameHint,
                 labelText: AppLocalizations.of(context).collectionNameLabel,
-                labelStyle: GoogleFonts.inter(color: Colors.white54),
+                labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
               ),
             ),
             const SizedBox(height: 16),
@@ -180,13 +170,13 @@ class _CreateCollectionDialogState extends ConsumerState<CreateCollectionDialog>
             // Description Field
             TextField(
               controller: _descController,
-              style: GoogleFonts.inter(color: Colors.white, fontSize: 14),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
               maxLines: 2,
               decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.notes_rounded, color: Colors.white54, size: 20),
+                prefixIcon: const Icon(Icons.notes_rounded, color: AppColors.textSecondary, size: 20),
                 hintText: AppLocalizations.of(context).collectionDescriptionHint,
                 labelText: AppLocalizations.of(context).collectionDescriptionLabel,
-                labelStyle: GoogleFonts.inter(color: Colors.white54),
+                labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
               ),
             ),
             const SizedBox(height: 20),
@@ -194,15 +184,11 @@ class _CreateCollectionDialogState extends ConsumerState<CreateCollectionDialog>
             // Marathon Target Date Title
             Row(
               children: [
-                const Icon(Icons.flag_rounded, color: AppTheme.ratingColor, size: 18),
+                const Icon(Icons.flag_rounded, color: AppColors.rating, size: 18),
                 const SizedBox(width: 6),
                 Text(
                   AppLocalizations.of(context).collectionTargetDateLabel,
-                  style: GoogleFonts.outfit(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white70,
-                  ),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600, color: AppColors.textSecondary),
                 ),
               ],
             ),
@@ -214,19 +200,19 @@ class _CreateCollectionDialogState extends ConsumerState<CreateCollectionDialog>
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.15),
+                  color: AppColors.surfaceSunken.withValues(alpha: AppOpacity.soft),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: _selectedTargetDate != null
-                        ? AppTheme.accentColor.withValues(alpha: 0.3)
-                        : Colors.white.withValues(alpha: 0.06),
+                        ? AppColors.accent.withValues(alpha: 0.3)
+                        : AppColors.textPrimary.withValues(alpha: AppOpacity.faint),
                   ),
                 ),
                 child: Row(
                   children: [
                     Icon(
                       Icons.calendar_today_rounded,
-                      color: _selectedTargetDate != null ? AppTheme.accentColor : Colors.white38,
+                      color: _selectedTargetDate != null ? AppColors.accent : AppColors.textTertiary,
                       size: 16,
                     ),
                     const SizedBox(width: 10),
@@ -235,11 +221,7 @@ class _CreateCollectionDialogState extends ConsumerState<CreateCollectionDialog>
                         _selectedTargetDate == null
                             ? AppLocalizations.of(context).collectionTargetDatePick
                             : formatShortDate(context, _selectedTargetDate!),
-                        style: GoogleFonts.inter(
-                          fontSize: 13,
-                          color: _selectedTargetDate != null ? Colors.white : Colors.white30,
-                          fontWeight: _selectedTargetDate != null ? FontWeight.w500 : FontWeight.normal,
-                        ),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: _selectedTargetDate != null ? AppColors.textPrimary : AppColors.textTertiary, fontWeight: _selectedTargetDate != null ? FontWeight.w500 : FontWeight.normal),
                       ),
                     ),
                     if (_selectedTargetDate != null)
@@ -251,7 +233,7 @@ class _CreateCollectionDialogState extends ConsumerState<CreateCollectionDialog>
                         },
                         child: const Icon(
                           Icons.close_rounded,
-                          color: Colors.redAccent,
+                          color: AppColors.error,
                           size: 18,
                         ),
                       ),
@@ -264,58 +246,26 @@ class _CreateCollectionDialogState extends ConsumerState<CreateCollectionDialog>
             // Action Buttons
             Row(
               children: [
+                // The confirm button used to carry a fourth distinct primary
+                // gradient (accent to accentSubtle), after the home hero's,
+                // the detail screen's warm one, and the TV dialog's. All four
+                // were the same control.
                 Expanded(
-                  child: OutlinedButton(
+                  child: AppButton(
+                    label: AppLocalizations.of(context).commonCancel,
+                    variant: AppButtonVariant.secondary,
+                    isFullWidth: true,
                     onPressed: () => Navigator.pop(context),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.white70,
-                      side: BorderSide(color: Colors.white.withValues(alpha: 0.12)),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                    child: Text(
-                      AppLocalizations.of(context).commonCancel,
-                      style: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 14),
-                    ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: AppSpacing.md),
                 Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(14),
-                      gradient: const LinearGradient(
-                        colors: [
-                          Color(0xFFE8362E), // Cinematic Red
-                          Color(0xFFFA584F), // Vibrant Crimson
-                        ],
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppTheme.accentColor.withValues(alpha: 0.3),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: ElevatedButton(
-                      onPressed: _saveCollection,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        foregroundColor: Colors.white,
-                        shadowColor: Colors.transparent,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                      ),
-                      child: Text(
-                        isEditMode ? AppLocalizations.of(context).commonSave : AppLocalizations.of(context).commonCreate,
-                        style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 14),
-                      ),
-                    ),
+                  child: AppButton(
+                    label: isEditMode
+                        ? AppLocalizations.of(context).commonSave
+                        : AppLocalizations.of(context).commonCreate,
+                    isFullWidth: true,
+                    onPressed: _saveCollection,
                   ),
                 ),
               ],

@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/ui/ui.dart';
 import '../../../../core/widgets/app_network_image.dart';
-import '../../../../core/theme/app_theme.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/database/database_provider.dart';
 import '../../../../core/database/app_database.dart';
@@ -30,10 +29,10 @@ class _CustomListsTabState extends ConsumerState<CustomListsTab>
     final allWatchRecordsAsync = ref.watch(allWatchRecordsProvider);
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.transparent,
       body: customListsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.accentColor)),
-        error: (err, stack) => Center(child: Text(AppLocalizations.of(context).collectionsLoadFailed, style: const TextStyle(color: Colors.white))),
+        loading: () => const Center(child: CircularProgressIndicator(color: AppColors.accent)),
+        error: (err, stack) => Center(child: Text(AppLocalizations.of(context).collectionsLoadFailed, style: const TextStyle(color: AppColors.textPrimary))),
         data: (lists) {
           if (lists.isEmpty) {
             return _buildEmptyState(context, ref);
@@ -53,14 +52,10 @@ class _CustomListsTabState extends ConsumerState<CustomListsTab>
                   children: [
                     Text(
                       AppLocalizations.of(context).collectionsTitle,
-                      style: GoogleFonts.outfit(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white70,
-                      ),
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(color: AppColors.textSecondary),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.add_box_rounded, color: AppTheme.accentColor, size: 28),
+                      icon: const Icon(Icons.add_box_rounded, color: AppColors.accent, size: 28),
                       onPressed: () => _showCreateListDialog(context, ref),
                     ),
                   ],
@@ -98,8 +93,8 @@ class _CustomListsTabState extends ConsumerState<CustomListsTab>
     final moviesAsync = ref.watch(moviesInCustomListProvider(list.id));
 
     return moviesAsync.when(
-      loading: () => const Card(color: Colors.black26),
-      error: (error, stackTrace) => const Card(color: Colors.black26),
+      loading: () => const Card(color: AppColors.surface),
+      error: (error, stackTrace) => const Card(color: AppColors.surface),
       data: (movies) {
         final totalCount = movies.length;
         final watchedCount =
@@ -140,12 +135,12 @@ class _CustomListsTabState extends ConsumerState<CustomListsTab>
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                               colors: [
-                                Colors.blueGrey.shade900,
-                                Colors.grey.shade900,
+                                AppColors.surfaceRaised,
+                                AppColors.surface,
                               ],
                             ),
                           ),
-                          child: const Icon(Icons.collections_bookmark_rounded, color: Colors.white24, size: 40),
+                          child: const Icon(Icons.collections_bookmark_rounded, color: AppColors.textTertiary, size: 40),
                         ),
                 ),
 
@@ -157,8 +152,8 @@ class _CustomListsTabState extends ConsumerState<CustomListsTab>
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
-                          Colors.black.withValues(alpha: 0.1),
-                          Colors.black.withValues(alpha: 0.85),
+                          AppColors.shadow.withValues(alpha: AppOpacity.subtle),
+                          AppColors.shadow.withValues(alpha: AppOpacity.overlay),
                         ],
                       ),
                     ),
@@ -176,11 +171,7 @@ class _CustomListsTabState extends ConsumerState<CustomListsTab>
                     children: [
                       Text(
                         list.name,
-                        style: GoogleFonts.outfit(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(color: AppColors.textPrimary),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -188,10 +179,7 @@ class _CustomListsTabState extends ConsumerState<CustomListsTab>
                       if (list.description != null && list.description!.trim().isNotEmpty)
                         Text(
                           list.description!,
-                          style: GoogleFonts.inter(
-                            fontSize: 10,
-                            color: Colors.white60,
-                          ),
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.textSecondary),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -203,15 +191,11 @@ class _CustomListsTabState extends ConsumerState<CustomListsTab>
                         children: [
                           Text(
                             '$totalCount Film',
-                            style: GoogleFonts.inter(fontSize: 10, color: AppTheme.textSecondary, fontWeight: FontWeight.bold),
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.bold),
                           ),
                           Text(
                             AppLocalizations.of(context).collectionProgressPercent((progress * 100).toInt()),
-                            style: GoogleFonts.inter(
-                              fontSize: 10,
-                              color: progress == 1.0 ? Colors.greenAccent : AppTheme.accentColor,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(color: progress == 1.0 ? AppColors.success : AppColors.accent, fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
@@ -223,9 +207,9 @@ class _CustomListsTabState extends ConsumerState<CustomListsTab>
                         child: LinearProgressIndicator(
                           value: progress,
                           minHeight: 4,
-                          backgroundColor: Colors.white12,
+                          backgroundColor: AppColors.border,
                           valueColor: AlwaysStoppedAnimation<Color>(
-                            progress == 1.0 ? Colors.greenAccent : AppTheme.accentColor,
+                            progress == 1.0 ? AppColors.success : AppColors.accent,
                           ),
                         ),
                       ),
@@ -259,38 +243,30 @@ class _CustomListsTabState extends ConsumerState<CustomListsTab>
             Icon(
               Icons.collections_bookmark_rounded,
               size: 64,
-              color: AppTheme.textSecondary.withValues(alpha: 0.3),
+              color: AppColors.textSecondary.withValues(alpha: 0.3),
             ),
             const SizedBox(height: 16),
             Text(
               AppLocalizations.of(context).collectionsEmptyTitle,
-              style: GoogleFonts.outfit(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.white70,
-              ),
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppColors.textSecondary),
             ),
             const SizedBox(height: 8),
             Text(
               AppLocalizations.of(context).collectionsEmptyHint,
-              style: GoogleFonts.inter(
-                fontSize: 12,
-                color: AppTheme.textSecondary,
-                height: 1.4,
-              ),
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.textSecondary, height: 1.4),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.accentColor,
+                backgroundColor: AppColors.accent,
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              icon: const Icon(Icons.add_rounded, color: Colors.black),
+              icon: const Icon(Icons.add_rounded, color: AppColors.onAccentAlt),
               label: Text(
                 AppLocalizations.of(context).collectionsCreate,
-                style: GoogleFonts.outfit(color: Colors.black, fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppColors.onAccentAlt),
               ),
               onPressed: () => _showCreateListDialog(context, ref),
             ),
