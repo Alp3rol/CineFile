@@ -234,45 +234,14 @@ class _CustomListsTabState extends ConsumerState<CustomListsTab>
 
   // Empty state placeholder
   Widget _buildEmptyState(BuildContext context, WidgetRef ref) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.collections_bookmark_rounded,
-              size: 64,
-              color: AppColors.textSecondary.withValues(alpha: 0.3),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              AppLocalizations.of(context).collectionsEmptyTitle,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppColors.textSecondary),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              AppLocalizations.of(context).collectionsEmptyHint,
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.textSecondary, height: 1.4),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.accent,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-              icon: const Icon(Icons.add_rounded, color: AppColors.onAccentAlt),
-              label: Text(
-                AppLocalizations.of(context).collectionsCreate,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppColors.onAccentAlt),
-              ),
-              onPressed: () => _showCreateListDialog(context, ref),
-            ),
-          ],
-        ),
-      ),
+    final l10n = AppLocalizations.of(context);
+
+    return AppEmptyState(
+      icon: Icons.collections_bookmark_rounded,
+      title: l10n.collectionsEmptyTitle,
+      subtitle: l10n.collectionsEmptyHint,
+      ctaLabel: l10n.collectionsCreate,
+      onCta: () => _showCreateListDialog(context, ref),
     );
   }
 }

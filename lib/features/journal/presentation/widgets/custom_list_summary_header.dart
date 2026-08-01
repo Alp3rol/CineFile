@@ -130,9 +130,18 @@ class CustomListSummaryHeader extends StatelessWidget {
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(color: AppColors.accent, fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
+                // The one styleFrom left in this feature, and deliberate: this
+                // is an underlined link sitting inline at the end of a status
+                // row, so it has to collapse to text height. AppButton's ghost
+                // variant is a button — it keeps the 36px minimum that would
+                // push this row taller than the line it belongs to.
                 TextButton(
                   onPressed: onStopSharing,
-                  style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero),
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
                   child: Text(
                     AppLocalizations.of(context).collectionStopSharing,
                     style: Theme.of(context).textTheme.labelMedium?.copyWith(color: AppColors.textSecondary, decoration: TextDecoration.underline),

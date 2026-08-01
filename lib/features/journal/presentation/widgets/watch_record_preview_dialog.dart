@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/l10n/date_text.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
+import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/database/app_database.dart';
@@ -11,33 +10,94 @@ import '../../../../core/database/database_provider.dart';
 import '../../../../core/widgets/premium_date_picker.dart';
 import '../../../../core/widgets/premium_toast.dart';
 
-Widget _buildPreviewDetailRow(IconData icon, String label, String value, {VoidCallback? onEdit}) {
-  return Row(
-    children: [
-      Icon(icon, size: 14, color: AppTheme.textSecondary),
-      const SizedBox(width: 8),
-      Text(
-        '$label: ',
-        style: GoogleFonts.inter(fontSize: 11, color: AppTheme.textSecondary, fontWeight: FontWeight.bold),
-      ),
-      Expanded(
-        child: Text(
-          value,
-          style: GoogleFonts.inter(fontSize: 11, color: Colors.white70),
-          overflow: TextOverflow.ellipsis,
+/// One "label: value" line in the preview, with an optional edit affordance.
+class _PreviewDetailRow extends StatelessWidget {
+  const _PreviewDetailRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+    this.onEdit,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+  final VoidCallback? onEdit;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
+    return Row(
+      children: [
+        Icon(icon, size: AppSize.iconSm, color: AppColors.textSecondary),
+        const SizedBox(width: AppSpacing.sm),
+        Text(
+          '$label: ',
+          style: textTheme.labelMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
-      ),
-      if (onEdit != null)
-        InkWell(
-          onTap: onEdit,
-          borderRadius: BorderRadius.circular(4),
-          child: const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0),
-            child: Icon(Icons.edit_rounded, size: 14, color: AppTheme.accentColor),
+        Expanded(
+          child: Text(
+            value,
+            style: textTheme.labelMedium,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
-    ],
-  );
+        if (onEdit != null)
+          AppPressable(
+            onTap: onEdit,
+            borderRadius: AppRadius.xs,
+            semanticLabel: label,
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.sm,
+              vertical: 2,
+            ),
+            child: const Icon(
+              Icons.edit_rounded,
+              size: AppSize.iconSm,
+              color: AppColors.accent,
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+/// Prompts for a new episode count. Returns null when dismissed or left blank.
+Future<int?> _askEpisodeCount(BuildContext context, int current) {
+  final controller = TextEditingController(text: current.toString());
+
+  return AppDialog.show<int>(
+    context: context,
+    builder: (dialogContext) {
+      final l10n = AppLocalizations.of(dialogContext);
+
+      return AlertDialog(
+        title: Text(l10n.recordEpisodeCount),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          autofocus: true,
+          decoration: InputDecoration(hintText: l10n.recordEpisodeCountHint),
+        ),
+        actions: [
+          AppButton(
+            label: l10n.commonCancel,
+            variant: AppButtonVariant.ghost,
+            onPressed: () => Navigator.pop(dialogContext),
+          ),
+          AppButton(
+            label: l10n.commonSave,
+            onPressed: () {
+              final val = int.tryParse(controller.text);
+              if (val != null && val > 0) Navigator.pop(dialogContext, val);
+            },
+          ),
+        ],
+      );
+    },
+    // This controller was never disposed at all before.
+  ).whenComplete(controller.dispose);
 }
 
 // Quick info long-press modal preview with Ranking editing
@@ -55,366 +115,323 @@ void showWatchRecordPreviewDialog(
   DateTime currentDate = record.watchDate;
   int currentEpisodeCount = record.episodeCount;
   bool currentIsPublic = record.isPublic;
-  final rankController = TextEditingController(text: setting?.personalRanking?.toString() ?? '');
+  final rankController =
+      TextEditingController(text: setting?.personalRanking?.toString() ?? '');
 
-  showDialog(
+  AppDialog.show<void>(
     context: context,
-    builder: (context) {
+    builder: (dialogContext) {
       return StatefulBuilder(
         builder: (context, setState) {
+          final l10n = AppLocalizations.of(context);
+          final textTheme = Theme.of(context).textTheme;
           final dateStr = formatShortDate(context, currentDate);
 
-      return Dialog(
-        backgroundColor: Colors.transparent,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: GlassContainer(
-          padding: const EdgeInsets.all(20),
-          borderRadius: 20,
-          opacity: 0.85,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header Area
-              Row(
+          Future<void> applyRank(int? newRank) async {
+            try {
+              await onUpdateRanking(
+                  {(tmdbId: movie.tmdbId, isTv: movie.isTv): newRank});
+              if (context.mounted) Navigator.pop(context);
+            } catch (e) {
+              if (context.mounted) {
+                showPremiumToast(context, l10n.journalReorderFailed,
+                    isError: true);
+              }
+            }
+          }
+
+          return Dialog(
+            backgroundColor: AppColors.transparent,
+            child: GlassContainer(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              borderRadius: AppRadius.xl,
+              opacity: AppOpacity.overlay,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(6),
-                    child: CachedNetworkImage(
-                      imageUrl: movie.posterPath != null
-                          ? '${ApiConstants.imagePathW185}${movie.posterPath}'
-                          : '',
-                      width: 44,
-                      height: 66,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          movie.title,
-                          style: GoogleFonts.outfit(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
+                  // Header Area
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ClipRRect(
+                        borderRadius: AppRadius.allXs,
+                        child: AppNetworkImage(
+                          imageUrl: movie.posterPath != null
+                              ? '${ApiConstants.imagePathW185}${movie.posterPath}'
+                              : '',
+                          seed: movie.title,
+                          width: 44,
+                          height: 66,
+                          fit: BoxFit.cover,
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          AppLocalizations.of(context).recordYearDirector(movie.releaseYear?.toString() ?? AppLocalizations.of(context).yearUnknown, movie.director ?? AppLocalizations.of(context).directorMissing),
-                          style: GoogleFonts.inter(fontSize: 11, color: AppTheme.textSecondary),
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Icon(Icons.star_rounded, color: AppTheme.ratingColor, size: 14),
-                            const SizedBox(width: 2),
+                            Text(movie.title, style: textTheme.titleMedium),
+                            const SizedBox(height: AppSpacing.xs),
                             Text(
-                              '${record.rating}',
-                              style: GoogleFonts.outfit(
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                              l10n.recordYearDirector(
+                                movie.releaseYear?.toString() ??
+                                    l10n.yearUnknown,
+                                movie.director ?? l10n.directorMissing,
                               ),
+                              style: textTheme.labelMedium,
                             ),
-                            const SizedBox(width: 12),
-                            Text(
-                              AppLocalizations.of(context).recordMood(record.mood ?? '🍿'),
-                              style: GoogleFonts.inter(fontSize: 11, color: Colors.white70),
+                            const SizedBox(height: AppSpacing.xs),
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.star_rounded,
+                                  color: AppColors.rating,
+                                  size: AppSize.iconSm,
+                                ),
+                                const SizedBox(width: 2),
+                                Text(
+                                  '${record.rating}',
+                                  style: textTheme.bodySmall?.copyWith(
+                                    color: AppColors.textPrimary,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(width: AppSpacing.md),
+                                Text(
+                                  l10n.recordMood(record.mood ?? '🍿'),
+                                  style: textTheme.labelMedium,
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              const Divider(color: Colors.white24, height: 1),
-              const SizedBox(height: 16),
-
-              // Details Grid
-              _buildPreviewDetailRow(
-                Icons.calendar_today_rounded, 
-                AppLocalizations.of(context).journalColumnWatchDate, 
-                dateStr,
-                onEdit: () async {
-                  final pickedDate = await PremiumDatePicker.show(
-                    context,
-                    initialDate: currentDate,
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime.now(),
-                  );
-                  if (pickedDate != null) {
-                    final newDateTime = DateTime(
-                      pickedDate.year,
-                      pickedDate.month,
-                      pickedDate.day,
-                      currentDate.hour,
-                      currentDate.minute,
-                    );
-                    await onUpdateDate(newDateTime);
-                    setState(() {
-                      currentDate = newDateTime;
-                    });
-                  }
-                },
-              ),
-              if (movie.isTv) ...[
-                const SizedBox(height: 10),
-                _buildPreviewDetailRow(
-                  Icons.ondemand_video_rounded,
-                  AppLocalizations.of(context).recordEpisodesWatched,
-                  AppLocalizations.of(context).recordEpisodesCount(currentEpisodeCount),
-                  onEdit: () async {
-                    final ctrl = TextEditingController(text: currentEpisodeCount.toString());
-                    final newCount = await showDialog<int>(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        backgroundColor: AppTheme.backgroundColor,
-                        title: Text(AppLocalizations.of(context).recordEpisodeCount, style: GoogleFonts.outfit(color: Colors.white)),
-                        content: TextField(
-                          controller: ctrl,
-                          keyboardType: TextInputType.number,
-                          style: const TextStyle(color: Colors.white),
-                          decoration: InputDecoration(
-                            hintText: AppLocalizations.of(context).recordEpisodeCountHint,
-                          ),
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: Text(AppLocalizations.of(context).commonCancel, style: const TextStyle(color: Colors.white70)),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              final val = int.tryParse(ctrl.text);
-                              if (val != null && val > 0) {
-                                Navigator.pop(context, val);
-                              }
-                            },
-                            child: Text(AppLocalizations.of(context).commonSave, style: const TextStyle(color: AppTheme.accentColor)),
-                          ),
-                        ],
-                      ),
-                    );
-                    if (newCount != null) {
-                      await onUpdateEpisodes(newCount);
-                      setState(() {
-                        currentEpisodeCount = newCount;
-                      });
-                    }
-                  },
-                ),
-              ],
-              if (record.watchPlace != null) ...[
-                const SizedBox(height: 10),
-                _buildPreviewDetailRow(Icons.location_on_outlined, AppLocalizations.of(context).recordWatchPlace, record.watchPlace!),
-              ],
-              if (record.watchCompanion != null) ...[
-                const SizedBox(height: 10),
-                _buildPreviewDetailRow(Icons.people_outline_rounded, AppLocalizations.of(context).recordCompanions, record.watchCompanion!),
-              ],
-
-              // Controls ONLY the "Son İzlediklerim" section on the user's
-              // own profile — unrelated to the Community feed, which is
-              // populated by explicit posts (see share_compose_sheet.dart),
-              // not by this flag.
-              const SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.public_rounded, color: AppTheme.accentColor, size: 14),
-                      const SizedBox(width: 8),
-                      Text(
-                        AppLocalizations.of(context).addRecordVisibilityLabel,
-                        style: GoogleFonts.inter(fontSize: 11, color: AppTheme.textSecondary, fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
-                  Switch(
-                    value: currentIsPublic,
-                    activeThumbColor: AppTheme.accentColor,
-                    onChanged: (value) async {
-                      try {
-                        await onUpdatePrivacy(value);
-                        setState(() {
-                          currentIsPublic = value;
-                        });
-                      } catch (e) {
-                        if (context.mounted) {
-                          showPremiumToast(context, AppLocalizations.of(context).recordVisibilityFailed, isError: true);
-                        }
-                      }
-                    },
-                  ),
-                ],
-              ),
+                  const SizedBox(height: AppSpacing.lg),
+                  const Divider(height: 1),
+                  const SizedBox(height: AppSpacing.lg),
 
-              // Edit Ranking Row
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  const Icon(Icons.format_list_numbered_rounded, color: AppTheme.accentColor, size: 14),
-                  const SizedBox(width: 8),
-                  Text(
-                    AppLocalizations.of(context).recordMyRank,
-                    style: GoogleFonts.inter(fontSize: 11, color: AppTheme.textSecondary, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(width: 8),
-                  SizedBox(
-                    width: 50,
-                    height: 24,
-                    child: TextField(
-                      controller: rankController,
-                      keyboardType: TextInputType.number,
-                      style: GoogleFonts.inter(fontSize: 11, color: Colors.white),
-                      textAlign: TextAlign.center,
-                      decoration: InputDecoration(
-                        hintText: '-',
-                        hintStyle: const TextStyle(color: Colors.grey),
-                        contentPadding: EdgeInsets.zero,
-                        filled: true,
-                        fillColor: Colors.black38,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: BorderSide.none),
-                      ),
-                      onSubmitted: (val) async {
-                        final newRank = val.trim().isEmpty ? null : int.tryParse(val.trim());
-                        try {
-                          await onUpdateRanking({(tmdbId: movie.tmdbId, isTv: movie.isTv): newRank});
-                          if (context.mounted) Navigator.pop(context);
-                        } catch (e) {
-                          if (context.mounted) {
-                            showPremiumToast(context, AppLocalizations.of(context).journalReorderFailed, isError: true);
-                          }
-                        }
-                      },
-                    ),
-                  ),
-                  const Spacer(),
-                  if (setting?.personalRanking != null)
-                     TextButton(
-                      onPressed: () async {
-                        try {
-                          await onUpdateRanking({(tmdbId: movie.tmdbId, isTv: movie.isTv): null});
-                          if (context.mounted) Navigator.pop(context);
-                        } catch (e) {
-                          if (context.mounted) {
-                            showPremiumToast(context, AppLocalizations.of(context).journalReorderFailed, isError: true);
-                          }
-                        }
-                      },
-                      style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero),
-                      child: Text(
-                        AppLocalizations.of(context).recordRemoveRank,
-                        style: GoogleFonts.inter(fontSize: 10, color: Colors.redAccent),
-                      ),
-                    ),
-                ],
-              ),
-
-              // Notes section
-              const SizedBox(height: 16),
-              Text(
-                AppLocalizations.of(context).recordMyNotes,
-                style: GoogleFonts.outfit(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.accentColor,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.black26,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                constraints: const BoxConstraints(maxHeight: 100),
-                child: SingleChildScrollView(
-                  child: Text(
-                    record.notes != null && record.notes!.trim().isNotEmpty
-                        ? record.notes!
-                        : AppLocalizations.of(context).recordNoNotes,
-                    style: GoogleFonts.inter(
-                      fontSize: 11,
-                      color: Colors.white.withValues(alpha: 0.8),
-                      height: 1.4,
-                    ),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextButton(
-                    onPressed: () async {
-                      final confirm = await showDialog<bool>(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          backgroundColor: AppTheme.backgroundColor,
-                          title: Text(AppLocalizations.of(context).recordDeleteConfirmTitle, style: GoogleFonts.outfit(color: Colors.white)),
-                          content: Text(AppLocalizations.of(context).recordDeleteConfirmBody, style: const TextStyle(color: Colors.white70)),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(context, false),
-                              child: Text(AppLocalizations.of(context).commonCancel, style: const TextStyle(color: Colors.white70)),
-                            ),
-                            TextButton(
-                              onPressed: () => Navigator.pop(context, true),
-                              child: Text(AppLocalizations.of(context).commonDelete, style: const TextStyle(color: Colors.redAccent)),
-                            ),
-                          ],
-                        ),
+                  // Details Grid
+                  _PreviewDetailRow(
+                    icon: Icons.calendar_today_rounded,
+                    label: l10n.journalColumnWatchDate,
+                    value: dateStr,
+                    onEdit: () async {
+                      final newDateTime = await PremiumDatePicker.show(
+                        context,
+                        initialDate: currentDate,
+                        firstDate: DateTime(1900),
+                        lastDate: DateTime.now(),
                       );
-                      if (confirm == true) {
-                        try {
-                          await onDelete();
-                          if (context.mounted) Navigator.pop(context);
-                        } catch (e) {
-                          if (context.mounted) {
-                            showPremiumToast(context, AppLocalizations.of(context).recordDeleteFailed, isError: true);
-                          }
-                        }
+                      if (newDateTime != null) {
+                        await onUpdateDate(newDateTime);
+                        setState(() => currentDate = newDateTime);
                       }
                     },
-                    child: Text(
-                      AppLocalizations.of(context).recordDelete,
-                      style: GoogleFonts.outfit(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.redAccent,
+                  ),
+                  if (movie.isTv) ...[
+                    const SizedBox(height: AppSpacing.sm),
+                    _PreviewDetailRow(
+                      icon: Icons.ondemand_video_rounded,
+                      label: l10n.recordEpisodesWatched,
+                      value: l10n.recordEpisodesCount(currentEpisodeCount),
+                      onEdit: () async {
+                        final newCount = await _askEpisodeCount(
+                            context, currentEpisodeCount);
+                        if (newCount != null) {
+                          await onUpdateEpisodes(newCount);
+                          setState(() => currentEpisodeCount = newCount);
+                        }
+                      },
+                    ),
+                  ],
+                  if (record.watchPlace != null) ...[
+                    const SizedBox(height: AppSpacing.sm),
+                    _PreviewDetailRow(
+                      icon: Icons.location_on_outlined,
+                      label: l10n.recordWatchPlace,
+                      value: record.watchPlace!,
+                    ),
+                  ],
+                  if (record.watchCompanion != null) ...[
+                    const SizedBox(height: AppSpacing.sm),
+                    _PreviewDetailRow(
+                      icon: Icons.people_outline_rounded,
+                      label: l10n.recordCompanions,
+                      value: record.watchCompanion!,
+                    ),
+                  ],
+
+                  // Controls ONLY the "Son İzlediklerim" section on the user's
+                  // own profile — unrelated to the Community feed, which is
+                  // populated by explicit posts (see share_compose_sheet.dart),
+                  // not by this flag.
+                  const SizedBox(height: AppSpacing.sm),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.public_rounded,
+                            color: AppColors.accent,
+                            size: AppSize.iconSm,
+                          ),
+                          const SizedBox(width: AppSpacing.sm),
+                          Text(
+                            l10n.addRecordVisibilityLabel,
+                            style: textTheme.labelMedium
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                      Switch(
+                        value: currentIsPublic,
+                        onChanged: (value) async {
+                          try {
+                            await onUpdatePrivacy(value);
+                            setState(() => currentIsPublic = value);
+                          } catch (e) {
+                            if (context.mounted) {
+                              showPremiumToast(
+                                  context, l10n.recordVisibilityFailed,
+                                  isError: true);
+                            }
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+
+                  // Edit Ranking Row
+                  const SizedBox(height: AppSpacing.sm),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.format_list_numbered_rounded,
+                        color: AppColors.accent,
+                        size: AppSize.iconSm,
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Text(
+                        l10n.recordMyRank,
+                        style: textTheme.labelMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      SizedBox(
+                        width: 50,
+                        height: AppSize.iconLg,
+                        child: TextField(
+                          controller: rankController,
+                          keyboardType: TextInputType.number,
+                          style: textTheme.labelMedium
+                              ?.copyWith(color: AppColors.textPrimary),
+                          textAlign: TextAlign.center,
+                          decoration: InputDecoration(
+                            hintText: '-',
+                            contentPadding: EdgeInsets.zero,
+                            fillColor: AppColors.surfaceSunken,
+                            border: OutlineInputBorder(
+                              borderRadius: AppRadius.allXs,
+                              borderSide: BorderSide.none,
+                            ),
+                          ),
+                          onSubmitted: (val) => applyRank(
+                            val.trim().isEmpty ? null : int.tryParse(val.trim()),
+                          ),
+                        ),
+                      ),
+                      const Spacer(),
+                      if (setting?.personalRanking != null)
+                        AppButton(
+                          label: l10n.recordRemoveRank,
+                          variant: AppButtonVariant.ghost,
+                          size: AppButtonSize.small,
+                          onPressed: () => applyRank(null),
+                        ),
+                    ],
+                  ),
+
+                  // Notes section
+                  const SizedBox(height: AppSpacing.lg),
+                  Text(
+                    l10n.recordMyNotes,
+                    style: textTheme.labelLarge?.copyWith(
+                      color: AppColors.accent,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(AppSpacing.sm),
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceSunken,
+                      borderRadius: AppRadius.allSm,
+                    ),
+                    constraints: const BoxConstraints(maxHeight: 100),
+                    child: SingleChildScrollView(
+                      child: Text(
+                        record.notes != null && record.notes!.trim().isNotEmpty
+                            ? record.notes!
+                            : l10n.recordNoNotes,
+                        style: textTheme.labelMedium?.copyWith(
+                          color: AppColors.textPrimary,
+                          height: 1.4,
+                        ),
                       ),
                     ),
                   ),
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text(
-                      AppLocalizations.of(context).commonClose,
-                      style: GoogleFonts.outfit(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.accentColor,
+
+                  const SizedBox(height: AppSpacing.lg),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      AppButton(
+                        label: l10n.recordDelete,
+                        variant: AppButtonVariant.destructive,
+                        size: AppButtonSize.small,
+                        onPressed: () async {
+                          final confirmed = await AppDialog.confirm(
+                            context: context,
+                            title: l10n.recordDeleteConfirmTitle,
+                            message: l10n.recordDeleteConfirmBody,
+                            confirmLabel: l10n.commonDelete,
+                            cancelLabel: l10n.commonCancel,
+                            isDestructive: true,
+                          );
+                          if (confirmed != true) return;
+
+                          try {
+                            await onDelete();
+                            if (context.mounted) Navigator.pop(context);
+                          } catch (e) {
+                            if (context.mounted) {
+                              showPremiumToast(context, l10n.recordDeleteFailed,
+                                  isError: true);
+                            }
+                          }
+                        },
                       ),
-                    ),
+                      AppButton(
+                        label: l10n.commonClose,
+                        variant: AppButtonVariant.ghost,
+                        size: AppButtonSize.small,
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
-          ),
-        ),
-      );
+            ),
+          );
         },
       );
     },
-  );
+    // Never disposed before: the preview could be opened and closed any number
+    // of times and each one left its rank controller behind.
+  ).whenComplete(rankController.dispose);
 }
