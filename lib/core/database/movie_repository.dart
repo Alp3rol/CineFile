@@ -5,6 +5,8 @@ import 'package:drift/drift.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'app_database.dart';
 import 'database_provider.dart';
+import 'custom_list_repository.dart';
+import 'backup_repository.dart';
 import '../constants/tmdb_genres.dart';
 import '../../features/auth/controllers/auth_controller.dart';
 
@@ -183,61 +185,6 @@ Movie movieFromTmdbPayload({
 // both the millisecond ints it writes and the ISO strings older web backups
 // contain.
 
-bool _backupBool(Object? value, {bool orElse = false}) {
-  if (value is bool) return value;
-  if (value is num) return value != 0;
-  if (value is String) {
-    final lower = value.trim().toLowerCase();
-    if (lower == 'true' || lower == '1') return true;
-    if (lower == 'false' || lower == '0') return false;
-  }
-  return orElse;
-}
-
-Map<String, dynamic> _movieBackupJson(Map<String, dynamic> json) => {
-      ...json,
-      'isTv': _backupBool(json['isTv']),
-    };
-
-Map<String, dynamic> _watchRecordBackupJson(Map<String, dynamic> json) => {
-      ...json,
-      'isTv': _backupBool(json['isTv']),
-      'isPublic': _backupBool(json['isPublic']),
-      'episodeCount': (json['episodeCount'] as num?)?.toInt() ?? 1,
-    };
-
-Map<String, dynamic> _userMovieSettingBackupJson(Map<String, dynamic> json) => {
-      ...json,
-      'isTv': _backupBool(json['isTv']),
-      'isFavorite': _backupBool(json['isFavorite']),
-      'isReWatchList': _backupBool(json['isReWatchList']),
-      'isActivelyWatching': _backupBool(json['isActivelyWatching']),
-    };
-
-Map<String, dynamic> _customListBackupJson(Map<String, dynamic> json) => {
-      ...json,
-      'isPublic': _backupBool(json['isPublic']),
-      'createdAt': json['createdAt'] ?? DateTime.now().millisecondsSinceEpoch,
-    };
-
-Map<String, dynamic> _customListMovieBackupJson(Map<String, dynamic> json) => {
-      ...json,
-      'isTv': _backupBool(json['isTv']),
-      'addedAt': json['addedAt'] ?? DateTime.now().millisecondsSinceEpoch,
-    };
-
-/// [Movie.fromJson] plus recovery of [Movie.genreIds] for backups written
-/// before schema 13, which only carry localized genre names. Without this a
-/// restored library would be invisible to every genre statistic until each
-/// title happened to be opened again.
-Movie _movieFromBackupJson(Map<String, dynamic> json) {
-  final movie = Movie.fromJson(_movieBackupJson(json));
-  if (movie.genreIds != null) return movie;
-
-  final recovered = formatGenreIds(genreIdsFromLegacyNames(movie.genres));
-  return recovered == null ? movie : movie.copyWith(genreIds: Value(recovered));
-}
-
 final movieRepositoryProvider = Provider<MovieRepository>((ref) {
   return kIsWeb ? WebMovieRepository(ref) : NativeMovieRepository(ref);
 });
@@ -287,18 +234,12 @@ class NativeMovieRepository implements MovieRepository {
   NativeMovieRepository(this._ref);
   final Ref _ref;
   AppDatabase get _db => _ref.read(databaseProvider);
+  CustomListRepository get _customListRepo => _ref.read(customListRepositoryProvider);
+  BackupRepository get _backupRepo => _ref.read(backupRepositoryProvider);
 
   @override
-  Future<void> createCustomList(String name, String? description, {DateTime? targetDate}) async {
-    await _db.into(_db.customLists).insert(
-          CustomListsCompanion.insert(
-            name: name,
-            description: Value(description),
-            targetDate: Value(targetDate),
-            createdAt: Value(DateTime.now()),
-          ),
-        );
-  }
+  Future<void> createCustomList(String name, String? description, {DateTime? targetDate}) =>
+      _customListRepo.createCustomList(name, description, targetDate: targetDate);
 
   @override
   Future<void> updateCustomList(
@@ -307,200 +248,27 @@ class NativeMovieRepository implements MovieRepository {
     String? description, {
     DateTime? targetDate,
     bool clearTargetDate = false,
-  }) async {
-    await (_db.update(_db.customLists)..where((t) => t.id.equals(id))).write(
-          CustomListsCompanion(
-            name: Value(name),
-            description: Value(description),
-            targetDate: Value(clearTargetDate ? null : targetDate),
-          ),
-        );
-    await _mirrorSharedCollectionIfPublic(id);
-  }
+  }) =>
+      _customListRepo.updateCustomList(id, name, description, targetDate: targetDate, clearTargetDate: clearTargetDate);
 
   @override
-  Future<void> deleteCustomList(int id) async {
-    // Tear the Firestore mirror down BEFORE the local row disappears.
-    // `isPublic` lives on that row, so once it is gone nothing is left to tell
-    // us the collection had a mirror — and shared_collections/{uid}_{id} would
-    // stay readable by every signed-in user forever, exposing the titles, name
-    // and description of a collection its owner believes they deleted. The
-    // 'collection' community post pointing at it would keep rendering too.
-    //
-    // Reading the row first keeps the (default, common) private case free of
-    // any network call.
-    final list = await (_db.select(_db.customLists)..where((t) => t.id.equals(id)))
-        .getSingleOrNull();
-    if (list != null && list.isPublic) {
-      await _deleteSharedCollectionMirror(id);
-    }
-    await (_db.delete(_db.customLists)..where((t) => t.id.equals(id))).go();
-  }
+  Future<void> deleteCustomList(int id) => _customListRepo.deleteCustomList(id);
 
   @override
-  Future<void> addMovieToCustomList(int listId, Movie movieData) async {
-    try {
-      // 1. Ensure movie metadata exists. createdAt is intentionally left
-      // absent so an existing movie's original "added at" timestamp isn't
-      // bumped to "now" just because it was added to another list.
-      await _db.into(_db.movies).insertOnConflictUpdate(
-            MoviesCompanion.insert(
-              tmdbId: movieData.tmdbId,
-              title: movieData.title,
-              originalTitle: Value(movieData.originalTitle),
-              posterPath: Value(movieData.posterPath),
-              backdropPath: Value(movieData.backdropPath),
-              releaseYear: Value(movieData.releaseYear),
-              runtime: Value(movieData.runtime),
-              genres: Value(movieData.genres),
-              genreIds: Value(movieData.genreIds),
-              director: Value(movieData.director),
-              actors: Value(movieData.actors),
-              overview: Value(movieData.overview),
-              isTv: Value(movieData.isTv),
-            ),
-          );
-
-      // Find the next rankingOrder
-      final existingMovies = await (_db.select(_db.customListMovies)..where((t) => t.listId.equals(listId))).get();
-      final maxOrder = existingMovies.isEmpty ? 0 : existingMovies.map((r) => r.rankingOrder ?? 0).reduce((a, b) => a > b ? a : b);
-
-      // 2. Insert relation
-      await _db.into(_db.customListMovies).insertOnConflictUpdate(
-            CustomListMovie(
-              listId: listId,
-              movieId: movieData.tmdbId,
-              isTv: movieData.isTv,
-              rankingOrder: maxOrder + 1,
-              addedAt: DateTime.now(),
-            ),
-          );
-      await _mirrorSharedCollectionIfPublic(listId);
-    } catch (e, st) {
-      debugPrint('addMovieToCustomList failed: $e\n$st');
-      rethrow;
-    }
-  }
+  Future<void> addMovieToCustomList(int listId, Movie movieData) =>
+      _customListRepo.addMovieToCustomList(listId, movieData);
 
   @override
-  Future<void> removeMovieFromCustomList(int listId, int tmdbId, bool isTv) async {
-    await (_db.delete(_db.customListMovies)
-          ..where((t) => t.listId.equals(listId) & t.movieId.equals(tmdbId) & t.isTv.equals(isTv)))
-        .go();
-    await _mirrorSharedCollectionIfPublic(listId);
-  }
+  Future<void> removeMovieFromCustomList(int listId, int tmdbId, bool isTv) =>
+      _customListRepo.removeMovieFromCustomList(listId, tmdbId, isTv);
 
   @override
-  Future<void> reorderCustomListMovies(int listId, Map<MovieKey, int> rankings) async {
-    try {
-      await _db.transaction(() async {
-        for (final entry in rankings.entries) {
-          await (_db.update(_db.customListMovies)
-                ..where((t) =>
-                    t.listId.equals(listId) & t.movieId.equals(entry.key.tmdbId) & t.isTv.equals(entry.key.isTv)))
-              .write(CustomListMoviesCompanion(rankingOrder: Value(entry.value)));
-        }
-      });
-      await _mirrorSharedCollectionIfPublic(listId);
-    } catch (e, st) {
-      debugPrint('reorderCustomListMovies failed: $e\n$st');
-      rethrow;
-    }
-  }
-
-  // Re-mirrors `listId`'s current contents to Firestore ONLY if that
-  // collection is currently shared — a no-op for the (default, common)
-  // case of a private collection, so ordinary local edits stay cheap.
-  Future<void> _mirrorSharedCollectionIfPublic(int listId) async {
-    final list = await (_db.select(_db.customLists)..where((t) => t.id.equals(listId))).getSingleOrNull();
-    if (list != null && list.isPublic) {
-      await _mirrorSharedCollection(listId);
-    }
-  }
-
-  Future<void> _mirrorSharedCollection(int listId) async {
-    final user = _ref.currentUser;
-    if (user == null) return;
-
-    final list = await (_db.select(_db.customLists)..where((t) => t.id.equals(listId))).getSingleOrNull();
-    if (list == null) return;
-
-    final movieRows = await (_db.select(_db.customListMovies)..where((t) => t.listId.equals(listId))).get();
-
-    // Fetch all referenced movies in one query instead of one per row.
-    // tmdbId.isIn(...) alone can return both a movie and a TV show sharing
-    // the same numeric tmdbId, so the (tmdbId, isTv) match still happens in
-    // Dart to keep the two correctly separated (see v8 migration).
-    final movieIds = movieRows.map((r) => r.movieId).toSet();
-    final movieRowsById = movieIds.isEmpty
-        ? const <MovieKey, Movie>{}
-        : {
-            for (final m in await (_db.select(_db.movies)..where((t) => t.tmdbId.isIn(movieIds))).get())
-              (tmdbId: m.tmdbId, isTv: m.isTv): m,
-          };
-
-    final movies = <Map<String, dynamic>>[];
-    for (final row in movieRows) {
-      final movie = movieRowsById[(tmdbId: row.movieId, isTv: row.isTv)];
-      if (movie == null) continue;
-      movies.add({
-        'tmdbId': movie.tmdbId,
-        'isTv': movie.isTv,
-        'title': movie.title,
-        'posterPath': movie.posterPath,
-        'rankingOrder': row.rankingOrder ?? 0,
-      });
-    }
-    movies.sort((a, b) => ((a['rankingOrder'] as num?)?.toInt() ?? 0).compareTo((b['rankingOrder'] as num?)?.toInt() ?? 0));
-
-    final identity = resolveUserIdentity(_ref.read(userModelProvider), user);
-
-    // Awaited, not fire-and-forget: setCollectionVisibility(true) returns to
-    // ShareComposeSheet, which immediately publishes a post carrying this
-    // document's id. If the mirror write were still in flight (or had failed)
-    // the post would point at a document that does not exist, and the card
-    // would render the "no longer shared" state on a collection just shared.
-    await _ref.read(firestoreProvider).collection('shared_collections').doc('${user.uid}_$listId').set({
-      'ownerId': user.uid,
-      'ownerUsername': identity.username,
-      'ownerAvatarUrl': identity.avatarUrl,
-      'name': list.name,
-      'description': list.description,
-      'movies': movies,
-      'updatedAt': FieldValue.serverTimestamp(),
-    });
-  }
+  Future<void> reorderCustomListMovies(int listId, Map<MovieKey, int> rankings) =>
+      _customListRepo.reorderCustomListMovies(listId, rankings);
 
   @override
-  Future<void> setCollectionVisibility(int listId, bool isPublic) async {
-    if (isPublic) {
-      await _mirrorSharedCollection(listId);
-      await (_db.update(_db.customLists)..where((t) => t.id.equals(listId)))
-          .write(const CustomListsCompanion(isPublic: Value(true)));
-    } else {
-      // Delete the mirror FIRST and await it. Fire-and-forget here meant
-      // "stop sharing" reported success while the document was still public
-      // — and if the write failed (offline, rules), nothing ever retried it,
-      // because the local isPublic flag had already been cleared.
-      await _deleteSharedCollectionMirror(listId);
-      await (_db.update(_db.customLists)..where((t) => t.id.equals(listId)))
-          .write(const CustomListsCompanion(isPublic: Value(false)));
-    }
-  }
-
-  /// Removes `shared_collections/{uid}_{listId}` if the signed-in user has one.
-  ///
-  /// Safe to call for a collection that was never shared: deleting a document
-  /// that does not exist is a no-op in Firestore.
-  Future<void> _deleteSharedCollectionMirror(int listId) async {
-    final user = _ref.currentUser;
-    if (user == null) return;
-    await _ref
-        .read(firestoreProvider)
-        .collection('shared_collections')
-        .doc('${user.uid}_$listId')
-        .delete();
-  }
+  Future<void> setCollectionVisibility(int listId, bool isPublic) =>
+      _customListRepo.setCollectionVisibility(listId, isPublic);
 
   @override
   Future<void> updateWatchRecordRankings(Map<MovieKey, int?> rankings) =>
@@ -643,60 +411,10 @@ class NativeMovieRepository implements MovieRepository {
   }
 
   @override
-  Future<Map<String, dynamic>> exportBackupData() async {
-    final movies = await _db.select(_db.movies).get();
-    final records = await _db.select(_db.watchRecords).get();
-    final settings = await _db.select(_db.userMovieSettings).get();
-    final customLists = await _db.select(_db.customLists).get();
-    final customListMovies = await _db.select(_db.customListMovies).get();
-
-    return {
-      'version': 1,
-      'movies': movies.map((m) => m.toJson()).toList(),
-      'watch_records': records.map((r) => r.toJson()).toList(),
-      'user_movie_settings': settings.map((s) => s.toJson()).toList(),
-      'custom_lists': customLists.map((l) => l.toJson()).toList(),
-      'custom_list_movies': customListMovies.map((m) => m.toJson()).toList(),
-    };
-  }
+  Future<Map<String, dynamic>> exportBackupData() => _backupRepo.exportBackupData();
 
   @override
-  Future<void> importBackupData(Map<String, dynamic> json) async {
-    final moviesList = json['movies'] as List<dynamic>? ?? [];
-    final recordsList = json['watch_records'] as List<dynamic>? ?? [];
-    final settingsList = json['user_movie_settings'] as List<dynamic>? ?? [];
-    final customListsList = json['custom_lists'] as List<dynamic>? ?? [];
-    final customListMoviesList = json['custom_list_movies'] as List<dynamic>? ?? [];
-
-    await _db.transaction(() async {
-      // Clear tables first (respect foreign keys: relation tables first)
-      await _db.delete(_db.customListMovies).go();
-      await _db.delete(_db.customLists).go();
-      await _db.delete(_db.watchRecords).go();
-      await _db.delete(_db.userMovieSettings).go();
-      await _db.delete(_db.movies).go();
-
-      for (final x in moviesList) {
-        await _db.into(_db.movies).insertOnConflictUpdate(_movieFromBackupJson(x as Map<String, dynamic>));
-      }
-      for (final x in settingsList) {
-        await _db.into(_db.userMovieSettings).insertOnConflictUpdate(
-            UserMovieSetting.fromJson(_userMovieSettingBackupJson(x as Map<String, dynamic>)));
-      }
-      for (final x in recordsList) {
-        await _db.into(_db.watchRecords).insertOnConflictUpdate(
-            WatchRecord.fromJson(_watchRecordBackupJson(x as Map<String, dynamic>)));
-      }
-      for (final x in customListsList) {
-        await _db.into(_db.customLists).insertOnConflictUpdate(
-            CustomList.fromJson(_customListBackupJson(x as Map<String, dynamic>)));
-      }
-      for (final x in customListMoviesList) {
-        await _db.into(_db.customListMovies).insertOnConflictUpdate(
-            CustomListMovie.fromJson(_customListMovieBackupJson(x as Map<String, dynamic>)));
-      }
-    });
-  }
+  Future<void> importBackupData(Map<String, dynamic> json) => _backupRepo.importBackupData(json);
 
   @override
   Future<void> writeEpisodeProgressSettingsLocal({
@@ -727,23 +445,12 @@ class NativeMovieRepository implements MovieRepository {
 class WebMovieRepository implements MovieRepository {
   WebMovieRepository(this._ref);
   final Ref _ref;
+  CustomListRepository get _customListRepo => WebCustomListRepository(_ref);
+  BackupRepository get _backupRepo => WebBackupRepository(_ref);
 
   @override
-  Future<void> createCustomList(String name, String? description, {DateTime? targetDate}) async {
-    final notifier = _ref.read(webCustomListsProvider.notifier);
-    final map = _ref.read(webCustomListsProvider);
-    final newMap = Map<int, CustomList>.from(map);
-    final nextId = newMap.isEmpty ? 1 : newMap.keys.reduce((a, b) => a > b ? a : b) + 1;
-    newMap[nextId] = CustomList(
-      id: nextId,
-      name: name,
-      description: description,
-      targetDate: targetDate,
-      createdAt: DateTime.now(),
-      isPublic: false,
-    );
-    notifier.state = newMap;
-  }
+  Future<void> createCustomList(String name, String? description, {DateTime? targetDate}) =>
+      _customListRepo.createCustomList(name, description, targetDate: targetDate);
 
   @override
   Future<void> updateCustomList(
@@ -752,105 +459,33 @@ class WebMovieRepository implements MovieRepository {
     String? description, {
     DateTime? targetDate,
     bool clearTargetDate = false,
-  }) async {
-    final notifier = _ref.read(webCustomListsProvider.notifier);
-    final map = _ref.read(webCustomListsProvider);
-    final newMap = Map<int, CustomList>.from(map);
-    final existing = newMap[id];
-    if (existing != null) {
-      newMap[id] = CustomList(
-        id: id,
-        name: name,
-        description: description,
-        targetDate: clearTargetDate ? null : (targetDate ?? existing.targetDate),
-        createdAt: existing.createdAt,
-        isPublic: existing.isPublic,
-      );
-      notifier.state = newMap;
-    }
-  }
+  }) =>
+      _customListRepo.updateCustomList(id, name, description, targetDate: targetDate, clearTargetDate: clearTargetDate);
 
   @override
-  Future<void> deleteCustomList(int id) async {
-    final listNotifier = _ref.read(webCustomListsProvider.notifier);
-    final map = _ref.read(webCustomListsProvider);
-    final newMap = Map<int, CustomList>.from(map)..remove(id);
-    listNotifier.state = newMap;
-
-    final moviesNotifier = _ref.read(webCustomListMoviesProvider.notifier);
-    final movies = _ref.read(webCustomListMoviesProvider);
-    moviesNotifier.state = movies.where((r) => r.listId != id).toList();
-  }
+  Future<void> deleteCustomList(int id) => _customListRepo.deleteCustomList(id);
 
   @override
-  Future<void> addMovieToCustomList(int listId, Movie movieData) async {
-    // Ensure movie metadata exists
-    final moviesNotifier = _ref.read(webMoviesProvider.notifier);
-    final moviesMap = _ref.read(webMoviesProvider);
-    final key = (tmdbId: movieData.tmdbId, isTv: movieData.isTv);
-    if (!moviesMap.containsKey(key)) {
-      final newMovies = Map<MovieKey, Movie>.from(moviesMap);
-      newMovies[key] = movieData;
-      moviesNotifier.state = newMovies;
-    }
-
-    final notifier = _ref.read(webCustomListMoviesProvider.notifier);
-    final currentList = _ref.read(webCustomListMoviesProvider);
-    if (!currentList.any((r) => r.listId == listId && r.movieId == movieData.tmdbId && r.isTv == movieData.isTv)) {
-      final listMovies = currentList.where((r) => r.listId == listId);
-      final maxOrder = listMovies.isEmpty ? 0 : listMovies.map((r) => r.rankingOrder ?? 0).reduce((a, b) => a > b ? a : b);
-
-      notifier.state = [
-        ...currentList,
-        CustomListMovie(
-          listId: listId,
-          movieId: movieData.tmdbId,
-          isTv: movieData.isTv,
-          rankingOrder: maxOrder + 1,
-          addedAt: DateTime.now(),
-        )
-      ];
-    }
-  }
+  Future<void> addMovieToCustomList(int listId, Movie movieData) =>
+      _customListRepo.addMovieToCustomList(listId, movieData);
 
   @override
-  Future<void> removeMovieFromCustomList(int listId, int tmdbId, bool isTv) async {
-    final notifier = _ref.read(webCustomListMoviesProvider.notifier);
-    final currentList = _ref.read(webCustomListMoviesProvider);
-    notifier.state =
-        currentList.where((r) => !(r.listId == listId && r.movieId == tmdbId && r.isTv == isTv)).toList();
-  }
+  Future<void> removeMovieFromCustomList(int listId, int tmdbId, bool isTv) =>
+      _customListRepo.removeMovieFromCustomList(listId, tmdbId, isTv);
 
   @override
-  Future<void> reorderCustomListMovies(int listId, Map<MovieKey, int> rankings) async {
-    final notifier = _ref.read(webCustomListMoviesProvider.notifier);
-    final currentList = _ref.read(webCustomListMoviesProvider);
-    final updatedList = currentList.map((r) {
-      final key = (tmdbId: r.movieId, isTv: r.isTv);
-      if (r.listId == listId && rankings.containsKey(key)) {
-        return CustomListMovie(
-          listId: listId,
-          movieId: r.movieId,
-          isTv: r.isTv,
-          rankingOrder: rankings[key],
-          addedAt: r.addedAt,
-        );
-      }
-      return r;
-    }).toList();
-    notifier.state = updatedList;
-  }
+  Future<void> reorderCustomListMovies(int listId, Map<MovieKey, int> rankings) =>
+      _customListRepo.reorderCustomListMovies(listId, rankings);
 
   @override
-  Future<void> updateWatchRecordRankings(Map<MovieKey, int?> rankings) =>
-      writeWatchRecordRankings(_ref, rankings);
+  Future<void> setCollectionVisibility(int listId, bool isPublic) =>
+      _customListRepo.setCollectionVisibility(listId, isPublic);
 
-  // Web collections stay in-memory only (see webCustomListsProvider) —
-  // there's no local persistence to mirror from, and the "Koleksiyon
-  // Paylaş" entry point is disabled on web builds, so this is never
-  // expected to be called. A no-op rather than a crash if it ever is.
   @override
-  Future<void> setCollectionVisibility(int listId, bool isPublic) async {}
+  Future<Map<String, dynamic>> exportBackupData() => _backupRepo.exportBackupData();
+
+  @override
+  Future<void> importBackupData(Map<String, dynamic> json) => _backupRepo.importBackupData(json);
 
   @override
   Future<void> deleteWatchRecordsByIds(List<int> ids) async {
@@ -952,81 +587,8 @@ class WebMovieRepository implements MovieRepository {
   }
 
   @override
-  Future<Map<String, dynamic>> exportBackupData() async {
-    final records = _ref.read(webWatchRecordsProvider);
-    final settings = _ref.read(webMovieSettingsProvider);
-    final movies = _ref.read(webMoviesProvider);
-    final customLists = _ref.read(webCustomListsProvider);
-    final customListMovies = _ref.read(webCustomListMoviesProvider);
-
-    // Serialised with the same Drift-generated `toJson()` the native path uses,
-    // rather than a hand-written map per table. The hand-written version had
-    // silently drifted from the schema and was dropping four fields on every
-    // web backup — WatchRecords.tags and .remoteId, and UserMovieSettings
-    // .personalRanking and .lastEpisodeProgressAt — so a user who backed up and
-    // restored on web lost every tag they had ever written and their whole
-    // personal ranking, with no error shown. Sharing the serialiser is what
-    // stops that from happening again.
-    return {
-      'version': 1,
-      'movies': movies.values.map((m) => m.toJson()).toList(),
-      'watch_records': records.map((r) => r.toJson()).toList(),
-      'user_movie_settings': settings.values.map((s) => s.toJson()).toList(),
-      'custom_lists': customLists.values.map((l) => l.toJson()).toList(),
-      'custom_list_movies': customListMovies.map((m) => m.toJson()).toList(),
-    };
-  }
-
-  @override
-  Future<void> importBackupData(Map<String, dynamic> json) async {
-    final moviesList = json['movies'] as List<dynamic>? ?? [];
-    final recordsList = json['watch_records'] as List<dynamic>? ?? [];
-    final settingsList = json['user_movie_settings'] as List<dynamic>? ?? [];
-    final customListsList = json['custom_lists'] as List<dynamic>? ?? [];
-    final customListMoviesList = json['custom_list_movies'] as List<dynamic>? ?? [];
-
-    // Deserialised with the same Drift `fromJson` the native path uses. The
-    // hand-written version this replaces had to be kept in step with the schema
-    // by hand and wasn't: it silently dropped WatchRecords.tags/.remoteId and
-    // UserMovieSettings.personalRanking/.lastEpisodeProgressAt. The
-    // *BackupJson helpers above supply the defaults for columns older files
-    // predate, which is the one thing fromJson can't do on its own.
-    final watchRecords = recordsList
-        .whereType<Map<String, dynamic>>()
-        .map((x) => WatchRecord.fromJson(_watchRecordBackupJson(x)))
-        .toList();
-
-    final movieSettings = <MovieKey, UserMovieSetting>{};
-    for (final x in settingsList.whereType<Map<String, dynamic>>()) {
-      final setting = UserMovieSetting.fromJson(_userMovieSettingBackupJson(x));
-      movieSettings[(tmdbId: setting.tmdbId, isTv: setting.isTv)] = setting;
-    }
-
-    final movies = <MovieKey, Movie>{};
-    for (final x in moviesList.whereType<Map<String, dynamic>>()) {
-      // _movieFromBackupJson also recovers genreIds for pre-schema-13 files,
-      // so a restored library isn't invisible to every genre statistic.
-      final movie = _movieFromBackupJson(x);
-      movies[(tmdbId: movie.tmdbId, isTv: movie.isTv)] = movie;
-    }
-
-    final customLists = <int, CustomList>{};
-    for (final x in customListsList.whereType<Map<String, dynamic>>()) {
-      final list = CustomList.fromJson(_customListBackupJson(x));
-      customLists[list.id] = list;
-    }
-
-    final customListMovies = customListMoviesList
-        .whereType<Map<String, dynamic>>()
-        .map((x) => CustomListMovie.fromJson(_customListMovieBackupJson(x)))
-        .toList();
-
-    _ref.read(webWatchRecordsProvider.notifier).state = watchRecords;
-    _ref.read(webMovieSettingsProvider.notifier).state = movieSettings;
-    _ref.read(webMoviesProvider.notifier).state = movies;
-    _ref.read(webCustomListsProvider.notifier).state = customLists;
-    _ref.read(webCustomListMoviesProvider.notifier).state = customListMovies;
-  }
+  Future<void> updateWatchRecordRankings(Map<MovieKey, int?> rankings) =>
+      writeWatchRecordRankings(_ref, rankings);
 
   @override
   Future<void> writeEpisodeProgressSettingsLocal({
