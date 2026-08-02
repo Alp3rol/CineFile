@@ -29,8 +29,8 @@ if not "%TMDB_PROXY_URL%"=="" (
 )
 
 if "%TMDB_WEB_KEY%"=="" set TMDB_WEB_KEY=69c105e672b14c99a16b9b59187a7680
+if "%TMDB_WEB_KEY%"=="none" set TMDB_WEB_KEY=69c105e672b14c99a16b9b59187a7680
 set WEB_KEY=%TMDB_WEB_KEY%
-if "%WEB_KEY%"=="none" set WEB_KEY=
 set BUILD_DEFINES=--dart-define=TMDB_API_KEY=%WEB_KEY%
 
 :build

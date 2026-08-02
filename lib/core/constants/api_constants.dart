@@ -29,8 +29,9 @@ class ApiConstants {
 
   static String _resolveTmdbApiKey() {
     const keyFromEnv = String.fromEnvironment('TMDB_API_KEY');
-    if (keyFromEnv.trim().isNotEmpty) {
-      return keyFromEnv;
+    final trimmed = keyFromEnv.trim();
+    if (trimmed.isNotEmpty && trimmed != 'none') {
+      return trimmed;
     }
     return defaultTmdbApiKey;
   }
