@@ -54,10 +54,11 @@ final authControllerProvider = Provider<AuthController>((ref) {
 });
 
 /// Display-name fallback for a signed-in [User] that has no profile document
-/// yet. Uses the local part of their own email, which the client always has
-/// from Firebase Auth — deliberately NOT read back from Firestore, since the
-/// email is no longer stored there (see [UserModel]).
-String defaultUsernameFor(User user) => (user.email ?? '').split('@').first;
+/// yet. Uses a privacy-preserving handle based on UID instead of email prefix.
+String defaultUsernameFor(User user) {
+  final suffix = user.uid.length >= 6 ? user.uid.substring(0, 6) : 'user';
+  return 'sinefil_$suffix';
+}
 
 String defaultAvatarUrlFor(String username) =>
     'https://api.dicebear.com/7.x/bottts/png?seed=$username';
