@@ -94,7 +94,8 @@ class MovieQuickActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppPressable(
       onTap: onTap,
-      borderRadius: AppRadius.pill,
+      borderRadius: AppRadius.md,
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs, vertical: AppSpacing.xs),
       semanticLabel: label,
       child: Column(
         children: [
