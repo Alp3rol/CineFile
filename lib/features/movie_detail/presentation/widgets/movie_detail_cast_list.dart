@@ -63,13 +63,14 @@ class MovieDetailCastList extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const SizedBox(height: AppSpacing.md),
         Text(
           AppLocalizations.of(context).detailCast,
           style: Theme.of(context).textTheme.titleLarge,
         ),
         const SizedBox(height: AppSpacing.md),
         SizedBox(
-          height: 100,
+          height: 120,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: cast.length > 8 ? 8 : cast.length,

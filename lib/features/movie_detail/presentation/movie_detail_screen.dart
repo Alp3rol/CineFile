@@ -328,7 +328,7 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
                 child: SafeArea(
                   child: SingleChildScrollView(
                     controller: _scrollController,
-                    padding: const EdgeInsets.fromLTRB(20, 72, 20, 16),
+                    padding: const EdgeInsets.fromLTRB(20, 80, 20, 16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
