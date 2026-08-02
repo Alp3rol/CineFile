@@ -21,6 +21,7 @@ REM
 REM Proxy yoksa buraya kisisel anahtar DEGIL, yalnizca bu site icin uretilmis,
 REM gerektiginde iptal edilebilir ayri bir anahtar verilmeli.
 set BUILD_DEFINES=
+if "%TMDB_PROXY_URL%"=="" set TMDB_PROXY_URL=https://cinefile-tmdb.alp3rol17.workers.dev
 if not "%TMDB_PROXY_URL%"=="" (
     echo Proxy modu: anahtar derlemeye gomulmeyecek.
     echo   %TMDB_PROXY_URL%
