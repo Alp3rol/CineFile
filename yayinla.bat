@@ -28,24 +28,7 @@ if not "%TMDB_PROXY_URL%"=="" (
     goto :build
 )
 
-if "%TMDB_WEB_KEY%"=="" (
-    echo ========================================================
-    echo HATA: Ne TMDB_PROXY_URL ne de TMDB_WEB_KEY tanimli.
-    echo.
-    echo TERCIH EDILEN - anahtari hic yayinlamayan yol:
-    echo     tools\tmdb-proxy\README.md dosyasini izleyip worker'i kurun,
-    echo     sonra:  setx TMDB_PROXY_URL "https://...workers.dev"
-    echo.
-    echo Alternatif - anahtari derlemeye gomer, yayinda herkese gorunur olur.
-    echo Kisisel anahtarinizi DEGIL, ayri bir web anahtari kullanin:
-    echo     setx TMDB_WEB_KEY "buraya_web_icin_uretilen_anahtar"
-    echo.
-    echo Anahtarsiz yayinlamak isterseniz ^(uygulama demo moduna duser^):
-    echo     set TMDB_WEB_KEY=none
-    echo ========================================================
-    pause
-    exit /b 1
-)
+if "%TMDB_WEB_KEY%"=="" set TMDB_WEB_KEY=69c105e672b14c99a16b9b59187a7680
 set WEB_KEY=%TMDB_WEB_KEY%
 if "%WEB_KEY%"=="none" set WEB_KEY=
 set BUILD_DEFINES=--dart-define=TMDB_API_KEY=%WEB_KEY%

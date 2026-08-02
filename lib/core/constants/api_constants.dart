@@ -25,10 +25,15 @@ class ApiConstants {
   ///
   /// Still mutable: SettingsKeyNotifier overwrites it with the key the user
   /// entered in Settings, which is read back from the platform keystore.
-  static String tmdbApiKey = const String.fromEnvironment(
-    'TMDB_API_KEY',
-    defaultValue: defaultTmdbApiKey,
-  );
+  static String tmdbApiKey = _resolveTmdbApiKey();
+
+  static String _resolveTmdbApiKey() {
+    const keyFromEnv = String.fromEnvironment('TMDB_API_KEY');
+    if (keyFromEnv.trim().isNotEmpty) {
+      return keyFromEnv;
+    }
+    return defaultTmdbApiKey;
+  }
 
   /// Origin of a server-side TMDb proxy, e.g.
   /// `--dart-define=TMDB_PROXY_URL=https://cinefile-tmdb.<name>.workers.dev`.
