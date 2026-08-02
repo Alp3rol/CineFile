@@ -79,13 +79,16 @@ class _AppNetworkImageState extends ConsumerState<AppNetworkImage> {
       final dpr = MediaQuery.of(context).devicePixelRatio;
       final hasFiniteWidth = widget.width != null && widget.width!.isFinite;
       final hasFiniteHeight = widget.height != null && widget.height!.isFinite;
+      final targetWidth = hasFiniteWidth ? (widget.width! * dpr).round() : null;
+      final targetHeight = (!hasFiniteWidth && hasFiniteHeight) ? (widget.height! * dpr).round() : null;
+
       childWidget = Image.network(
         finalUrl,
         width: widget.width,
         height: widget.height,
         fit: widget.fit,
-        cacheWidth: hasFiniteWidth ? (widget.width! * dpr).round() : null,
-        cacheHeight: hasFiniteHeight ? (widget.height! * dpr).round() : null,
+        cacheWidth: targetWidth,
+        cacheHeight: targetHeight,
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null) return child;
           return SizedBox(
@@ -103,23 +106,19 @@ class _AppNetworkImageState extends ConsumerState<AppNetworkImage> {
         },
       );
     } else {
-      // Decoding a poster/backdrop at its full TMDb resolution (e.g. w500
-      // or "original") when it's displayed at a fraction of that size wastes
-      // memory and CPU on every scroll/rebuild. memCacheWidth/Height tell
-      // the decoder to downsample to roughly the on-screen size instead.
-      // Callers sometimes pass width: double.infinity to fill a flexible
-      // parent (e.g. search grid tiles) — isFinite guards against
-      // Infinity.round() throwing.
       final dpr = MediaQuery.of(context).devicePixelRatio;
       final hasFiniteWidth = widget.width != null && widget.width!.isFinite;
       final hasFiniteHeight = widget.height != null && widget.height!.isFinite;
+      final targetWidth = hasFiniteWidth ? (widget.width! * dpr).round() : null;
+      final targetHeight = (!hasFiniteWidth && hasFiniteHeight) ? (widget.height! * dpr).round() : null;
+
       childWidget = CachedNetworkImage(
         imageUrl: widget.imageUrl,
         width: widget.width,
         height: widget.height,
         fit: widget.fit,
-        memCacheWidth: hasFiniteWidth ? (widget.width! * dpr).round() : null,
-        memCacheHeight: hasFiniteHeight ? (widget.height! * dpr).round() : null,
+        memCacheWidth: targetWidth,
+        memCacheHeight: targetHeight,
         placeholder: (context, url) => SizedBox(
           width: widget.width,
           height: widget.height,

@@ -134,14 +134,14 @@ class MovieQuickActionButton extends StatelessWidget {
               size: AppSize.iconLg,
             ),
           ),
-          const SizedBox(height: AppSpacing.sm),
+          const SizedBox(height: AppSpacing.xs),
           SizedBox(
-            width: 84,
+            width: 92,
             child: Text(
               label,
               textAlign: TextAlign.center,
               maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+              softWrap: true,
               style: Theme.of(context).textTheme.labelMedium?.copyWith(
                     fontWeight: isPrimary ? FontWeight.bold : FontWeight.w500,
                     color: isPrimary

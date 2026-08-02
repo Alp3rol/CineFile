@@ -55,6 +55,7 @@ class AppAvatar extends StatelessWidget {
               imageUrl: imageUrl!,
               width: size,
               height: size,
+              fit: BoxFit.cover,
               seed: name ?? imageUrl,
             )
           : Center(
