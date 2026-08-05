@@ -77,7 +77,12 @@ kapatmak; her yayın öncesinde hızlı ve güvenilir geri bildirim almak.
   - **Tamamlandı (5 Ağustos 2026):** başarılı CI raporunda genel coverage
     %50,67 (9.601/18.947), domain coverage %82,74 (532/643) ölçüldü. CI'a
     sırasıyla %50 ve %80 alt sınırlarını uygulayan kalite kapısı eklendi.
-- [ ] Web yerel depo sürümleme ve kota hatası davranışını test et.
+- [x] Web yerel depo sürümleme ve kota hatası davranışını test et.
+  - **Tamamlandı (5 Ağustos 2026):** snapshot codec'i sürüm 1'i açıkça
+    doğruluyor; eksik/eski ve gelecekteki bilinmeyen sürümler son geçerli
+    snapshot'a güvenli dönüş yapıyor. Tarayıcı yazmasının `false` dönmesi veya
+    kota istisnası artık tipli hata olarak çağırana iletiliyor ve başarısız
+    snapshot depo tarafından kabul edilmiyor. Beş regresyon testi eklendi.
 - [ ] Backup import için bozuk tip, aşırı büyük dosya ve kısmi veri testleri ekle.
 - [ ] Firestore kural testlerinde create/update/delete matrisini tamamla.
 
@@ -262,10 +267,10 @@ Her görev aşağıdaki sırayla ilerler:
 
 ## Bir sonraki görev
 
-**Faz 1 / P1 / Görev 2:** Web yerel depo sürümleme ve kota hatası davranışını test etmek.
+**Faz 1 / P1 / Görev 3:** Backup import için bozuk tip, aşırı büyük dosya ve kısmi veri testleri eklemek.
 
 Tamamlanma kanıtı:
 
-- Eski veya bilinmeyen snapshot sürümü güvenli biçimde ele alınır.
-- Tarayıcı kotası dolduğunda veri kaybı sessizce gerçekleşmez.
-- Sürümleme ve kota davranışları otomatik testlerle korunur.
+- Bozuk alan tipleri kontrollü hata veya güvenli atlama üretir.
+- Aşırı büyük backup dosyası işlemden önce reddedilir.
+- Kısmi ama geçerli backup, sağlam tabloları geri yükler.
