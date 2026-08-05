@@ -22,7 +22,10 @@ REM Proxy yoksa buraya kisisel anahtar DEGIL, yalnizca bu site icin uretilmis,
 REM gerektiginde iptal edilebilir ayri bir anahtar verilmeli.
 set BUILD_DEFINES=
 for /f "tokens=2" %%V in ('findstr /b "version:" pubspec.yaml') do set APP_VERSION=%%V
-for /f %%C in ('git rev-parse --short=12 HEAD') do set RELEASE_COMMIT=%%C
+REM `for /f` treats the `=` in `--short=12` specially on some cmd versions.
+REM Read the full SHA and trim it outside the subshell instead.
+for /f %%C in ('git rev-parse HEAD') do set RELEASE_COMMIT_FULL=%%C
+set RELEASE_COMMIT=%RELEASE_COMMIT_FULL:~0,12%
 if "%APP_VERSION%"=="" (
     echo HATA: pubspec.yaml surumu okunamadi.
     exit /b 1
