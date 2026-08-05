@@ -183,10 +183,18 @@ senaryolarına karşı hazırlamak.
 
 ### İş paketleri
 
-- [ ] **Firebase App Check geçiş planı hazırla.**
+- [x] **Firebase App Check geçiş planı hazırla.**
   - Önce ölçüm/enforcement kapalı mod.
   - Web için reCAPTCHA Enterprise veya uygun provider.
   - Geçerli kullanıcıların reddedilme oranı ölçüldükten sonra enforcement.
+  - **Tamamlandı (5 Ağustos 2026):** `APP_CHECK_ROLLOUT.md` içinde web için
+    reCAPTCHA Enterprise, Android için Play Integrity, iOS için App Attest +
+    DeviceCheck fallback ve yerel/CI debug token politikası tanımlandı.
+    Firestore için 7 günlük monitoring-only kapısı, `%99,5` doğrulanmış meşru
+    trafik eşiği, Authentication için ayrı aşama ve 15 dakikalık yayılmayı
+    hesaba katan rollback prosedürü yazıldı. Windows üretim desteği açılmadan
+    çözülmesi gereken açık engel olarak kaydedildi. Bu görev yalnızca plan ve
+    dokümantasyon değişikliğidir; console enforcement açılmadı.
 - [ ] TMDb proxy rate limitini atomik altyapıya taşı.
   - Cloudflare Durable Object veya resmi Rate Limiting.
   - IP, origin ve anormal trafik gözlemi.
@@ -314,11 +322,12 @@ Her görev aşağıdaki sırayla ilerler:
 
 ## Bir sonraki görev
 
-**Faz 3 / Görev 1:** Firebase App Check geçiş planını hazırlamak.
+**Faz 3 / Görev 2:** TMDb proxy rate limitini atomik altyapıya taşımak.
 
 Tamamlanma kanıtı:
 
-- Web ve native provider seçenekleri ile geliştirme/debug token akışı belgelenir.
-- Enforcement kapalı ölçüm aşaması ve kabul edilebilir reddedilme eşiği tanımlanır.
-- Firebase servisleri için kademeli enforcement ve geri alma adımları yazılır.
-- Plan mevcut CI, GitHub Pages ve yerel geliştirme akışlarıyla uyumlu olur.
+- Mevcut process-memory sayaç kaldırılır; paralel edge istekleri aynı atomik
+  kota durumunu paylaşır.
+- IP/origin anahtarlama, pencere süresi ve 429 cevabı testlerle sabitlenir.
+- Cloudflare Durable Object veya resmi Rate Limiting yapılandırması belgelenir.
+- Proxy testleri, CI ve üretim dağıtım prosedürü güncellenir.
