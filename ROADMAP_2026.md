@@ -71,9 +71,12 @@ kapatmak; her yayın öncesinde hızlı ve güvenilir geri bildirim almak.
 
 ### P1 — kalite kapısı
 
-- [ ] CI coverage tabanını güncelle ve başlangıç eşiği koy.
+- [x] CI coverage tabanını güncelle ve başlangıç eşiği koy.
   - İlk eşik mevcut değerin altına düşmeyi engeller; hedef en az %50.
   - Yeni/yenilenen domain kodu için hedef ≥%80.
+  - **Tamamlandı (5 Ağustos 2026):** başarılı CI raporunda genel coverage
+    %50,67 (9.601/18.947), domain coverage %82,74 (532/643) ölçüldü. CI'a
+    sırasıyla %50 ve %80 alt sınırlarını uygulayan kalite kapısı eklendi.
 - [ ] Web yerel depo sürümleme ve kota hatası davranışını test et.
 - [ ] Backup import için bozuk tip, aşırı büyük dosya ve kısmi veri testleri ekle.
 - [ ] Firestore kural testlerinde create/update/delete matrisini tamamla.
@@ -259,10 +262,10 @@ Her görev aşağıdaki sırayla ilerler:
 
 ## Bir sonraki görev
 
-**Faz 1 / P1 / Görev 1:** CI coverage tabanını güncellemek ve başlangıç eşiği koymak.
+**Faz 1 / P1 / Görev 2:** Web yerel depo sürümleme ve kota hatası davranışını test etmek.
 
 Tamamlanma kanıtı:
 
-- Mevcut coverage oranı ölçülür ve raporlanır.
-- Mevcut değerin gerilemesini engelleyen başlangıç eşiği CI'a eklenir.
-- Yeni veya yenilenen domain kodu için ≥%80 hedefi belgelenir.
+- Eski veya bilinmeyen snapshot sürümü güvenli biçimde ele alınır.
+- Tarayıcı kotası dolduğunda veri kaybı sessizce gerçekleşmez.
+- Sürümleme ve kota davranışları otomatik testlerle korunur.

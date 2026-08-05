@@ -66,12 +66,11 @@ jobs:
       - name: Report slowest test files
         run: dart run tool/summarize_test_timings.dart | tee build/test-timing-report.md
 
-      - name: Report coverage
-        run: |
-          # lcov's own summary, without needing lcov installed: count DA lines.
-          total=$(grep -c '^DA:' coverage/lcov.info || true)
-          hit=$(grep '^DA:' coverage/lcov.info | grep -cv ',0$' || true)
-          echo "Covered $hit / $total executable lines ($(( hit * 100 / total ))%)"
+      - name: Enforce coverage baseline
+        run: >-
+          dart run tool/check_coverage.dart coverage/lcov.info
+          --minimum=50
+          --domain-minimum=80
 
       - uses: actions/upload-artifact@v4
         with:
