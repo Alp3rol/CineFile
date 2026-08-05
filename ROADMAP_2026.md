@@ -125,9 +125,15 @@ eklenebilmesini sağlamak. Bu faz kullanıcı davranışını bilinçli olarak d
     Ana dosya 913 satırdan 43 satıra indi; en büyük parça 366 satırda kaldı.
     Mevcut importlar ve public provider/action yüzeyi değişmedi. Statik analiz,
     261 Flutter testi, 77 Firestore kural testi ve release web derlemesi geçti.
-- [ ] **`insights_provider.dart` hesaplarını domain servislerine taşı.**
+- [x] **`insights_provider.dart` hesaplarını domain servislerine taşı.**
   - Saf hesaplama fonksiyonları UI/Riverpod'dan bağımsız test edilmeli.
   - Provider yalnızca veri toplama ve sonuç birleştirme yapmalı.
+  - **Tamamlandı (5 Ağustos 2026):** Özet, trend, dağılım, ısı haritası ve
+    seri hesapları 226 satırlık `InsightsCalculator` domain servisine taşındı;
+    provider 890 satırdan 161 satıra indi. Yerelleştirilmiş rozet kataloğu ayrı
+    561 satırlık servise ayrıldı. Hesaplayıcı Riverpod/Firebase olmadan ve sabit
+    saat girdisiyle iki doğrudan domain testinde doğrulandı. Tam Flutter paketi,
+    77 Firestore testi ve release web derlemesi geçti.
 - [ ] **TMDb servis yüzeyini kaynaklara ayır.**
   - Arama/keşif, detay, kişi/krediler ve sezon endpoint grupları.
   - Ortak hata eşleme ve proxy davranışı tek katmanda kalmalı.
@@ -283,11 +289,11 @@ Her görev aşağıdaki sırayla ilerler:
 
 ## Bir sonraki görev
 
-**Faz 2 / Görev 2:** `insights_provider.dart` hesaplarını saf domain servislerine taşımak.
+**Faz 2 / Görev 3:** TMDb servis yüzeyini kaynak gruplarına ayırmak.
 
 Tamamlanma kanıtı:
 
-- Rozet, özet ve istatistik hesapları Riverpod/Widget bağımlılığı olmadan test edilir.
-- Provider yalnız veri toplama, yerelleştirme ve sonuç birleştirme yapar.
-- Mevcut analiz ekranı sonuçları ve kullanıcı davranışı değişmez.
+- Arama/keşif, detay, kişi/krediler ve sezon uçları ayrı kaynaklarda toplanır.
+- Ortak istek, proxy ve hata eşleme davranışı tek çekirdek katmanda kalır.
+- Mevcut `TmdbService` çağrı yüzeyi geçiş sırasında uyumlu kalır.
 - Tam Flutter testi, Firestore kural paketi ve web release derlemesi geçer.
