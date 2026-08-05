@@ -217,6 +217,15 @@ senaryolarına karşı hazırlamak.
     başlıklarını doğruluyor. Üç hata senaryosu birim testleriyle sabit; kontrol
     altı saatte bir ve elle GitHub Actions'tan çalıştırılabiliyor.
 - [ ] Firestore yedekleme ve geri dönüş prosedürünü yazılı hâle getir.
+  - **Hazırlık tamamlandı (5 Ağustos 2026):** Dokuz koleksiyon grubunu kapsayan
+    tam veri envanteri, günlük/haftalık saklama planı, RPO 24 saat/RTO 4 saat,
+    üretimi hedeflemeyi reddeden korumalı export/restore araçları ve ayrıntılı
+    olay karar ağacı `FIRESTORE_DISASTER_RECOVERY.md` içinde hazırlandı. Plan
+    modu ve üretim-hedefi ret testi geçti; hiçbir bulut verisi değiştirilmedi.
+  - **Açık doğrulama:** Blaze/faturalandırma, aynı konumda Storage bucket,
+    günlük backup schedule ve ayrı boş test projesi seçilmeli. Ardından gerçek
+    export → test projesine import → dokuz koleksiyon grubu sayım provası
+    çalıştırılıp drill log doldurulmadan bu görev tamamlandı sayılmayacak.
 - [ ] Yayın geri alma prosedürü ve son sağlıklı `gh-pages` artefaktı tanımla.
 - [ ] Bağımlılık ve gizli bilgi taramasını CI'a ekle.
 
@@ -347,3 +356,4 @@ Tamamlanma kanıtı:
 - Yedek alma komutu güvenli değişkenlerle belgelenir ve prova edilir.
 - Ayrı bir test projesine geri yükleme adımları doğrulanır.
 - RPO/RTO hedefleri ve geri dönüş sorumluluğu kayda alınır.
+- Gerçek prova sonucu, artefakt yolu ve süreleri drill log'a işlenir.

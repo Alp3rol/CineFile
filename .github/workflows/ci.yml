@@ -39,6 +39,23 @@ jobs:
           node-version: '22'
       - name: Test synthetic health diagnostics
         run: node --test test/synthetic_health_check_test.mjs
+      - name: Test Firestore disaster-recovery safeguards
+        shell: pwsh
+        run: |
+          ./tool/firestore_export.ps1 -Bucket 'gs://cinefile-test-backups'
+          ./tool/firestore_restore_drill.ps1 `
+            -SourceExport 'gs://cinefile-test-backups/export/sample' `
+            -TargetProjectId 'cinefile-restore-test'
+          try {
+            ./tool/firestore_restore_drill.ps1 `
+              -SourceExport 'gs://cinefile-test-backups/export/sample' `
+              -TargetProjectId 'cinefile-6252a'
+            throw 'Production restore guard did not fire.'
+          } catch {
+            if ($_.Exception.Message -notmatch 'refuses the production project') {
+              throw
+            }
+          }
 
   analyze-and-test:
     runs-on: ubuntu-latest
