@@ -134,9 +134,15 @@ eklenebilmesini sağlamak. Bu faz kullanıcı davranışını bilinçli olarak d
     561 satırlık servise ayrıldı. Hesaplayıcı Riverpod/Firebase olmadan ve sabit
     saat girdisiyle iki doğrudan domain testinde doğrulandı. Tam Flutter paketi,
     77 Firestore testi ve release web derlemesi geçti.
-- [ ] **TMDb servis yüzeyini kaynaklara ayır.**
+- [x] **TMDb servis yüzeyini kaynaklara ayır.**
   - Arama/keşif, detay, kişi/krediler ve sezon endpoint grupları.
   - Ortak hata eşleme ve proxy davranışı tek katmanda kalmalı.
+  - **Tamamlandı (5 Ağustos 2026):** `TmdbService` uyumlu cephe olarak
+    korunurken yöntemler arama/keşif, detay/izleme sağlayıcıları, kişi/krediler
+    ve sezon kaynaklarına ayrıldı. Ortak Dio, dil, API anahtarı, proxy ve demo
+    verisi 139 satırlık çekirdekte kaldı; en büyük kaynak 375 satırdır. Proxy
+    allowlist testi tüm kaynak dosyalarını tarayacak şekilde genişletildi. Tam
+    Flutter paketi, 77 Firestore testi, analiz ve release web derlemesi geçti.
 - [ ] İzleme kaydı yazma işlemlerini widget'lardan repository/use-case katmanına taşı.
 - [ ] Web/native repository davranış sözleşmesi için ortak karakterizasyon testleri yaz.
 - [ ] Sessiz hata yakalama noktalarını gözden geçir; kullanıcı mesajı, gözlemleme
@@ -289,11 +295,11 @@ Her görev aşağıdaki sırayla ilerler:
 
 ## Bir sonraki görev
 
-**Faz 2 / Görev 3:** TMDb servis yüzeyini kaynak gruplarına ayırmak.
+**Faz 2 / Görev 4:** İzleme kaydı yazma işlemlerini widget'lardan repository/use-case katmanına taşımak.
 
 Tamamlanma kanıtı:
 
-- Arama/keşif, detay, kişi/krediler ve sezon uçları ayrı kaynaklarda toplanır.
-- Ortak istek, proxy ve hata eşleme davranışı tek çekirdek katmanda kalır.
-- Mevcut `TmdbService` çağrı yüzeyi geçiş sırasında uyumlu kalır.
+- İzleme kaydı oluşturma, güncelleme ve silme tek uygulama servisi üzerinden yürür.
+- Widget'lar Firestore batch ve yerel repository ayrıntılarını bilmez.
+- Web/native davranışı ve bölüm ilerleme güncellemeleri değişmez.
 - Tam Flutter testi, Firestore kural paketi ve web release derlemesi geçer.

@@ -42,8 +42,15 @@ List<String> _servicePaths(String source) {
 
 /// Regex sources from the worker's ALLOWED_PATHS array literal.
 List<RegExp> _allowlist(String source) {
-  final block = RegExp(r'const ALLOWED_PATHS = \[(.*?)\];', dotAll: true).firstMatch(source);
-  expect(block, isNotNull, reason: 'ALLOWED_PATHS array not found in the worker source');
+  final block = RegExp(
+    r'const ALLOWED_PATHS = \[(.*?)\];',
+    dotAll: true,
+  ).firstMatch(source);
+  expect(
+    block,
+    isNotNull,
+    reason: 'ALLOWED_PATHS array not found in the worker source',
+  );
   return RegExp(r'/\^(.*?)\$/')
       .allMatches(block!.group(1)!)
       .map((m) => RegExp('^${m.group(1)!}\$'))
@@ -56,15 +63,32 @@ void main() {
 
   setUpAll(() {
     // cwd is the package root under `flutter test`.
-    servicePaths = _servicePaths(File('lib/core/network/tmdb_service.dart').readAsStringSync());
-    allowlist = _allowlist(File('tools/tmdb-proxy/src/index.js').readAsStringSync());
+    final networkDir = Directory('lib/core/network');
+    final serviceSource = [
+      File('${networkDir.path}/tmdb_service.dart'),
+      ...networkDir.listSync().whereType<File>().where(
+        (file) => file.path.endsWith('_resource.dart'),
+      ),
+    ].map((file) => file.readAsStringSync()).join('\n');
+    servicePaths = _servicePaths(serviceSource);
+    allowlist = _allowlist(
+      File('tools/tmdb-proxy/src/index.js').readAsStringSync(),
+    );
   });
 
   test('the scrapers actually found something', () {
     // Without this, a refactor that changes either file's shape would turn the
     // real assertion below into a vacuous pass.
-    expect(servicePaths, isNotEmpty, reason: 'no _dio.get paths scraped from TmdbService');
-    expect(allowlist, hasLength(greaterThan(5)), reason: 'no regexes scraped from ALLOWED_PATHS');
+    expect(
+      servicePaths,
+      isNotEmpty,
+      reason: 'no _dio.get paths scraped from TmdbService',
+    );
+    expect(
+      allowlist,
+      hasLength(greaterThan(5)),
+      reason: 'no regexes scraped from ALLOWED_PATHS',
+    );
   });
 
   test('every endpoint TmdbService calls is allowed by the proxy', () {
@@ -75,7 +99,8 @@ void main() {
     expect(
       unmatched,
       isEmpty,
-      reason: 'These paths would 404 through the proxy. Add a regex to ALLOWED_PATHS in '
+      reason:
+          'These paths would 404 through the proxy. Add a regex to ALLOWED_PATHS in '
           'tools/tmdb-proxy/src/index.js and redeploy the worker '
           '(see tools/tmdb-proxy/README.md).',
     );
