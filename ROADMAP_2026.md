@@ -113,12 +113,18 @@ eklenebilmesini sağlamak. Bu faz kullanıcı davranışını bilinçli olarak d
 
 ### İş paketleri
 
-- [ ] **`database_provider.dart` dosyasını böl.**
+- [x] **`database_provider.dart` dosyasını böl.**
   - `watch_record_providers.dart`
   - `movie_settings_providers.dart`
   - `collection_providers.dart`
   - `follow_repository.dart`
   - Firestore mapper ve sorgu yardımcıları
+  - **Tamamlandı (5 Ağustos 2026):** Dışarıdan kullanılan
+    `database_provider.dart` giriş noktası korunarak izleme kayıtları, film
+    ayarları, koleksiyonlar ve takip işlemleri dört `part` dosyasına ayrıldı.
+    Ana dosya 913 satırdan 43 satıra indi; en büyük parça 366 satırda kaldı.
+    Mevcut importlar ve public provider/action yüzeyi değişmedi. Statik analiz,
+    261 Flutter testi, 77 Firestore kural testi ve release web derlemesi geçti.
 - [ ] **`insights_provider.dart` hesaplarını domain servislerine taşı.**
   - Saf hesaplama fonksiyonları UI/Riverpod'dan bağımsız test edilmeli.
   - Provider yalnızca veri toplama ve sonuç birleştirme yapmalı.
@@ -277,11 +283,11 @@ Her görev aşağıdaki sırayla ilerler:
 
 ## Bir sonraki görev
 
-**Faz 2 / Görev 1:** `database_provider.dart` dosyasını sorumluluklarına göre bölmek.
+**Faz 2 / Görev 2:** `insights_provider.dart` hesaplarını saf domain servislerine taşımak.
 
 Tamamlanma kanıtı:
 
-- Mevcut provider dışa aktarımları ve kullanıcı davranışı değişmez.
-- İzleme kayıtları, film ayarları, koleksiyonlar ve takip işlemleri ayrı dosyalara taşınır.
-- Ana provider dosyası 600 satırın altına iner; hedef 400 satırdır.
+- Rozet, özet ve istatistik hesapları Riverpod/Widget bağımlılığı olmadan test edilir.
+- Provider yalnız veri toplama, yerelleştirme ve sonuç birleştirme yapar.
+- Mevcut analiz ekranı sonuçları ve kullanıcı davranışı değişmez.
 - Tam Flutter testi, Firestore kural paketi ve web release derlemesi geçer.
