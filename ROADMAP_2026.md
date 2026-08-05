@@ -83,7 +83,12 @@ kapatmak; her yayın öncesinde hızlı ve güvenilir geri bildirim almak.
     snapshot'a güvenli dönüş yapıyor. Tarayıcı yazmasının `false` dönmesi veya
     kota istisnası artık tipli hata olarak çağırana iletiliyor ve başarısız
     snapshot depo tarafından kabul edilmiyor. Beş regresyon testi eklendi.
-- [ ] Backup import için bozuk tip, aşırı büyük dosya ve kısmi veri testleri ekle.
+- [x] Backup import için bozuk tip, aşırı büyük dosya ve kısmi veri testleri ekle.
+  - **Tamamlandı (5 Ağustos 2026):** içe aktarma tüm mutasyonlardan önce sürüm,
+    bölüm tipi ve 5 MiB boyut sınırıyla doğrulanıyor. Bozuk alanlar kontrollü
+    `BackupFormatException` üretiyor, skaler liste girdileri güvenle atlanıyor;
+    kısmi backup web ve native tarafta eksik bölümleri silmeden birleştiriliyor.
+    Beş yeni güvenlik testi eklendi.
 - [ ] Firestore kural testlerinde create/update/delete matrisini tamamla.
 
 ### Faz 1 kabul kriterleri
@@ -267,10 +272,10 @@ Her görev aşağıdaki sırayla ilerler:
 
 ## Bir sonraki görev
 
-**Faz 1 / P1 / Görev 3:** Backup import için bozuk tip, aşırı büyük dosya ve kısmi veri testleri eklemek.
+**Faz 1 / P1 / Görev 4:** Firestore kural testlerinde create/update/delete matrisini tamamlamak.
 
 Tamamlanma kanıtı:
 
-- Bozuk alan tipleri kontrollü hata veya güvenli atlama üretir.
-- Aşırı büyük backup dosyası işlemden önce reddedilir.
-- Kısmi ama geçerli backup, sağlam tabloları geri yükler.
+- Korunan koleksiyonların create/update/delete izin matrisi belgelenir.
+- Eksik olumlu ve olumsuz kural testleri eklenir.
+- Firestore emulator kural paketi tamamen geçer.

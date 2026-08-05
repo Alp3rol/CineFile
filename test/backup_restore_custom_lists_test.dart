@@ -22,16 +22,18 @@ void main() {
     late ProviderContainer container;
 
     ProviderContainer buildContainer({required bool signedIn}) {
-      return ProviderContainer(overrides: [
-        databaseProvider.overrideWithValue(db),
-        firestoreProvider.overrideWithValue(firestore),
-        firebaseAuthProvider.overrideWithValue(
-          MockFirebaseAuth(
-            signedIn: signedIn,
-            mockUser: MockUser(uid: _uid, email: 'a@b.com'),
+      return ProviderContainer(
+        overrides: [
+          databaseProvider.overrideWithValue(db),
+          firestoreProvider.overrideWithValue(firestore),
+          firebaseAuthProvider.overrideWithValue(
+            MockFirebaseAuth(
+              signedIn: signedIn,
+              mockUser: MockUser(uid: _uid, email: 'a@b.com'),
+            ),
           ),
-        ),
-      ]);
+        ],
+      );
     }
 
     setUp(() {
@@ -46,10 +48,19 @@ void main() {
     });
 
     Future<void> seedLocalCollection() async {
-      await db.into(db.movies).insert(
-            Movie(tmdbId: 101, title: 'Inception', isTv: false, createdAt: DateTime.now()),
+      await db
+          .into(db.movies)
+          .insert(
+            Movie(
+              tmdbId: 101,
+              title: 'Inception',
+              isTv: false,
+              createdAt: DateTime.now(),
+            ),
           );
-      await db.into(db.customLists).insert(
+      await db
+          .into(db.customLists)
+          .insert(
             CustomList(
               id: 1,
               name: 'My Best Movies',
@@ -58,7 +69,9 @@ void main() {
               isPublic: true,
             ),
           );
-      await db.into(db.customListMovies).insert(
+      await db
+          .into(db.customListMovies)
+          .insert(
             CustomListMovie(
               listId: 1,
               movieId: 101,
@@ -91,11 +104,11 @@ void main() {
           .collection('movie_settings')
           .doc('101_false')
           .set({
-        'movieId': 101,
-        'isTv': false,
-        'isFavorite': true,
-        'updatedAt': Timestamp.fromDate(DateTime(2024, 5, 2)),
-      });
+            'movieId': 101,
+            'isTv': false,
+            'isFavorite': true,
+            'updatedAt': Timestamp.fromDate(DateTime(2024, 5, 2)),
+          });
     }
 
     test('Native: export and import custom lists correctly', () async {
@@ -107,7 +120,8 @@ void main() {
       expect(exportedJson.containsKey('custom_list_movies'), isTrue);
 
       final exportedLists = exportedJson['custom_lists'] as List<dynamic>;
-      final exportedMovies = exportedJson['custom_list_movies'] as List<dynamic>;
+      final exportedMovies =
+          exportedJson['custom_list_movies'] as List<dynamic>;
 
       expect(exportedLists.length, 1);
       expect(exportedLists.first['name'], 'My Best Movies');
@@ -131,121 +145,166 @@ void main() {
       expect(restoredMovies.first.movieId, 101);
     });
 
+    test(
+      'Native: a partial backup preserves sections that are absent',
+      () async {
+        await seedLocalCollection();
+
+        await BackupService.importData(container, {
+          'version': 2,
+          'movies': [
+            {
+              'tmdbId': 202,
+              'title': 'Arrival',
+              'isTv': false,
+              'createdAt': DateTime(2026, 8, 5).millisecondsSinceEpoch,
+            },
+          ],
+        });
+
+        final movies = await db.select(db.movies).get();
+        expect(movies.map((movie) => movie.tmdbId), containsAll([101, 202]));
+        expect(
+          (await db.select(db.customLists).get()).single.name,
+          'My Best Movies',
+        );
+        expect(
+          (await db.select(db.customListMovies).get()).single.movieId,
+          101,
+        );
+      },
+    );
+
     // The regression this whole file's cloud half exists for: watch history is
     // written to Firestore, never to the local `watch_records` table, so an
     // export that only read drift produced a file with no history in it at all
     // while the UI promised "tüm izleme geçmişiniz".
-    test('exports the signed-in user\'s Firestore watch history and settings', () async {
-      await seedCloudHistory();
+    test(
+      'exports the signed-in user\'s Firestore watch history and settings',
+      () async {
+        await seedCloudHistory();
 
-      final json = await BackupService.exportData(container);
+        final json = await BackupService.exportData(container);
 
-      final logs = json['logs'] as List<dynamic>;
-      expect(logs, hasLength(1));
-      expect(logs.first['movieTitle'], 'Inception');
-      expect(logs.first['rating'], 9.0);
-      // Timestamps are normalised to ISO-8601 so the map is JSON-encodable.
-      expect(logs.first['watchDate'], isA<String>());
-      expect(DateTime.parse(logs.first['watchDate'] as String).year, 2024);
+        final logs = json['logs'] as List<dynamic>;
+        expect(logs, hasLength(1));
+        expect(logs.first['movieTitle'], 'Inception');
+        expect(logs.first['rating'], 9.0);
+        // Timestamps are normalised to ISO-8601 so the map is JSON-encodable.
+        expect(logs.first['watchDate'], isA<String>());
+        expect(DateTime.parse(logs.first['watchDate'] as String).year, 2024);
 
-      final settings = json['movie_settings'] as List<dynamic>;
-      expect(settings, hasLength(1));
-      expect(settings.first['isFavorite'], isTrue);
-      expect(settings.first['updatedAt'], isA<String>());
-    });
+        final settings = json['movie_settings'] as List<dynamic>;
+        expect(settings, hasLength(1));
+        expect(settings.first['isFavorite'], isTrue);
+        expect(settings.first['updatedAt'], isA<String>());
+      },
+    );
 
-    test('restores watch history into Firestore, replacing what was there', () async {
-      await seedCloudHistory();
-      final json = await BackupService.exportData(container);
+    test(
+      'restores watch history into Firestore, replacing what was there',
+      () async {
+        await seedCloudHistory();
+        final json = await BackupService.exportData(container);
 
-      // Simulate a different device: one unrelated log that the restore must
-      // clear, and none of the original ones.
-      await firestore.collection('logs').get().then((s) async {
-        for (final d in s.docs) {
-          await d.reference.delete();
-        }
-      });
-      await firestore.collection('logs').add({
-        'userId': _uid,
-        'movieId': 999,
-        'isTv': false,
-        'movieTitle': 'Stale entry',
-        'watchDate': Timestamp.now(),
-        'createdAt': Timestamp.now(),
-        'rating': 1.0,
-        'watchNumber': 1,
-        'episodeCount': 1,
-      });
-
-      await BackupService.importData(container, json);
-
-      final logs = await firestore.collection('logs').get();
-      expect(logs.docs, hasLength(1));
-      final restored = logs.docs.first.data();
-      expect(restored['movieTitle'], 'Inception');
-      expect(restored['userId'], _uid);
-      // Timestamps come back as real Timestamps, not strings.
-      expect(restored['watchDate'], isA<Timestamp>());
-      // Social state belongs to the original posting, not a restored copy.
-      expect(restored['starredBy'], isEmpty);
-      expect(restored['commentCount'], 0);
-
-      final settings =
-          await firestore.collection('users').doc(_uid).collection('movie_settings').get();
-      expect(settings.docs, hasLength(1));
-      expect(settings.docs.first.id, '101_false');
-      expect(settings.docs.first.data()['isFavorite'], isTrue);
-      expect(settings.docs.first.data()['updatedAt'], isA<Timestamp>());
-    });
-
-    test('a signed-out export contains only local data and does not touch Firestore', () async {
-      await seedLocalCollection();
-      await seedCloudHistory();
-
-      final signedOut = buildContainer(signedIn: false);
-      addTearDown(signedOut.dispose);
-
-      final json = await BackupService.exportData(signedOut);
-      expect(json.containsKey('logs'), isFalse);
-      expect(json['custom_lists'], hasLength(1));
-
-      await BackupService.importData(signedOut, json);
-      // The other user's cloud data is untouched.
-      expect((await firestore.collection('logs').get()).docs, hasLength(1));
-    });
-
-    test('Native: backward compatibility with legacy backups missing custom_lists keys', () async {
-      await seedCloudHistory();
-
-      // Legacy (version 1) JSON backup: local sections only, no cloud data.
-      final legacyJson = {
-        'version': 1,
-        'movies': [
-          {
-            'tmdbId': 102,
-            'title': 'Interstellar',
-            'isTv': false,
-            'createdAt': DateTime.now().toIso8601String(),
+        // Simulate a different device: one unrelated log that the restore must
+        // clear, and none of the original ones.
+        await firestore.collection('logs').get().then((s) async {
+          for (final d in s.docs) {
+            await d.reference.delete();
           }
-        ],
-        'watch_records': [],
-        'user_movie_settings': []
-      };
+        });
+        await firestore.collection('logs').add({
+          'userId': _uid,
+          'movieId': 999,
+          'isTv': false,
+          'movieTitle': 'Stale entry',
+          'watchDate': Timestamp.now(),
+          'createdAt': Timestamp.now(),
+          'rating': 1.0,
+          'watchNumber': 1,
+          'episodeCount': 1,
+        });
 
-      // Import shouldn't fail
-      await BackupService.importData(container, legacyJson);
+        await BackupService.importData(container, json);
 
-      final restoredMovies = await db.select(db.movies).get();
-      expect(restoredMovies.length, 1);
-      expect(restoredMovies.first.title, 'Interstellar');
+        final logs = await firestore.collection('logs').get();
+        expect(logs.docs, hasLength(1));
+        final restored = logs.docs.first.data();
+        expect(restored['movieTitle'], 'Inception');
+        expect(restored['userId'], _uid);
+        // Timestamps come back as real Timestamps, not strings.
+        expect(restored['watchDate'], isA<Timestamp>());
+        // Social state belongs to the original posting, not a restored copy.
+        expect(restored['starredBy'], isEmpty);
+        expect(restored['commentCount'], 0);
 
-      final restoredLists = await db.select(db.customLists).get();
-      expect(restoredLists, isEmpty);
+        final settings = await firestore
+            .collection('users')
+            .doc(_uid)
+            .collection('movie_settings')
+            .get();
+        expect(settings.docs, hasLength(1));
+        expect(settings.docs.first.id, '101_false');
+        expect(settings.docs.first.data()['isFavorite'], isTrue);
+        expect(settings.docs.first.data()['updatedAt'], isA<Timestamp>());
+      },
+    );
 
-      // A file with no cloud sections means "this backup predates them", not
-      // "the user had no history" — deleting their cloud data here would be
-      // the worst possible reading of "restore".
-      expect((await firestore.collection('logs').get()).docs, hasLength(1));
-    });
+    test(
+      'a signed-out export contains only local data and does not touch Firestore',
+      () async {
+        await seedLocalCollection();
+        await seedCloudHistory();
+
+        final signedOut = buildContainer(signedIn: false);
+        addTearDown(signedOut.dispose);
+
+        final json = await BackupService.exportData(signedOut);
+        expect(json.containsKey('logs'), isFalse);
+        expect(json['custom_lists'], hasLength(1));
+
+        await BackupService.importData(signedOut, json);
+        // The other user's cloud data is untouched.
+        expect((await firestore.collection('logs').get()).docs, hasLength(1));
+      },
+    );
+
+    test(
+      'Native: backward compatibility with legacy backups missing custom_lists keys',
+      () async {
+        await seedCloudHistory();
+
+        // Legacy (version 1) JSON backup: local sections only, no cloud data.
+        final legacyJson = {
+          'version': 1,
+          'movies': [
+            {
+              'tmdbId': 102,
+              'title': 'Interstellar',
+              'isTv': false,
+              'createdAt': DateTime.now().toIso8601String(),
+            },
+          ],
+          'watch_records': [],
+          'user_movie_settings': [],
+        };
+
+        // Import shouldn't fail
+        await BackupService.importData(container, legacyJson);
+
+        final restoredMovies = await db.select(db.movies).get();
+        expect(restoredMovies.length, 1);
+        expect(restoredMovies.first.title, 'Interstellar');
+
+        final restoredLists = await db.select(db.customLists).get();
+        expect(restoredLists, isEmpty);
+
+        // A file with no cloud sections means "this backup predates them", not
+        // "the user had no history" — deleting their cloud data here would be
+        // the worst possible reading of "restore".
+        expect((await firestore.collection('logs').get()).docs, hasLength(1));
+      },
+    );
   });
 }

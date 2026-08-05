@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../features/auth/controllers/auth_controller.dart';
 import '../../features/auth/models/user_model.dart';
 import '../../features/journal/models/diary_log_model.dart';
+import 'backup_repository.dart';
 import 'movie_repository.dart';
 
 /// Whole-account JSON backup and restore, behind Settings → "Veri Yönetimi &
@@ -33,10 +36,27 @@ class BackupService {
   /// data, which [importData] treats as "leave the cloud side alone" rather
   /// than "wipe it".
   static const int currentVersion = 2;
+  static const int maxImportBytes = 5 * 1024 * 1024;
+
+  static Map<String, dynamic> decodeImportPayload(String input) {
+    final bytes = utf8.encode(input).length;
+    if (bytes > maxImportBytes) {
+      throw BackupFormatException(
+        'Backup is too large ($bytes bytes; maximum $maxImportBytes).',
+      );
+    }
+    final decoded = jsonDecode(input);
+    if (decoded is! Map<String, dynamic>) {
+      throw const BackupFormatException('Backup root must be a JSON object.');
+    }
+    _validateImportMap(decoded, encodedBytes: bytes);
+    return decoded;
+  }
 
   static Future<Map<String, dynamic>> exportData(dynamic ref) async {
-    final data = await ref.read(movieRepositoryProvider).exportBackupData()
-        as Map<String, dynamic>;
+    final data =
+        await ref.read(movieRepositoryProvider).exportBackupData()
+            as Map<String, dynamic>;
     data['version'] = currentVersion;
 
     // currentUser, not authStateProvider: the latter is a StreamProvider whose
@@ -47,8 +67,10 @@ class BackupService {
 
     final firestore = ref.read(firestoreProvider) as FirebaseFirestore;
 
-    final logsSnapshot =
-        await firestore.collection('logs').where('userId', isEqualTo: user.uid).get();
+    final logsSnapshot = await firestore
+        .collection('logs')
+        .where('userId', isEqualTo: user.uid)
+        .get();
     data['logs'] = logsSnapshot.docs.map((doc) {
       final log = DiaryLogModel.fromMap(doc.data(), doc.id);
       return _logToJson(log);
@@ -74,6 +96,7 @@ class BackupService {
   }
 
   static Future<void> importData(dynamic ref, Map<String, dynamic> json) async {
+    _validateImportMap(json);
     // Local side first: collections and cached title metadata.
     await ref.read(movieRepositoryProvider).importBackupData(json);
 
@@ -97,8 +120,10 @@ class BackupService {
     );
 
     if (logs != null) {
-      final existing =
-          await firestore.collection('logs').where('userId', isEqualTo: user.uid).get();
+      final existing = await firestore
+          .collection('logs')
+          .where('userId', isEqualTo: user.uid)
+          .get();
 
       // Write the incoming logs FIRST, delete the old ones only once every
       // write has landed.
@@ -151,13 +176,18 @@ class BackupService {
       // every restored document forever.
       await _commitInChunks(firestore, [
         for (final doc in written.docs)
-          (ref: doc.reference, data: {...doc.data()}..remove(_kRestoreBatchField)),
+          (
+            ref: doc.reference,
+            data: {...doc.data()}..remove(_kRestoreBatchField),
+          ),
       ]);
     }
 
     if (settings != null) {
-      final settingsCol =
-          firestore.collection('users').doc(user.uid).collection('movie_settings');
+      final settingsCol = firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('movie_settings');
 
       // Settings ids are deterministic ("{tmdbId}_{isTv}"), so unlike logs the
       // incoming documents overlap the existing ones. Overwrite those in place
@@ -180,6 +210,36 @@ class BackupService {
     }
   }
 
+  static void _validateImportMap(
+    Map<String, dynamic> json, {
+    int? encodedBytes,
+  }) {
+    final bytes = encodedBytes ?? utf8.encode(jsonEncode(json)).length;
+    if (bytes > maxImportBytes) {
+      throw BackupFormatException(
+        'Backup is too large ($bytes bytes; maximum $maxImportBytes).',
+      );
+    }
+    final version = json['version'];
+    if (version is! int || version < 1 || version > currentVersion) {
+      throw BackupFormatException('Unsupported backup version: $version.');
+    }
+    const sections = [
+      'movies',
+      'watch_records',
+      'user_movie_settings',
+      'custom_lists',
+      'custom_list_movies',
+      'logs',
+      'movie_settings',
+    ];
+    for (final key in sections) {
+      if (json.containsKey(key) && json[key] is! List<dynamic>) {
+        throw BackupFormatException('Backup section "$key" must be a list.');
+      }
+    }
+  }
+
   // --- helpers ---
 
   /// Temporary marker written on documents created by one restore run, so the
@@ -192,7 +252,13 @@ class BackupService {
   /// operations are committed in chunks rather than as one batch.
   static Future<void> _commitInChunks(
     FirebaseFirestore firestore,
-    List<({DocumentReference<Map<String, dynamic>> ref, Map<String, dynamic>? data})> ops,
+    List<
+      ({
+        DocumentReference<Map<String, dynamic>> ref,
+        Map<String, dynamic>? data,
+      })
+    >
+    ops,
   ) async {
     const chunkSize = 400;
     for (var i = 0; i < ops.length; i += chunkSize) {

@@ -33,9 +33,9 @@ class _JsonPanel extends StatelessWidget {
       child: SingleChildScrollView(
         child: Text(
           json,
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                fontFamily: 'monospace',
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.labelSmall?.copyWith(fontFamily: 'monospace'),
         ),
       ),
     );
@@ -52,52 +52,59 @@ Future<void> exportBackup(BuildContext context, WidgetRef ref) async {
 
     if (context.mounted) {
       // Show backup display modal
-      unawaited(AppDialog.show<void>(
-        context: context,
-        builder: (dialogContext) {
-          final l10n = AppLocalizations.of(dialogContext);
-          final theme = Theme.of(dialogContext);
+      unawaited(
+        AppDialog.show<void>(
+          context: context,
+          builder: (dialogContext) {
+            final l10n = AppLocalizations.of(dialogContext);
+            final theme = Theme.of(dialogContext);
 
-          return AlertDialog(
-            title: Row(
-              children: [
-                const Icon(
-                  Icons.check_circle_rounded,
-                  color: AppColors.success,
-                  size: AppSize.iconLg,
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(child: Text(l10n.backupCopiedTitle)),
-              ],
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.backupCopiedMessage,
-                  style: theme.textTheme.labelLarge
-                      ?.copyWith(color: AppColors.textSecondary),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                _JsonPanel(json: jsonString),
-              ],
-            ),
-            actions: [
-              AppButton(
-                label: l10n.commonClose,
-                variant: AppButtonVariant.ghost,
-                onPressed: () => Navigator.of(dialogContext).pop(),
+            return AlertDialog(
+              title: Row(
+                children: [
+                  const Icon(
+                    Icons.check_circle_rounded,
+                    color: AppColors.success,
+                    size: AppSize.iconLg,
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(child: Text(l10n.backupCopiedTitle)),
+                ],
               ),
-            ],
-          );
-        },
-      ));
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.backupCopiedMessage,
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  _JsonPanel(json: jsonString),
+                ],
+              ),
+              actions: [
+                AppButton(
+                  label: l10n.commonClose,
+                  variant: AppButtonVariant.ghost,
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                ),
+              ],
+            );
+          },
+        ),
+      );
     }
   } catch (e) {
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context).backupExportError(e.toString()))),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context).backupExportError(e.toString()),
+          ),
+        ),
       );
     }
   }
@@ -153,7 +160,7 @@ void showImportDialog(BuildContext context, WidgetRef ref) {
               final navigator = Navigator.of(dialogContext);
 
               try {
-                final jsonMap = jsonDecode(input) as Map<String, dynamic>;
+                final jsonMap = BackupService.decodeImportPayload(input);
                 await BackupService.importData(ref, jsonMap);
 
                 navigator.pop();
@@ -162,7 +169,9 @@ void showImportDialog(BuildContext context, WidgetRef ref) {
                 );
               } catch (e) {
                 messenger.showSnackBar(
-                  SnackBar(content: Text(l10n.backupRestoreInvalid(e.toString()))),
+                  SnackBar(
+                    content: Text(l10n.backupRestoreInvalid(e.toString())),
+                  ),
                 );
               }
             },

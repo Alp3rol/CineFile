@@ -14,6 +14,44 @@ abstract class BackupRepository {
   Future<void> importBackupData(Map<String, dynamic> json);
 }
 
+class BackupFormatException implements Exception {
+  const BackupFormatException(this.message, [this.cause]);
+
+  final String message;
+  final Object? cause;
+
+  @override
+  String toString() => cause == null ? message : '$message: $cause';
+}
+
+List<Map<String, dynamic>>? _backupSection(
+  Map<String, dynamic> json,
+  String key,
+) {
+  if (!json.containsKey(key)) return null;
+  final value = json[key];
+  if (value is! List<dynamic>) {
+    throw BackupFormatException('Backup section "$key" must be a list.');
+  }
+  // A stray scalar entry cannot be restored and is safe to ignore. Field
+  // errors inside a map remain errors and are reported before any mutation.
+  return value.whereType<Map<String, dynamic>>().toList();
+}
+
+List<T>? _parseBackupSection<T>(
+  Map<String, dynamic> json,
+  String key,
+  T Function(Map<String, dynamic>) parse,
+) {
+  final section = _backupSection(json, key);
+  if (section == null) return null;
+  try {
+    return section.map(parse).toList();
+  } catch (error) {
+    throw BackupFormatException('Backup section "$key" is invalid.', error);
+  }
+}
+
 final backupRepositoryProvider = Provider<BackupRepository>((ref) {
   return kIsWeb ? WebBackupRepository(ref) : NativeBackupRepository(ref);
 });
@@ -95,62 +133,69 @@ class NativeBackupRepository implements BackupRepository {
 
   @override
   Future<void> importBackupData(Map<String, dynamic> json) async {
-    final moviesList = json['movies'] as List<dynamic>? ?? [];
-    final recordsList = json['watch_records'] as List<dynamic>? ?? [];
-    final settingsList = json['user_movie_settings'] as List<dynamic>? ?? [];
-    final customListsList = json['custom_lists'] as List<dynamic>? ?? [];
-    final customListMoviesList =
-        json['custom_list_movies'] as List<dynamic>? ?? [];
+    // Parse everything before entering the destructive transaction. A bad
+    // field can therefore never run after table deletion has started.
+    final movies = _parseBackupSection(json, 'movies', _movieFromBackupJson);
+    final records = _parseBackupSection(
+      json,
+      'watch_records',
+      (x) => WatchRecord.fromJson(_watchRecordBackupJson(x)),
+    );
+    final settings = _parseBackupSection(
+      json,
+      'user_movie_settings',
+      (x) => UserMovieSetting.fromJson(_userMovieSettingBackupJson(x)),
+    );
+    final customLists = _parseBackupSection(
+      json,
+      'custom_lists',
+      (x) => CustomList.fromJson(_customListBackupJson(x)),
+    );
+    final customListMovies = _parseBackupSection(
+      json,
+      'custom_list_movies',
+      (x) => CustomListMovie.fromJson(_customListMovieBackupJson(x)),
+    );
+    final isFullBackup =
+        movies != null &&
+        records != null &&
+        settings != null &&
+        customLists != null &&
+        customListMovies != null;
 
     await _db.transaction(() async {
-      await _db.delete(_db.customListMovies).go();
-      await _db.delete(_db.customLists).go();
-      await _db.delete(_db.watchRecords).go();
-      await _db.delete(_db.userMovieSettings).go();
-      await _db.delete(_db.movies).go();
+      if (isFullBackup) {
+        await _db.delete(_db.customListMovies).go();
+        await _db.delete(_db.customLists).go();
+        await _db.delete(_db.watchRecords).go();
+        await _db.delete(_db.userMovieSettings).go();
+        await _db.delete(_db.movies).go();
+      }
 
-      for (final x in moviesList) {
-        await _db
-            .into(_db.movies)
-            .insertOnConflictUpdate(
-              _movieFromBackupJson(x as Map<String, dynamic>),
-            );
+      if (movies != null) {
+        for (final movie in movies) {
+          await _db.into(_db.movies).insertOnConflictUpdate(movie);
+        }
       }
-      for (final x in settingsList) {
-        await _db
-            .into(_db.userMovieSettings)
-            .insertOnConflictUpdate(
-              UserMovieSetting.fromJson(
-                _userMovieSettingBackupJson(x as Map<String, dynamic>),
-              ),
-            );
+      if (settings != null) {
+        for (final setting in settings) {
+          await _db.into(_db.userMovieSettings).insertOnConflictUpdate(setting);
+        }
       }
-      for (final x in recordsList) {
-        await _db
-            .into(_db.watchRecords)
-            .insertOnConflictUpdate(
-              WatchRecord.fromJson(
-                _watchRecordBackupJson(x as Map<String, dynamic>),
-              ),
-            );
+      if (records != null) {
+        for (final record in records) {
+          await _db.into(_db.watchRecords).insertOnConflictUpdate(record);
+        }
       }
-      for (final x in customListsList) {
-        await _db
-            .into(_db.customLists)
-            .insertOnConflictUpdate(
-              CustomList.fromJson(
-                _customListBackupJson(x as Map<String, dynamic>),
-              ),
-            );
+      if (customLists != null) {
+        for (final list in customLists) {
+          await _db.into(_db.customLists).insertOnConflictUpdate(list);
+        }
       }
-      for (final x in customListMoviesList) {
-        await _db
-            .into(_db.customListMovies)
-            .insertOnConflictUpdate(
-              CustomListMovie.fromJson(
-                _customListMovieBackupJson(x as Map<String, dynamic>),
-              ),
-            );
+      if (customListMovies != null) {
+        for (final relation in customListMovies) {
+          await _db.into(_db.customListMovies).insertOnConflictUpdate(relation);
+        }
       }
     });
   }
@@ -180,50 +225,114 @@ class WebBackupRepository implements BackupRepository {
 
   @override
   Future<void> importBackupData(Map<String, dynamic> json) async {
-    final moviesList = json['movies'] as List<dynamic>? ?? [];
-    final recordsList = json['watch_records'] as List<dynamic>? ?? [];
-    final settingsList = json['user_movie_settings'] as List<dynamic>? ?? [];
-    final customListsList = json['custom_lists'] as List<dynamic>? ?? [];
-    final customListMoviesList =
-        json['custom_list_movies'] as List<dynamic>? ?? [];
+    var watchRecords = _parseBackupSection(
+      json,
+      'watch_records',
+      (x) => WatchRecord.fromJson(_watchRecordBackupJson(x)),
+    );
 
-    final watchRecords = recordsList
-        .whereType<Map<String, dynamic>>()
-        .map((x) => WatchRecord.fromJson(_watchRecordBackupJson(x)))
-        .toList();
-
-    final movieSettings = <MovieKey, UserMovieSetting>{};
-    for (final x in settingsList.whereType<Map<String, dynamic>>()) {
-      final setting = UserMovieSetting.fromJson(_userMovieSettingBackupJson(x));
-      movieSettings[(tmdbId: setting.tmdbId, isTv: setting.isTv)] = setting;
+    Map<MovieKey, UserMovieSetting>? movieSettings;
+    final parsedSettings = _parseBackupSection(
+      json,
+      'user_movie_settings',
+      (x) => UserMovieSetting.fromJson(_userMovieSettingBackupJson(x)),
+    );
+    if (parsedSettings != null) {
+      movieSettings = {
+        for (final setting in parsedSettings)
+          (tmdbId: setting.tmdbId, isTv: setting.isTv): setting,
+      };
     }
 
-    final movies = <MovieKey, Movie>{};
-    for (final x in moviesList.whereType<Map<String, dynamic>>()) {
-      final movie = _movieFromBackupJson(x);
-      movies[(tmdbId: movie.tmdbId, isTv: movie.isTv)] = movie;
+    Map<MovieKey, Movie>? movies;
+    final parsedMovies = _parseBackupSection(
+      json,
+      'movies',
+      _movieFromBackupJson,
+    );
+    if (parsedMovies != null) {
+      movies = {
+        for (final movie in parsedMovies)
+          (tmdbId: movie.tmdbId, isTv: movie.isTv): movie,
+      };
     }
 
-    final customLists = <int, CustomList>{};
-    for (final x in customListsList.whereType<Map<String, dynamic>>()) {
-      final list = CustomList.fromJson(_customListBackupJson(x));
-      customLists[list.id] = list;
+    Map<int, CustomList>? customLists;
+    final parsedLists = _parseBackupSection(
+      json,
+      'custom_lists',
+      (x) => CustomList.fromJson(_customListBackupJson(x)),
+    );
+    if (parsedLists != null) {
+      customLists = {for (final list in parsedLists) list.id: list};
     }
 
-    final customListMovies = customListMoviesList
-        .whereType<Map<String, dynamic>>()
-        .map((x) => CustomListMovie.fromJson(_customListMovieBackupJson(x)))
-        .toList();
+    var customListMovies = _parseBackupSection(
+      json,
+      'custom_list_movies',
+      (x) => CustomListMovie.fromJson(_customListMovieBackupJson(x)),
+    );
+    final isFullBackup =
+        movies != null &&
+        watchRecords != null &&
+        movieSettings != null &&
+        customLists != null &&
+        customListMovies != null;
 
-    _ref.read(webWatchRecordsProvider.notifier).state = watchRecords;
-    _ref.read(webMovieSettingsProvider.notifier).state = movieSettings;
-    _ref.read(webMoviesProvider.notifier).state = movies;
-    _ref.read(webCustomListsProvider.notifier).state = customLists;
-    _ref.read(webCustomListMoviesProvider.notifier).state = customListMovies;
+    if (!isFullBackup) {
+      if (movies != null) {
+        movies = {..._ref.read(webMoviesProvider), ...movies};
+      }
+      if (movieSettings != null) {
+        movieSettings = {
+          ..._ref.read(webMovieSettingsProvider),
+          ...movieSettings,
+        };
+      }
+      if (customLists != null) {
+        customLists = {..._ref.read(webCustomListsProvider), ...customLists};
+      }
+      if (watchRecords != null) {
+        watchRecords = [..._ref.read(webWatchRecordsProvider), ...watchRecords];
+      }
+      if (customListMovies != null) {
+        final merged =
+            <({int listId, int tmdbId, bool isTv}), CustomListMovie>{};
+        for (final relation in [
+          ..._ref.read(webCustomListMoviesProvider),
+          ...customListMovies,
+        ]) {
+          merged[(
+                listId: relation.listId,
+                tmdbId: relation.movieId,
+                isTv: relation.isTv,
+              )] =
+              relation;
+        }
+        customListMovies = merged.values.toList();
+      }
+    }
+
+    if (watchRecords != null) {
+      _ref.read(webWatchRecordsProvider.notifier).state = watchRecords;
+    }
+    if (movieSettings != null) {
+      _ref.read(webMovieSettingsProvider.notifier).state = movieSettings;
+    }
+    if (movies != null) {
+      _ref.read(webMoviesProvider.notifier).state = movies;
+    }
+    if (customLists != null) {
+      _ref.read(webCustomListsProvider.notifier).state = customLists;
+    }
+    if (customListMovies != null) {
+      _ref.read(webCustomListMoviesProvider.notifier).state = customListMovies;
+    }
     await WebLocalStore.save(
-      movies: movies,
-      customLists: customLists,
-      customListMovies: customListMovies,
+      movies: movies ?? _ref.read(webMoviesProvider),
+      customLists: customLists ?? _ref.read(webCustomListsProvider),
+      customListMovies:
+          customListMovies ?? _ref.read(webCustomListMoviesProvider),
     );
   }
 }
