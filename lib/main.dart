@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'core/navigation/app_navigator.dart';
+import 'core/database/web_local_store.dart';
 import 'core/observability/error_reporting.dart';
 import 'core/platform/firebase_web_registrar.dart';
 import 'core/theme/app_theme.dart';
@@ -53,13 +54,13 @@ void main() async {
     // handed was never initialized.
     await initializeDateFormatting();
 
+    // Collections are device-local on web. Hydrate them before ProviderScope
+    // creates its state providers so a reload cannot momentarily look empty.
+    await WebLocalStore.initialize();
+
     registerFirebaseWebPlugins();
 
-    runApp(
-      const ProviderScope(
-        child: MyApp(),
-      ),
-    );
+    runApp(const ProviderScope(child: MyApp()));
   });
 }
 
@@ -118,7 +119,11 @@ class _FirebaseInitErrorScreen extends ConsumerWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.cloud_off_rounded, color: AppTheme.accentColor, size: 52),
+              const Icon(
+                Icons.cloud_off_rounded,
+                color: AppTheme.accentColor,
+                size: 52,
+              ),
               const SizedBox(height: 16),
               Text(
                 l10n.firebaseInitErrorTitle,
@@ -143,13 +148,21 @@ class _FirebaseInitErrorScreen extends ConsumerWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.accentColor,
                   foregroundColor: Colors.black,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 14,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
                 ),
                 icon: const Icon(Icons.refresh_rounded, size: 20),
                 label: Text(
                   l10n.commonRetry,
-                  style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.bold),
+                  style: GoogleFonts.outfit(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],

@@ -6,8 +6,9 @@ import 'package:drift/web.dart';
 /// app doesn't ship, so opening this connection throws.
 ///
 /// That is fine *as long as nothing on web actually reaches it* — the web
-/// build stores collections in the in-memory providers instead (see
-/// WebMovieRepository), and everything else lives in Firestore. It is kept
+/// build stores collections in Riverpod providers backed by browser storage
+/// instead (see WebMovieRepository/WebLocalStore), and everything else lives
+/// in Firestore. It is kept
 /// rather than removed so `databaseProvider` still type-checks on web; any
 /// code path that hits it is a bug, and the exception is the signal.
 ///

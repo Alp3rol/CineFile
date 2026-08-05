@@ -5,6 +5,7 @@ import 'package:drift/drift.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'app_database.dart';
 import 'database_provider.dart';
+import 'web_local_store.dart';
 import 'custom_list_repository.dart';
 import 'backup_repository.dart';
 import '../constants/tmdb_genres.dart';
@@ -14,7 +15,11 @@ import '../../features/auth/controllers/auth_controller.dart';
 /// behind one interface, so call sites don't need to branch on kIsWeb
 /// themselves and each platform's logic lives in exactly one place.
 abstract class MovieRepository {
-  Future<void> createCustomList(String name, String? description, {DateTime? targetDate});
+  Future<void> createCustomList(
+    String name,
+    String? description, {
+    DateTime? targetDate,
+  });
   Future<void> updateCustomList(
     int id,
     String name,
@@ -115,9 +120,11 @@ Movie movieFromTmdbPayload({
   DateTime? createdAt,
 }) {
   final crew = movieData['credits']?['crew'] as List<dynamic>?;
-  final director = crew
-      ?.where((e) => e is Map && e['job'] == 'Director')
-      .firstOrNull?['name'] as String?;
+  final director =
+      crew
+              ?.where((e) => e is Map && e['job'] == 'Director')
+              .firstOrNull?['name']
+          as String?;
 
   final cast = movieData['credits']?['cast'] as List<dynamic>?;
   final actors = cast
@@ -139,8 +146,10 @@ Movie movieFromTmdbPayload({
   // detail normalisation in TmdbService may have already copied one to the
   // other — accept whichever is present.
   final releaseDateStr =
-      (movieData['release_date'] ?? movieData['first_air_date'] ?? '').toString();
-  final releaseYear = DateTime.tryParse(releaseDateStr)?.year ??
+      (movieData['release_date'] ?? movieData['first_air_date'] ?? '')
+          .toString();
+  final releaseYear =
+      DateTime.tryParse(releaseDateStr)?.year ??
       int.tryParse(releaseDateStr.split('-').first);
 
   return Movie(
@@ -151,11 +160,13 @@ Movie movieFromTmdbPayload({
     // moment the user switches — the same leak the director field had. An
     // empty string is honest, and display sites already substitute their own
     // placeholder for it.
-    title: (movieData['title'] ??
-            movieData['name'] ??
-            movieData['original_title'] ??
-            movieData['original_name'] ??
-            '') as String,
+    title:
+        (movieData['title'] ??
+                movieData['name'] ??
+                movieData['original_title'] ??
+                movieData['original_name'] ??
+                '')
+            as String,
     originalTitle:
         (movieData['original_title'] ?? movieData['original_name']) as String?,
     posterPath: movieData['poster_path'] as String?,
@@ -200,15 +211,20 @@ final movieRepositoryProvider = Provider<MovieRepository>((ref) {
 /// One batch rather than a `set()` per entry: reordering a fifty-title list
 /// used to be fifty sequential round trips, each awaited before the next
 /// started.
-Future<void> writeWatchRecordRankings(Ref ref, Map<MovieKey, int?> rankings) async {
+Future<void> writeWatchRecordRankings(
+  Ref ref,
+  Map<MovieKey, int?> rankings,
+) async {
   if (rankings.isEmpty) return;
   final user = ref.currentUser;
   if (user == null) return;
 
   try {
     final firestore = ref.read(firestoreProvider);
-    final settings =
-        firestore.collection('users').doc(user.uid).collection('movie_settings');
+    final settings = firestore
+        .collection('users')
+        .doc(user.uid)
+        .collection('movie_settings');
 
     final batch = firestore.batch();
     for (final entry in rankings.entries) {
@@ -234,12 +250,20 @@ class NativeMovieRepository implements MovieRepository {
   NativeMovieRepository(this._ref);
   final Ref _ref;
   AppDatabase get _db => _ref.read(databaseProvider);
-  CustomListRepository get _customListRepo => _ref.read(customListRepositoryProvider);
+  CustomListRepository get _customListRepo =>
+      _ref.read(customListRepositoryProvider);
   BackupRepository get _backupRepo => _ref.read(backupRepositoryProvider);
 
   @override
-  Future<void> createCustomList(String name, String? description, {DateTime? targetDate}) =>
-      _customListRepo.createCustomList(name, description, targetDate: targetDate);
+  Future<void> createCustomList(
+    String name,
+    String? description, {
+    DateTime? targetDate,
+  }) => _customListRepo.createCustomList(
+    name,
+    description,
+    targetDate: targetDate,
+  );
 
   @override
   Future<void> updateCustomList(
@@ -248,8 +272,13 @@ class NativeMovieRepository implements MovieRepository {
     String? description, {
     DateTime? targetDate,
     bool clearTargetDate = false,
-  }) =>
-      _customListRepo.updateCustomList(id, name, description, targetDate: targetDate, clearTargetDate: clearTargetDate);
+  }) => _customListRepo.updateCustomList(
+    id,
+    name,
+    description,
+    targetDate: targetDate,
+    clearTargetDate: clearTargetDate,
+  );
 
   @override
   Future<void> deleteCustomList(int id) => _customListRepo.deleteCustomList(id);
@@ -263,8 +292,10 @@ class NativeMovieRepository implements MovieRepository {
       _customListRepo.removeMovieFromCustomList(listId, tmdbId, isTv);
 
   @override
-  Future<void> reorderCustomListMovies(int listId, Map<MovieKey, int> rankings) =>
-      _customListRepo.reorderCustomListMovies(listId, rankings);
+  Future<void> reorderCustomListMovies(
+    int listId,
+    Map<MovieKey, int> rankings,
+  ) => _customListRepo.reorderCustomListMovies(listId, rankings);
 
   @override
   Future<void> setCollectionVisibility(int listId, bool isPublic) =>
@@ -282,22 +313,33 @@ class NativeMovieRepository implements MovieRepository {
 
   @override
   Future<void> deleteWatchRecordLocal(WatchRecord record) async {
-    await (_db.delete(_db.watchRecords)..where((t) => t.id.equals(record.id))).go();
+    await (_db.delete(
+      _db.watchRecords,
+    )..where((t) => t.id.equals(record.id))).go();
 
     // Recalculate Drift settings progress
-    final remainingRecords = await (_db.select(_db.watchRecords)
-          ..where((t) => t.movieId.equals(record.movieId) & t.isTv.equals(record.isTv))
-          ..orderBy([(t) => OrderingTerm.desc(t.watchDate)]))
-        .get();
+    final remainingRecords =
+        await (_db.select(_db.watchRecords)
+              ..where(
+                (t) =>
+                    t.movieId.equals(record.movieId) &
+                    t.isTv.equals(record.isTv),
+              )
+              ..orderBy([(t) => OrderingTerm.desc(t.watchDate)]))
+            .get();
 
     final settingsQuery = _db.select(_db.userMovieSettings)
-      ..where((t) => t.tmdbId.equals(record.movieId) & t.isTv.equals(record.isTv));
+      ..where(
+        (t) => t.tmdbId.equals(record.movieId) & t.isTv.equals(record.isTv),
+      );
     final existingSetting = await settingsQuery.getSingleOrNull();
 
     if (existingSetting == null) return;
 
     if (remainingRecords.isEmpty) {
-      await _db.into(_db.userMovieSettings).insertOnConflictUpdate(
+      await _db
+          .into(_db.userMovieSettings)
+          .insertOnConflictUpdate(
             existingSetting.copyWith(
               isActivelyWatching: false,
               lastWatchedEpisode: const Value(null),
@@ -312,13 +354,18 @@ class NativeMovieRepository implements MovieRepository {
           .fold<int>(0, (acc, r) => acc + r.episodeCount);
 
       final movieQuery = _db.select(_db.movies)
-        ..where((t) => t.tmdbId.equals(record.movieId) & t.isTv.equals(record.isTv));
+        ..where(
+          (t) => t.tmdbId.equals(record.movieId) & t.isTv.equals(record.isTv),
+        );
       final movie = await movieQuery.getSingleOrNull();
       final totalEpisodes = movie?.totalEpisodes;
 
-      final newIsActivelyWatching = totalEpisodes == null || currentEpisodeProgress < totalEpisodes;
+      final newIsActivelyWatching =
+          totalEpisodes == null || currentEpisodeProgress < totalEpisodes;
 
-      await _db.into(_db.userMovieSettings).insertOnConflictUpdate(
+      await _db
+          .into(_db.userMovieSettings)
+          .insertOnConflictUpdate(
             existingSetting.copyWith(
               isActivelyWatching: newIsActivelyWatching,
               lastWatchedEpisode: Value(currentEpisodeProgress),
@@ -334,10 +381,14 @@ class NativeMovieRepository implements MovieRepository {
     int? episodeCount,
     bool? isPublic,
   }) async {
-    await (_db.update(_db.watchRecords)..where((t) => t.id.equals(record.id))).write(
+    await (_db.update(
+      _db.watchRecords,
+    )..where((t) => t.id.equals(record.id))).write(
       WatchRecordsCompanion(
         watchDate: watchDate != null ? Value(watchDate) : const Value.absent(),
-        episodeCount: episodeCount != null ? Value(episodeCount) : const Value.absent(),
+        episodeCount: episodeCount != null
+            ? Value(episodeCount)
+            : const Value.absent(),
         isPublic: isPublic != null ? Value(isPublic) : const Value.absent(),
       ),
     );
@@ -355,11 +406,17 @@ class NativeMovieRepository implements MovieRepository {
     // better cache entry than something fabricated.
     if (isOfflinePlaceholderPayload(movieData)) return;
 
-    final movie = movieFromTmdbPayload(tmdbId: tmdbId, isTv: isTv, movieData: movieData);
+    final movie = movieFromTmdbPayload(
+      tmdbId: tmdbId,
+      isTv: isTv,
+      movieData: movieData,
+    );
     // createdAt is intentionally left absent so re-caching an already-known
     // title doesn't bump its original "added at" timestamp to now (which the
     // Home screen's "Son Eklediklerim" ordering depends on).
-    await _db.into(_db.movies).insertOnConflictUpdate(
+    await _db
+        .into(_db.movies)
+        .insertOnConflictUpdate(
           MoviesCompanion.insert(
             tmdbId: movie.tmdbId,
             title: movie.title,
@@ -388,9 +445,15 @@ class NativeMovieRepository implements MovieRepository {
     required int? rank,
   }) async {
     try {
-      await cacheMovieMetadata(tmdbId: tmdbId, isTv: isTv, movieData: movieData);
+      await cacheMovieMetadata(
+        tmdbId: tmdbId,
+        isTv: isTv,
+        movieData: movieData,
+      );
 
-      await _db.into(_db.userMovieSettings).insertOnConflictUpdate(
+      await _db
+          .into(_db.userMovieSettings)
+          .insertOnConflictUpdate(
             UserMovieSetting(
               tmdbId: tmdbId,
               isTv: isTv,
@@ -411,10 +474,12 @@ class NativeMovieRepository implements MovieRepository {
   }
 
   @override
-  Future<Map<String, dynamic>> exportBackupData() => _backupRepo.exportBackupData();
+  Future<Map<String, dynamic>> exportBackupData() =>
+      _backupRepo.exportBackupData();
 
   @override
-  Future<void> importBackupData(Map<String, dynamic> json) => _backupRepo.importBackupData(json);
+  Future<void> importBackupData(Map<String, dynamic> json) =>
+      _backupRepo.importBackupData(json);
 
   @override
   Future<void> writeEpisodeProgressSettingsLocal({
@@ -424,7 +489,9 @@ class NativeMovieRepository implements MovieRepository {
     required int? lastWatchedEpisode,
     required bool isActivelyWatching,
   }) async {
-    await _db.into(_db.userMovieSettings).insertOnConflictUpdate(
+    await _db
+        .into(_db.userMovieSettings)
+        .insertOnConflictUpdate(
           UserMovieSetting(
             tmdbId: tmdbId,
             isTv: isTv,
@@ -449,8 +516,15 @@ class WebMovieRepository implements MovieRepository {
   BackupRepository get _backupRepo => WebBackupRepository(_ref);
 
   @override
-  Future<void> createCustomList(String name, String? description, {DateTime? targetDate}) =>
-      _customListRepo.createCustomList(name, description, targetDate: targetDate);
+  Future<void> createCustomList(
+    String name,
+    String? description, {
+    DateTime? targetDate,
+  }) => _customListRepo.createCustomList(
+    name,
+    description,
+    targetDate: targetDate,
+  );
 
   @override
   Future<void> updateCustomList(
@@ -459,8 +533,13 @@ class WebMovieRepository implements MovieRepository {
     String? description, {
     DateTime? targetDate,
     bool clearTargetDate = false,
-  }) =>
-      _customListRepo.updateCustomList(id, name, description, targetDate: targetDate, clearTargetDate: clearTargetDate);
+  }) => _customListRepo.updateCustomList(
+    id,
+    name,
+    description,
+    targetDate: targetDate,
+    clearTargetDate: clearTargetDate,
+  );
 
   @override
   Future<void> deleteCustomList(int id) => _customListRepo.deleteCustomList(id);
@@ -474,18 +553,22 @@ class WebMovieRepository implements MovieRepository {
       _customListRepo.removeMovieFromCustomList(listId, tmdbId, isTv);
 
   @override
-  Future<void> reorderCustomListMovies(int listId, Map<MovieKey, int> rankings) =>
-      _customListRepo.reorderCustomListMovies(listId, rankings);
+  Future<void> reorderCustomListMovies(
+    int listId,
+    Map<MovieKey, int> rankings,
+  ) => _customListRepo.reorderCustomListMovies(listId, rankings);
 
   @override
   Future<void> setCollectionVisibility(int listId, bool isPublic) =>
       _customListRepo.setCollectionVisibility(listId, isPublic);
 
   @override
-  Future<Map<String, dynamic>> exportBackupData() => _backupRepo.exportBackupData();
+  Future<Map<String, dynamic>> exportBackupData() =>
+      _backupRepo.exportBackupData();
 
   @override
-  Future<void> importBackupData(Map<String, dynamic> json) => _backupRepo.importBackupData(json);
+  Future<void> importBackupData(Map<String, dynamic> json) =>
+      _backupRepo.importBackupData(json);
 
   @override
   Future<void> deleteWatchRecordsByIds(List<int> ids) async {
@@ -493,7 +576,9 @@ class WebMovieRepository implements MovieRepository {
     final idsToDelete = ids.toSet();
     final notifier = _ref.read(webWatchRecordsProvider.notifier);
     final currentList = _ref.read(webWatchRecordsProvider);
-    notifier.state = currentList.where((r) => !idsToDelete.contains(r.id)).toList();
+    notifier.state = currentList
+        .where((r) => !idsToDelete.contains(r.id))
+        .toList();
   }
 
   @override
@@ -557,6 +642,11 @@ class WebMovieRepository implements MovieRepository {
       createdAt: current[key]?.createdAt,
     );
     _ref.read(webMoviesProvider.notifier).state = updated;
+    await WebLocalStore.save(
+      movies: updated,
+      customLists: _ref.read(webCustomListsProvider),
+      customListMovies: _ref.read(webCustomListMoviesProvider),
+    );
   }
 
   @override
@@ -600,7 +690,9 @@ class WebMovieRepository implements MovieRepository {
   }) async {
     final key = (tmdbId: tmdbId, isTv: isTv);
     final currentSettings = _ref.read(webMovieSettingsProvider);
-    final updatedSettings = Map<MovieKey, UserMovieSetting>.from(currentSettings);
+    final updatedSettings = Map<MovieKey, UserMovieSetting>.from(
+      currentSettings,
+    );
     updatedSettings[key] = UserMovieSetting(
       tmdbId: tmdbId,
       isTv: isTv,

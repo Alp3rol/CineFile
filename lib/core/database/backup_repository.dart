@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../constants/tmdb_genres.dart';
 import 'app_database.dart';
 import 'database_provider.dart';
+import 'web_local_store.dart';
 
 /// Handles exporting and importing database backups.
 abstract class BackupRepository {
@@ -29,36 +30,36 @@ bool _backupBool(Object? value, {bool orElse = false}) {
 }
 
 Map<String, dynamic> _movieBackupJson(Map<String, dynamic> json) => {
-      ...json,
-      'isTv': _backupBool(json['isTv']),
-    };
+  ...json,
+  'isTv': _backupBool(json['isTv']),
+};
 
 Map<String, dynamic> _watchRecordBackupJson(Map<String, dynamic> json) => {
-      ...json,
-      'isTv': _backupBool(json['isTv']),
-      'isPublic': _backupBool(json['isPublic']),
-      'episodeCount': (json['episodeCount'] as num?)?.toInt() ?? 1,
-    };
+  ...json,
+  'isTv': _backupBool(json['isTv']),
+  'isPublic': _backupBool(json['isPublic']),
+  'episodeCount': (json['episodeCount'] as num?)?.toInt() ?? 1,
+};
 
 Map<String, dynamic> _userMovieSettingBackupJson(Map<String, dynamic> json) => {
-      ...json,
-      'isTv': _backupBool(json['isTv']),
-      'isFavorite': _backupBool(json['isFavorite']),
-      'isReWatchList': _backupBool(json['isReWatchList']),
-      'isActivelyWatching': _backupBool(json['isActivelyWatching']),
-    };
+  ...json,
+  'isTv': _backupBool(json['isTv']),
+  'isFavorite': _backupBool(json['isFavorite']),
+  'isReWatchList': _backupBool(json['isReWatchList']),
+  'isActivelyWatching': _backupBool(json['isActivelyWatching']),
+};
 
 Map<String, dynamic> _customListBackupJson(Map<String, dynamic> json) => {
-      ...json,
-      'isPublic': _backupBool(json['isPublic']),
-      'createdAt': json['createdAt'] ?? DateTime.now().millisecondsSinceEpoch,
-    };
+  ...json,
+  'isPublic': _backupBool(json['isPublic']),
+  'createdAt': json['createdAt'] ?? DateTime.now().millisecondsSinceEpoch,
+};
 
 Map<String, dynamic> _customListMovieBackupJson(Map<String, dynamic> json) => {
-      ...json,
-      'isTv': _backupBool(json['isTv']),
-      'addedAt': json['addedAt'] ?? DateTime.now().millisecondsSinceEpoch,
-    };
+  ...json,
+  'isTv': _backupBool(json['isTv']),
+  'addedAt': json['addedAt'] ?? DateTime.now().millisecondsSinceEpoch,
+};
 
 Movie _movieFromBackupJson(Map<String, dynamic> json) {
   final movie = Movie.fromJson(_movieBackupJson(json));
@@ -98,7 +99,8 @@ class NativeBackupRepository implements BackupRepository {
     final recordsList = json['watch_records'] as List<dynamic>? ?? [];
     final settingsList = json['user_movie_settings'] as List<dynamic>? ?? [];
     final customListsList = json['custom_lists'] as List<dynamic>? ?? [];
-    final customListMoviesList = json['custom_list_movies'] as List<dynamic>? ?? [];
+    final customListMoviesList =
+        json['custom_list_movies'] as List<dynamic>? ?? [];
 
     await _db.transaction(() async {
       await _db.delete(_db.customListMovies).go();
@@ -108,23 +110,47 @@ class NativeBackupRepository implements BackupRepository {
       await _db.delete(_db.movies).go();
 
       for (final x in moviesList) {
-        await _db.into(_db.movies).insertOnConflictUpdate(_movieFromBackupJson(x as Map<String, dynamic>));
+        await _db
+            .into(_db.movies)
+            .insertOnConflictUpdate(
+              _movieFromBackupJson(x as Map<String, dynamic>),
+            );
       }
       for (final x in settingsList) {
-        await _db.into(_db.userMovieSettings).insertOnConflictUpdate(
-            UserMovieSetting.fromJson(_userMovieSettingBackupJson(x as Map<String, dynamic>)));
+        await _db
+            .into(_db.userMovieSettings)
+            .insertOnConflictUpdate(
+              UserMovieSetting.fromJson(
+                _userMovieSettingBackupJson(x as Map<String, dynamic>),
+              ),
+            );
       }
       for (final x in recordsList) {
-        await _db.into(_db.watchRecords).insertOnConflictUpdate(
-            WatchRecord.fromJson(_watchRecordBackupJson(x as Map<String, dynamic>)));
+        await _db
+            .into(_db.watchRecords)
+            .insertOnConflictUpdate(
+              WatchRecord.fromJson(
+                _watchRecordBackupJson(x as Map<String, dynamic>),
+              ),
+            );
       }
       for (final x in customListsList) {
-        await _db.into(_db.customLists).insertOnConflictUpdate(
-            CustomList.fromJson(_customListBackupJson(x as Map<String, dynamic>)));
+        await _db
+            .into(_db.customLists)
+            .insertOnConflictUpdate(
+              CustomList.fromJson(
+                _customListBackupJson(x as Map<String, dynamic>),
+              ),
+            );
       }
       for (final x in customListMoviesList) {
-        await _db.into(_db.customListMovies).insertOnConflictUpdate(
-            CustomListMovie.fromJson(_customListMovieBackupJson(x as Map<String, dynamic>)));
+        await _db
+            .into(_db.customListMovies)
+            .insertOnConflictUpdate(
+              CustomListMovie.fromJson(
+                _customListMovieBackupJson(x as Map<String, dynamic>),
+              ),
+            );
       }
     });
   }
@@ -158,7 +184,8 @@ class WebBackupRepository implements BackupRepository {
     final recordsList = json['watch_records'] as List<dynamic>? ?? [];
     final settingsList = json['user_movie_settings'] as List<dynamic>? ?? [];
     final customListsList = json['custom_lists'] as List<dynamic>? ?? [];
-    final customListMoviesList = json['custom_list_movies'] as List<dynamic>? ?? [];
+    final customListMoviesList =
+        json['custom_list_movies'] as List<dynamic>? ?? [];
 
     final watchRecords = recordsList
         .whereType<Map<String, dynamic>>()
@@ -193,5 +220,10 @@ class WebBackupRepository implements BackupRepository {
     _ref.read(webMoviesProvider.notifier).state = movies;
     _ref.read(webCustomListsProvider.notifier).state = customLists;
     _ref.read(webCustomListMoviesProvider.notifier).state = customListMovies;
+    await WebLocalStore.save(
+      movies: movies,
+      customLists: customLists,
+      customListMovies: customListMovies,
+    );
   }
 }

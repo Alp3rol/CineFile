@@ -15,6 +15,10 @@ import 'package:cinefile/core/database/database_provider.dart';
 import 'package:cinefile/core/database/movie_repository.dart';
 import 'package:cinefile/features/auth/controllers/auth_controller.dart';
 
+final _webMovieRepositoryProvider = Provider<MovieRepository>(
+  (ref) => WebMovieRepository(ref),
+);
+
 void main() {
   late AppDatabase db;
   late FakeFirebaseFirestore firestore;
@@ -23,13 +27,18 @@ void main() {
   setUp(() async {
     db = AppDatabase.forTesting(NativeDatabase.memory());
     firestore = FakeFirebaseFirestore();
-    container = ProviderContainer(overrides: [
-      databaseProvider.overrideWithValue(db),
-      firebaseAuthProvider.overrideWithValue(
-        MockFirebaseAuth(signedIn: true, mockUser: MockUser(uid: 'owner', email: 'owner@test.com')),
-      ),
-      firestoreProvider.overrideWithValue(firestore),
-    ]);
+    container = ProviderContainer(
+      overrides: [
+        databaseProvider.overrideWithValue(db),
+        firebaseAuthProvider.overrideWithValue(
+          MockFirebaseAuth(
+            signedIn: true,
+            mockUser: MockUser(uid: 'owner', email: 'owner@test.com'),
+          ),
+        ),
+        firestoreProvider.overrideWithValue(firestore),
+      ],
+    );
     addTearDown(() async {
       container.dispose();
       await db.close();
@@ -39,33 +48,52 @@ void main() {
     await readAsync(container, authStateProvider.future);
   });
 
-  test('turning sharing on mirrors the collection; turning it off deletes the mirror', () async {
-    final repo = container.read(movieRepositoryProvider);
-    await repo.createCustomList('Halloween Marathon', 'spooky picks');
-    final listId = (await db.select(db.customLists).get()).first.id;
+  test(
+    'turning sharing on mirrors the collection; turning it off deletes the mirror',
+    () async {
+      final repo = container.read(movieRepositoryProvider);
+      await repo.createCustomList('Halloween Marathon', 'spooky picks');
+      final listId = (await db.select(db.customLists).get()).first.id;
 
-    final movie = Movie(tmdbId: 1, title: 'Scream', isTv: false, posterPath: '/scream.jpg', createdAt: DateTime.now());
-    await repo.addMovieToCustomList(listId, movie);
+      final movie = Movie(
+        tmdbId: 1,
+        title: 'Scream',
+        isTv: false,
+        posterPath: '/scream.jpg',
+        createdAt: DateTime.now(),
+      );
+      await repo.addMovieToCustomList(listId, movie);
 
-    await repo.setCollectionVisibility(listId, true);
+      await repo.setCollectionVisibility(listId, true);
 
-    final docId = 'owner_$listId';
-    final doc = await firestore.collection('shared_collections').doc(docId).get();
-    expect(doc.exists, isTrue);
-    expect(doc.data()!['name'], 'Halloween Marathon');
-    expect((doc.data()!['movies'] as List).length, 1);
-    expect((doc.data()!['movies'] as List).first['title'], 'Scream');
+      final docId = 'owner_$listId';
+      final doc = await firestore
+          .collection('shared_collections')
+          .doc(docId)
+          .get();
+      expect(doc.exists, isTrue);
+      expect(doc.data()!['name'], 'Halloween Marathon');
+      expect((doc.data()!['movies'] as List).length, 1);
+      expect((doc.data()!['movies'] as List).first['title'], 'Scream');
 
-    final listRow = await (db.select(db.customLists)..where((t) => t.id.equals(listId))).getSingle();
-    expect(listRow.isPublic, isTrue);
+      final listRow = await (db.select(
+        db.customLists,
+      )..where((t) => t.id.equals(listId))).getSingle();
+      expect(listRow.isPublic, isTrue);
 
-    await repo.setCollectionVisibility(listId, false);
+      await repo.setCollectionVisibility(listId, false);
 
-    final docAfter = await firestore.collection('shared_collections').doc(docId).get();
-    expect(docAfter.exists, isFalse);
-    final listRowAfter = await (db.select(db.customLists)..where((t) => t.id.equals(listId))).getSingle();
-    expect(listRowAfter.isPublic, isFalse);
-  });
+      final docAfter = await firestore
+          .collection('shared_collections')
+          .doc(docId)
+          .get();
+      expect(docAfter.exists, isFalse);
+      final listRowAfter = await (db.select(
+        db.customLists,
+      )..where((t) => t.id.equals(listId))).getSingle();
+      expect(listRowAfter.isPublic, isFalse);
+    },
+  );
 
   test('editing a SHARED collection re-mirrors it live', () async {
     final repo = container.read(movieRepositoryProvider);
@@ -75,17 +103,28 @@ void main() {
 
     // The owner adds a movie AFTER sharing — the whole point of "canlı
     // senkron" is that viewers see this without the owner re-sharing.
-    final newMovie = Movie(tmdbId: 2, title: 'Newly Added', isTv: false, createdAt: DateTime.now());
+    final newMovie = Movie(
+      tmdbId: 2,
+      title: 'Newly Added',
+      isTv: false,
+      createdAt: DateTime.now(),
+    );
     await repo.addMovieToCustomList(listId, newMovie);
 
-    final doc = await firestore.collection('shared_collections').doc('owner_$listId').get();
+    final doc = await firestore
+        .collection('shared_collections')
+        .doc('owner_$listId')
+        .get();
     final movies = doc.data()!['movies'] as List;
     expect(movies.length, 1);
     expect(movies.first['title'], 'Newly Added');
 
     // Removing it again also propagates.
     await repo.removeMovieFromCustomList(listId, 2, false);
-    final docAfterRemove = await firestore.collection('shared_collections').doc('owner_$listId').get();
+    final docAfterRemove = await firestore
+        .collection('shared_collections')
+        .doc('owner_$listId')
+        .get();
     expect((docAfterRemove.data()!['movies'] as List), isEmpty);
   });
 
@@ -94,10 +133,18 @@ void main() {
     await repo.createCustomList('Private List', null);
     final listId = (await db.select(db.customLists).get()).first.id;
 
-    final movie = Movie(tmdbId: 3, title: 'Secret Movie', isTv: false, createdAt: DateTime.now());
+    final movie = Movie(
+      tmdbId: 3,
+      title: 'Secret Movie',
+      isTv: false,
+      createdAt: DateTime.now(),
+    );
     await repo.addMovieToCustomList(listId, movie);
 
-    final doc = await firestore.collection('shared_collections').doc('owner_$listId').get();
+    final doc = await firestore
+        .collection('shared_collections')
+        .doc('owner_$listId')
+        .get();
     expect(doc.exists, isFalse);
   });
 
@@ -106,30 +153,51 @@ void main() {
   // signed-in user, with its titles, name and description, indefinitely. The
   // owner had no way to see it, and the 'collection' community post pointing
   // at it kept rendering.
-  test('deleting a SHARED collection also removes its Firestore mirror', () async {
-    final repo = container.read(movieRepositoryProvider);
-    await repo.createCustomList('Gizli Kalmasi Gereken', 'ozel notlar');
-    final listId = (await db.select(db.customLists).get()).first.id;
-    await repo.addMovieToCustomList(
-      listId,
-      Movie(tmdbId: 7, title: 'Se7en', isTv: false, createdAt: DateTime.now()),
-    );
-    await repo.setCollectionVisibility(listId, true);
-    expect(
-      (await firestore.collection('shared_collections').doc('owner_$listId').get()).exists,
-      isTrue,
-      reason: 'sanity check: sharing should have created the mirror',
-    );
+  test(
+    'deleting a SHARED collection also removes its Firestore mirror',
+    () async {
+      final repo = container.read(movieRepositoryProvider);
+      await repo.createCustomList('Gizli Kalmasi Gereken', 'ozel notlar');
+      final listId = (await db.select(db.customLists).get()).first.id;
+      await repo.addMovieToCustomList(
+        listId,
+        Movie(
+          tmdbId: 7,
+          title: 'Se7en',
+          isTv: false,
+          createdAt: DateTime.now(),
+        ),
+      );
+      await repo.setCollectionVisibility(listId, true);
+      expect(
+        (await firestore
+                .collection('shared_collections')
+                .doc('owner_$listId')
+                .get())
+            .exists,
+        isTrue,
+        reason: 'sanity check: sharing should have created the mirror',
+      );
 
-    await repo.deleteCustomList(listId);
+      await repo.deleteCustomList(listId);
 
-    expect(
-      (await firestore.collection('shared_collections').doc('owner_$listId').get()).exists,
-      isFalse,
-      reason: 'deleting the collection must take its public mirror with it',
-    );
-    expect(await (db.select(db.customLists)..where((t) => t.id.equals(listId))).getSingleOrNull(), isNull);
-  });
+      expect(
+        (await firestore
+                .collection('shared_collections')
+                .doc('owner_$listId')
+                .get())
+            .exists,
+        isFalse,
+        reason: 'deleting the collection must take its public mirror with it',
+      );
+      expect(
+        await (db.select(
+          db.customLists,
+        )..where((t) => t.id.equals(listId))).getSingleOrNull(),
+        isNull,
+      );
+    },
+  );
 
   test('deleting a PRIVATE collection issues no Firestore write', () async {
     final repo = container.read(movieRepositoryProvider);
@@ -139,35 +207,117 @@ void main() {
     await repo.deleteCustomList(listId);
 
     expect(
-      (await firestore.collection('shared_collections').doc('owner_$listId').get()).exists,
+      (await firestore
+              .collection('shared_collections')
+              .doc('owner_$listId')
+              .get())
+          .exists,
       isFalse,
     );
-    expect(await (db.select(db.customLists)..where((t) => t.id.equals(listId))).getSingleOrNull(), isNull);
+    expect(
+      await (db.select(
+        db.customLists,
+      )..where((t) => t.id.equals(listId))).getSingleOrNull(),
+      isNull,
+    );
   });
 
-  test('mirroring correctly separates a movie and a TV show that share the same tmdbId', () async {
-    final repo = container.read(movieRepositoryProvider);
-    await repo.createCustomList('Mixed List', null);
-    final listId = (await db.select(db.customLists).get()).first.id;
+  test(
+    'mirroring correctly separates a movie and a TV show that share the same tmdbId',
+    () async {
+      final repo = container.read(movieRepositoryProvider);
+      await repo.createCustomList('Mixed List', null);
+      final listId = (await db.select(db.customLists).get()).first.id;
 
-    // Same numeric tmdbId, one is a movie and the other a TV show — this is
-    // the exact collision the v8 migration made isTv part of the primary
-    // key for. The batched movie lookup in _mirrorSharedCollection must
-    // still resolve each row to its correct counterpart.
-    final movie = Movie(tmdbId: 42, title: 'The Movie', isTv: false, createdAt: DateTime.now());
-    final show = Movie(tmdbId: 42, title: 'The Show', isTv: true, createdAt: DateTime.now());
-    await repo.addMovieToCustomList(listId, movie);
-    await repo.addMovieToCustomList(listId, show);
+      // Same numeric tmdbId, one is a movie and the other a TV show — this is
+      // the exact collision the v8 migration made isTv part of the primary
+      // key for. The batched movie lookup in _mirrorSharedCollection must
+      // still resolve each row to its correct counterpart.
+      final movie = Movie(
+        tmdbId: 42,
+        title: 'The Movie',
+        isTv: false,
+        createdAt: DateTime.now(),
+      );
+      final show = Movie(
+        tmdbId: 42,
+        title: 'The Show',
+        isTv: true,
+        createdAt: DateTime.now(),
+      );
+      await repo.addMovieToCustomList(listId, movie);
+      await repo.addMovieToCustomList(listId, show);
 
-    await repo.setCollectionVisibility(listId, true);
+      await repo.setCollectionVisibility(listId, true);
 
-    final doc = await firestore.collection('shared_collections').doc('owner_$listId').get();
-    final movies = (doc.data()!['movies'] as List).cast<Map<String, dynamic>>();
-    expect(movies.length, 2);
+      final doc = await firestore
+          .collection('shared_collections')
+          .doc('owner_$listId')
+          .get();
+      final movies = (doc.data()!['movies'] as List)
+          .cast<Map<String, dynamic>>();
+      expect(movies.length, 2);
 
-    final movieEntry = movies.firstWhere((m) => m['isTv'] == false);
-    final showEntry = movies.firstWhere((m) => m['isTv'] == true);
-    expect(movieEntry['title'], 'The Movie');
-    expect(showEntry['title'], 'The Show');
-  });
+      final movieEntry = movies.firstWhere((m) => m['isTv'] == false);
+      final showEntry = movies.firstWhere((m) => m['isTv'] == true);
+      expect(movieEntry['title'], 'The Movie');
+      expect(showEntry['title'], 'The Show');
+    },
+  );
+
+  test(
+    'web repository persists sharing state and maintains its Firestore mirror',
+    () async {
+      final webFirestore = FakeFirebaseFirestore();
+      final webContainer = ProviderContainer(
+        overrides: [
+          firebaseAuthProvider.overrideWithValue(
+            MockFirebaseAuth(
+              signedIn: true,
+              mockUser: MockUser(uid: 'web-owner', email: 'web@test.com'),
+            ),
+          ),
+          firestoreProvider.overrideWithValue(webFirestore),
+        ],
+      );
+      addTearDown(webContainer.dispose);
+      await readAsync(webContainer, authStateProvider.future);
+
+      final repo = webContainer.read(_webMovieRepositoryProvider);
+      await repo.createCustomList('Web Collection', 'survives refresh');
+      final listId = webContainer.read(webCustomListsProvider).keys.single;
+      await repo.addMovieToCustomList(
+        listId,
+        Movie(
+          tmdbId: 99,
+          title: 'Web Movie',
+          isTv: false,
+          createdAt: DateTime.now(),
+        ),
+      );
+      await repo.setCollectionVisibility(listId, true);
+
+      expect(
+        webContainer.read(webCustomListsProvider)[listId]!.isPublic,
+        isTrue,
+      );
+      final mirror = await webFirestore
+          .collection('shared_collections')
+          .doc('web-owner_$listId')
+          .get();
+      expect(mirror.exists, isTrue);
+      expect((mirror.data()!['movies'] as List).single['title'], 'Web Movie');
+
+      await repo.deleteCustomList(listId);
+      expect(webContainer.read(webCustomListsProvider), isEmpty);
+      expect(
+        (await webFirestore
+                .collection('shared_collections')
+                .doc('web-owner_$listId')
+                .get())
+            .exists,
+        isFalse,
+      );
+    },
+  );
 }

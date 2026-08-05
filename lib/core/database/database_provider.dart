@@ -9,6 +9,7 @@ import '../../features/journal/models/diary_log_model.dart';
 import '../utils/safe_parsers.dart';
 import 'app_database.dart';
 import 'movie_repository.dart';
+import 'web_local_store.dart';
 
 final databaseProvider = Provider<AppDatabase>((ref) {
   final db = AppDatabase();
@@ -27,30 +28,40 @@ typedef MovieKey = ({int tmdbId, bool isTv});
 // Since sql.js is not loaded on Flutter Web without hosting setup,
 // we use in-memory Riverpod lists to simulate database operations on Web.
 final webWatchRecordsProvider = StateProvider<List<WatchRecord>>((ref) => []);
-final webMovieSettingsProvider = StateProvider<Map<MovieKey, UserMovieSetting>>((ref) => {});
-final webMoviesProvider = StateProvider<Map<MovieKey, Movie>>((ref) => {});
+final webMovieSettingsProvider = StateProvider<Map<MovieKey, UserMovieSetting>>(
+  (ref) => {},
+);
+final webMoviesProvider = StateProvider<Map<MovieKey, Movie>>(
+  (ref) => Map.of(WebLocalStore.snapshot.movies),
+);
 
 // Stream provider to get watch records for a specific movie
-final watchRecordsForMovieProvider = StreamProvider.family<List<WatchRecord>, MovieKey>((ref, key) {
-  final authState = ref.watch(authStateProvider);
-  final user = authState.value;
-  if (user == null) {
-    return Stream.value(<WatchRecord>[]);
-  }
+final watchRecordsForMovieProvider =
+    StreamProvider.family<List<WatchRecord>, MovieKey>((ref, key) {
+      final authState = ref.watch(authStateProvider);
+      final user = authState.value;
+      if (user == null) {
+        return Stream.value(<WatchRecord>[]);
+      }
 
-  return ref.read(firestoreProvider)
-      .collection('logs')
-      .where('userId', isEqualTo: user.uid)
-      .where('movieId', isEqualTo: key.tmdbId)
-      .where('isTv', isEqualTo: key.isTv)
-      .snapshots()
-      .map((snapshot) {
-        final logs = snapshot.docs.map((doc) => DiaryLogModel.fromMap(doc.data(), doc.id)).toList();
-        // Sort descending by watchDate
-        logs.sort((a, b) => b.watchDate.compareTo(a.watchDate));
-        return logs.map((log) => log.toWatchRecordWithMovie().record).toList();
-      });
-});
+      return ref
+          .read(firestoreProvider)
+          .collection('logs')
+          .where('userId', isEqualTo: user.uid)
+          .where('movieId', isEqualTo: key.tmdbId)
+          .where('isTv', isEqualTo: key.isTv)
+          .snapshots()
+          .map((snapshot) {
+            final logs = snapshot.docs
+                .map((doc) => DiaryLogModel.fromMap(doc.data(), doc.id))
+                .toList();
+            // Sort descending by watchDate
+            logs.sort((a, b) => b.watchDate.compareTo(a.watchDate));
+            return logs
+                .map((log) => log.toWatchRecordWithMovie().record)
+                .toList();
+          });
+    });
 
 // Reactive settings lookup unifying the web-guest in-memory map and the
 // native/signed-in Firestore stream (movieSettingsProvider below) behind one
@@ -58,12 +69,13 @@ final watchRecordsForMovieProvider = StreamProvider.family<List<WatchRecord>, Mo
 // tracking seed) ref.watch a single provider instead of branching on kIsWeb
 // themselves. A reactive read via ref.watch, so this kIsWeb branch is within
 // this file's documented exception (see CLAUDE.md).
-final movieSettingsSnapshotProvider = Provider.family<AsyncValue<UserMovieSetting?>, MovieKey>((ref, key) {
-  if (kIsWeb) {
-    return AsyncValue.data(ref.watch(webMovieSettingsProvider)[key]);
-  }
-  return ref.watch(movieSettingsProvider(key));
-});
+final movieSettingsSnapshotProvider =
+    Provider.family<AsyncValue<UserMovieSetting?>, MovieKey>((ref, key) {
+      if (kIsWeb) {
+        return AsyncValue.data(ref.watch(webMovieSettingsProvider)[key]);
+      }
+      return ref.watch(movieSettingsProvider(key));
+    });
 
 /// Re-subscribes [movieSettingsProvider] for [key] so its next value is a
 /// genuinely current snapshot.
@@ -88,36 +100,38 @@ void refreshMovieSettings(WidgetRef ref, MovieKey key) {
 }
 
 // Stream provider to get settings for a specific movie
-final movieSettingsProvider = StreamProvider.family<UserMovieSetting?, MovieKey>((ref, key) {
-  final authState = ref.watch(authStateProvider);
-  final user = authState.value;
-  if (user == null) {
-    return Stream.value(null);
-  }
+final movieSettingsProvider =
+    StreamProvider.family<UserMovieSetting?, MovieKey>((ref, key) {
+      final authState = ref.watch(authStateProvider);
+      final user = authState.value;
+      if (user == null) {
+        return Stream.value(null);
+      }
 
-  return ref.read(firestoreProvider)
-      .collection('users')
-      .doc(user.uid)
-      .collection('movie_settings')
-      .doc('${key.tmdbId}_${key.isTv}')
-      .snapshots()
-      .map((doc) {
-        if (!doc.exists) return null;
-        final data = doc.data()!;
-        return UserMovieSetting(
-          tmdbId: key.tmdbId,
-          isTv: key.isTv,
-          isFavorite: parseBool(data['isFavorite']),
-          isReWatchList: parseBool(data['isReWatchList']),
-          personalRanking: parseInt(data['personalRanking']),
-          personalNotes: data['personalNotes'] as String?,
-          personalTags: data['personalTags'] as String?,
-          updatedAt: parseDateTime(data['updatedAt']),
-          isActivelyWatching: parseBool(data['isActivelyWatching']),
-          lastWatchedEpisode: parseInt(data['lastWatchedEpisode']),
-        );
-      });
-});
+      return ref
+          .read(firestoreProvider)
+          .collection('users')
+          .doc(user.uid)
+          .collection('movie_settings')
+          .doc('${key.tmdbId}_${key.isTv}')
+          .snapshots()
+          .map((doc) {
+            if (!doc.exists) return null;
+            final data = doc.data()!;
+            return UserMovieSetting(
+              tmdbId: key.tmdbId,
+              isTv: key.isTv,
+              isFavorite: parseBool(data['isFavorite']),
+              isReWatchList: parseBool(data['isReWatchList']),
+              personalRanking: parseInt(data['personalRanking']),
+              personalNotes: data['personalNotes'] as String?,
+              personalTags: data['personalTags'] as String?,
+              updatedAt: parseDateTime(data['updatedAt']),
+              isActivelyWatching: parseBool(data['isActivelyWatching']),
+              lastWatchedEpisode: parseInt(data['lastWatchedEpisode']),
+            );
+          });
+    });
 
 // Model to represent a Watch Record joined with its Movie metadata and settings
 class WatchRecordWithMovie {
@@ -141,56 +155,64 @@ const int kProfileWatchRecordLimit = 100;
 // the rules would reject, and the read rule's `isPublic == true` branch is
 // the only one a non-owner can satisfy, so the query itself must include
 // that filter for a stranger's profile.
-final watchRecordsForUserProvider = StreamProvider.family<List<WatchRecordWithMovie>, String>((ref, userId) {
-  final currentUserId = ref.watch(authStateProvider).value?.uid;
-  final isOwnProfile = currentUserId == userId;
+final watchRecordsForUserProvider =
+    StreamProvider.family<List<WatchRecordWithMovie>, String>((ref, userId) {
+      final currentUserId = ref.watch(authStateProvider).value?.uid;
+      final isOwnProfile = currentUserId == userId;
 
-  var query = ref.read(firestoreProvider).collection('logs').where('userId', isEqualTo: userId);
-  if (!isOwnProfile) {
-    query = query.where('isPublic', isEqualTo: true);
-  }
+      var query = ref
+          .read(firestoreProvider)
+          .collection('logs')
+          .where('userId', isEqualTo: userId);
+      if (!isOwnProfile) {
+        query = query.where('isPublic', isEqualTo: true);
+      }
 
-  // A profile screen shows a recent-activity grid, not an entire life's worth
-  // of history, so the query is bounded. Ordering happens server-side because
-  // a `limit` without one would return an arbitrary subset rather than the
-  // newest entries (see firestore.indexes.json for the composite indexes this
-  // needs). The list is still sorted again below: Firestore's ordering is
-  // authoritative for *which* documents come back, but re-sorting keeps the
-  // output stable regardless.
-  return query
-      .orderBy('watchDate', descending: true)
-      .limit(kProfileWatchRecordLimit)
-      .snapshots()
-      .asyncMap((snapshot) async {
-        final logs = snapshot.docs.map((doc) => DiaryLogModel.fromMap(doc.data(), doc.id)).toList();
-        // Sort descending by watchDate
-        logs.sort((a, b) => b.watchDate.compareTo(a.watchDate));
+      // A profile screen shows a recent-activity grid, not an entire life's worth
+      // of history, so the query is bounded. Ordering happens server-side because
+      // a `limit` without one would return an arbitrary subset rather than the
+      // newest entries (see firestore.indexes.json for the composite indexes this
+      // needs). The list is still sorted again below: Firestore's ordering is
+      // authoritative for *which* documents come back, but re-sorting keeps the
+      // output stable regardless.
+      return query
+          .orderBy('watchDate', descending: true)
+          .limit(kProfileWatchRecordLimit)
+          .snapshots()
+          .asyncMap((snapshot) async {
+            final logs = snapshot.docs
+                .map((doc) => DiaryLogModel.fromMap(doc.data(), doc.id))
+                .toList();
+            // Sort descending by watchDate
+            logs.sort((a, b) => b.watchDate.compareTo(a.watchDate));
 
-        // One query for the whole settings collection instead of a per-log
-        // document read. The previous shape issued one `get()` inside the
-        // loop, so rendering a 200-entry profile cost 200 extra document
-        // reads — repeated in full on every snapshot the listener emitted.
-        final settingsMap = _movieSettingsMapFromSnapshot(
-          await ref
-              .read(firestoreProvider)
-              .collection('users')
-              .doc(userId)
-              .collection('movie_settings')
-              .get(),
-        );
+            // One query for the whole settings collection instead of a per-log
+            // document read. The previous shape issued one `get()` inside the
+            // loop, so rendering a 200-entry profile cost 200 extra document
+            // reads — repeated in full on every snapshot the listener emitted.
+            final settingsMap = _movieSettingsMapFromSnapshot(
+              await ref
+                  .read(firestoreProvider)
+                  .collection('users')
+                  .doc(userId)
+                  .collection('movie_settings')
+                  .get(),
+            );
 
-        return logs.map((log) {
-          final wRecord = log.toWatchRecordWithMovie();
-          return WatchRecordWithMovie(
-            wRecord.record,
-            wRecord.movie,
-            setting: settingsMap[(tmdbId: log.movieId, isTv: log.isTv)],
-          );
-        }).toList();
-      });
-});
+            return logs.map((log) {
+              final wRecord = log.toWatchRecordWithMovie();
+              return WatchRecordWithMovie(
+                wRecord.record,
+                wRecord.movie,
+                setting: settingsMap[(tmdbId: log.movieId, isTv: log.isTv)],
+              );
+            }).toList();
+          });
+    });
 
-Map<MovieKey, UserMovieSetting> _movieSettingsMapFromSnapshot(QuerySnapshot<Map<String, dynamic>> snapshot) {
+Map<MovieKey, UserMovieSetting> _movieSettingsMapFromSnapshot(
+  QuerySnapshot<Map<String, dynamic>> snapshot,
+) {
   final map = <MovieKey, UserMovieSetting>{};
   for (final doc in snapshot.docs) {
     final data = doc.data();
@@ -208,7 +230,9 @@ Map<MovieKey, UserMovieSetting> _movieSettingsMapFromSnapshot(QuerySnapshot<Map<
       updatedAt: parseDateTime(data['updatedAt']),
       isActivelyWatching: parseBool(data['isActivelyWatching']),
       lastWatchedEpisode: parseInt(data['lastWatchedEpisode']),
-      lastEpisodeProgressAt: parseNullableDateTime(data['lastEpisodeProgressAt']),
+      lastEpisodeProgressAt: parseNullableDateTime(
+        data['lastEpisodeProgressAt'],
+      ),
     );
   }
   return map;
@@ -220,20 +244,22 @@ Map<MovieKey, UserMovieSetting> _movieSettingsMapFromSnapshot(QuerySnapshot<Map<
 // depend on this via ref.watch, since that would tear down and recreate its
 // logs subscription (and briefly flash to a loading state) on every
 // settings change; it merges both Firestore streams manually instead.
-final allMovieSettingsProvider = StreamProvider<Map<MovieKey, UserMovieSetting>>((ref) {
-  final authState = ref.watch(authStateProvider);
-  final user = authState.value;
-  if (user == null) {
-    return Stream.value(<MovieKey, UserMovieSetting>{});
-  }
+final allMovieSettingsProvider =
+    StreamProvider<Map<MovieKey, UserMovieSetting>>((ref) {
+      final authState = ref.watch(authStateProvider);
+      final user = authState.value;
+      if (user == null) {
+        return Stream.value(<MovieKey, UserMovieSetting>{});
+      }
 
-  return ref.read(firestoreProvider)
-      .collection('users')
-      .doc(user.uid)
-      .collection('movie_settings')
-      .snapshots()
-      .map(_movieSettingsMapFromSnapshot);
-});
+      return ref
+          .read(firestoreProvider)
+          .collection('users')
+          .doc(user.uid)
+          .collection('movie_settings')
+          .snapshots()
+          .map(_movieSettingsMapFromSnapshot);
+    });
 
 // Stream provider to get all watch records with movie details (current
 // logged in user). Manually merges two independent Firestore listeners
@@ -243,7 +269,9 @@ final allMovieSettingsProvider = StreamProvider<Map<MovieKey, UserMovieSetting>>
 // instead would rebuild this whole provider (and its logs subscription) on
 // every settings change, which briefly resets consumers to a loading state
 // and shows up as a visible flicker/jump in the Journal list.
-final allWatchRecordsProvider = StreamProvider<List<WatchRecordWithMovie>>((ref) {
+final allWatchRecordsProvider = StreamProvider<List<WatchRecordWithMovie>>((
+  ref,
+) {
   final authState = ref.watch(authStateProvider);
   final user = authState.value;
   if (user == null) {
@@ -260,38 +288,53 @@ final allWatchRecordsProvider = StreamProvider<List<WatchRecordWithMovie>>((ref)
     // records just render with a null setting briefly. Logs are the primary
     // data source, so wait for at least one logs snapshot before emitting.
     if (!hasLogs) return;
-    final sorted = [...latestLogs]..sort((a, b) => b.watchDate.compareTo(a.watchDate));
+    final sorted = [...latestLogs]
+      ..sort((a, b) => b.watchDate.compareTo(a.watchDate));
     final list = sorted.map((log) {
       final key = (tmdbId: log.movieId, isTv: log.isTv);
       final wRecord = log.toWatchRecordWithMovie();
-      return WatchRecordWithMovie(wRecord.record, wRecord.movie, setting: latestSettings[key]);
+      return WatchRecordWithMovie(
+        wRecord.record,
+        wRecord.movie,
+        setting: latestSettings[key],
+      );
     }).toList();
     if (!controller.isClosed) controller.add(list);
   }
 
-  final logsSub = ref.read(firestoreProvider)
+  final logsSub = ref
+      .read(firestoreProvider)
       .collection('logs')
       .where('userId', isEqualTo: user.uid)
       .snapshots()
-      .listen((snapshot) {
-        latestLogs = snapshot.docs.map((doc) => DiaryLogModel.fromMap(doc.data(), doc.id)).toList();
-        hasLogs = true;
-        emit();
-      }, onError: (Object e, StackTrace st) {
-        if (!controller.isClosed) controller.addError(e, st);
-      });
+      .listen(
+        (snapshot) {
+          latestLogs = snapshot.docs
+              .map((doc) => DiaryLogModel.fromMap(doc.data(), doc.id))
+              .toList();
+          hasLogs = true;
+          emit();
+        },
+        onError: (Object e, StackTrace st) {
+          if (!controller.isClosed) controller.addError(e, st);
+        },
+      );
 
-  final settingsSub = ref.read(firestoreProvider)
+  final settingsSub = ref
+      .read(firestoreProvider)
       .collection('users')
       .doc(user.uid)
       .collection('movie_settings')
       .snapshots()
-      .listen((snapshot) {
-        latestSettings = _movieSettingsMapFromSnapshot(snapshot);
-        emit();
-      }, onError: (Object e, StackTrace st) {
-        if (!controller.isClosed) controller.addError(e, st);
-      });
+      .listen(
+        (snapshot) {
+          latestSettings = _movieSettingsMapFromSnapshot(snapshot);
+          emit();
+        },
+        onError: (Object e, StackTrace st) {
+          if (!controller.isClosed) controller.addError(e, st);
+        },
+      );
 
   ref.onDispose(() {
     logsSub.cancel();
@@ -310,24 +353,31 @@ final followedUserIdsProvider = StreamProvider<Set<String>>((ref) {
     return Stream.value(<String>{});
   }
 
-  return ref.read(firestoreProvider)
+  return ref
+      .read(firestoreProvider)
       .collection('follows')
       .where('followerId', isEqualTo: user.uid)
       .snapshots()
       .map((snapshot) {
-        return snapshot.docs.map((doc) => doc.data()['followingId'] as String).toSet();
+        return snapshot.docs
+            .map((doc) => doc.data()['followingId'] as String)
+            .toSet();
       });
 });
 
 // Stream provider to check if a specific user is followed by the current user
-final isFollowingProvider = StreamProvider.family<bool, String>((ref, targetUserId) {
+final isFollowingProvider = StreamProvider.family<bool, String>((
+  ref,
+  targetUserId,
+) {
   final authState = ref.watch(authStateProvider);
   final user = authState.value;
   if (user == null) {
     return Stream.value(false);
   }
 
-  return ref.read(firestoreProvider)
+  return ref
+      .read(firestoreProvider)
       .collection('follows')
       .doc('${user.uid}_$targetUserId')
       .snapshots()
@@ -345,7 +395,9 @@ Future<void> toggleFollow(
   required bool currentlyFollowing,
 }) async {
   final firestore = ref.read(firestoreProvider);
-  final followDocRef = firestore.collection('follows').doc('${currentUserId}_$targetUserId');
+  final followDocRef = firestore
+      .collection('follows')
+      .doc('${currentUserId}_$targetUserId');
   final currentUserRef = firestore.collection('users').doc(currentUserId);
   final targetUserRef = firestore.collection('users').doc(targetUserId);
 
@@ -382,7 +434,8 @@ final favoriteMovieIdsProvider = StreamProvider<Set<MovieKey>>((ref) {
     return Stream.value(<MovieKey>{});
   }
 
-  return ref.read(firestoreProvider)
+  return ref
+      .read(firestoreProvider)
       .collection('users')
       .doc(user.uid)
       .collection('movie_settings')
@@ -428,25 +481,37 @@ final unwatchedMoviesProvider = StreamProvider<List<Movie>>((ref) {
     loading: () => Stream.value(<Movie>[]),
     error: (err, stack) => Stream.value(<Movie>[]),
     data: (records) {
-      final watchedKeys = records.map((r) => (tmdbId: r.movie.tmdbId, isTv: r.movie.isTv)).toSet();
+      final watchedKeys = records
+          .map((r) => (tmdbId: r.movie.tmdbId, isTv: r.movie.isTv))
+          .toSet();
 
       if (kIsWeb) {
         final movies = ref.watch(webMoviesProvider);
-        return Stream.value(movies.values.where((m) => !watchedKeys.contains((tmdbId: m.tmdbId, isTv: m.isTv))).toList());
+        return Stream.value(
+          movies.values
+              .where(
+                (m) => !watchedKeys.contains((tmdbId: m.tmdbId, isTv: m.isTv)),
+              )
+              .toList(),
+        );
       }
 
       final db = ref.watch(databaseProvider);
       final query = db.select(db.movies).join([
         leftOuterJoin(
           db.watchRecords,
-          db.watchRecords.movieId.equalsExp(db.movies.tmdbId) & db.watchRecords.isTv.equalsExp(db.movies.isTv),
+          db.watchRecords.movieId.equalsExp(db.movies.tmdbId) &
+              db.watchRecords.isTv.equalsExp(db.movies.isTv),
         ),
-      ])
-        ..where(db.watchRecords.id.isNull());
+      ])..where(db.watchRecords.id.isNull());
 
       return query.watch().map((rows) {
         final list = rows.map((row) => row.readTable(db.movies)).toList();
-        return list.where((m) => !watchedKeys.contains((tmdbId: m.tmdbId, isTv: m.isTv))).toList();
+        return list
+            .where(
+              (m) => !watchedKeys.contains((tmdbId: m.tmdbId, isTv: m.isTv)),
+            )
+            .toList();
       });
     },
   );
@@ -469,7 +534,9 @@ class ActivelyWatchingShow {
 // actively-watched show in each snapshot, fire a separate `logs` query just
 // to recover that show's title and poster — N round trips per emission, on a
 // widget that sits on the Home screen.
-final activelyWatchingProvider = StreamProvider<List<ActivelyWatchingShow>>((ref) {
+final activelyWatchingProvider = StreamProvider<List<ActivelyWatchingShow>>((
+  ref,
+) {
   final user = ref.watch(authStateProvider).value;
   if (user == null) {
     return Stream.value(<ActivelyWatchingShow>[]);
@@ -485,7 +552,10 @@ final activelyWatchingProvider = StreamProvider<List<ActivelyWatchingShow>>((ref
   // this is the most recently logged metadata for the show.
   final movieByKey = <MovieKey, Movie>{};
   for (final r in records) {
-    movieByKey.putIfAbsent((tmdbId: r.movie.tmdbId, isTv: r.movie.isTv), () => r.movie);
+    movieByKey.putIfAbsent((
+      tmdbId: r.movie.tmdbId,
+      isTv: r.movie.isTv,
+    ), () => r.movie);
   }
 
   final list = <ActivelyWatchingShow>[];
@@ -505,20 +575,28 @@ final activelyWatchingProvider = StreamProvider<List<ActivelyWatchingShow>>((ref
 
 // --- CUSTOM LISTS PROVIDERS AND ACTIONS ---
 
-// Web in-memory lists state
-final webCustomListsProvider = StateProvider<Map<int, CustomList>>((ref) => {});
-final webCustomListMoviesProvider = StateProvider<List<CustomListMovie>>((ref) => []);
+// Web collection state is hydrated from browser storage before ProviderScope
+// starts; repository mutations persist each complete snapshot.
+final webCustomListsProvider = StateProvider<Map<int, CustomList>>(
+  (ref) => Map.of(WebLocalStore.snapshot.customLists),
+);
+final webCustomListMoviesProvider = StateProvider<List<CustomListMovie>>(
+  (ref) => List.of(WebLocalStore.snapshot.customListMovies),
+);
 
 // Stream provider to get all custom lists
 final customListsProvider = StreamProvider<List<CustomList>>((ref) {
   if (kIsWeb) {
     final map = ref.watch(webCustomListsProvider);
-    final sorted = map.values.toList()..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    final sorted = map.values.toList()
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
     return Stream.value(sorted);
   }
 
   final db = ref.watch(databaseProvider);
-  return (db.select(db.customLists)..orderBy([(t) => OrderingTerm.desc(t.createdAt)])).watch();
+  return (db.select(
+    db.customLists,
+  )..orderBy([(t) => OrderingTerm.desc(t.createdAt)])).watch();
 });
 
 class CustomListMovieWithMovie {
@@ -528,69 +606,79 @@ class CustomListMovieWithMovie {
 }
 
 // Stream provider to get movies in a specific list, ordered by rankingOrder or addedAt
-final moviesInCustomListProvider = StreamProvider.family<List<CustomListMovieWithMovie>, int>((ref, listId) {
-  if (kIsWeb) {
-    final list = ref.watch(webCustomListMoviesProvider);
-    final movies = ref.watch(webMoviesProvider);
-    
-    final filtered = list.where((r) => r.listId == listId).map((r) {
-      final movie = movies[(tmdbId: r.movieId, isTv: r.isTv)] ?? Movie(
-        tmdbId: r.movieId,
-        title: 'Bilinmeyen Film',
-        isTv: r.isTv,
-        createdAt: DateTime.now(),
-      );
-      return CustomListMovieWithMovie(r, movie);
-    }).toList();
-    
-    // Sort: if rankingOrder is not null, sort by it, otherwise sort by addedAt descending
-    filtered.sort((a, b) {
-      final rA = a.relation.rankingOrder;
-      final rB = b.relation.rankingOrder;
-      if (rA != null && rB != null) {
-        return rA.compareTo(rB);
-      } else if (rA != null) {
-        return -1;
-      } else if (rB != null) {
-        return 1;
-      } else {
-        return b.relation.addedAt.compareTo(a.relation.addedAt);
+final moviesInCustomListProvider =
+    StreamProvider.family<List<CustomListMovieWithMovie>, int>((ref, listId) {
+      if (kIsWeb) {
+        final list = ref.watch(webCustomListMoviesProvider);
+        final movies = ref.watch(webMoviesProvider);
+
+        final filtered = list.where((r) => r.listId == listId).map((r) {
+          final movie =
+              movies[(tmdbId: r.movieId, isTv: r.isTv)] ??
+              Movie(
+                tmdbId: r.movieId,
+                title: 'Bilinmeyen Film',
+                isTv: r.isTv,
+                createdAt: DateTime.now(),
+              );
+          return CustomListMovieWithMovie(r, movie);
+        }).toList();
+
+        // Sort: if rankingOrder is not null, sort by it, otherwise sort by addedAt descending
+        filtered.sort((a, b) {
+          final rA = a.relation.rankingOrder;
+          final rB = b.relation.rankingOrder;
+          if (rA != null && rB != null) {
+            return rA.compareTo(rB);
+          } else if (rA != null) {
+            return -1;
+          } else if (rB != null) {
+            return 1;
+          } else {
+            return b.relation.addedAt.compareTo(a.relation.addedAt);
+          }
+        });
+        return Stream.value(filtered);
       }
+
+      final db = ref.watch(databaseProvider);
+      final query = db.select(db.customListMovies).join([
+        leftOuterJoin(
+          db.movies,
+          db.movies.tmdbId.equalsExp(db.customListMovies.movieId) &
+              db.movies.isTv.equalsExp(db.customListMovies.isTv),
+        ),
+      ])..where(db.customListMovies.listId.equals(listId));
+
+      // Order: first by rankingOrder (ascending), then addedAt (descending)
+      query.orderBy([
+        OrderingTerm.asc(db.customListMovies.rankingOrder),
+        OrderingTerm.desc(db.customListMovies.addedAt),
+      ]);
+
+      return query.watch().map((rows) {
+        return rows.map((row) {
+          return CustomListMovieWithMovie(
+            row.readTable(db.customListMovies),
+            row.readTable(db.movies),
+          );
+        }).toList();
+      });
     });
-    return Stream.value(filtered);
-  }
-
-  final db = ref.watch(databaseProvider);
-  final query = db.select(db.customListMovies).join([
-    leftOuterJoin(
-      db.movies,
-      db.movies.tmdbId.equalsExp(db.customListMovies.movieId) &
-          db.movies.isTv.equalsExp(db.customListMovies.isTv),
-    ),
-  ])..where(db.customListMovies.listId.equals(listId));
-
-  // Order: first by rankingOrder (ascending), then addedAt (descending)
-  query.orderBy([
-    OrderingTerm.asc(db.customListMovies.rankingOrder),
-    OrderingTerm.desc(db.customListMovies.addedAt),
-  ]);
-
-  return query.watch().map((rows) {
-    return rows.map((row) {
-      return CustomListMovieWithMovie(
-        row.readTable(db.customListMovies),
-        row.readTable(db.movies),
-      );
-    }).toList();
-  });
-});
 
 // Stream provider to find which lists a movie belongs to
-final listsForMovieProvider = StreamProvider.family<Set<int>, MovieKey>((ref, key) {
+final listsForMovieProvider = StreamProvider.family<Set<int>, MovieKey>((
+  ref,
+  key,
+) {
   if (kIsWeb) {
     final list = ref.watch(webCustomListMoviesProvider);
     return Stream.value(
-        list.where((r) => r.movieId == key.tmdbId && r.isTv == key.isTv).map((r) => r.listId).toSet());
+      list
+          .where((r) => r.movieId == key.tmdbId && r.isTv == key.isTv)
+          .map((r) => r.listId)
+          .toSet(),
+    );
   }
 
   final db = ref.watch(databaseProvider);
@@ -606,8 +694,14 @@ final listsForMovieProvider = StreamProvider.family<Set<int>, MovieKey>((ref, ke
 // which picks the native (Drift/SQLite) or web (in-memory) implementation.
 // Kept as free functions so existing call sites don't need to change.
 
-Future<void> createCustomList(WidgetRef ref, String name, String? description, {DateTime? targetDate}) =>
-    ref.read(movieRepositoryProvider).createCustomList(name, description, targetDate: targetDate);
+Future<void> createCustomList(
+  WidgetRef ref,
+  String name,
+  String? description, {
+  DateTime? targetDate,
+}) => ref
+    .read(movieRepositoryProvider)
+    .createCustomList(name, description, targetDate: targetDate);
 
 Future<void> updateCustomList(
   WidgetRef ref,
@@ -616,14 +710,15 @@ Future<void> updateCustomList(
   String? description, {
   DateTime? targetDate,
   bool clearTargetDate = false,
-}) =>
-    ref.read(movieRepositoryProvider).updateCustomList(
-          id,
-          name,
-          description,
-          targetDate: targetDate,
-          clearTargetDate: clearTargetDate,
-        );
+}) => ref
+    .read(movieRepositoryProvider)
+    .updateCustomList(
+      id,
+      name,
+      description,
+      targetDate: targetDate,
+      clearTargetDate: clearTargetDate,
+    );
 
 Future<void> deleteCustomList(WidgetRef ref, int id) =>
     ref.read(movieRepositoryProvider).deleteCustomList(id);
@@ -631,13 +726,27 @@ Future<void> deleteCustomList(WidgetRef ref, int id) =>
 Future<void> addMovieToCustomList(WidgetRef ref, int listId, Movie movieData) =>
     ref.read(movieRepositoryProvider).addMovieToCustomList(listId, movieData);
 
-Future<void> removeMovieFromCustomList(WidgetRef ref, int listId, int tmdbId, bool isTv) =>
-    ref.read(movieRepositoryProvider).removeMovieFromCustomList(listId, tmdbId, isTv);
+Future<void> removeMovieFromCustomList(
+  WidgetRef ref,
+  int listId,
+  int tmdbId,
+  bool isTv,
+) => ref
+    .read(movieRepositoryProvider)
+    .removeMovieFromCustomList(listId, tmdbId, isTv);
 
-Future<void> reorderCustomListMovies(WidgetRef ref, int listId, Map<MovieKey, int> rankings) =>
+Future<void> reorderCustomListMovies(
+  WidgetRef ref,
+  int listId,
+  Map<MovieKey, int> rankings,
+) =>
     ref.read(movieRepositoryProvider).reorderCustomListMovies(listId, rankings);
 
-Future<void> setCollectionVisibility(WidgetRef ref, int listId, bool isPublic) =>
+Future<void> setCollectionVisibility(
+  WidgetRef ref,
+  int listId,
+  bool isPublic,
+) =>
     ref.read(movieRepositoryProvider).setCollectionVisibility(listId, isPublic);
 
 // Live view of a shared collection's current contents — used by the
@@ -645,14 +754,18 @@ Future<void> setCollectionVisibility(WidgetRef ref, int listId, bool isPublic) =
 // screen.dart. Returns null once the doc doesn't exist (owner turned
 // sharing off, or it was never shared), which callers render as a graceful
 // "no longer shared" state rather than an error.
-final sharedCollectionProvider = StreamProvider.family<Map<String, dynamic>?, String>((ref, collectionRefId) {
-  return ref
-      .watch(firestoreProvider)
-      .collection('shared_collections')
-      .doc(collectionRefId)
-      .snapshots()
-      .map((doc) => doc.data());
-});
+final sharedCollectionProvider =
+    StreamProvider.family<Map<String, dynamic>?, String>((
+      ref,
+      collectionRefId,
+    ) {
+      return ref
+          .watch(firestoreProvider)
+          .collection('shared_collections')
+          .doc(collectionRefId)
+          .snapshots()
+          .map((doc) => doc.data());
+    });
 
 // --- WATCH RECORD ACTIONS ---
 
@@ -701,19 +814,22 @@ Future<void> deleteWatchRecord(WidgetRef ref, WatchRecord record) async {
     final logRef = await _resolveLogRef(ref, user.uid, record);
     if (logRef == null) {
       throw Exception(
-          'No matching Firestore log to delete (movieId: ${record.movieId})');
+        'No matching Firestore log to delete (movieId: ${record.movieId})',
+      );
     }
     await logRef.delete();
 
     // Recalculate movie settings progress for this user & movie/show in Firestore
-    final remainingQuery = await ref.read(firestoreProvider)
+    final remainingQuery = await ref
+        .read(firestoreProvider)
         .collection('logs')
         .where('userId', isEqualTo: user.uid)
         .where('movieId', isEqualTo: record.movieId)
         .where('isTv', isEqualTo: record.isTv)
         .get();
 
-    final settingsRef = ref.read(firestoreProvider)
+    final settingsRef = ref
+        .read(firestoreProvider)
         .collection('users')
         .doc(user.uid)
         .collection('movie_settings')
@@ -725,18 +841,21 @@ Future<void> deleteWatchRecord(WidgetRef ref, WatchRecord record) async {
         'lastWatchedEpisode': null,
       }, SetOptions(merge: true));
     } else {
-      final remainingLogs = remainingQuery.docs.map((doc) => DiaryLogModel.fromMap(doc.data(), doc.id)).toList();
+      final remainingLogs = remainingQuery.docs
+          .map((doc) => DiaryLogModel.fromMap(doc.data(), doc.id))
+          .toList();
       remainingLogs.sort((a, b) => b.watchDate.compareTo(a.watchDate));
-      
+
       final latestLog = remainingLogs.first;
       final latestWatchNumber = latestLog.watchNumber;
-      
+
       final currentEpisodeProgress = remainingLogs
           .where((log) => log.watchNumber == latestWatchNumber)
           .fold<int>(0, (acc, log) => acc + log.episodeCount);
-          
+
       final totalEpisodes = latestLog.totalEpisodes;
-      final newIsActivelyWatching = totalEpisodes == null || currentEpisodeProgress < totalEpisodes;
+      final newIsActivelyWatching =
+          totalEpisodes == null || currentEpisodeProgress < totalEpisodes;
 
       await settingsRef.set({
         'isActivelyWatching': newIsActivelyWatching,
@@ -762,7 +881,8 @@ Future<void> updateWatchRecord(
     final logRef = await _resolveLogRef(ref, user.uid, record);
     if (logRef == null) {
       throw Exception(
-          'No matching Firestore log to update (movieId: ${record.movieId})');
+        'No matching Firestore log to update (movieId: ${record.movieId})',
+      );
     }
 
     final updates = <String, dynamic>{};
@@ -782,7 +902,9 @@ Future<void> updateWatchRecord(
     return;
   }
 
-  await ref.read(movieRepositoryProvider).updateWatchRecordLocal(
+  await ref
+      .read(movieRepositoryProvider)
+      .updateWatchRecordLocal(
         record,
         watchDate: watchDate,
         episodeCount: episodeCount,
