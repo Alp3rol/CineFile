@@ -21,6 +21,19 @@ REM
 REM Proxy yoksa buraya kisisel anahtar DEGIL, yalnizca bu site icin uretilmis,
 REM gerektiginde iptal edilebilir ayri bir anahtar verilmeli.
 set BUILD_DEFINES=
+for /f "tokens=2" %%V in ('findstr /b "version:" pubspec.yaml') do set APP_VERSION=%%V
+for /f %%C in ('git rev-parse --short=12 HEAD') do set RELEASE_COMMIT=%%C
+if "%APP_VERSION%"=="" (
+    echo HATA: pubspec.yaml surumu okunamadi.
+    exit /b 1
+)
+if "%RELEASE_COMMIT%"=="" (
+    echo HATA: Git commit bilgisi okunamadi.
+    exit /b 1
+)
+set RELEASE_DEFINES=--dart-define=SENTRY_RELEASE=cinefile@%APP_VERSION% --dart-define=SENTRY_COMMIT=%RELEASE_COMMIT% --dart-define=SENTRY_ENVIRONMENT=production
+if not "%SENTRY_DSN%"=="" set RELEASE_DEFINES=%RELEASE_DEFINES% --dart-define=SENTRY_DSN=%SENTRY_DSN%
+echo Sentry surumu: cinefile@%APP_VERSION% ^(%RELEASE_COMMIT%, production^)
 if "%TMDB_PROXY_URL%"=="" set TMDB_PROXY_URL=https://cinefile-tmdb.alp3rol17.workers.dev
 if not "%TMDB_PROXY_URL%"=="" (
     echo Proxy modu: anahtar derlemeye gomulmeyecek.
@@ -41,7 +54,7 @@ REM derlenebiliyor mu diye kontrol eder. Bu ayri bir tam derleme gecisi ve
 REM olculdu: dagitim basina ~22 saniye (toplamin ucte biri). Ciktiyi hic
 REM etkilemiyor - bayrakli ve bayraksiz derlemelerin main.dart.js hash'leri
 REM birebir ayni. WASM'a gecilirse bu bayrak kaldirilmali.
-call flutter build web --release --no-wasm-dry-run --base-href "/CineFile/" %BUILD_DEFINES%
+call flutter build web --release --no-wasm-dry-run --base-href "/CineFile/" %BUILD_DEFINES% %RELEASE_DEFINES%
 if %errorlevel% neq 0 (
     echo.
     echo HATA: Derleme basarisiz oldu!

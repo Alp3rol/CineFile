@@ -203,7 +203,12 @@ senaryolarına karşı hazırlamak.
     150 paralel istekte tam 120 kabul/30 ret, IP ayrımı, pencere sıfırlama,
     anonim kota, origin reddi ve fail-closed davranışı testlerle sabitlendi.
     Proxy test/paketleme kapısı CI'a ve dağıtım prosedürüne eklendi.
-- [ ] Sentry release adı, commit ve ortam etiketlerini yayın akışına ekle.
+- [x] **Sentry release adı, commit ve ortam etiketlerini yayın akışına ekle.**
+  - **Tamamlandı (5 Ağustos 2026):** Yayın akışı `pubspec.yaml` sürümünden
+    `cinefile@<version>` release adını ve kaynak commit'in 12 karakterli SHA'sını
+    otomatik üretiyor; olaylara release, dist/commit ve ortam ekleniyor. Eksik
+    üretim metadata'sı derlemeyi durduruyor ve Sentry etkin paket üç değeri de
+    taşımadan yayımlanamıyor. Yerel web ve native derleme sözleşmesi belgelendi.
 - [ ] Canlılık kontrolü: Firebase init, TMDb proxy ve temel arama için sentetik test.
 - [ ] Firestore yedekleme ve geri dönüş prosedürünü yazılı hâle getir.
 - [ ] Yayın geri alma prosedürü ve son sağlıklı `gh-pages` artefaktı tanımla.
@@ -327,12 +332,12 @@ Her görev aşağıdaki sırayla ilerler:
 
 ## Bir sonraki görev
 
-**Faz 3 / Görev 3:** Sentry release adı, commit ve ortam etiketlerini yayın
-akışına eklemek.
+**Faz 3 / Görev 4:** Firebase init, TMDb proxy ve temel arama için sentetik
+canlılık kontrolü eklemek.
 
 Tamamlanma kanıtı:
 
-- Web ve native üretim derlemeleri anlamlı bir release adı taşır.
-- Sentry olayı kaynak commit ve üretim/önizleme ortamıyla ilişkilendirilir.
-- Yayın betiği gerekli `--dart-define` değerlerini tek noktadan üretir.
-- CI, release metadata'sı eksik üretim derlemesini reddeder.
+- Canlı Firebase başlatma ve kimlik katmanı dışarıdan doğrulanır.
+- TMDb proxy sağlık ve temel arama isteği periyodik çalıştırılır.
+- Başarısızlık anlamlı bir çıkış kodu ve tanı bilgisi üretir.
+- Kontrol hem CI'dan elle hem zamanlanmış olarak çalıştırılabilir.

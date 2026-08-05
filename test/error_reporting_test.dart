@@ -7,6 +7,40 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:cinefile/core/observability/error_reporting.dart';
 
 void main() {
+  group('Sentry release metadata', () {
+    test('keeps release, commit and environment supplied by deployment', () {
+      expect(
+        resolveSentryMetadata(
+          release: 'cinefile@1.7.2+12',
+          commit: 'd735059',
+          environment: 'production',
+          isReleaseMode: true,
+        ),
+        (
+          release: 'cinefile@1.7.2+12',
+          commit: 'd735059',
+          environment: 'production',
+        ),
+      );
+    });
+
+    test('uses explicit, searchable local fallbacks', () {
+      expect(
+        resolveSentryMetadata(
+          release: '',
+          commit: '',
+          environment: '',
+          isReleaseMode: false,
+        ),
+        (
+          release: 'cinefile@development',
+          commit: 'local',
+          environment: 'development',
+        ),
+      );
+    });
+  });
+
   group('redactSecrets', () {
     test('strips a TMDb key out of a request URL', () {
       expect(

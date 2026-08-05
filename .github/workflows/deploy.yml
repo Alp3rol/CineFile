@@ -55,6 +55,21 @@ jobs:
 
       - run: flutter pub get
 
+      - name: Generate release metadata
+        id: release
+        shell: bash
+        run: |
+          VERSION=$(sed -n 's/^version:[[:space:]]*//p' pubspec.yaml | head -n1)
+          COMMIT=$(git rev-parse --short=12 HEAD)
+          if [ -z "$VERSION" ] || [ -z "$COMMIT" ]; then
+            echo "::error::Production release metadata could not be generated."
+            exit 1
+          fi
+          echo "release=cinefile@$VERSION" >> "$GITHUB_OUTPUT"
+          echo "commit=$COMMIT" >> "$GITHUB_OUTPUT"
+          echo "environment=production" >> "$GITHUB_OUTPUT"
+          echo "Sentry release: cinefile@$VERSION ($COMMIT, production)"
+
       # Refuse to publish a build that would embed a key in main.dart.js unless
       # that was asked for explicitly. TMDb takes the key as a query parameter,
       # so anything compiled in is served to every visitor.
@@ -91,9 +106,11 @@ jobs:
           if [ -n "$DSN" ]; then
             echo "Crashes will be reported to Sentry."
             echo "defines=--dart-define=SENTRY_DSN=$DSN" >> "$GITHUB_OUTPUT"
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
           else
             echo "::warning::No SENTRY_DSN set — this build will not report crashes anywhere."
             echo "defines=" >> "$GITHUB_OUTPUT"
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
           fi
 
       # The same gates as CI, because a tag can be pushed without a PR.
@@ -101,10 +118,32 @@ jobs:
       - run: flutter test
 
       - name: Build web
+        env:
+          SENTRY_RELEASE: ${{ steps.release.outputs.release }}
+          SENTRY_COMMIT: ${{ steps.release.outputs.commit }}
+          SENTRY_ENVIRONMENT: ${{ steps.release.outputs.environment }}
         run: |
+          test -n "$SENTRY_RELEASE" && test -n "$SENTRY_COMMIT" && test -n "$SENTRY_ENVIRONMENT"
           flutter build web --release --no-wasm-dry-run \
             --base-href "/CineFile/" \
-            ${{ steps.tmdb.outputs.defines }} ${{ steps.sentry.outputs.defines }}
+            ${{ steps.tmdb.outputs.defines }} ${{ steps.sentry.outputs.defines }} \
+            --dart-define=SENTRY_RELEASE="$SENTRY_RELEASE" \
+            --dart-define=SENTRY_COMMIT="$SENTRY_COMMIT" \
+            --dart-define=SENTRY_ENVIRONMENT="$SENTRY_ENVIRONMENT"
+
+      - name: Verify release metadata in bundle
+        if: steps.sentry.outputs.enabled == 'true'
+        env:
+          SENTRY_RELEASE: ${{ steps.release.outputs.release }}
+          SENTRY_COMMIT: ${{ steps.release.outputs.commit }}
+          SENTRY_ENVIRONMENT: ${{ steps.release.outputs.environment }}
+        run: |
+          for value in "$SENTRY_RELEASE" "$SENTRY_COMMIT" "$SENTRY_ENVIRONMENT"; do
+            if ! grep -qF "$value" build/web/main.dart.js; then
+              echo "::error::Release metadata '$value' is missing from the production bundle."
+              exit 1
+            fi
+          done
 
       # Guard against the exact failure this arrangement exists to prevent: a
       # proxy build that nonetheless shipped a key. Greps for the literal secret

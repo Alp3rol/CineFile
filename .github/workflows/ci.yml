@@ -71,6 +71,9 @@ jobs:
 
       - run: flutter analyze
 
+      - name: Test Sentry release metadata contract
+        run: flutter test test/error_reporting_test.dart
+
       # --coverage so the number is visible on every run. There is deliberately
       # no failing threshold yet: the suite covers domain logic well and the
       # widget layer thinly, so a gate set at today's number would mostly

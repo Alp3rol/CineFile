@@ -18,6 +18,26 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 /// TMDb proxy URL is — so the value belongs to the deployment rather than to
 /// the working tree.
 const String sentryDsn = String.fromEnvironment('SENTRY_DSN');
+const String sentryRelease = String.fromEnvironment('SENTRY_RELEASE');
+const String sentryCommit = String.fromEnvironment('SENTRY_COMMIT');
+const String sentryEnvironment = String.fromEnvironment('SENTRY_ENVIRONMENT');
+
+/// Metadata attached to every event. Production builds receive these values
+/// from the release workflow; local builds deliberately keep readable
+/// fallbacks so enabling a developer DSN does not create unlabeled events.
+@visibleForTesting
+({String release, String commit, String environment}) resolveSentryMetadata({
+  required String release,
+  required String commit,
+  required String environment,
+  required bool isReleaseMode,
+}) => (
+  release: release.isEmpty ? 'cinefile@development' : release,
+  commit: commit.isEmpty ? 'local' : commit,
+  environment: environment.isEmpty
+      ? (isReleaseMode ? 'production' : 'development')
+      : environment,
+);
 
 /// Whether this build reports errors anywhere other than the console.
 bool get errorReportingEnabled => sentryDsn.isNotEmpty;
@@ -36,10 +56,19 @@ Future<void> runWithErrorReporting(AppRunner appRunner) async {
     return;
   }
 
+  final metadata = resolveSentryMetadata(
+    release: sentryRelease,
+    commit: sentryCommit,
+    environment: sentryEnvironment,
+    isReleaseMode: kReleaseMode,
+  );
+
   await SentryFlutter.init(
     (options) {
       options.dsn = sentryDsn;
-      options.environment = kReleaseMode ? 'production' : 'development';
+      options.release = metadata.release;
+      options.dist = metadata.commit;
+      options.environment = metadata.environment;
 
       // Errors only, for now. Tracing is what consumes a Sentry quota fastest,
       // and the performance work this project needs is already identified in
@@ -81,7 +110,13 @@ Future<void> runWithErrorReporting(AppRunner appRunner) async {
         return event;
       };
     },
-    appRunner: appRunner,
+    appRunner: () async {
+      await Sentry.configureScope((scope) {
+        scope.setTag('commit', metadata.commit);
+        scope.setTag('deployment_environment', metadata.environment);
+      });
+      await appRunner();
+    },
   );
 }
 
