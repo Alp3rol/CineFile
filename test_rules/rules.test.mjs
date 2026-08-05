@@ -101,6 +101,17 @@ function addCommentBatch(db, overrides = {}) {
   return batch.commit();
 }
 
+function addLogCommentBatch(db, overrides = {}) {
+  const commentId = 'c1';
+  const batch = writeBatch(db);
+  batch.set(doc(db, `logs/l1/comments/${commentId}`), comment(overrides));
+  batch.update(doc(db, 'logs/l1'), {
+    commentCount: increment(1),
+    lastCommentMutationId: commentId,
+  });
+  return batch.commit();
+}
+
 before(async () => {
   env = await initializeTestEnvironment({
     projectId: 'demo-cinefile',
@@ -135,6 +146,19 @@ const asAnon = () => env.unauthenticatedContext().firestore();
 // ---------------------------------------------------------------------------
 
 describe('users — username is bound to the /usernames claim', () => {
+  it('allows creating your own profile with your claimed username', async () => {
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await deleteDoc(doc(ctx.firestore(), 'users', ALICE));
+    });
+    await assertSucceeds(setDoc(doc(asAlice(), 'users', ALICE), profile('Alice', DICEBEAR)));
+  });
+
+  it('rejects creating another user profile', async () => {
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await deleteDoc(doc(ctx.firestore(), 'users', BOB));
+    });
+    await assertFails(setDoc(doc(asAlice(), 'users', BOB), profile('Bob', BOB_AVATAR)));
+  });
   it('rejects a profile advertising a username claimed by someone else', async () => {
     // The impersonation that was possible before: Alice renames herself "Bob".
     await assertFails(
@@ -339,6 +363,20 @@ describe('posts — author fields and social counters', () => {
     );
   });
 
+  it('rejects ordinary content updates by a non-owner', async () => {
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'posts/p1'), post());
+    });
+    await assertFails(updateDoc(doc(asBob(), 'posts/p1'), { caption: 'hacked' }));
+  });
+
+  it('allows deletion by the owner', async () => {
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'posts/p1'), post());
+    });
+    await assertSucceeds(deleteDoc(doc(asAlice(), 'posts/p1')));
+  });
+
   it('rejects deletion by a non-owner', async () => {
     await env.withSecurityRulesDisabled(async (ctx) => {
       await setDoc(doc(ctx.firestore(), 'posts/p1'), post());
@@ -404,6 +442,20 @@ describe('logs — privacy and authorship', () => {
       await setDoc(doc(ctx.firestore(), 'logs/l1'), log({ isPublic: true }));
     });
     await assertFails(deleteDoc(doc(asBob(), 'logs/l1')));
+  });
+
+  it('allows the owner to update ordinary log content', async () => {
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'logs/l1'), log());
+    });
+    await assertSucceeds(updateDoc(doc(asAlice(), 'logs/l1'), { rating: 9 }));
+  });
+
+  it('allows the owner to delete their log', async () => {
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'logs/l1'), log());
+    });
+    await assertSucceeds(deleteDoc(doc(asAlice(), 'logs/l1')));
   });
 
   it('rejects the owner changing log identity or social counters', async () => {
@@ -491,6 +543,36 @@ describe('comments — authorship', () => {
   });
 });
 
+describe('log comments — create/update/delete matrix', () => {
+  beforeEach(async () => {
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'logs/l1'), log({ isPublic: true }));
+    });
+  });
+
+  it('allows create and author delete with matching parent counter steps', async () => {
+    await assertSucceeds(addLogCommentBatch(asBob()));
+    const db = asBob();
+    const batch = writeBatch(db);
+    batch.delete(doc(db, 'logs/l1/comments/c1'));
+    batch.update(doc(db, 'logs/l1'), {
+      commentCount: increment(-1), lastCommentMutationId: 'c1',
+    });
+    await assertSucceeds(batch.commit());
+  });
+
+  it('rejects create or delete without the matching parent counter step', async () => {
+    await assertFails(setDoc(doc(asBob(), 'logs/l1/comments/orphan'), comment()));
+    await assertSucceeds(addLogCommentBatch(asBob()));
+    await assertFails(deleteDoc(doc(asBob(), 'logs/l1/comments/c1')));
+  });
+
+  it('rejects comment updates', async () => {
+    await assertSucceeds(addLogCommentBatch(asBob()));
+    await assertFails(updateDoc(doc(asBob(), 'logs/l1/comments/c1'), { text: 'edited' }));
+  });
+});
+
 describe('shared_collections — owner identity', () => {
   const sharedCollection = (overrides = {}) => ({
     ownerId: ALICE,
@@ -538,6 +620,15 @@ describe('shared_collections — owner identity', () => {
     );
   });
 
+  it('allows only the owner to update a mirror without changing ownership', async () => {
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), `shared_collections/${ALICE}_1`), sharedCollection());
+    });
+    await assertSucceeds(updateDoc(doc(asAlice(), `shared_collections/${ALICE}_1`), { name: 'Yeni ad' }));
+    await assertFails(updateDoc(doc(asBob(), `shared_collections/${ALICE}_1`), { name: 'Hacked' }));
+    await assertFails(updateDoc(doc(asAlice(), `shared_collections/${ALICE}_1`), { ownerId: BOB }));
+  });
+
   it('rejects deletion by a non-owner', async () => {
     await env.withSecurityRulesDisabled(async (ctx) => {
       await setDoc(
@@ -572,6 +663,11 @@ describe('usernames registry', () => {
 
   it("rejects releasing another user's claim", async () => {
     await assertFails(deleteDoc(doc(asAlice(), 'usernames/bob')));
+  });
+
+  it('allows releasing your own claim and rejects claim updates', async () => {
+    await assertSucceeds(deleteDoc(doc(asAlice(), 'usernames/alice')));
+    await assertFails(updateDoc(doc(asBob(), 'usernames/bob'), { uid: ALICE }));
   });
 
   // AuthController._claimUsername reads this doc inside a transaction, so
@@ -623,6 +719,15 @@ describe('follows — edge and counters stay atomic', () => {
     });
     batch.update(doc(db, 'users', ALICE), { followerCount: increment(-1) });
     await assertSucceeds(batch.commit());
+  });
+  it('rejects edge updates and deletion without counter decrements', async () => {
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), `follows/${BOB}_${ALICE}`), {
+        followerId: BOB, followingId: ALICE, createdAt: new Date(),
+      });
+    });
+    await assertFails(updateDoc(doc(asBob(), `follows/${BOB}_${ALICE}`), { followingId: BOB }));
+    await assertFails(deleteDoc(doc(asBob(), `follows/${BOB}_${ALICE}`)));
   });
 
 });
@@ -676,4 +781,16 @@ describe('per-user subcollections stay private', () => {
       }),
     );
   });
+
+  for (const subcollection of ['movie_settings', 'graph_overrides']) {
+    it(`allows owner and rejects non-owner create/update/delete for ${subcollection}`, async () => {
+      const path = `users/${ALICE}/${subcollection}/matrix`;
+      await assertSucceeds(setDoc(doc(asAlice(), path), { value: 1 }));
+      await assertFails(setDoc(doc(asBob(), `${path}-other`), { value: 1 }));
+      await assertSucceeds(updateDoc(doc(asAlice(), path), { value: 2 }));
+      await assertFails(updateDoc(doc(asBob(), path), { value: 3 }));
+      await assertFails(deleteDoc(doc(asBob(), path)));
+      await assertSucceeds(deleteDoc(doc(asAlice(), path)));
+    });
+  }
 });

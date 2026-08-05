@@ -89,7 +89,12 @@ kapatmak; her yayın öncesinde hızlı ve güvenilir geri bildirim almak.
     `BackupFormatException` üretiyor, skaler liste girdileri güvenle atlanıyor;
     kısmi backup web ve native tarafta eksik bölümleri silmeden birleştiriliyor.
     Beş yeni güvenlik testi eklendi.
-- [ ] Firestore kural testlerinde create/update/delete matrisini tamamla.
+- [x] Firestore kural testlerinde create/update/delete matrisini tamamla.
+  - **Tamamlandı (5 Ağustos 2026):** Korunan tüm istemci yazma yüzeyleri
+    `FIRESTORE_RULES_MATRIX.md` içinde belgelendi. Kullanıcı profili, gönderi,
+    günlük, günlük yorumu, paylaşılan koleksiyon, kullanıcı adı, takip kenarı ve
+    kullanıcıya özel alt koleksiyonlar için eksik olumlu/olumsuz create, update
+    ve delete senaryoları eklendi. Emulator kural paketi 77/77 geçti.
 
 ### Faz 1 kabul kriterleri
 
@@ -272,10 +277,11 @@ Her görev aşağıdaki sırayla ilerler:
 
 ## Bir sonraki görev
 
-**Faz 1 / P1 / Görev 4:** Firestore kural testlerinde create/update/delete matrisini tamamlamak.
+**Faz 2 / Görev 1:** `database_provider.dart` dosyasını sorumluluklarına göre bölmek.
 
 Tamamlanma kanıtı:
 
-- Korunan koleksiyonların create/update/delete izin matrisi belgelenir.
-- Eksik olumlu ve olumsuz kural testleri eklenir.
-- Firestore emulator kural paketi tamamen geçer.
+- Mevcut provider dışa aktarımları ve kullanıcı davranışı değişmez.
+- İzleme kayıtları, film ayarları, koleksiyonlar ve takip işlemleri ayrı dosyalara taşınır.
+- Ana provider dosyası 600 satırın altına iner; hedef 400 satırdır.
+- Tam Flutter testi, Firestore kural paketi ve web release derlemesi geçer.
