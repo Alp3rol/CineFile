@@ -60,10 +60,14 @@ kapatmak; her yayın öncesinde hızlı ve güvenilir geri bildirim almak.
     koleksiyon + film + ilişki, seed parametresi kaldırılıp sayfa yeniden
     yüklendikten sonra korundu. Bozuk JSON ile uygulamanın açıldığı doğrulandı;
     paylaşım/düzenleme/silme aynası da `collection_sharing_test.dart` ile geçti.
-- [ ] **Analiz/test yavaşlığını teşhis et.**
+- [x] **Analiz/test yavaşlığını teşhis et.**
   - Test dosyası ve aşama bazında süre raporu üret.
   - Yerelde `flutter analyze` hedefi: sıcak önbellekte ≤60 saniye.
   - Tüm test paketi hedefi: CI'da ≤8 dakika; takılan test kalmamalı.
+  - **Tamamlandı (5 Ağustos 2026):** sıcak analiz 11,07 sn, tüm test paketi
+    29,12 sn sürdü; 251 test geçti ve takılma görülmedi. CI, proxy yolunda tüm
+    paketi tekrarlamak yerine ilgili iki testi çalıştıracak şekilde daraltıldı.
+    Her CI koşusu artık en yavaş 15 test dosyasını artifact olarak raporluyor.
 
 ### P1 — kalite kapısı
 
@@ -255,10 +259,10 @@ Her görev aşağıdaki sırayla ilerler:
 
 ## Bir sonraki görev
 
-**Faz 1 / P0 / Görev 3:** Analiz ve test yavaşlığını teşhis etmek.
+**Faz 1 / P1 / Görev 1:** CI coverage tabanını güncellemek ve başlangıç eşiği koymak.
 
 Tamamlanma kanıtı:
 
-- Test dosyası ve aşama bazında süre raporu hazırlanır.
-- Sıcak önbellekte `flutter analyze` süresi 60 saniyeyi aşmaz.
-- CI test paketi 8 dakikayı aşmaz ve takılan test kalmaz.
+- Mevcut coverage oranı ölçülür ve raporlanır.
+- Mevcut değerin gerilemesini engelleyen başlangıç eşiği CI'a eklenir.
+- Yeni veya yenilenen domain kodu için ≥%80 hedefi belgelenir.

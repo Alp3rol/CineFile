@@ -58,7 +58,13 @@ jobs:
       # widget layer thinly, so a gate set at today's number would mostly
       # measure how much UI a change touches. Add one once the repository
       # abstraction lands and the untestable-by-construction code shrinks.
-      - run: flutter test --coverage
+      - name: Run tests with coverage and timings
+        run: >-
+          flutter test --coverage
+          --file-reporter json:build/test-timings.json
+
+      - name: Report slowest test files
+        run: dart run tool/summarize_test_timings.dart | tee build/test-timing-report.md
 
       - name: Report coverage
         run: |
@@ -69,8 +75,10 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: coverage-lcov
-          path: coverage/lcov.info
+          name: test-quality-reports
+          path: |
+            coverage/lcov.info
+            build/test-timing-report.md
 
       # Whether the app talks to TMDb directly or through the proxy is a
       # compile-time decision, so the run above only ever exercises one of the
@@ -78,7 +86,11 @@ jobs:
       # serving demo data for everything — and nothing would notice until a
       # release was built against it.
       - name: Test the proxy build path
-        run: flutter test --dart-define=TMDB_PROXY_URL=https://proxy.invalid
+        run: >-
+          flutter test
+          test/tmdb_proxy_mode_test.dart
+          test/tmdb_proxy_allowlist_test.dart
+          --dart-define=TMDB_PROXY_URL=https://proxy.invalid
 
   # Every authorization decision in this app lives in firestore.rules, and
   # nothing was exercising it — three real holes (username impersonation,
