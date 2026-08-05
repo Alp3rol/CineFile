@@ -1,34 +1,7 @@
-/**
- * CineFile TMDb proxy.
- *
- * TMDb authenticates with an `api_key` *query parameter*, so any key the client
- * holds is exposed: in the web build it is served to every visitor inside
- * main.dart.js, and in a native build it can be read straight out of the APK.
- * There is no client-side fix for that — the key has to live somewhere the user
- * cannot reach, which means a server.
- *
- * This worker is that server. It is deliberately small: it forwards GET
- * requests to api.themoviedb.org, appends the key from a secret, and refuses
- * everything else. It also adds the two things the app has nowhere else — a
- * per-IP rate limit, and an allowlist of the endpoints the app actually calls,
- * so a leaked proxy URL cannot be turned into a general-purpose TMDb relay.
- *
- * Deploy:
- *   cd tools/tmdb-proxy
- *   npm install
- *   npx wrangler secret put TMDB_API_KEY     # paste the key, it is never committed
- *   npx wrangler deploy
- *
- * Then build the app against it:
- *   flutter build web --dart-define=TMDB_PROXY_URL=https://<name>.workers.dev
- */
+/** CineFile TMDb proxy — API key isolation, endpoint allowlist and abuse control. */
 
 const TMDB_ORIGIN = 'https://api.themoviedb.org';
 
-/**
- * Endpoints the app calls, as regexes over the path after `/3`.
- * Anything else gets a 404 — see the module comment.
- */
 const ALLOWED_PATHS = [
   /^\/search\/(multi|person)$/,
   /^\/movie\/(popular|top_rated)$/,
@@ -44,25 +17,14 @@ const ALLOWED_PATHS = [
   /^\/person\/\d+\/combined_credits$/,
 ];
 
-/** Query parameters that may be forwarded. `api_key` is deliberately absent. */
 const ALLOWED_PARAMS = new Set([
-  'query',
-  'page',
-  'language',
-  'append_to_response',
-  'sort_by',
-  'with_genres',
-  'with_crew',
-  'with_cast',
-  'with_people',
+  'query', 'page', 'language', 'append_to_response', 'sort_by', 'with_genres',
+  'with_crew', 'with_cast', 'with_people',
 ]);
 
-const RATE_LIMIT = { requests: 120, windowSeconds: 60 };
+export const RATE_LIMIT = { requests: 120, windowSeconds: 60 };
 
 function cors(origin, allowedOrigins) {
-  // When ALLOWED_ORIGINS is unset every origin is allowed, which is the right
-  // default for a native-only deployment (apps send no Origin header) and for
-  // getting started. Set it once the web build has a stable URL.
   const allowAll = allowedOrigins.length === 0;
   const allowed = allowAll || (origin && allowedOrigins.includes(origin));
   return {
@@ -74,7 +36,7 @@ function cors(origin, allowedOrigins) {
   };
 }
 
-function json(status, body, headers) {
+function json(status, body, headers = {}) {
   return new Response(JSON.stringify(body), {
     status,
     headers: { 'Content-Type': 'application/json', ...headers },
@@ -82,83 +44,105 @@ function json(status, body, headers) {
 }
 
 /**
- * Fixed-window per-IP limit backed by the Cache API, so it needs no extra
- * binding to stand up. It is approximate — windows reset on the minute and
- * each edge location counts separately — which is the right trade for abuse
- * protection on a hobby deployment. Swap in a Durable Object if it ever needs
- * to be exact.
+ * One instance exists per client key. The storage transaction makes the
+ * fixed-window read/increment/write indivisible, including under concurrency.
  */
-async function isRateLimited(request, ctx) {
-  const ip = request.headers.get('CF-Connecting-IP');
-  if (!ip) return false;
+export class RateLimiter {
+  constructor(state) {
+    this.state = state;
+  }
 
-  const window = Math.floor(Date.now() / 1000 / RATE_LIMIT.windowSeconds);
-  const key = new Request(`https://ratelimit.invalid/${encodeURIComponent(ip)}/${window}`);
-  const cache = caches.default;
+  async fetch(request) {
+    if (request.method !== 'POST') return json(405, { error: 'Only POST is supported' });
 
-  const seen = await cache.match(key);
-  const count = seen ? Number(await seen.text()) : 0;
-  if (count >= RATE_LIMIT.requests) return true;
+    const { nowMs = Date.now(), limit, windowSeconds } = await request.json();
+    if (!Number.isInteger(limit) || limit < 1 ||
+        !Number.isInteger(windowSeconds) || windowSeconds < 1) {
+      return json(400, { error: 'Invalid rate-limit configuration' });
+    }
 
-  ctx.waitUntil(
-    cache.put(
-      key,
-      new Response(String(count + 1), {
-        headers: { 'Cache-Control': `max-age=${RATE_LIMIT.windowSeconds}` },
-      }),
-    ),
-  );
-  return false;
+    const windowMs = windowSeconds * 1000;
+    const windowStart = Math.floor(nowMs / windowMs) * windowMs;
+    let result;
+
+    await this.state.storage.transaction(async (txn) => {
+      const stored = await txn.get('window');
+      const count = stored?.windowStart === windowStart ? stored.count : 0;
+      const allowed = count < limit;
+      const nextCount = allowed ? count + 1 : count;
+      await txn.put('window', { windowStart, count: nextCount });
+      result = {
+        allowed,
+        limit,
+        remaining: Math.max(0, limit - nextCount),
+        resetAt: windowStart + windowMs,
+      };
+    });
+
+    return json(200, result);
+  }
+}
+
+function clientKey(request) {
+  // Cloudflare always supplies CF-Connecting-IP in production. A shared
+  // anonymous bucket is intentionally used in local/non-Cloudflare traffic so
+  // a missing header never becomes a quota bypass.
+  return request.headers.get('CF-Connecting-IP')?.trim() || 'anonymous';
+}
+
+export async function checkRateLimit(request, env, nowMs = Date.now()) {
+  if (!env.RATE_LIMITER) throw new Error('RATE_LIMITER binding is missing');
+  const id = env.RATE_LIMITER.idFromName(clientKey(request));
+  const stub = env.RATE_LIMITER.get(id);
+  const response = await stub.fetch('https://rate-limiter.internal/check', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ nowMs, limit: RATE_LIMIT.requests, windowSeconds: RATE_LIMIT.windowSeconds }),
+  });
+  if (!response.ok) throw new Error(`Rate limiter returned ${response.status}`);
+  return response.json();
 }
 
 export default {
-  async fetch(request, env, ctx) {
-    const allowedOrigins = (env.ALLOWED_ORIGINS ?? '')
-      .split(',')
-      .map((s) => s.trim())
-      .filter(Boolean);
-    const corsHeaders = cors(request.headers.get('Origin'), allowedOrigins);
+  async fetch(request, env) {
+    const allowedOrigins = (env.ALLOWED_ORIGINS ?? '').split(',').map((s) => s.trim()).filter(Boolean);
+    const origin = request.headers.get('Origin');
+    const corsHeaders = cors(origin, allowedOrigins);
 
-    if (request.method === 'OPTIONS') {
-      return new Response(null, { status: 204, headers: corsHeaders });
+    if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders });
+    if (request.method !== 'GET') return json(405, { error: 'Only GET is supported' }, corsHeaders);
+    if (allowedOrigins.length > 0 && origin && !allowedOrigins.includes(origin)) {
+      return json(403, { error: 'Origin not allowed' }, corsHeaders);
     }
-    if (request.method !== 'GET') {
-      return json(405, { error: 'Only GET is supported' }, corsHeaders);
-    }
-    if (!env.TMDB_API_KEY) {
-      // Fail loudly rather than forwarding an unauthenticated request and
-      // returning TMDb's own confusing 401.
-      return json(500, { error: 'Proxy is missing TMDB_API_KEY' }, corsHeaders);
-    }
+    if (!env.TMDB_API_KEY) return json(500, { error: 'Proxy is missing TMDB_API_KEY' }, corsHeaders);
 
     const url = new URL(request.url);
-
-    // Requests arrive BOTH ways, so both are accepted.
-    //
-    // TMDb's own base URL is `https://api.themoviedb.org/3`, i.e. the version
-    // segment is part of the base rather than of each path. Pointing the app at
-    // a proxy origin with no path therefore produces `/search/person`, not
-    // `/3/search/person` — which an earlier version of this worker rejected
-    // with a 404, breaking every request the app made. Normalising here means
-    // the proxy URL can be configured with or without the `/3` suffix.
-    const tmdbPath = url.pathname.startsWith('/3/')
-      ? url.pathname.slice(2)
-      : url.pathname;
-
+    const tmdbPath = url.pathname.startsWith('/3/') ? url.pathname.slice(2) : url.pathname;
     if (!ALLOWED_PATHS.some((re) => re.test(tmdbPath))) {
       return json(404, { error: 'Endpoint not proxied' }, corsHeaders);
     }
 
-    if (await isRateLimited(request, ctx)) {
+    let quota;
+    try {
+      quota = await checkRateLimit(request, env);
+    } catch (error) {
+      console.error('Rate limiter unavailable', error);
+      return json(503, { error: 'Rate limiter unavailable' }, { ...corsHeaders, 'Retry-After': '5' });
+    }
+
+    const quotaHeaders = {
+      'X-RateLimit-Limit': String(quota.limit),
+      'X-RateLimit-Remaining': String(quota.remaining),
+      'X-RateLimit-Reset': String(Math.ceil(quota.resetAt / 1000)),
+    };
+    if (!quota.allowed) {
       return json(429, { error: 'Rate limit exceeded' }, {
         ...corsHeaders,
-        'Retry-After': String(RATE_LIMIT.windowSeconds),
+        ...quotaHeaders,
+        'Retry-After': String(Math.max(1, Math.ceil((quota.resetAt - Date.now()) / 1000))),
       });
     }
 
-    // Rebuilt from an allowlist rather than copied: this is what guarantees a
-    // client-supplied `api_key` can never be forwarded, and keeps the upstream
-    // URL (and therefore the cache key) stable.
     const upstream = new URL(`${TMDB_ORIGIN}/3${tmdbPath}`);
     for (const [name, value] of url.searchParams) {
       if (ALLOWED_PARAMS.has(name)) upstream.searchParams.append(name, value);
@@ -166,14 +150,11 @@ export default {
     upstream.searchParams.set('api_key', env.TMDB_API_KEY);
 
     const response = await fetch(upstream.toString(), {
-      // TMDb responses are shared across all users, so let the edge cache them.
       cf: { cacheTtl: 600, cacheEverything: true },
       headers: { Accept: 'application/json' },
     });
-
     const out = new Response(response.body, response);
-    for (const [k, v] of Object.entries(corsHeaders)) out.headers.set(k, v);
-    // Never let an upstream header leak the key back out via a redirect target.
+    for (const [key, value] of Object.entries({ ...corsHeaders, ...quotaHeaders })) out.headers.set(key, value);
     out.headers.delete('Location');
     return out;
   },

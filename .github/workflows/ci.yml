@@ -12,6 +12,24 @@ on:
   workflow_dispatch:
 
 jobs:
+  tmdb-proxy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: tools/tmdb-proxy
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: tools/tmdb-proxy/package-lock.json
+      - run: npm ci
+      - name: Test atomic proxy quota
+        run: npm test
+      - name: Validate Cloudflare deployment
+        run: npx wrangler deploy --dry-run
+
   analyze-and-test:
     runs-on: ubuntu-latest
     steps:

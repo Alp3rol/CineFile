@@ -2,6 +2,14 @@ name = "cinefile-tmdb"
 main = "src/index.js"
 compatibility_date = "2025-01-01"
 
+[[durable_objects.bindings]]
+name = "RATE_LIMITER"
+class_name = "RateLimiter"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["RateLimiter"]
+
 # The TMDb key is a SECRET, not a var — it must never appear in this file:
 #   npx wrangler secret put TMDB_API_KEY
 #

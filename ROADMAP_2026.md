@@ -195,9 +195,14 @@ senaryolarına karşı hazırlamak.
     hesaba katan rollback prosedürü yazıldı. Windows üretim desteği açılmadan
     çözülmesi gereken açık engel olarak kaydedildi. Bu görev yalnızca plan ve
     dokümantasyon değişikliğidir; console enforcement açılmadı.
-- [ ] TMDb proxy rate limitini atomik altyapıya taşı.
+- [x] **TMDb proxy rate limitini atomik altyapıya taşı.**
   - Cloudflare Durable Object veya resmi Rate Limiting.
   - IP, origin ve anormal trafik gözlemi.
+  - **Tamamlandı (5 Ağustos 2026):** Her IP, SQLite destekli tek bir Durable
+    Object'a eşleniyor; sayaç güncellemesi depolama transaction'ı içinde atomik.
+    150 paralel istekte tam 120 kabul/30 ret, IP ayrımı, pencere sıfırlama,
+    anonim kota, origin reddi ve fail-closed davranışı testlerle sabitlendi.
+    Proxy test/paketleme kapısı CI'a ve dağıtım prosedürüne eklendi.
 - [ ] Sentry release adı, commit ve ortam etiketlerini yayın akışına ekle.
 - [ ] Canlılık kontrolü: Firebase init, TMDb proxy ve temel arama için sentetik test.
 - [ ] Firestore yedekleme ve geri dönüş prosedürünü yazılı hâle getir.
@@ -322,12 +327,12 @@ Her görev aşağıdaki sırayla ilerler:
 
 ## Bir sonraki görev
 
-**Faz 3 / Görev 2:** TMDb proxy rate limitini atomik altyapıya taşımak.
+**Faz 3 / Görev 3:** Sentry release adı, commit ve ortam etiketlerini yayın
+akışına eklemek.
 
 Tamamlanma kanıtı:
 
-- Mevcut process-memory sayaç kaldırılır; paralel edge istekleri aynı atomik
-  kota durumunu paylaşır.
-- IP/origin anahtarlama, pencere süresi ve 429 cevabı testlerle sabitlenir.
-- Cloudflare Durable Object veya resmi Rate Limiting yapılandırması belgelenir.
-- Proxy testleri, CI ve üretim dağıtım prosedürü güncellenir.
+- Web ve native üretim derlemeleri anlamlı bir release adı taşır.
+- Sentry olayı kaynak commit ve üretim/önizleme ortamıyla ilişkilendirilir.
+- Yayın betiği gerekli `--dart-define` değerlerini tek noktadan üretir.
+- CI, release metadata'sı eksik üretim derlemesini reddeder.

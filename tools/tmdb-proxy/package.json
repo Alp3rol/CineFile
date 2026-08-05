@@ -2,12 +2,15 @@
   "name": "cinefile-tmdb-proxy",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "description": "Cloudflare Worker that holds the TMDb API key server-side, so no build ever ships it.",
   "scripts": {
     "dev": "wrangler dev",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy",
+    "test": "node --test test/*.test.js",
+    "check": "npm test && wrangler deploy --dry-run"
   },
   "devDependencies": {
-    "wrangler": "^3.99.0"
+    "wrangler": "^4.118.0"
   }
 }

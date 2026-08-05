@@ -27,6 +27,24 @@ npx wrangler deploy
 
 Wrangler prints the URL, e.g. `https://cinefile-tmdb.<subdomain>.workers.dev`.
 
+The first deploy creates the SQLite-backed `RateLimiter` Durable Object namespace
+declared in `wrangler.toml`. Never remove or rename migration tag `v1` after it
+has reached Cloudflare; later schema changes need a new tag. Before deployment,
+run the same proxy gate as CI with `npm run check`.
+
+## Abuse controls
+
+Each `CF-Connecting-IP` maps to one globally unique Durable Object. A storage
+transaction atomically applies 120 accepted requests per 60 seconds, so
+simultaneous edge requests cannot race past the quota. Missing IP headers share
+an `anonymous` bucket instead of bypassing it. Responses expose standard quota
+metadata; rejected requests return `429` and `Retry-After`.
+
+If the limiter is unavailable, the proxy fails closed with `503` and does not
+spend TMDb quota. Configure `ALLOWED_ORIGINS` to reject unknown browser origins
+with `403`. Native callers without an `Origin` remain supported. The quota key
+stays IP-based because non-browser callers can forge the `Origin` header.
+
 ## Point the app at it
 
 ```bash
