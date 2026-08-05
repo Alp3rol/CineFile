@@ -50,11 +50,16 @@ kapatmak; her yayın öncesinde hızlı ve güvenilir geri bildirim almak.
   - **Tamamlandı (5 Ağustos 2026):** yorum kimliği işaretçisi ile create/delete
     geçişi `exists`/`existsAfter` üzerinden doğrulanıyor; bağımsız yorum veya
     sayaç yazımı reddediliyor. Firestore kural paketi 63/63 geçti.
-- [ ] **Web kalıcılığı için gerçek tarayıcı yenileme testi ekle.**
+- [x] **Web kalıcılığı için gerçek tarayıcı yenileme testi ekle.**
   - Koleksiyon oluştur → film ekle → sayfayı yenile → veriyi doğrula.
   - Paylaşımı aç → düzenle → Firestore aynasını doğrula → sil → aynanın
     silindiğini doğrula.
   - Bozuk yerel JSON uygulamanın açılmasını engellememeli.
+  - **Tamamlandı (5 Ağustos 2026):** üretim başlangıç sırası düzeltildi ve
+    `shared_preferences_web` açıkça kaydedildi. Gerçek tarayıcı harness'ında
+    koleksiyon + film + ilişki, seed parametresi kaldırılıp sayfa yeniden
+    yüklendikten sonra korundu. Bozuk JSON ile uygulamanın açıldığı doğrulandı;
+    paylaşım/düzenleme/silme aynası da `collection_sharing_test.dart` ile geçti.
 - [ ] **Analiz/test yavaşlığını teşhis et.**
   - Test dosyası ve aşama bazında süre raporu üret.
   - Yerelde `flutter analyze` hedefi: sıcak önbellekte ≤60 saniye.
@@ -250,12 +255,10 @@ Her görev aşağıdaki sırayla ilerler:
 
 ## Bir sonraki görev
 
-**Faz 1 / P0 / Görev 2:** Web kalıcılığı için gerçek tarayıcı yenileme testi
-eklemek.
+**Faz 1 / P0 / Görev 3:** Analiz ve test yavaşlığını teşhis etmek.
 
 Tamamlanma kanıtı:
 
-- Koleksiyon oluşturma ve film ekleme tarayıcı yenilemesinden sonra korunur.
-- Paylaşılan koleksiyon düzenlemesi Firestore aynasına yansır.
-- Koleksiyon silme yerel ve açık kopyayı birlikte kaldırır.
-- Bozuk yerel snapshot uygulamanın başlamasını engellemez.
+- Test dosyası ve aşama bazında süre raporu hazırlanır.
+- Sıcak önbellekte `flutter analyze` süresi 60 saniyeyi aşmaz.
+- CI test paketi 8 dakikayı aşmaz ve takılan test kalmaz.

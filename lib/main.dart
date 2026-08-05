@@ -48,6 +48,10 @@ void main() async {
   // up, so a failure in startup itself — not just in a widget that is already
   // on screen — is reported rather than only printed.
   await runWithErrorReporting(() async {
+    // WebLocalStore uses SharedPreferences, so web plugins must be available
+    // before the store is hydrated.
+    registerFirebaseWebPlugins();
+
     GoogleFonts.config.allowRuntimeFetching = true;
     // Loads symbols for every locale rather than just tr_TR — the user can
     // switch languages at runtime, and DateFormat throws if the locale it is
@@ -57,8 +61,6 @@ void main() async {
     // Collections are device-local on web. Hydrate them before ProviderScope
     // creates its state providers so a reload cannot momentarily look empty.
     await WebLocalStore.initialize();
-
-    registerFirebaseWebPlugins();
 
     runApp(const ProviderScope(child: MyApp()));
   });
