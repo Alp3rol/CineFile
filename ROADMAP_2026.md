@@ -209,7 +209,13 @@ senaryolarına karşı hazırlamak.
     otomatik üretiyor; olaylara release, dist/commit ve ortam ekleniyor. Eksik
     üretim metadata'sı derlemeyi durduruyor ve Sentry etkin paket üç değeri de
     taşımadan yayımlanamıyor. Yerel web ve native derleme sözleşmesi belgelendi.
-- [ ] Canlılık kontrolü: Firebase init, TMDb proxy ve temel arama için sentetik test.
+- [x] **Canlılık kontrolü: Firebase init, TMDb proxy ve temel arama için sentetik test.**
+  - **Tamamlandı (5 Ağustos 2026):** Dışarıdan ve veri değiştirmeden çalışan
+    Node sentetiği canlı Flutter bootstrap/bundle'ını, beklenen Firebase web
+    uygulaması ve Identity Toolkit proje yapılandırmasını, ardından proxy
+    üzerinden sonuç döndüren gerçek `/search/multi` isteğini ve atomik kota
+    başlıklarını doğruluyor. Üç hata senaryosu birim testleriyle sabit; kontrol
+    altı saatte bir ve elle GitHub Actions'tan çalıştırılabiliyor.
 - [ ] Firestore yedekleme ve geri dönüş prosedürünü yazılı hâle getir.
 - [ ] Yayın geri alma prosedürü ve son sağlıklı `gh-pages` artefaktı tanımla.
 - [ ] Bağımlılık ve gizli bilgi taramasını CI'a ekle.
@@ -332,12 +338,12 @@ Her görev aşağıdaki sırayla ilerler:
 
 ## Bir sonraki görev
 
-**Faz 3 / Görev 4:** Firebase init, TMDb proxy ve temel arama için sentetik
-canlılık kontrolü eklemek.
+**Faz 3 / Görev 5:** Firestore yedekleme ve geri dönüş prosedürünü yazılı hâle
+getirmek.
 
 Tamamlanma kanıtı:
 
-- Canlı Firebase başlatma ve kimlik katmanı dışarıdan doğrulanır.
-- TMDb proxy sağlık ve temel arama isteği periyodik çalıştırılır.
-- Başarısızlık anlamlı bir çıkış kodu ve tanı bilgisi üretir.
-- Kontrol hem CI'dan elle hem zamanlanmış olarak çalıştırılabilir.
+- Firestore koleksiyon kapsamı ve saklama politikası tanımlanır.
+- Yedek alma komutu güvenli değişkenlerle belgelenir ve prova edilir.
+- Ayrı bir test projesine geri yükleme adımları doğrulanır.
+- RPO/RTO hedefleri ve geri dönüş sorumluluğu kayda alınır.

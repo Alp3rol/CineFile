@@ -30,6 +30,16 @@ jobs:
       - name: Validate Cloudflare deployment
         run: npx wrangler deploy --dry-run
 
+  synthetic-health-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test synthetic health diagnostics
+        run: node --test test/synthetic_health_check_test.mjs
+
   analyze-and-test:
     runs-on: ubuntu-latest
     steps:
