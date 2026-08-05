@@ -149,7 +149,14 @@ eklenebilmesini sağlamak. Bu faz kullanıcı davranışını bilinçli olarak d
     yerel repository ayrıntılarından ayrıldı. Bölüm ilerlemesi, izleme sayacı ve
     web/native fallback davranışı korundu. 263 Flutter testi geçti (1 bilinçli
     skip); 77 Firestore kural testi, tam analiz ve release web derlemesi temiz.
-- [ ] Web/native repository davranış sözleşmesi için ortak karakterizasyon testleri yaz.
+- [x] Web/native repository davranış sözleşmesi için ortak karakterizasyon testleri yaz.
+  - 5 Ağustos 2026: Aynı 4 senaryolu sözleşme paketi native ve web
+    `MovieRepository` uygulamalarına karşı çalıştırıldı. Koleksiyon CRUD,
+    metadata/ayarlar, izleme kaydı ilerlemesi ve tam yedek değiştirme davranışı
+    sabitlendi. Sözleşme sayesinde web'de kayıt silme sonrası ilerlemenin
+    hesaplanmadığı ve native'de son ilerlemenin `null` değerine temizlenmediği
+    bulundu ve düzeltildi. 271 Flutter testi geçti (1 bilinçli skip); 77
+    Firestore testi, tam analiz ve release web derlemesi temiz.
 - [ ] Sessiz hata yakalama noktalarını gözden geçir; kullanıcı mesajı, gözlemleme
   veya bilinçli ignore seçeneklerinden biri açıkça seçilsin.
 
@@ -300,11 +307,11 @@ Her görev aşağıdaki sırayla ilerler:
 
 ## Bir sonraki görev
 
-**Faz 2 / Görev 5:** Web/native repository davranış sözleşmesi için ortak karakterizasyon testleri yazmak.
+**Faz 2 / Görev 6:** Sessiz hata yakalama noktalarını gözden geçirmek ve her biri için kullanıcı mesajı, gözlemleme veya bilinçli ignore kararı vermek.
 
 Tamamlanma kanıtı:
 
-- Aynı ortak sözleşme testi web ve native repository uygulamalarına karşı çalışır.
-- Koleksiyon, ayar ve izleme kaydı davranışlarının eşdeğerliği doğrulanır.
-- Mevcut yedek formatı ve kullanıcı akışları değişmez.
+- Boş veya yalnızca `debugPrint` yapan hata yakalama noktaları envanterlenir.
+- Kullanıcıyı etkileyen hatalar görünür geri bildirim veya merkezi raporlama alır.
+- Bilinçli olarak yoksayılan hataların gerekçesi kodda açıkça belgelenir.
 - Tam Flutter testi, Firestore kural paketi ve web release derlemesi geçer.

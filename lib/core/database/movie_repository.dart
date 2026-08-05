@@ -337,12 +337,13 @@ class NativeMovieRepository implements MovieRepository {
     if (existingSetting == null) return;
 
     if (remainingRecords.isEmpty) {
-      await _db
-          .into(_db.userMovieSettings)
-          .insertOnConflictUpdate(
-            existingSetting.copyWith(
-              isActivelyWatching: false,
-              lastWatchedEpisode: const Value(null),
+      await (_db.update(_db.userMovieSettings)..where(
+            (t) => t.tmdbId.equals(record.movieId) & t.isTv.equals(record.isTv),
+          ))
+          .write(
+            const UserMovieSettingsCompanion(
+              isActivelyWatching: Value(false),
+              lastWatchedEpisode: Value(null),
             ),
           );
     } else {
@@ -363,11 +364,12 @@ class NativeMovieRepository implements MovieRepository {
       final newIsActivelyWatching =
           totalEpisodes == null || currentEpisodeProgress < totalEpisodes;
 
-      await _db
-          .into(_db.userMovieSettings)
-          .insertOnConflictUpdate(
-            existingSetting.copyWith(
-              isActivelyWatching: newIsActivelyWatching,
+      await (_db.update(_db.userMovieSettings)..where(
+            (t) => t.tmdbId.equals(record.movieId) & t.isTv.equals(record.isTv),
+          ))
+          .write(
+            UserMovieSettingsCompanion(
+              isActivelyWatching: Value(newIsActivelyWatching),
               lastWatchedEpisode: Value(currentEpisodeProgress),
             ),
           );
@@ -585,7 +587,42 @@ class WebMovieRepository implements MovieRepository {
   Future<void> deleteWatchRecordLocal(WatchRecord record) async {
     final notifier = _ref.read(webWatchRecordsProvider.notifier);
     final currentList = _ref.read(webWatchRecordsProvider);
-    notifier.state = currentList.where((r) => r.id != record.id).toList();
+    final remainingRecords = currentList
+        .where((r) => r.id != record.id)
+        .toList();
+    notifier.state = remainingRecords;
+
+    final key = (tmdbId: record.movieId, isTv: record.isTv);
+    final currentSettings = _ref.read(webMovieSettingsProvider);
+    final existingSetting = currentSettings[key];
+    if (existingSetting == null) return;
+
+    final movieRecords =
+        remainingRecords
+            .where((r) => r.movieId == record.movieId && r.isTv == record.isTv)
+            .toList()
+          ..sort((a, b) => b.watchDate.compareTo(a.watchDate));
+
+    int? lastWatchedEpisode;
+    var isActivelyWatching = false;
+    if (movieRecords.isNotEmpty) {
+      final latestWatchNumber = movieRecords.first.watchNumber;
+      lastWatchedEpisode = movieRecords
+          .where((r) => r.watchNumber == latestWatchNumber)
+          .fold<int>(0, (total, r) => total + r.episodeCount);
+      final totalEpisodes = _ref.read(webMoviesProvider)[key]?.totalEpisodes;
+      isActivelyWatching =
+          totalEpisodes == null || lastWatchedEpisode < totalEpisodes;
+    }
+
+    final updatedSettings = Map<MovieKey, UserMovieSetting>.from(
+      currentSettings,
+    );
+    updatedSettings[key] = existingSetting.copyWith(
+      isActivelyWatching: isActivelyWatching,
+      lastWatchedEpisode: Value(lastWatchedEpisode),
+    );
+    _ref.read(webMovieSettingsProvider.notifier).state = updatedSettings;
   }
 
   @override
