@@ -97,12 +97,43 @@ service cloud.firestore {
              .hasOnly([request.auth.uid]);
     }
 
-    // A comment add/remove moves the counter by exactly one, in step with the
-    // matching write in the comments subcollection.
-    function isCommentCountStep() {
-      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['commentCount'])
-        && (request.resource.data.commentCount == resource.data.get('commentCount', 0) + 1
-            || request.resource.data.commentCount == resource.data.get('commentCount', 0) - 1);
+    function parentDocument(collectionName, parentId) {
+      return /databases/$(database)/documents/$(collectionName)/$(parentId);
+    }
+
+    function commentDocument(collectionName, parentId, commentId) {
+      return /databases/$(database)/documents/$(collectionName)/$(parentId)/comments/$(commentId);
+    }
+
+    // A counter step is valid only when the comment named by the mutation
+    // marker is created/deleted in the same atomic request. Checking both the
+    // state before and after closes the old loophole where any signed-in user
+    // could issue repeated +1 updates without writing a comment at all.
+    function isCommentCountStep(collectionName, parentId) {
+      let commentId = request.resource.data.get('lastCommentMutationId', '');
+      let delta = request.resource.data.get('commentCount', 0)
+        - resource.data.get('commentCount', 0);
+      return commentId is string
+        && commentId.size() > 0
+        && request.resource.data.get('commentCount', 0) >= 0
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['commentCount', 'lastCommentMutationId'])
+        && (
+          (delta == 1
+            && !exists(commentDocument(collectionName, parentId, commentId))
+            && existsAfter(commentDocument(collectionName, parentId, commentId)))
+          ||
+          (delta == -1
+            && exists(commentDocument(collectionName, parentId, commentId))
+            && !existsAfter(commentDocument(collectionName, parentId, commentId)))
+        );
+    }
+
+    function parentCounterMatchesComment(collectionName, parentId, commentId, delta) {
+      return getAfter(parentDocument(collectionName, parentId)).data.get('commentCount', 0)
+            == get(parentDocument(collectionName, parentId)).data.get('commentCount', 0) + delta
+        && getAfter(parentDocument(collectionName, parentId)).data.get('lastCommentMutationId', '')
+            == commentId;
     }
 
     // Following someone touches the *other* user's followerCount. Same
@@ -166,7 +197,7 @@ service cloud.firestore {
           && withinTextLimits()
           && authorAndSocialFieldsAreUnchanged()) ||
         isOwnStarToggle() ||
-        isCommentCountStep()
+        isCommentCountStep('logs', logId)
       );
       allow delete: if request.auth != null && request.auth.uid == resource.data.userId;
 
@@ -176,8 +207,11 @@ service cloud.firestore {
                       request.auth.uid == get(/databases/$(database)/documents/logs/$(logId)).data.userId);
         allow create: if request.auth != null
           && authorFieldsAreOwn()
-          && request.resource.data.get('text', '').size() <= 1000;
-        allow delete: if request.auth != null && request.auth.uid == resource.data.userId;
+          && request.resource.data.get('text', '').size() <= 1000
+          && parentCounterMatchesComment('logs', logId, commentId, 1);
+        allow delete: if request.auth != null
+          && request.auth.uid == resource.data.userId
+          && parentCounterMatchesComment('logs', logId, commentId, -1);
         allow update: if false;
       }
     }
@@ -197,7 +231,7 @@ service cloud.firestore {
           && withinTextLimits()
           && authorAndSocialFieldsAreUnchanged()) ||
         isOwnStarToggle() ||
-        isCommentCountStep()
+        isCommentCountStep('posts', postId)
       );
       allow delete: if request.auth != null && request.auth.uid == resource.data.userId;
 
@@ -205,8 +239,11 @@ service cloud.firestore {
         allow read: if request.auth != null;
         allow create: if request.auth != null
           && authorFieldsAreOwn()
-          && request.resource.data.get('text', '').size() <= 1000;
-        allow delete: if request.auth != null && request.auth.uid == resource.data.userId;
+          && request.resource.data.get('text', '').size() <= 1000
+          && parentCounterMatchesComment('posts', postId, commentId, 1);
+        allow delete: if request.auth != null
+          && request.auth.uid == resource.data.userId
+          && parentCounterMatchesComment('posts', postId, commentId, -1);
         allow update: if false;
       }
     }

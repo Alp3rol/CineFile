@@ -24,22 +24,32 @@ abstract class SocialRepository {
   Future<void> publishPost(CommunityPost draft);
 
   /// Adds or removes the current user's star on [postId].
-  Future<void> toggleStar({required String postId, required bool currentlyStarred});
+  Future<void> toggleStar({
+    required String postId,
+    required bool currentlyStarred,
+  });
 
   /// Appends a comment and moves the post's counter in the same batch.
   ///
   /// The counter and the comment must move together: `isCommentCountStep` in
   /// the rules only permits a ±1 change, so a counter that drifted out of step
   /// with the subcollection could never be corrected by the client.
-  Future<CommentModel> addComment({required String postId, required String text});
+  Future<CommentModel> addComment({
+    required String postId,
+    required String text,
+  });
 
-  Future<void> deleteComment({required String postId, required String commentId});
+  Future<void> deleteComment({
+    required String postId,
+    required String commentId,
+  });
 }
 
 class NotSignedInException implements Exception {
   const NotSignedInException();
   @override
-  String toString() => 'NotSignedInException: this action requires a signed-in user';
+  String toString() =>
+      'NotSignedInException: this action requires a signed-in user';
 }
 
 final socialRepositoryProvider = Provider<SocialRepository>(
@@ -52,7 +62,8 @@ class FirestoreSocialRepository implements SocialRepository {
 
   FirebaseFirestore get _firestore => _ref.read(firestoreProvider);
 
-  CollectionReference<Map<String, dynamic>> get _posts => _firestore.collection('posts');
+  CollectionReference<Map<String, dynamic>> get _posts =>
+      _firestore.collection('posts');
 
   User _requireUser() {
     final user = _ref.currentUser;
@@ -81,7 +92,10 @@ class FirestoreSocialRepository implements SocialRepository {
   }
 
   @override
-  Future<void> toggleStar({required String postId, required bool currentlyStarred}) async {
+  Future<void> toggleStar({
+    required String postId,
+    required bool currentlyStarred,
+  }) async {
     final user = _requireUser();
     await _posts.doc(postId).update({
       'starredBy': currentlyStarred
@@ -91,7 +105,10 @@ class FirestoreSocialRepository implements SocialRepository {
   }
 
   @override
-  Future<CommentModel> addComment({required String postId, required String text}) async {
+  Future<CommentModel> addComment({
+    required String postId,
+    required String text,
+  }) async {
     final user = _requireUser();
     final identity = _identity(user);
 
@@ -108,20 +125,29 @@ class FirestoreSocialRepository implements SocialRepository {
 
     final batch = _firestore.batch();
     batch.set(commentRef, comment.toMap());
-    batch.update(postRef, {'commentCount': FieldValue.increment(1)});
+    batch.update(postRef, {
+      'commentCount': FieldValue.increment(1),
+      'lastCommentMutationId': commentRef.id,
+    });
     await batch.commit();
 
     return comment;
   }
 
   @override
-  Future<void> deleteComment({required String postId, required String commentId}) async {
+  Future<void> deleteComment({
+    required String postId,
+    required String commentId,
+  }) async {
     _requireUser();
     final postRef = _posts.doc(postId);
 
     final batch = _firestore.batch();
     batch.delete(postRef.collection('comments').doc(commentId));
-    batch.update(postRef, {'commentCount': FieldValue.increment(-1)});
+    batch.update(postRef, {
+      'commentCount': FieldValue.increment(-1),
+      'lastCommentMutationId': commentId,
+    });
     await batch.commit();
   }
 }

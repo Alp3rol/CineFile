@@ -1,5 +1,10 @@
 # FilmDizi Günlüğü - Yol Haritası ve MVP Tanımı (Roadmap & MVP)
 
+> **Bu dosya tarihsel sürüm kaydıdır.** Güncel öncelikler, kabul kriterleri ve
+> uygulama sırası için [`ROADMAP_2026.md`](ROADMAP_2026.md) kullanılmalıdır.
+> Yeni işler yalnızca aktif yol haritasına eklenir; tamamlanan büyük sürümler
+> gerektiğinde bu tarihçeye taşınır.
+
 Bu doküman, projenin adım adım geliştirilmesini sağlayacak modüler ve sürüm tabanlı (version-by-version) yol haritasını tanımlar. Büyük bir kodu tek seferde yazmak yerine, her aşamada çalışan ve test edilebilir bir uygulama elde etmeyi amaçlar.
 
 ---

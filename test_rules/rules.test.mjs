@@ -79,6 +79,28 @@ function post(overrides = {}) {
   };
 }
 
+function comment(overrides = {}) {
+  return {
+    userId: BOB,
+    username: 'Bob',
+    userAvatarUrl: BOB_AVATAR,
+    text: 'katılıyorum',
+    createdAt: new Date(),
+    ...overrides,
+  };
+}
+
+function addCommentBatch(db, overrides = {}) {
+  const commentId = 'c1';
+  const batch = writeBatch(db);
+  batch.set(doc(db, `posts/p1/comments/${commentId}`), comment(overrides));
+  batch.update(doc(db, 'posts/p1'), {
+    commentCount: increment(1),
+    lastCommentMutationId: commentId,
+  });
+  return batch.commit();
+}
+
 before(async () => {
   env = await initializeTestEnvironment({
     projectId: 'demo-cinefile',
@@ -405,30 +427,31 @@ describe('comments — authorship', () => {
   });
 
   it('allows a comment with your own identity', async () => {
-    await assertSucceeds(
-      addDoc(collection(asBob(), 'posts/p1/comments'), {
-        userId: BOB, username: 'Bob', userAvatarUrl: BOB_AVATAR,
-        text: 'katılıyorum', createdAt: new Date(),
+    await assertSucceeds(addCommentBatch(asBob()));
+  });
+
+  it('rejects creating a comment without stepping the parent counter', async () => {
+    await assertFails(
+      setDoc(doc(asBob(), 'posts/p1/comments/orphan'), comment()),
+    );
+  });
+
+  it('rejects stepping the counter without creating the named comment', async () => {
+    await assertFails(
+      updateDoc(doc(asBob(), 'posts/p1'), {
+        commentCount: increment(1), lastCommentMutationId: 'missing',
       }),
     );
   });
 
   it("rejects a comment carrying another user's username", async () => {
-    await assertFails(
-      addDoc(collection(asBob(), 'posts/p1/comments'), {
-        userId: BOB, username: 'Alice', userAvatarUrl: DICEBEAR,
-        text: 'sahte', createdAt: new Date(),
-      }),
-    );
+    await assertFails(addCommentBatch(asBob(), {
+      username: 'Alice', userAvatarUrl: DICEBEAR,
+    }));
   });
 
   it('rejects an oversized comment', async () => {
-    await assertFails(
-      addDoc(collection(asBob(), 'posts/p1/comments'), {
-        userId: BOB, username: 'Bob', userAvatarUrl: BOB_AVATAR,
-        text: 'x'.repeat(1001), createdAt: new Date(),
-      }),
-    );
+    await assertFails(addCommentBatch(asBob(), { text: 'x'.repeat(1001) }));
   });
 
   it('rejects editing a comment', async () => {
@@ -440,6 +463,30 @@ describe('comments — authorship', () => {
     });
     await assertFails(
       updateDoc(doc(asBob(), 'posts/p1/comments/c1'), { text: 'düzenlendi' }),
+    );
+  });
+
+  it('allows the author to delete only with the matching counter decrement', async () => {
+    await assertSucceeds(addCommentBatch(asBob()));
+    const db = asBob();
+    const batch = writeBatch(db);
+    batch.delete(doc(db, 'posts/p1/comments/c1'));
+    batch.update(doc(db, 'posts/p1'), {
+      commentCount: increment(-1), lastCommentMutationId: 'c1',
+    });
+    await assertSucceeds(batch.commit());
+  });
+
+  it('rejects deleting a comment without decrementing the counter', async () => {
+    await assertSucceeds(addCommentBatch(asBob()));
+    await assertFails(deleteDoc(doc(asBob(), 'posts/p1/comments/c1')));
+  });
+
+  it('rejects decrementing the counter below zero', async () => {
+    await assertFails(
+      updateDoc(doc(asBob(), 'posts/p1'), {
+        commentCount: increment(-1), lastCommentMutationId: 'missing',
+      }),
     );
   });
 });
@@ -577,6 +624,7 @@ describe('follows — edge and counters stay atomic', () => {
     batch.update(doc(db, 'users', ALICE), { followerCount: increment(-1) });
     await assertSucceeds(batch.commit());
   });
+
 });
 
 describe('per-user subcollections stay private', () => {
