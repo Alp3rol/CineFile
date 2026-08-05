@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/ui/ui.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/database/database_provider.dart';
+import '../../../../core/observability/error_reporting.dart';
 import '../../../../core/database/app_database.dart';
 import 'create_collection_dialog.dart';
 
@@ -19,7 +20,9 @@ class AddToListSheet extends ConsumerWidget {
       isScrollControlled: true,
       builder: (context) {
         return Padding(
-          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
           child: AddToListSheet(movieData: movie),
         );
       },
@@ -29,8 +32,9 @@ class AddToListSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final listsAsync = ref.watch(customListsProvider);
-    final selectedListsAsync =
-        ref.watch(listsForMovieProvider((tmdbId: movieData.tmdbId, isTv: movieData.isTv)));
+    final selectedListsAsync = ref.watch(
+      listsForMovieProvider((tmdbId: movieData.tmdbId, isTv: movieData.isTv)),
+    );
 
     return GlassContainer(
       borderRadius: 24,
@@ -52,22 +56,33 @@ class AddToListSheet extends ConsumerWidget {
                 children: [
                   Text(
                     AppLocalizations.of(context).collectionAddTo,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppColors.textPrimary),
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     movieData.title,
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(color: AppColors.textSecondary),
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
               TextButton.icon(
-                icon: const Icon(Icons.add_rounded, size: 16, color: AppColors.accent),
+                icon: const Icon(
+                  Icons.add_rounded,
+                  size: 16,
+                  color: AppColors.accent,
+                ),
                 label: Text(
                   AppLocalizations.of(context).collectionNewList,
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold, color: AppColors.accent),
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.accent,
+                  ),
                 ),
                 onPressed: () => _showCreateListDialog(context, ref),
               ),
@@ -79,8 +94,18 @@ class AddToListSheet extends ConsumerWidget {
 
           // Lists items Grid/ListView
           listsAsync.when(
-            loading: () => const Center(child: Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator())),
-            error: (err, _) => Center(child: Text(AppLocalizations.of(context).collectionsLoadFailed, style: const TextStyle(color: AppColors.textPrimary))),
+            loading: () => const Center(
+              child: Padding(
+                padding: EdgeInsets.all(20),
+                child: CircularProgressIndicator(),
+              ),
+            ),
+            error: (err, _) => Center(
+              child: Text(
+                AppLocalizations.of(context).collectionsLoadFailed,
+                style: const TextStyle(color: AppColors.textPrimary),
+              ),
+            ),
             data: (lists) {
               if (lists.isEmpty) {
                 return _buildEmptyState(context, ref);
@@ -102,12 +127,18 @@ class AddToListSheet extends ConsumerWidget {
                       checkColor: AppColors.onAccentAlt,
                       title: Text(
                         list.name,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
-                      subtitle: list.description != null && list.description!.trim().isNotEmpty
+                      subtitle:
+                          list.description != null &&
+                              list.description!.trim().isNotEmpty
                           ? Text(
                               list.description!,
-                              style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.textSecondary),
+                              style: Theme.of(context).textTheme.labelSmall
+                                  ?.copyWith(color: AppColors.textSecondary),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             )
@@ -118,12 +149,28 @@ class AddToListSheet extends ConsumerWidget {
                           if (selected == true) {
                             await addMovieToCustomList(ref, list.id, movieData);
                           } else {
-                            await removeMovieFromCustomList(ref, list.id, movieData.tmdbId, movieData.isTv);
+                            await removeMovieFromCustomList(
+                              ref,
+                              list.id,
+                              movieData.tmdbId,
+                              movieData.isTv,
+                            );
                           }
-                        } catch (_) {
+                        } catch (error, stackTrace) {
+                          reportError(
+                            error,
+                            stackTrace,
+                            where: 'addToListSheet.toggleMembership',
+                          );
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(AppLocalizations.of(context).collectionUpdateFailed)),
+                              SnackBar(
+                                content: Text(
+                                  AppLocalizations.of(
+                                    context,
+                                  ).collectionUpdateFailed,
+                                ),
+                              ),
                             );
                           }
                         }
@@ -142,7 +189,9 @@ class AddToListSheet extends ConsumerWidget {
               onPressed: () => Navigator.pop(context),
               child: Text(
                 AppLocalizations.of(context).commonOk,
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(color: AppColors.accent),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleSmall?.copyWith(color: AppColors.accent),
               ),
             ),
           ),
@@ -167,12 +216,16 @@ class AddToListSheet extends ConsumerWidget {
           children: [
             Text(
               AppLocalizations.of(context).collectionNoneYet,
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.textSecondary),
+              style: Theme.of(
+                context,
+              ).textTheme.labelLarge?.copyWith(color: AppColors.textSecondary),
             ),
             const SizedBox(height: 8),
             Text(
               AppLocalizations.of(context).collectionNoneYetHint,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.textSecondary),
+              style: Theme.of(
+                context,
+              ).textTheme.labelSmall?.copyWith(color: AppColors.textSecondary),
             ),
           ],
         ),

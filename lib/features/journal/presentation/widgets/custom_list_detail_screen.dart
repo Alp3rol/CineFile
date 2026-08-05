@@ -5,6 +5,7 @@ import '../../../../core/ui/ui.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/database/database_provider.dart';
 import '../../../../core/database/app_database.dart';
+import '../../../../core/observability/error_reporting.dart';
 import 'create_collection_dialog.dart';
 import 'custom_list_empty_state.dart';
 import 'custom_list_marathon_banner.dart';
@@ -16,10 +17,12 @@ class CustomListDetailScreen extends ConsumerStatefulWidget {
   const CustomListDetailScreen({super.key, required this.list});
 
   @override
-  ConsumerState<CustomListDetailScreen> createState() => _CustomListDetailScreenState();
+  ConsumerState<CustomListDetailScreen> createState() =>
+      _CustomListDetailScreenState();
 }
 
-class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen> {
+class _CustomListDetailScreenState
+    extends ConsumerState<CustomListDetailScreen> {
   // Mirrors widget.list.isPublic locally so the badge/button update
   // immediately after _stopSharing — widget.list is a snapshot passed in
   // by the caller, not a reactively-watched provider value.
@@ -29,17 +32,26 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
     try {
       await setCollectionVisibility(ref, widget.list.id, false);
       if (mounted) setState(() => _isPublic = false);
-    } catch (_) {
+    } catch (error, stackTrace) {
+      reportError(error, stackTrace, where: 'customListDetail.stopSharing');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context).collectionStopSharingFailed)),
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context).collectionStopSharingFailed,
+            ),
+          ),
         );
       }
     }
   }
 
   // Handles reordering of list movies
-  void _onReorder(List<CustomListMovieWithMovie> items, int oldIndex, int newIndex) async {
+  void _onReorder(
+    List<CustomListMovieWithMovie> items,
+    int oldIndex,
+    int newIndex,
+  ) async {
     if (oldIndex == newIndex) return;
 
     final updated = List<CustomListMovieWithMovie>.from(items);
@@ -49,15 +61,22 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
     // Map: (tmdbId, isTv) -> new rankingOrder (1-based index)
     final newRankings = <MovieKey, int>{};
     for (int i = 0; i < updated.length; i++) {
-      newRankings[(tmdbId: updated[i].movie.tmdbId, isTv: updated[i].movie.isTv)] = i + 1;
+      newRankings[(
+            tmdbId: updated[i].movie.tmdbId,
+            isTv: updated[i].movie.isTv,
+          )] =
+          i + 1;
     }
 
     try {
       await reorderCustomListMovies(ref, widget.list.id, newRankings);
-    } catch (_) {
+    } catch (error, stackTrace) {
+      reportError(error, stackTrace, where: 'customListDetail.reorder');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context).collectionReorderFailed)),
+          SnackBar(
+            content: Text(AppLocalizations.of(context).collectionReorderFailed),
+          ),
         );
       }
     }
@@ -68,7 +87,10 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
     final moviesAsync = ref.watch(moviesInCustomListProvider(widget.list.id));
     final allWatchRecordsAsync = ref.watch(allWatchRecordsProvider);
     final watchedMovieIds =
-        allWatchRecordsAsync.value?.map((r) => (tmdbId: r.movie.tmdbId, isTv: r.movie.isTv)).toSet() ?? {};
+        allWatchRecordsAsync.value
+            ?.map((r) => (tmdbId: r.movie.tmdbId, isTv: r.movie.isTv))
+            .toSet() ??
+        {};
 
     return Scaffold(
       body: SafeArea(
@@ -78,7 +100,12 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
           children: [
             // Floating Header Bar (Back button, Title, Settings)
             Padding(
-              padding: const EdgeInsets.only(left: 16, right: 16, top: 12, bottom: 8),
+              padding: const EdgeInsets.only(
+                left: 16,
+                right: 16,
+                top: 12,
+                bottom: 8,
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -88,19 +115,31 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
                       padding: const EdgeInsets.all(8),
                       borderRadius: 12,
                       opacity: 0.7,
-                      child: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary, size: 20),
+                      child: const Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        color: AppColors.textPrimary,
+                        size: 20,
+                      ),
                     ),
                   ),
                   Row(
                     children: [
                       // Edit List Button
                       IconButton(
-                        icon: const Icon(Icons.edit_note_rounded, color: AppColors.textSecondary, size: 24),
+                        icon: const Icon(
+                          Icons.edit_note_rounded,
+                          color: AppColors.textSecondary,
+                          size: 24,
+                        ),
                         onPressed: () => _showEditListDialog(context),
                       ),
                       // Delete List Button
                       IconButton(
-                        icon: const Icon(Icons.delete_sweep_rounded, color: AppColors.error, size: 24),
+                        icon: const Icon(
+                          Icons.delete_sweep_rounded,
+                          color: AppColors.error,
+                          size: 24,
+                        ),
                         onPressed: () => _showDeleteConfirmDialog(context),
                       ),
                     ],
@@ -110,14 +149,35 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
             ),
 
             moviesAsync.when(
-              loading: () => const Expanded(child: Center(child: CircularProgressIndicator(color: AppColors.accent))),
-              error: (err, _) => Expanded(child: Center(child: Text(AppLocalizations.of(context).collectionsLoadFailed, style: const TextStyle(color: AppColors.textPrimary)))),
+              loading: () => const Expanded(
+                child: Center(
+                  child: CircularProgressIndicator(color: AppColors.accent),
+                ),
+              ),
+              error: (err, _) => Expanded(
+                child: Center(
+                  child: Text(
+                    AppLocalizations.of(context).collectionsLoadFailed,
+                    style: const TextStyle(color: AppColors.textPrimary),
+                  ),
+                ),
+              ),
               data: (movies) {
                 final totalCount = movies.length;
-                final watchedCount =
-                    movies.where((m) => watchedMovieIds.contains((tmdbId: m.movie.tmdbId, isTv: m.movie.isTv))).length;
-                final progress = totalCount == 0 ? 0.0 : watchedCount / totalCount;
-                final coverPath = movies.isNotEmpty ? movies.first.movie.posterPath : null;
+                final watchedCount = movies
+                    .where(
+                      (m) => watchedMovieIds.contains((
+                        tmdbId: m.movie.tmdbId,
+                        isTv: m.movie.isTv,
+                      )),
+                    )
+                    .length;
+                final progress = totalCount == 0
+                    ? 0.0
+                    : watchedCount / totalCount;
+                final coverPath = movies.isNotEmpty
+                    ? movies.first.movie.posterPath
+                    : null;
 
                 return Expanded(
                   child: Column(
@@ -137,7 +197,10 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
                       // Marathon challenge banner (v0.9.0)
                       if (widget.list.targetDate != null) ...[
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 4,
+                          ),
                           child: CustomListMarathonBanner(
                             targetDate: widget.list.targetDate!,
                             progress: progress,
@@ -152,19 +215,29 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
                         child: movies.isEmpty
                             ? const CustomListEmptyState()
                             : ReorderableListView.builder(
-                                padding: const EdgeInsets.only(left: 16, right: 16, bottom: 80),
+                                padding: const EdgeInsets.only(
+                                  left: 16,
+                                  right: 16,
+                                  bottom: 80,
+                                ),
                                 itemCount: movies.length,
-                                onReorderItem: (oldIdx, newIdx) => _onReorder(movies, oldIdx, newIdx),
+                                onReorderItem: (oldIdx, newIdx) =>
+                                    _onReorder(movies, oldIdx, newIdx),
                                 itemBuilder: (context, index) {
                                   final item = movies[index];
-                                  final isWatched = watchedMovieIds
-                                      .contains((tmdbId: item.movie.tmdbId, isTv: item.movie.isTv));
+                                  final isWatched = watchedMovieIds.contains((
+                                    tmdbId: item.movie.tmdbId,
+                                    isTv: item.movie.isTv,
+                                  ));
 
                                   return CustomListMovieTile(
                                     item: item,
                                     index: index,
                                     isWatched: isWatched,
-                                    onRemove: () => _removeMovie(item.movie.tmdbId, item.movie.isTv),
+                                    onRemove: () => _removeMovie(
+                                      item.movie.tmdbId,
+                                      item.movie.isTv,
+                                    ),
                                   );
                                 },
                               ),
@@ -185,7 +258,9 @@ class _CustomListDetailScreenState extends ConsumerState<CustomListDetailScreen>
     await removeMovieFromCustomList(ref, widget.list.id, tmdbId, isTv);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context).collectionRemovedMovie)),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).collectionRemovedMovie),
+        ),
       );
     }
   }

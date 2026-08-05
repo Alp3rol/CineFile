@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app_database.dart';
+import '../observability/error_reporting.dart';
 
 /// Persistent browser storage for the data that has no Firestore home.
 ///
@@ -168,13 +169,14 @@ class WebLocalStore {
       _snapshot = _codec.decodeOrFallback(
         raw,
         fallback: _snapshot,
-        onError: (error) => debugPrint('WebLocalStore load failed: $error'),
+        onError: (error) =>
+            reportError(error, null, where: 'webLocalStore.decode'),
       );
-    } catch (error) {
+    } catch (error, stackTrace) {
       // A malformed/blocked local store must not prevent the app from opening.
       // Keep the last valid in-memory snapshot and let the next successful
       // write replace the browser value.
-      debugPrint('WebLocalStore load failed: $error');
+      reportError(error, stackTrace, where: 'webLocalStore.load');
     }
   }
 
@@ -200,11 +202,14 @@ class WebLocalStore {
           next,
           (encoded) => preferences.setString(_storageKey, encoded),
         );
-      } catch (error) {
-        debugPrint('WebLocalStore save failed: $error');
+      } catch (error, stackTrace) {
+        reportError(error, stackTrace, where: 'webLocalStore.save');
         rethrow;
       }
     });
+    // The returned [operation] still completes with the error. This secondary
+    // handler only repairs the internal queue so one failed browser write does
+    // not prevent every later snapshot from being attempted.
     _writeQueue = operation.catchError((_) {});
     return operation;
   }

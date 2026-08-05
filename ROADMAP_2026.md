@@ -157,8 +157,15 @@ eklenebilmesini sağlamak. Bu faz kullanıcı davranışını bilinçli olarak d
     hesaplanmadığı ve native'de son ilerlemenin `null` değerine temizlenmediği
     bulundu ve düzeltildi. 271 Flutter testi geçti (1 bilinçli skip); 77
     Firestore testi, tam analiz ve release web derlemesi temiz.
-- [ ] Sessiz hata yakalama noktalarını gözden geçir; kullanıcı mesajı, gözlemleme
+- [x] Sessiz hata yakalama noktalarını gözden geçir; kullanıcı mesajı, gözlemleme
   veya bilinçli ignore seçeneklerinden biri açıkça seçilsin.
+  - 5 Ağustos 2026: Koleksiyon, öneri, ilişki ağı, ayar ve yerel depolama
+    hataları kullanıcı geri bildirimi ve/veya merkezi `reportError`
+    gözlemlemesine bağlandı. Beklenen plugin tekrar kaydı, teardown ve alternatif
+    veri yolu fallback'leri kod içinde gerekçeli bilinçli yoksayma olarak
+    belgelendi. Proje çapındaki karar matrisi `ERROR_HANDLING.md` dosyasına
+    yazıldı. 271 Flutter testi geçti (1 bilinçli skip); 77 Firestore testi, tam
+    analiz ve release web derlemesi temiz. Faz 2 tamamlandı.
 
 ### Faz 2 kabul kriterleri
 
@@ -307,11 +314,11 @@ Her görev aşağıdaki sırayla ilerler:
 
 ## Bir sonraki görev
 
-**Faz 2 / Görev 6:** Sessiz hata yakalama noktalarını gözden geçirmek ve her biri için kullanıcı mesajı, gözlemleme veya bilinçli ignore kararı vermek.
+**Faz 3 / Görev 1:** Firebase App Check geçiş planını hazırlamak.
 
 Tamamlanma kanıtı:
 
-- Boş veya yalnızca `debugPrint` yapan hata yakalama noktaları envanterlenir.
-- Kullanıcıyı etkileyen hatalar görünür geri bildirim veya merkezi raporlama alır.
-- Bilinçli olarak yoksayılan hataların gerekçesi kodda açıkça belgelenir.
-- Tam Flutter testi, Firestore kural paketi ve web release derlemesi geçer.
+- Web ve native provider seçenekleri ile geliştirme/debug token akışı belgelenir.
+- Enforcement kapalı ölçüm aşaması ve kabul edilebilir reddedilme eşiği tanımlanır.
+- Firebase servisleri için kademeli enforcement ve geri alma adımları yazılır.
+- Plan mevcut CI, GitHub Pages ve yerel geliştirme akışlarıyla uyumlu olur.

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/database/database_provider.dart';
 import '../../../../core/database/duplicate_cleanup.dart';
+import '../../../../core/observability/error_reporting.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/widgets/glass_container.dart';
@@ -17,10 +18,12 @@ class DuplicateCleanupScreen extends ConsumerStatefulWidget {
   const DuplicateCleanupScreen({super.key});
 
   @override
-  ConsumerState<DuplicateCleanupScreen> createState() => _DuplicateCleanupScreenState();
+  ConsumerState<DuplicateCleanupScreen> createState() =>
+      _DuplicateCleanupScreenState();
 }
 
-class _DuplicateCleanupScreenState extends ConsumerState<DuplicateCleanupScreen> {
+class _DuplicateCleanupScreenState
+    extends ConsumerState<DuplicateCleanupScreen> {
   final Set<String> _selectedKeys = {};
   bool _selectionInitialized = false;
   bool _isCleaning = false;
@@ -36,19 +39,30 @@ class _DuplicateCleanupScreenState extends ConsumerState<DuplicateCleanupScreen>
       context: context,
       builder: (dialogContext) => AlertDialog(
         backgroundColor: AppTheme.surfaceColor,
-        title: Text(AppLocalizations.of(context).duplicateCleanupConfirmTitle, style: const TextStyle(color: Colors.white)),
+        title: Text(
+          AppLocalizations.of(context).duplicateCleanupConfirmTitle,
+          style: const TextStyle(color: Colors.white),
+        ),
         content: Text(
-          AppLocalizations.of(context).duplicateCleanupConfirmBody(toClean.length),
+          AppLocalizations.of(
+            context,
+          ).duplicateCleanupConfirmBody(toClean.length),
           style: const TextStyle(color: Colors.white70),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: Text(AppLocalizations.of(context).commonCancel, style: const TextStyle(color: Colors.white70)),
+            child: Text(
+              AppLocalizations.of(context).commonCancel,
+              style: const TextStyle(color: Colors.white70),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: Text(AppLocalizations.of(context).commonDelete, style: const TextStyle(color: Colors.redAccent)),
+            child: Text(
+              AppLocalizations.of(context).commonDelete,
+              style: const TextStyle(color: Colors.redAccent),
+            ),
           ),
         ],
       ),
@@ -58,14 +72,17 @@ class _DuplicateCleanupScreenState extends ConsumerState<DuplicateCleanupScreen>
     setState(() => _isCleaning = true);
     // Each group targets a different show, so its Firestore/DB calls are
     // independent — run them concurrently instead of one group at a time.
-    final results = await Future.wait(toClean.map((group) async {
-      try {
-        await cleanupDuplicateGroup(ref, group);
-        return true;
-      } catch (_) {
-        return false;
-      }
-    }));
+    final results = await Future.wait(
+      toClean.map((group) async {
+        try {
+          await cleanupDuplicateGroup(ref, group);
+          return true;
+        } catch (error, stackTrace) {
+          reportError(error, stackTrace, where: 'duplicateCleanup.group');
+          return false;
+        }
+      }),
+    );
     final failureCount = results.where((success) => !success).length;
     if (!mounted) return;
     setState(() {
@@ -74,11 +91,16 @@ class _DuplicateCleanupScreenState extends ConsumerState<DuplicateCleanupScreen>
     });
 
     if (failureCount == 0) {
-      showPremiumToast(context, AppLocalizations.of(context).duplicateCleanupCleaned(toClean.length));
+      showPremiumToast(
+        context,
+        AppLocalizations.of(context).duplicateCleanupCleaned(toClean.length),
+      );
     } else {
       showPremiumToast(
         context,
-        AppLocalizations.of(context).duplicateCleanupPartial(toClean.length - failureCount, failureCount),
+        AppLocalizations.of(
+          context,
+        ).duplicateCleanupPartial(toClean.length - failureCount, failureCount),
         isError: true,
       );
     }
@@ -100,7 +122,10 @@ class _DuplicateCleanupScreenState extends ConsumerState<DuplicateCleanupScreen>
                 children: [
                   IconButton(
                     onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+                    icon: const Icon(
+                      Icons.arrow_back_rounded,
+                      color: Colors.white,
+                    ),
                   ),
                   const SizedBox(width: 4),
                   Expanded(
@@ -114,9 +139,16 @@ class _DuplicateCleanupScreenState extends ConsumerState<DuplicateCleanupScreen>
             ),
             Expanded(
               child: recordsAsync.when(
-                loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.accentColor)),
+                loading: () => const Center(
+                  child: CircularProgressIndicator(color: AppTheme.accentColor),
+                ),
                 error: (e, _) => Center(
-                  child: Text(AppLocalizations.of(context).duplicateCleanupLoadError(e.toString()), style: const TextStyle(color: AppTheme.textSecondary)),
+                  child: Text(
+                    AppLocalizations.of(
+                      context,
+                    ).duplicateCleanupLoadError(e.toString()),
+                    style: const TextStyle(color: AppTheme.textSecondary),
+                  ),
                 ),
                 data: (records) {
                   final groups = findDuplicateWatchGroups(records);
@@ -145,7 +177,9 @@ class _DuplicateCleanupScreenState extends ConsumerState<DuplicateCleanupScreen>
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: Text(
-                          AppLocalizations.of(context).duplicateCleanupIntro(groups.length),
+                          AppLocalizations.of(
+                            context,
+                          ).duplicateCleanupIntro(groups.length),
                           style: Theme.of(context).textTheme.labelLarge,
                         ),
                       ),
@@ -179,21 +213,33 @@ class _DuplicateCleanupScreenState extends ConsumerState<DuplicateCleanupScreen>
                                     const SizedBox(width: 12),
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             group.movie.title,
                                             style: Theme.of(context)
                                                 .textTheme
                                                 .bodyMedium
-                                                ?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+                                                ?.copyWith(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                           ),
                                           const SizedBox(height: 2),
                                           Text(
-                                            AppLocalizations.of(context).duplicateCleanupGroupSummary(_formatDay(group.day), group.records.length, group.toDelete.length),
-                                            style: Theme.of(context).textTheme.labelLarge,
+                                            AppLocalizations.of(
+                                              context,
+                                            ).duplicateCleanupGroupSummary(
+                                              _formatDay(group.day),
+                                              group.records.length,
+                                              group.toDelete.length,
+                                            ),
+                                            style: Theme.of(
+                                              context,
+                                            ).textTheme.labelLarge,
                                           ),
                                         ],
                                       ),
@@ -208,7 +254,9 @@ class _DuplicateCleanupScreenState extends ConsumerState<DuplicateCleanupScreen>
                                                 if (v == true) {
                                                   _selectedKeys.add(group.key);
                                                 } else {
-                                                  _selectedKeys.remove(group.key);
+                                                  _selectedKeys.remove(
+                                                    group.key,
+                                                  );
                                                 }
                                               });
                                             },
@@ -228,18 +276,32 @@ class _DuplicateCleanupScreenState extends ConsumerState<DuplicateCleanupScreen>
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppTheme.accentColor,
                               padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                             ),
-                            onPressed: _isCleaning || _selectedKeys.isEmpty ? null : () => _cleanupSelected(groups),
+                            onPressed: _isCleaning || _selectedKeys.isEmpty
+                                ? null
+                                : () => _cleanupSelected(groups),
                             child: _isCleaning
                                 ? const SizedBox(
                                     width: 18,
                                     height: 18,
-                                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black),
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.black,
+                                    ),
                                   )
                                 : Text(
-                                    AppLocalizations.of(context).duplicateCleanupAction(_selectedKeys.length),
-                                    style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                                    AppLocalizations.of(
+                                      context,
+                                    ).duplicateCleanupAction(
+                                      _selectedKeys.length,
+                                    ),
+                                    style: const TextStyle(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                           ),
                         ),

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/database/app_database.dart';
 import '../../../core/database/database_provider.dart';
+import '../../../core/observability/error_reporting.dart';
 import '../domain/graph_models.dart';
 
 /// How long a cached credits entry is trusted.
@@ -46,15 +47,18 @@ class _DriftTitleCreditsCache implements TitleCreditsCache {
   AppDatabase get _db => _ref.read(databaseProvider);
 
   @override
-  Future<Map<MovieKey, List<CreditPerson>>> read(Iterable<MovieKey> keys) async {
+  Future<Map<MovieKey, List<CreditPerson>>> read(
+    Iterable<MovieKey> keys,
+  ) async {
     final ids = keys.map((k) => k.tmdbId).toSet();
     if (ids.isEmpty) return const {};
 
     // One query for the whole batch. tmdbId.isIn alone can match both a movie
     // and a show sharing the same numeric id, so the (tmdbId, isTv) pair is
     // matched in Dart — same reasoning as _mirrorSharedCollection.
-    final rows =
-        await (_db.select(_db.titleCredits)..where((t) => t.tmdbId.isIn(ids))).get();
+    final rows = await (_db.select(
+      _db.titleCredits,
+    )..where((t) => t.tmdbId.isIn(ids))).get();
 
     final wanted = keys.toSet();
     final cutoff = DateTime.now().subtract(kTitleCreditsTtl);
@@ -65,10 +69,14 @@ class _DriftTitleCreditsCache implements TitleCreditsCache {
       if (row.fetchedAt.isBefore(cutoff)) continue;
       try {
         result[key] = _decode(row.people);
-      } catch (e) {
+      } catch (error, stackTrace) {
         // A corrupt entry must not take the whole graph down with it; leaving
         // it out simply makes this title a cache miss.
-        debugPrint('TitleCredits cache entry for $key is unreadable: $e');
+        reportError(
+          error,
+          stackTrace,
+          where: 'titleCreditsCache.decode.${key.tmdbId}_${key.isTv}',
+        );
       }
     }
     return result;
@@ -80,7 +88,9 @@ class _DriftTitleCreditsCache implements TitleCreditsCache {
     // _fetchCredits fell through to its stored-names fallback, and persisting
     // that would keep the title out of the graph for a month.
     if (people.isEmpty) return;
-    await _db.into(_db.titleCredits).insertOnConflictUpdate(
+    await _db
+        .into(_db.titleCredits)
+        .insertOnConflictUpdate(
           TitleCredit(
             tmdbId: key.tmdbId,
             isTv: key.isTv,
@@ -99,7 +109,9 @@ class MemoryTitleCreditsCache implements TitleCreditsCache {
   final Map<MovieKey, List<CreditPerson>> _entries = {};
 
   @override
-  Future<Map<MovieKey, List<CreditPerson>>> read(Iterable<MovieKey> keys) async {
+  Future<Map<MovieKey, List<CreditPerson>>> read(
+    Iterable<MovieKey> keys,
+  ) async {
     return {
       for (final key in keys)
         if (_entries.containsKey(key)) key: _entries[key]!,

@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import '../observability/error_reporting.dart';
 
 /// Single owner of `app_settings.json`, the small key/value file holding the
 /// user's non-synced preferences (TMDb base URL, weekly goal, journal view
@@ -45,8 +46,8 @@ class AppSettingsStore {
           final decoded = jsonDecode(await file.readAsString());
           if (decoded is Map<String, dynamic>) _cache = decoded;
         }
-      } catch (e) {
-        debugPrint('AppSettingsStore load failed: $e');
+      } catch (error, stackTrace) {
+        reportError(error, stackTrace, where: 'appSettings.load');
       }
     }();
   }
@@ -68,8 +69,8 @@ class AppSettingsStore {
       try {
         final file = await _file();
         if (file != null) await file.writeAsString(jsonEncode(snapshot));
-      } catch (e) {
-        debugPrint('AppSettingsStore write failed for "$key": $e');
+      } catch (error, stackTrace) {
+        reportError(error, stackTrace, where: 'appSettings.write.$key');
       }
     });
     return _writeQueue;
@@ -86,8 +87,8 @@ class AppSettingsStore {
       try {
         final file = await _file();
         if (file != null) await file.writeAsString(jsonEncode(next));
-      } catch (e) {
-        debugPrint('AppSettingsStore remove failed for "$key": $e');
+      } catch (error, stackTrace) {
+        reportError(error, stackTrace, where: 'appSettings.remove.$key');
       }
     });
     return _writeQueue;

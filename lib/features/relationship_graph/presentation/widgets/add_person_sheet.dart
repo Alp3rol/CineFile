@@ -4,6 +4,7 @@ import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/network/tmdb_service.dart';
+import '../../../../core/observability/error_reporting.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/widgets/glass_container.dart';
@@ -39,7 +40,10 @@ class AddPersonSheet extends ConsumerStatefulWidget {
       builder: (c) => Padding(
         padding: EdgeInsets.only(bottom: MediaQuery.of(c).viewInsets.bottom),
         child: AddPersonSheet(
-            tmdbId: tmdbId, isTv: isTv, titleLabel: titleLabel),
+          tmdbId: tmdbId,
+          isTv: isTv,
+          titleLabel: titleLabel,
+        ),
       ),
     );
   }
@@ -86,8 +90,9 @@ class _AddPersonSheetState extends ConsumerState<AddPersonSheet> {
         _results = res;
         _loading = false;
       });
-    } catch (_) {
+    } catch (error, stackTrace) {
       if (!mounted || req != _reqId) return;
+      reportError(error, stackTrace, where: 'relationshipGraph.personSearch');
       setState(() {
         _results = const [];
         _loading = false;
@@ -110,7 +115,10 @@ class _AddPersonSheetState extends ConsumerState<AddPersonSheet> {
         .addPersonToTitle(widget.tmdbId, widget.isTv, credit);
     if (!mounted) return;
     Navigator.of(context).pop();
-    showPremiumToast(context, AppLocalizations.of(context).graphPersonAdded(name, widget.titleLabel));
+    showPremiumToast(
+      context,
+      AppLocalizations.of(context).graphPersonAdded(name, widget.titleLabel),
+    );
   }
 
   @override
@@ -121,7 +129,8 @@ class _AddPersonSheetState extends ConsumerState<AddPersonSheet> {
       padding: const EdgeInsets.all(20),
       child: ConstrainedBox(
         constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.75),
+          maxHeight: MediaQuery.of(context).size.height * 0.75,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -131,15 +140,22 @@ class _AddPersonSheetState extends ConsumerState<AddPersonSheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                    color: Colors.white24,
-                    borderRadius: BorderRadius.circular(2)),
+                  color: Colors.white24,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
             ),
             const SizedBox(height: 16),
-            Text(AppLocalizations.of(context).graphAddPerson,
-                style: Theme.of(context).textTheme.titleLarge),
-            Text(AppLocalizations.of(context).graphAddPersonPrompt(widget.titleLabel),
-                style: Theme.of(context).textTheme.bodyMedium),
+            Text(
+              AppLocalizations.of(context).graphAddPerson,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            Text(
+              AppLocalizations.of(
+                context,
+              ).graphAddPersonPrompt(widget.titleLabel),
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
             const SizedBox(height: 14),
             TextField(
               controller: _controller,
@@ -153,12 +169,25 @@ class _AddPersonSheetState extends ConsumerState<AddPersonSheet> {
             const SizedBox(height: 10),
             Row(
               children: [
-                Text(AppLocalizations.of(context).graphAddPersonRole,
-                    style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+                Text(
+                  AppLocalizations.of(context).graphAddPersonRole,
+                  style: const TextStyle(
+                    color: AppTheme.textSecondary,
+                    fontSize: 12,
+                  ),
+                ),
                 const SizedBox(width: 10),
-                _roleChip(AppLocalizations.of(context).graphNodeActor, !_asDirector, () => setState(() => _asDirector = false)),
+                _roleChip(
+                  AppLocalizations.of(context).graphNodeActor,
+                  !_asDirector,
+                  () => setState(() => _asDirector = false),
+                ),
                 const SizedBox(width: 8),
-                _roleChip(AppLocalizations.of(context).graphNodeDirector, _asDirector, () => setState(() => _asDirector = true)),
+                _roleChip(
+                  AppLocalizations.of(context).graphNodeDirector,
+                  _asDirector,
+                  () => setState(() => _asDirector = true),
+                ),
               ],
             ),
             const SizedBox(height: 12),
@@ -180,12 +209,16 @@ class _AddPersonSheetState extends ConsumerState<AddPersonSheet> {
               : Colors.transparent,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-              color: active ? AppTheme.accentColor : AppTheme.borderColor),
+            color: active ? AppTheme.accentColor : AppTheme.borderColor,
+          ),
         ),
-        child: Text(label,
-            style: TextStyle(
-                fontSize: 12,
-                color: active ? AppTheme.textPrimary : AppTheme.textSecondary)),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: active ? AppTheme.textPrimary : AppTheme.textSecondary,
+          ),
+        ),
       ),
     );
   }
@@ -205,8 +238,10 @@ class _AddPersonSheetState extends ConsumerState<AddPersonSheet> {
       return Padding(
         padding: EdgeInsets.symmetric(vertical: 24),
         child: Center(
-          child: Text(AppLocalizations.of(context).graphAddPersonSearchPrompt,
-              style: const TextStyle(color: AppTheme.textSecondary)),
+          child: Text(
+            AppLocalizations.of(context).graphAddPersonSearchPrompt,
+            style: const TextStyle(color: AppTheme.textSecondary),
+          ),
         ),
       );
     }
@@ -225,21 +260,30 @@ class _AddPersonSheetState extends ConsumerState<AddPersonSheet> {
               width: 40,
               height: 40,
               child: AppNetworkImage(
-                imageUrl:
-                    path == null ? '' : '${ApiConstants.imagePathW185}$path',
+                imageUrl: path == null
+                    ? ''
+                    : '${ApiConstants.imagePathW185}$path',
                 seed: (p['name'] as String?) ?? '',
               ),
             ),
           ),
-          title: Text((p['name'] as String?) ?? '',
-              style: const TextStyle(color: AppTheme.textPrimary, fontSize: 14)),
+          title: Text(
+            (p['name'] as String?) ?? '',
+            style: const TextStyle(color: AppTheme.textPrimary, fontSize: 14),
+          ),
           subtitle: (p['known_for_department'] as String?) == null
               ? null
-              : Text(p['known_for_department'] as String,
+              : Text(
+                  p['known_for_department'] as String,
                   style: const TextStyle(
-                      color: AppTheme.textSecondary, fontSize: 12)),
-          trailing: const Icon(Icons.add_circle_outline_rounded,
-              color: AppTheme.accentColor),
+                    color: AppTheme.textSecondary,
+                    fontSize: 12,
+                  ),
+                ),
+          trailing: const Icon(
+            Icons.add_circle_outline_rounded,
+            color: AppTheme.accentColor,
+          ),
           onTap: () => _pick(p),
         );
       },

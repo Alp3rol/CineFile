@@ -8,6 +8,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/constants/watch_regions.dart';
 import '../../../../core/l10n/l10n_lookup.dart';
+import '../../../../core/observability/error_reporting.dart';
 import '../../../../core/services/app_settings_store.dart';
 
 // Re-exported so existing call sites (settings_backup_dialogs.dart) keep
@@ -21,13 +22,16 @@ const _secureApiKeyStorageKey = 'tmdb_api_key';
 /// Shared owner of `app_settings.json` — see [AppSettingsStore] for why every
 /// preference goes through one instance instead of reading and rewriting the
 /// file independently.
-final appSettingsStoreProvider = Provider<AppSettingsStore>((ref) => AppSettingsStore());
+final appSettingsStoreProvider = Provider<AppSettingsStore>(
+  (ref) => AppSettingsStore(),
+);
 
 /// Base class for the file-backed preferences below. Each subclass only has to
 /// name its key and its default; loading, caching and serialised writing are
 /// handled once here rather than copy-pasted per preference.
 abstract class _StoredPreferenceNotifier<T> extends StateNotifier<T> {
-  _StoredPreferenceNotifier(this._store, this._key, T initial) : super(initial) {
+  _StoredPreferenceNotifier(this._store, this._key, T initial)
+    : super(initial) {
     unawaited(_load());
   }
 
@@ -46,7 +50,9 @@ abstract class _StoredPreferenceNotifier<T> extends StateNotifier<T> {
   }
 }
 
-final settingsKeyProvider = StateNotifierProvider<SettingsKeyNotifier, String>((ref) {
+final settingsKeyProvider = StateNotifierProvider<SettingsKeyNotifier, String>((
+  ref,
+) {
   return SettingsKeyNotifier(ref.watch(appSettingsStoreProvider));
 });
 
@@ -73,7 +79,10 @@ class SettingsKeyNotifier extends StateNotifier<String> {
         final legacyKey = _store.read<String>(_secureApiKeyStorageKey);
         if (legacyKey != null && legacyKey.isNotEmpty) {
           key = legacyKey;
-          await _secureStorage.write(key: _secureApiKeyStorageKey, value: legacyKey);
+          await _secureStorage.write(
+            key: _secureApiKeyStorageKey,
+            value: legacyKey,
+          );
           await _store.remove(_secureApiKeyStorageKey);
         }
       }
@@ -82,8 +91,8 @@ class SettingsKeyNotifier extends StateNotifier<String> {
         state = key;
         ApiConstants.tmdbApiKey = key;
       }
-    } catch (e) {
-      debugPrint('loadKey failed: $e');
+    } catch (error, stackTrace) {
+      reportError(error, stackTrace, where: 'settings.apiKey.load');
     }
   }
 
@@ -93,19 +102,20 @@ class SettingsKeyNotifier extends StateNotifier<String> {
     if (kIsWeb) return;
     try {
       await _secureStorage.write(key: _secureApiKeyStorageKey, value: key);
-    } catch (e) {
-      debugPrint('saveKey failed: $e');
+    } catch (error, stackTrace) {
+      reportError(error, stackTrace, where: 'settings.apiKey.save');
     }
   }
 }
 
-final settingsBaseUrlProvider = StateNotifierProvider<SettingsBaseUrlNotifier, String>((ref) {
-  return SettingsBaseUrlNotifier(ref.watch(appSettingsStoreProvider));
-});
+final settingsBaseUrlProvider =
+    StateNotifierProvider<SettingsBaseUrlNotifier, String>((ref) {
+      return SettingsBaseUrlNotifier(ref.watch(appSettingsStoreProvider));
+    });
 
 class SettingsBaseUrlNotifier extends _StoredPreferenceNotifier<String> {
   SettingsBaseUrlNotifier(AppSettingsStore store)
-      : super(store, 'tmdb_base_url', ApiConstants.defaultBaseUrl);
+    : super(store, 'tmdb_base_url', ApiConstants.defaultBaseUrl);
 
   @override
   Future<void> _load() async {
@@ -121,35 +131,39 @@ class SettingsBaseUrlNotifier extends _StoredPreferenceNotifier<String> {
 
 final releaseRemindersEnabledProvider =
     StateNotifierProvider<ReleaseRemindersNotifier, bool>((ref) {
-  return ReleaseRemindersNotifier(ref.watch(appSettingsStoreProvider));
-});
+      return ReleaseRemindersNotifier(ref.watch(appSettingsStoreProvider));
+    });
 
 class ReleaseRemindersNotifier extends _StoredPreferenceNotifier<bool> {
   ReleaseRemindersNotifier(AppSettingsStore store)
-      : super(store, 'release_reminders_enabled', false);
+    : super(store, 'release_reminders_enabled', false);
 
   Future<void> savePreference(bool enabled) => _save(enabled);
 }
 
-final weeklyGoalProvider = StateNotifierProvider<WeeklyGoalNotifier, int>((ref) {
+final weeklyGoalProvider = StateNotifierProvider<WeeklyGoalNotifier, int>((
+  ref,
+) {
   return WeeklyGoalNotifier(ref.watch(appSettingsStoreProvider));
 });
 
 class WeeklyGoalNotifier extends _StoredPreferenceNotifier<int> {
-  WeeklyGoalNotifier(AppSettingsStore store) : super(store, 'weekly_watch_goal', 3);
+  WeeklyGoalNotifier(AppSettingsStore store)
+    : super(store, 'weekly_watch_goal', 3);
 
   Future<void> saveGoal(int goal) => _save(goal);
 }
 
 /// Whether the Journal screen shows the sortable/drag-reorder table view
 /// (true) or the month-grouped card view (false, default).
-final journalViewModeProvider = StateNotifierProvider<JournalViewModeNotifier, bool>((ref) {
-  return JournalViewModeNotifier(ref.watch(appSettingsStoreProvider));
-});
+final journalViewModeProvider =
+    StateNotifierProvider<JournalViewModeNotifier, bool>((ref) {
+      return JournalViewModeNotifier(ref.watch(appSettingsStoreProvider));
+    });
 
 class JournalViewModeNotifier extends _StoredPreferenceNotifier<bool> {
   JournalViewModeNotifier(AppSettingsStore store)
-      : super(store, 'journal_table_view', false);
+    : super(store, 'journal_table_view', false);
 
   Future<void> setTableView(bool isTableView) => _save(isTableView);
 }
@@ -203,9 +217,11 @@ class LocaleNotifier extends StateNotifier<Locale?> {
 /// questions: language decides what the UI reads like, country decides what
 /// Netflix carries. A Turkish speaker living in Germany wants the German
 /// catalogue.
-final watchRegionProvider = StateNotifierProvider<WatchRegionNotifier, String?>((ref) {
-  return WatchRegionNotifier(ref.watch(appSettingsStoreProvider));
-});
+final watchRegionProvider = StateNotifierProvider<WatchRegionNotifier, String?>(
+  (ref) {
+    return WatchRegionNotifier(ref.watch(appSettingsStoreProvider));
+  },
+);
 
 class WatchRegionNotifier extends StateNotifier<String?> {
   WatchRegionNotifier(this._store) : super(null) {
@@ -252,7 +268,9 @@ final effectiveWatchRegionProvider = Provider<String>((ref) {
   final fromDevice = deviceCountryCode();
   if (fromDevice != null) return fromDevice;
 
-  return resolveAppLocale(ref.watch(localeProvider)).languageCode == 'tr' ? 'TR' : 'US';
+  return resolveAppLocale(ref.watch(localeProvider)).languageCode == 'tr'
+      ? 'TR'
+      : 'US';
 });
 
 /// Codes the picker offers: the curated list plus whatever the device reports,
@@ -262,18 +280,24 @@ List<String> watchRegionOptions() {
   final fromDevice = deviceCountryCode();
   if (fromDevice != null) codes.add(fromDevice);
   final sorted = codes.toList()
-    ..sort((a, b) => watchRegionLabel(a).toLowerCase().compareTo(watchRegionLabel(b).toLowerCase()));
+    ..sort(
+      (a, b) => watchRegionLabel(
+        a,
+      ).toLowerCase().compareTo(watchRegionLabel(b).toLowerCase()),
+    );
   return sorted;
 }
 
 final dynamicBackgroundEnabledProvider =
     StateNotifierProvider<DynamicBackgroundEnabledNotifier, bool>((ref) {
-  return DynamicBackgroundEnabledNotifier(ref.watch(appSettingsStoreProvider));
-});
+      return DynamicBackgroundEnabledNotifier(
+        ref.watch(appSettingsStoreProvider),
+      );
+    });
 
 class DynamicBackgroundEnabledNotifier extends _StoredPreferenceNotifier<bool> {
   DynamicBackgroundEnabledNotifier(AppSettingsStore store)
-      : super(store, 'dynamic_background_enabled', true);
+    : super(store, 'dynamic_background_enabled', true);
 
   Future<void> setEnabled(bool enabled) => _save(enabled);
 }

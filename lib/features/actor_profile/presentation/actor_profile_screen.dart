@@ -27,9 +27,9 @@ class _ActorProfileScreenState extends ConsumerState<ActorProfileScreen> {
   void dispose() {
     // Restoring the background is cosmetic, and dispose() runs while the
     // container may already be tearing down — so a failure here must not
-    // propagate out of dispose. It is logged rather than swallowed silently:
-    // an exception on this path means the provider lifetime assumption is
-    // wrong, which is worth seeing in a debug run.
+    // propagate out of dispose. The only known failure is Riverpod rejecting
+    // reads after the widget has been deactivated; reporting that expected
+    // teardown race would create noise without an actionable user failure.
     try {
       final background = ref.read(dynamicBackgroundProvider.notifier);
       if (widget.parentMovieData != null) {
@@ -37,8 +37,8 @@ class _ActorProfileScreenState extends ConsumerState<ActorProfileScreen> {
       } else {
         background.clearColors();
       }
-    } catch (e) {
-      debugPrint('Restoring the dynamic background on dispose failed: $e');
+    } catch (_) {
+      // Intentionally ignored: cosmetic cleanup during provider teardown.
     }
     super.dispose();
   }
@@ -46,7 +46,9 @@ class _ActorProfileScreenState extends ConsumerState<ActorProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final detailAsync = ref.watch(personDetailsProvider(widget.actorId));
-    final filmographyAsync = ref.watch(actorFilmographyProvider(widget.actorId));
+    final filmographyAsync = ref.watch(
+      actorFilmographyProvider(widget.actorId),
+    );
 
     // Register active color from actor's profile image to dynamic background
     final actorDetails = detailAsync.value;
@@ -55,10 +57,7 @@ class _ActorProfileScreenState extends ConsumerState<ActorProfileScreen> {
         final profilePath = actorDetails['profile_path'] as String?;
         final name = actorDetails['name'] as String? ?? 'actor';
         ref.read(dynamicBackgroundProvider.notifier).updateMoviesFromMapList([
-          {
-            'poster_path': profilePath,
-            'name': name,
-          }
+          {'poster_path': profilePath, 'name': name},
         ]);
       });
     }
@@ -76,7 +75,10 @@ class _ActorProfileScreenState extends ConsumerState<ActorProfileScreen> {
               backgroundColor: Colors.transparent,
               elevation: 0,
               leading: IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
+                icon: const Icon(
+                  Icons.arrow_back_ios_new_rounded,
+                  color: Colors.white,
+                ),
                 onPressed: () => Navigator.pop(context),
               ),
             ),
@@ -108,12 +110,18 @@ class _ActorProfileScreenState extends ConsumerState<ActorProfileScreen> {
                     backgroundColor: Colors.transparent,
                     elevation: 0,
                     leading: IconButton(
-                      icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
+                      icon: const Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        color: Colors.white,
+                      ),
                       onPressed: () => Navigator.pop(context),
                     ),
                     title: Text(
                       'Oyuncu Profili',
-                      style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: Colors.white),
+                      style: GoogleFonts.outfit(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
                     centerTitle: true,
                     floating: true,
@@ -121,17 +129,20 @@ class _ActorProfileScreenState extends ConsumerState<ActorProfileScreen> {
                   ),
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0,
+                        vertical: 8.0,
+                      ),
                       child: ActorProfileHeader(actor: actor),
                     ),
                   ),
-                  const SliverToBoxAdapter(
-                    child: SizedBox(height: 16),
-                  ),
+                  const SliverToBoxAdapter(child: SizedBox(height: 16)),
                 ],
                 body: filmographyAsync.when(
                   loading: () => const Center(
-                    child: CircularProgressIndicator(color: AppTheme.accentColor),
+                    child: CircularProgressIndicator(
+                      color: AppTheme.accentColor,
+                    ),
                   ),
                   error: (err, stack) => Center(
                     child: Text(
@@ -140,7 +151,8 @@ class _ActorProfileScreenState extends ConsumerState<ActorProfileScreen> {
                       textAlign: TextAlign.center,
                     ),
                   ),
-                  data: (filmography) => ActorFilmographyGrid(filmography: filmography),
+                  data: (filmography) =>
+                      ActorFilmographyGrid(filmography: filmography),
                 ),
               ),
             );

@@ -1,15 +1,17 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/tmdb_genres.dart';
 import '../../../core/database/database_provider.dart';
 import '../../../core/l10n/genre_names.dart';
 import '../../../core/l10n/l10n_lookup.dart';
 import '../../../core/network/tmdb_service.dart';
+import '../../../core/observability/error_reporting.dart';
 import '../../insights/presentation/insights_provider.dart';
 import '../../settings/presentation/settings_provider.dart';
 import '../data/recommendation_model.dart';
 
-final recommendationsProvider = FutureProvider<List<RecommendationItem>>((ref) async {
+final recommendationsProvider = FutureProvider<List<RecommendationItem>>((
+  ref,
+) async {
   final tmdbService = ref.watch(tmdbServiceProvider);
   // Reasons are built here rather than in a widget, so the genre name is
   // resolved through the context-free lookup against the user's chosen
@@ -28,7 +30,10 @@ final recommendationsProvider = FutureProvider<List<RecommendationItem>>((ref) a
     libraryKeys.add('${key.tmdbId}_${key.isTv}');
   }
 
-  final uniqueRecordsCount = watchRecords.map((r) => '${r.movie.tmdbId}_${r.movie.isTv}').toSet().length;
+  final uniqueRecordsCount = watchRecords
+      .map((r) => '${r.movie.tmdbId}_${r.movie.isTv}')
+      .toSet()
+      .length;
 
   // Fallback for new/inactive users
   if (uniqueRecordsCount < 5 || insights == null) {
@@ -40,18 +45,33 @@ final recommendationsProvider = FutureProvider<List<RecommendationItem>>((ref) a
 
       for (final m in popularMovies) {
         if (!libraryKeys.contains('${m['id']}_false')) {
-          list.add(RecommendationItem.fromJson(m, reason: l10n.recommendationReasonPopular, fallbackTitle: l10n.titleUnknown, isTvOverride: false));
+          list.add(
+            RecommendationItem.fromJson(
+              m,
+              reason: l10n.recommendationReasonPopular,
+              fallbackTitle: l10n.titleUnknown,
+              isTvOverride: false,
+            ),
+          );
         }
       }
       for (final tv in popularTv) {
         if (!libraryKeys.contains('${tv['id']}_true')) {
-          list.add(RecommendationItem.fromJson(tv, reason: l10n.recommendationReasonPopular, fallbackTitle: l10n.titleUnknown, isTvOverride: true));
+          list.add(
+            RecommendationItem.fromJson(
+              tv,
+              reason: l10n.recommendationReasonPopular,
+              fallbackTitle: l10n.titleUnknown,
+              isTvOverride: true,
+            ),
+          );
         }
       }
 
       list.shuffle();
       return list.take(12).toList();
-    } catch (_) {
+    } catch (error, stackTrace) {
+      reportError(error, stackTrace, where: 'recommendations.popularFallback');
       return [];
     }
   }
@@ -71,7 +91,9 @@ final recommendationsProvider = FutureProvider<List<RecommendationItem>>((ref) a
 
     try {
       if (movieGenreIds.isNotEmpty) {
-        final genreMovies = await tmdbService.discoverMovies(withGenres: movieGenreIds);
+        final genreMovies = await tmdbService.discoverMovies(
+          withGenres: movieGenreIds,
+        );
         for (final m in genreMovies) {
           final id = m['id'] as int;
           if (!libraryKeys.contains('${id}_false')) {
@@ -86,7 +108,9 @@ final recommendationsProvider = FutureProvider<List<RecommendationItem>>((ref) a
       }
 
       if (tvGenreIds.isNotEmpty) {
-        final genreTv = await tmdbService.discoverTvShows(withGenres: tvGenreIds);
+        final genreTv = await tmdbService.discoverTvShows(
+          withGenres: tvGenreIds,
+        );
         for (final tv in genreTv) {
           final id = tv['id'] as int;
           if (!libraryKeys.contains('${id}_true')) {
@@ -99,8 +123,8 @@ final recommendationsProvider = FutureProvider<List<RecommendationItem>>((ref) a
           }
         }
       }
-    } catch (e) {
-      debugPrint('Genre-based recommendations failed: $e');
+    } catch (error, stackTrace) {
+      reportError(error, stackTrace, where: 'recommendations.byGenre');
     }
   }
 
@@ -116,7 +140,9 @@ final recommendationsProvider = FutureProvider<List<RecommendationItem>>((ref) a
       try {
         final directorId = await tmdbService.searchPersonId(topDirector);
         if (directorId != null) {
-          final directorMovies = await tmdbService.discoverMovies(withCrew: directorId.toString());
+          final directorMovies = await tmdbService.discoverMovies(
+            withCrew: directorId.toString(),
+          );
           for (final m in directorMovies) {
             final id = m['id'] as int;
             if (!libraryKeys.contains('${id}_false')) {
@@ -129,8 +155,8 @@ final recommendationsProvider = FutureProvider<List<RecommendationItem>>((ref) a
             }
           }
         }
-      } catch (e) {
-        debugPrint('Director-based recommendations failed: $e');
+      } catch (error, stackTrace) {
+        reportError(error, stackTrace, where: 'recommendations.byDirector');
       }
     }
   }
@@ -156,8 +182,8 @@ final recommendationsProvider = FutureProvider<List<RecommendationItem>>((ref) a
             }
           }
         }
-      } catch (e) {
-        debugPrint('Actor-based recommendations failed: $e');
+      } catch (error, stackTrace) {
+        reportError(error, stackTrace, where: 'recommendations.byActor');
       }
     }
   }
