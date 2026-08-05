@@ -143,7 +143,12 @@ eklenebilmesini sağlamak. Bu faz kullanıcı davranışını bilinçli olarak d
     verisi 139 satırlık çekirdekte kaldı; en büyük kaynak 375 satırdır. Proxy
     allowlist testi tüm kaynak dosyalarını tarayacak şekilde genişletildi. Tam
     Flutter paketi, 77 Firestore testi, analiz ve release web derlemesi geçti.
-- [ ] İzleme kaydı yazma işlemlerini widget'lardan repository/use-case katmanına taşı.
+- [x] İzleme kaydı yazma işlemlerini widget'lardan repository/use-case katmanına taşı.
+  - 5 Ağustos 2026: Oluşturma, güncelleme ve silme işlemleri
+    `WatchRecordService` altında birleştirildi; widget'lar Firestore transaction ve
+    yerel repository ayrıntılarından ayrıldı. Bölüm ilerlemesi, izleme sayacı ve
+    web/native fallback davranışı korundu. 263 Flutter testi geçti (1 bilinçli
+    skip); 77 Firestore kural testi, tam analiz ve release web derlemesi temiz.
 - [ ] Web/native repository davranış sözleşmesi için ortak karakterizasyon testleri yaz.
 - [ ] Sessiz hata yakalama noktalarını gözden geçir; kullanıcı mesajı, gözlemleme
   veya bilinçli ignore seçeneklerinden biri açıkça seçilsin.
@@ -295,11 +300,11 @@ Her görev aşağıdaki sırayla ilerler:
 
 ## Bir sonraki görev
 
-**Faz 2 / Görev 4:** İzleme kaydı yazma işlemlerini widget'lardan repository/use-case katmanına taşımak.
+**Faz 2 / Görev 5:** Web/native repository davranış sözleşmesi için ortak karakterizasyon testleri yazmak.
 
 Tamamlanma kanıtı:
 
-- İzleme kaydı oluşturma, güncelleme ve silme tek uygulama servisi üzerinden yürür.
-- Widget'lar Firestore batch ve yerel repository ayrıntılarını bilmez.
-- Web/native davranışı ve bölüm ilerleme güncellemeleri değişmez.
+- Aynı ortak sözleşme testi web ve native repository uygulamalarına karşı çalışır.
+- Koleksiyon, ayar ve izleme kaydı davranışlarının eşdeğerliği doğrulanır.
+- Mevcut yedek formatı ve kullanıcı akışları değişmez.
 - Tam Flutter testi, Firestore kural paketi ve web release derlemesi geçer.

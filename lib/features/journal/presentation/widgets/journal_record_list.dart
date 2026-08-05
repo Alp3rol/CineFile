@@ -38,9 +38,10 @@ class JournalRecordsList extends ConsumerWidget {
 
     final latestWatchIds = <MovieKey, int>{};
     for (final item in sorted) {
-      latestWatchIds.putIfAbsent(
-          (tmdbId: item.movie.tmdbId, isTv: item.movie.isTv),
-          () => item.record.id);
+      latestWatchIds.putIfAbsent((
+        tmdbId: item.movie.tmdbId,
+        isTv: item.movie.isTv,
+      ), () => item.record.id);
     }
 
     final groups = <String, List<WatchRecordWithMovie>>{};
@@ -85,8 +86,11 @@ class JournalRecordsList extends ConsumerWidget {
                 child: _JournalRecordCard(
                   item: item,
                   onUpdateRanking: onUpdateRanking,
-                  isLatestWatch: latestWatchIds[
-                          (tmdbId: item.movie.tmdbId, isTv: item.movie.isTv)] ==
+                  isLatestWatch:
+                      latestWatchIds[(
+                        tmdbId: item.movie.tmdbId,
+                        isTv: item.movie.isTv,
+                      )] ==
                       item.record.id,
                 ),
               ),
@@ -121,10 +125,10 @@ class _MonthHeading extends StatelessWidget {
         Text(
           label,
           style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: AppColors.accent,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1.0,
-              ),
+            color: AppColors.accent,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.0,
+          ),
         ),
         const SizedBox(width: AppSpacing.sm),
         Expanded(
@@ -214,13 +218,16 @@ class _JournalRecordCard extends ConsumerWidget {
         record,
         item.setting,
         onUpdateRanking: onUpdateRanking,
-        onDelete: () => deleteWatchRecord(ref, record),
-        onUpdateDate: (newDate) =>
-            updateWatchRecord(ref, record, watchDate: newDate),
-        onUpdateEpisodes: (newCount) =>
-            updateWatchRecord(ref, record, episodeCount: newCount),
-        onUpdatePrivacy: (newValue) =>
-            updateWatchRecord(ref, record, isPublic: newValue),
+        onDelete: () => ref.read(watchRecordServiceProvider).delete(record),
+        onUpdateDate: (newDate) => ref
+            .read(watchRecordServiceProvider)
+            .update(record, watchDate: newDate),
+        onUpdateEpisodes: (newCount) => ref
+            .read(watchRecordServiceProvider)
+            .update(record, episodeCount: newCount),
+        onUpdatePrivacy: (newValue) => ref
+            .read(watchRecordServiceProvider)
+            .update(record, isPublic: newValue),
       ),
       // Was a hand-built gradient from 5% to 2% white. A flat translucent card
       // at the same starting alpha is indistinguishable at this size and is

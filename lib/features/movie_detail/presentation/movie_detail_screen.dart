@@ -62,7 +62,8 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
     final wasSaturatedHigh = _scrollOffset >= 200;
     final isSaturatedLow = offset <= 0;
     final isSaturatedHigh = offset >= 200;
-    if ((wasSaturatedLow && isSaturatedLow) || (wasSaturatedHigh && isSaturatedHigh)) {
+    if ((wasSaturatedLow && isSaturatedLow) ||
+        (wasSaturatedHigh && isSaturatedHigh)) {
       _scrollOffset = offset;
       return;
     }
@@ -72,11 +73,16 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
   }
 
   // Toggle Favorite Status
-  Future<void> _toggleFavorite(WidgetRef ref, Map<String, dynamic> movieData) async {
+  Future<void> _toggleFavorite(
+    WidgetRef ref,
+    Map<String, dynamic> movieData,
+  ) async {
     final user = ref.currentUser;
     if (user == null) return;
 
-    final settings = ref.read(movieSettingsProvider((tmdbId: tmdbId, isTv: isTv))).value;
+    final settings = ref
+        .read(movieSettingsProvider((tmdbId: tmdbId, isTv: isTv)))
+        .value;
     final isFavorite = settings?.isFavorite ?? false;
 
     try {
@@ -97,24 +103,32 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
       debugPrint('Updating the favourite flag failed: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context).detailFavoriteFailed)),
+          SnackBar(
+            content: Text(AppLocalizations.of(context).detailFavoriteFailed),
+          ),
         );
       }
     }
   }
 
-  Future<void> _toggleWatchlist(WidgetRef ref, Map<String, dynamic> movieData) async {
+  Future<void> _toggleWatchlist(
+    WidgetRef ref,
+    Map<String, dynamic> movieData,
+  ) async {
     // Resolved before the awaits below; the reminder title is built after them.
     final l10n = AppLocalizations.of(context);
     final user = ref.currentUser;
     if (user == null) return;
 
-    final settings = ref.read(movieSettingsProvider((tmdbId: tmdbId, isTv: isTv))).value;
+    final settings = ref
+        .read(movieSettingsProvider((tmdbId: tmdbId, isTv: isTv)))
+        .value;
     final isReWatchList = settings?.isReWatchList ?? false;
 
-    final releaseDateStr = (isTv
-        ? movieData['first_air_date']
-        : movieData['release_date']) as String? ?? '';
+    final releaseDateStr =
+        (isTv ? movieData['first_air_date'] : movieData['release_date'])
+            as String? ??
+        '';
 
     try {
       final settingsRef = ref
@@ -139,7 +153,9 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
       // "İzleme listesi güncellenemedi" — nor stop the reminder below from
       // being scheduled, which is what used to happen on web.
       try {
-        await ref.read(movieRepositoryProvider).cacheMovieMetadata(
+        await ref
+            .read(movieRepositoryProvider)
+            .cacheMovieMetadata(
               tmdbId: tmdbId,
               isTv: isTv,
               movieData: movieData,
@@ -155,15 +171,26 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
         if (parsedDate != null) {
           if (!isReWatchList) {
             if (parsedDate.isAfter(DateTime.now())) {
-              await ref.read(notificationServiceProvider).scheduleReleaseReminder(
-                id: tmdbId,
-                title: (isTv ? (movieData['name'] ?? movieData['original_name']) : (movieData['title'] ?? movieData['original_title'])) as String? ?? l10n.titleUnknown,
-                releaseDate: parsedDate,
-                isTv: isTv,
-              );
+              await ref
+                  .read(notificationServiceProvider)
+                  .scheduleReleaseReminder(
+                    id: tmdbId,
+                    title:
+                        (isTv
+                                ? (movieData['name'] ??
+                                      movieData['original_name'])
+                                : (movieData['title'] ??
+                                      movieData['original_title']))
+                            as String? ??
+                        l10n.titleUnknown,
+                    releaseDate: parsedDate,
+                    isTv: isTv,
+                  );
             }
           } else {
-            await ref.read(notificationServiceProvider).cancelReleaseReminder(tmdbId, isTv);
+            await ref
+                .read(notificationServiceProvider)
+                .cancelReleaseReminder(tmdbId, isTv);
           }
         }
       }
@@ -171,7 +198,9 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
       debugPrint('Updating the watchlist failed: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context).detailWatchlistFailed)),
+          SnackBar(
+            content: Text(AppLocalizations.of(context).detailWatchlistFailed),
+          ),
         );
       }
     }
@@ -184,12 +213,16 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
   // settings afterwards, which this screen's own copy never did — deleting a
   // record from here used to leave "Aktif İzliyorum" pointing at an episode
   // count that no longer had any logs behind it.
-  Future<void> _deleteRecord(BuildContext context, WidgetRef ref, WatchRecord record) async {
+  Future<void> _deleteRecord(
+    BuildContext context,
+    WidgetRef ref,
+    WatchRecord record,
+  ) async {
     final user = ref.currentUser;
     if (user == null) return;
 
     try {
-      await deleteWatchRecord(ref, record);
+      await ref.read(watchRecordServiceProvider).delete(record);
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -202,7 +235,11 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context).detailRecordDeleteFailed)),
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context).detailRecordDeleteFailed,
+            ),
+          ),
         );
       }
     }
@@ -226,7 +263,9 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
             if (last3.length >= 3) break;
           }
         }
-        ref.read(dynamicBackgroundProvider.notifier).updateMoviesFromList(last3);
+        ref
+            .read(dynamicBackgroundProvider.notifier)
+            .updateMoviesFromList(last3);
       } else {
         ref.read(dynamicBackgroundProvider.notifier).clearColors();
       }
@@ -238,15 +277,23 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final detailAsync = ref.watch(movieDetailProvider((tmdbId: tmdbId, isTv: isTv)));
-    final watchRecordsAsync = ref.watch(watchRecordsForMovieProvider((tmdbId: tmdbId, isTv: isTv)));
-    final settingsAsync = ref.watch(movieSettingsProvider((tmdbId: tmdbId, isTv: isTv)));
+    final detailAsync = ref.watch(
+      movieDetailProvider((tmdbId: tmdbId, isTv: isTv)),
+    );
+    final watchRecordsAsync = ref.watch(
+      watchRecordsForMovieProvider((tmdbId: tmdbId, isTv: isTv)),
+    );
+    final settingsAsync = ref.watch(
+      movieSettingsProvider((tmdbId: tmdbId, isTv: isTv)),
+    );
 
     // Update background color based on movie detail data (after build)
     final movieDataValue = detailAsync.value;
     if (movieDataValue != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref.read(dynamicBackgroundProvider.notifier).updateMoviesFromMapList([movieDataValue]);
+        ref.read(dynamicBackgroundProvider.notifier).updateMoviesFromMapList([
+          movieDataValue,
+        ]);
       });
     }
 
@@ -256,280 +303,357 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
         bottomNavigationBar: detailAsync.maybeWhen(
           data: (movieData) => movieData == null
               ? null
-              : MovieDetailStickyCta(onTap: () => _openAddWatchRecordSheet(context, movieData)),
+              : MovieDetailStickyCta(
+                  onTap: () => _openAddWatchRecordSheet(context, movieData),
+                ),
           orElse: () => null,
         ),
         body: detailAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Text(
-            AppLocalizations.of(context).detailLoadFailed,
-            style: Theme.of(context).textTheme.bodyLarge,
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stack) => Center(
+            child: Text(
+              AppLocalizations.of(context).detailLoadFailed,
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
           ),
-        ),
-        data: (movieData) {
-          if (movieData == null) {
-            return Center(
-              child: Text(
-                AppLocalizations.of(context).detailNotFound,
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-            );
-          }
-
-          final backdropPath = movieData['backdrop_path'] as String?;
-          final posterPath = movieData['poster_path'] as String?;
-          final title = (movieData['title'] ?? movieData['name'] ?? movieData['original_title'] ?? movieData['original_name'] ?? AppLocalizations.of(context).titleUnknown).toString();
-          final tagline = (movieData['tagline'] ?? '').toString();
-          final overview = (movieData['overview'] ?? AppLocalizations.of(context).detailNoOverview).toString();
-
-          final releaseDateStr = (movieData['release_date'] ?? movieData['first_air_date'] ?? '').toString();
-          final year = releaseDateStr.isNotEmpty ? releaseDateStr.split('-').first : '';
-          final runtime = (movieData['runtime'] as num?)?.toInt() ?? 0;
-
-          final genres = movieData['genres'] as List<dynamic>?;
-          final genresString = genres?.map((e) => (e is Map) ? (e['name'] ?? '') : '').where((s) => s.toString().isNotEmpty).join(', ') ?? '';
-
-          final crew = movieData['credits']?['crew'] as List<dynamic>?;
-          final director = crew?.where((e) => (e is Map) && e['job'] == 'Director').firstOrNull?['name'] as String? ?? AppLocalizations.of(context).directorUnknown;
-
-          final cast = movieData['credits']?['cast'] as List<dynamic>?;
-
-          final voteAverage = (movieData['vote_average'] as num?)?.toDouble();
-          final voteCount = (movieData['vote_count'] as num?)?.toInt();
-
-          final isFavorite = settingsAsync.value?.isFavorite ?? false;
-          final isReWatchList = settingsAsync.value?.isReWatchList ?? false;
-          // watchRecordsForMovieProvider already orders by watchDate desc.
-          final latestRecord = watchRecordsAsync.value?.firstOrNull;
-
-          final double backdropOpacity = (1.0 - (_scrollOffset / 200.0)).clamp(0.0, 1.0);
-          final double backdropTop = _scrollOffset < 0 ? 0.0 : -_scrollOffset;
-
-          return Stack(
-            children: [
-              // 1. Blurred Backdrop + Fading Mask — see MovieDetailBackdrop's
-              // doc comment for why this stays a single always-present
-              // Positioned entry regardless of backdropPath/opacity.
-              Positioned(
-                top: backdropTop,
-                left: 0,
-                right: 0,
-                height: 480,
-                child: MovieDetailBackdrop(
-                  backdropPath: backdropPath,
-                  opacity: backdropOpacity,
-                  width: MediaQuery.of(context).size.width,
+          data: (movieData) {
+            if (movieData == null) {
+              return Center(
+                child: Text(
+                  AppLocalizations.of(context).detailNotFound,
+                  style: Theme.of(context).textTheme.bodyLarge,
                 ),
-              ),
+              );
+            }
 
-              // 2. Main Scrollable Content
-              Positioned.fill(
-                child: SafeArea(
-                  child: SingleChildScrollView(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.fromLTRB(20, 80, 20, 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        MovieDetailHeaderRow(
-                          tmdbId: tmdbId,
-                          isTv: isTv,
-                          posterPath: posterPath,
-                          title: title,
-                          tagline: tagline,
-                          year: year,
-                          runtime: runtime,
-                          genresString: genresString,
-                          voteAverage: voteAverage,
-                          voteCount: voteCount,
-                          settings: settingsAsync.value,
-                          totalEpisodes: (movieData['number_of_episodes'] as num?)?.toInt(),
-                        ),
-                        const SizedBox(height: 20),
+            final backdropPath = movieData['backdrop_path'] as String?;
+            final posterPath = movieData['poster_path'] as String?;
+            final title =
+                (movieData['title'] ??
+                        movieData['name'] ??
+                        movieData['original_title'] ??
+                        movieData['original_name'] ??
+                        AppLocalizations.of(context).titleUnknown)
+                    .toString();
+            final tagline = (movieData['tagline'] ?? '').toString();
+            final overview =
+                (movieData['overview'] ??
+                        AppLocalizations.of(context).detailNoOverview)
+                    .toString();
 
-                        // 3-up info cards: my rating / director / watch place
-                        Row(
-                          children: [
-                            Expanded(
-                              child: MovieInfoCard(
-                                icon: Icons.star_rounded,
-                                iconColor: AppColors.rating,
-                                value: latestRecord != null ? latestRecord.rating.toStringAsFixed(1) : '—',
-                                label: AppLocalizations.of(context).detailMyRating,
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: MovieInfoCard(
-                                icon: Icons.movie_creation_outlined,
-                                iconColor: AppColors.textPrimary,
-                                value: director,
-                                label: AppLocalizations.of(context).detailDirector,
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: MovieInfoCard(
-                                icon: Icons.location_on_outlined,
-                                iconColor: AppColors.textPrimary,
-                                value: latestRecord?.watchPlace ?? '—',
-                                label: AppLocalizations.of(context).detailPlace,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 20),
+            final releaseDateStr =
+                (movieData['release_date'] ?? movieData['first_air_date'] ?? '')
+                    .toString();
+            final year = releaseDateStr.isNotEmpty
+                ? releaseDateStr.split('-').first
+                : '';
+            final runtime = (movieData['runtime'] as num?)?.toInt() ?? 0;
 
-                        // Quick actions row
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            MovieQuickActionButton(
-                              icon: Icons.add_rounded,
-                              label: AppLocalizations.of(context).detailAddToDiary,
-                              isPrimary: true,
-                              onTap: () => _openAddWatchRecordSheet(context, movieData),
-                            ),
-                            MovieQuickActionButton(
-                              icon: Icons.bookmark_add_outlined,
-                              label: AppLocalizations.of(context).detailAddToList,
-                              onTap: () {
-                                final movie = Movie(
-                                  tmdbId: tmdbId,
-                                  title: title,
-                                  originalTitle: (movieData['original_title'] ?? movieData['original_name']) as String?,
-                                  posterPath: posterPath,
-                                  backdropPath: backdropPath,
-                                  releaseYear: int.tryParse(year),
-                                  runtime: runtime,
-                                  genres: genresString,
-                                  director: director,
-                                  actors: cast?.take(5).map((e) => e['name']).join(', '),
-                                  overview: overview,
-                                  isTv: isTv,
-                                  createdAt: DateTime.now(),
-                                );
-                                AddToListSheet.show(context, movie);
-                              },
-                            ),
-                            MovieQuickActionButton(
-                              icon: Icons.share_rounded,
-                              label: AppLocalizations.of(context).detailShare,
-                              onTap: () => _shareMovie(title, tmdbId),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 28),
+            final genres = movieData['genres'] as List<dynamic>?;
+            final genresString =
+                genres
+                    ?.map((e) => (e is Map) ? (e['name'] ?? '') : '')
+                    .where((s) => s.toString().isNotEmpty)
+                    .join(', ') ??
+                '';
 
-                        // Overview (Konu) Section
-                        Text(
-                          AppLocalizations.of(context).detailOverview,
-                          style: Theme.of(context).textTheme.titleLarge,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          overview,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
-                              ?.copyWith(height: 1.5),
-                        ),
-                        const SizedBox(height: 28),
+            final crew = movieData['credits']?['crew'] as List<dynamic>?;
+            final director =
+                crew
+                        ?.where((e) => (e is Map) && e['job'] == 'Director')
+                        .firstOrNull?['name']
+                    as String? ??
+                AppLocalizations.of(context).directorUnknown;
 
-                        // Above the cast deliberately: it is the actionable
-                        // thing on this screen. Renders nothing at all when the
-                        // title isn't available in the user's region, so it
-                        // costs no vertical space in that case.
-                        MovieDetailWatchProvidersSection(tmdbId: tmdbId, isTv: isTv),
+            final cast = movieData['credits']?['cast'] as List<dynamic>?;
 
-                        MovieDetailCastList(cast: cast, movieData: movieData),
+            final voteAverage = (movieData['vote_average'] as num?)?.toDouble();
+            final voteCount = (movieData['vote_count'] as num?)?.toInt();
 
-                        if (isTv) ...[
-                          const SizedBox(height: 28),
-                          MovieDetailTvEpisodesSection(
-                            movie: Movie(
-                              tmdbId: tmdbId,
-                              title: title,
-                              originalTitle: (movieData['original_title'] ?? movieData['original_name']) as String?,
-                              posterPath: posterPath,
-                              backdropPath: backdropPath,
-                              releaseYear: int.tryParse(year),
-                              runtime: runtime,
-                              genres: genresString,
-                              director: director,
-                              actors: cast?.take(5).map((e) => e['name']).join(', '),
-                              overview: overview,
-                              isTv: isTv,
-                              createdAt: DateTime.now(),
-                            ),
-                            seasons: movieData['seasons'] as List<dynamic>? ?? const [],
+            final isFavorite = settingsAsync.value?.isFavorite ?? false;
+            final isReWatchList = settingsAsync.value?.isReWatchList ?? false;
+            // watchRecordsForMovieProvider already orders by watchDate desc.
+            final latestRecord = watchRecordsAsync.value?.firstOrNull;
+
+            final double backdropOpacity = (1.0 - (_scrollOffset / 200.0))
+                .clamp(0.0, 1.0);
+            final double backdropTop = _scrollOffset < 0 ? 0.0 : -_scrollOffset;
+
+            return Stack(
+              children: [
+                // 1. Blurred Backdrop + Fading Mask — see MovieDetailBackdrop's
+                // doc comment for why this stays a single always-present
+                // Positioned entry regardless of backdropPath/opacity.
+                Positioned(
+                  top: backdropTop,
+                  left: 0,
+                  right: 0,
+                  height: 480,
+                  child: MovieDetailBackdrop(
+                    backdropPath: backdropPath,
+                    opacity: backdropOpacity,
+                    width: MediaQuery.of(context).size.width,
+                  ),
+                ),
+
+                // 2. Main Scrollable Content
+                Positioned.fill(
+                  child: SafeArea(
+                    child: SingleChildScrollView(
+                      controller: _scrollController,
+                      padding: const EdgeInsets.fromLTRB(20, 80, 20, 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          MovieDetailHeaderRow(
+                            tmdbId: tmdbId,
+                            isTv: isTv,
+                            posterPath: posterPath,
+                            title: title,
+                            tagline: tagline,
+                            year: year,
+                            runtime: runtime,
+                            genresString: genresString,
+                            voteAverage: voteAverage,
+                            voteCount: voteCount,
                             settings: settingsAsync.value,
-                            totalEpisodes: (movieData['number_of_episodes'] as num?)?.toInt(),
-                            hasJournalEntry: (watchRecordsAsync.value ?? const []).isNotEmpty,
-                            onRequestAddToJournal: () => _openAddWatchRecordSheet(context, movieData),
+                            totalEpisodes:
+                                (movieData['number_of_episodes'] as num?)
+                                    ?.toInt(),
                           ),
-                        ],
+                          const SizedBox(height: 20),
 
-                        MovieDetailTimelineSection(
-                          watchRecordsAsync: watchRecordsAsync,
-                          onDelete: (record) => _deleteRecord(context, ref, record),
-                        ),
-
-                        // TMDB Atıf
-                        const SizedBox(height: 20),
-                        Center(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
+                          // 3-up info cards: my rating / director / watch place
+                          Row(
                             children: [
-                              // One sentence under the logo rather than two Text
-                              // widgets either side of it — word order around
-                              // the brand name differs by language.
-                              Image.asset(
-                                'assets/images/tmdb_logo.png',
-                                height: 10,
-                                fit: BoxFit.contain,
+                              Expanded(
+                                child: MovieInfoCard(
+                                  icon: Icons.star_rounded,
+                                  iconColor: AppColors.rating,
+                                  value: latestRecord != null
+                                      ? latestRecord.rating.toStringAsFixed(1)
+                                      : '—',
+                                  label: AppLocalizations.of(
+                                    context,
+                                  ).detailMyRating,
+                                ),
                               ),
-                              const SizedBox(width: 6),
-                              Text(
-                                AppLocalizations.of(context).detailTmdbAttribution,
-                                style: Theme.of(context).textTheme.labelSmall,
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: MovieInfoCard(
+                                  icon: Icons.movie_creation_outlined,
+                                  iconColor: AppColors.textPrimary,
+                                  value: director,
+                                  label: AppLocalizations.of(
+                                    context,
+                                  ).detailDirector,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: MovieInfoCard(
+                                  icon: Icons.location_on_outlined,
+                                  iconColor: AppColors.textPrimary,
+                                  value: latestRecord?.watchPlace ?? '—',
+                                  label: AppLocalizations.of(
+                                    context,
+                                  ).detailPlace,
+                                ),
                               ),
                             ],
                           ),
-                        ),
-                        const SizedBox(height: 40),
-                      ],
+                          const SizedBox(height: 20),
+
+                          // Quick actions row
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              MovieQuickActionButton(
+                                icon: Icons.add_rounded,
+                                label: AppLocalizations.of(
+                                  context,
+                                ).detailAddToDiary,
+                                isPrimary: true,
+                                onTap: () => _openAddWatchRecordSheet(
+                                  context,
+                                  movieData,
+                                ),
+                              ),
+                              MovieQuickActionButton(
+                                icon: Icons.bookmark_add_outlined,
+                                label: AppLocalizations.of(
+                                  context,
+                                ).detailAddToList,
+                                onTap: () {
+                                  final movie = Movie(
+                                    tmdbId: tmdbId,
+                                    title: title,
+                                    originalTitle:
+                                        (movieData['original_title'] ??
+                                                movieData['original_name'])
+                                            as String?,
+                                    posterPath: posterPath,
+                                    backdropPath: backdropPath,
+                                    releaseYear: int.tryParse(year),
+                                    runtime: runtime,
+                                    genres: genresString,
+                                    director: director,
+                                    actors: cast
+                                        ?.take(5)
+                                        .map((e) => e['name'])
+                                        .join(', '),
+                                    overview: overview,
+                                    isTv: isTv,
+                                    createdAt: DateTime.now(),
+                                  );
+                                  AddToListSheet.show(context, movie);
+                                },
+                              ),
+                              MovieQuickActionButton(
+                                icon: Icons.share_rounded,
+                                label: AppLocalizations.of(context).detailShare,
+                                onTap: () => _shareMovie(title, tmdbId),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 28),
+
+                          // Overview (Konu) Section
+                          Text(
+                            AppLocalizations.of(context).detailOverview,
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            overview,
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodyMedium?.copyWith(height: 1.5),
+                          ),
+                          const SizedBox(height: 28),
+
+                          // Above the cast deliberately: it is the actionable
+                          // thing on this screen. Renders nothing at all when the
+                          // title isn't available in the user's region, so it
+                          // costs no vertical space in that case.
+                          MovieDetailWatchProvidersSection(
+                            tmdbId: tmdbId,
+                            isTv: isTv,
+                          ),
+
+                          MovieDetailCastList(cast: cast, movieData: movieData),
+
+                          if (isTv) ...[
+                            const SizedBox(height: 28),
+                            MovieDetailTvEpisodesSection(
+                              movie: Movie(
+                                tmdbId: tmdbId,
+                                title: title,
+                                originalTitle:
+                                    (movieData['original_title'] ??
+                                            movieData['original_name'])
+                                        as String?,
+                                posterPath: posterPath,
+                                backdropPath: backdropPath,
+                                releaseYear: int.tryParse(year),
+                                runtime: runtime,
+                                genres: genresString,
+                                director: director,
+                                actors: cast
+                                    ?.take(5)
+                                    .map((e) => e['name'])
+                                    .join(', '),
+                                overview: overview,
+                                isTv: isTv,
+                                createdAt: DateTime.now(),
+                              ),
+                              seasons:
+                                  movieData['seasons'] as List<dynamic>? ??
+                                  const [],
+                              settings: settingsAsync.value,
+                              totalEpisodes:
+                                  (movieData['number_of_episodes'] as num?)
+                                      ?.toInt(),
+                              hasJournalEntry:
+                                  (watchRecordsAsync.value ?? const [])
+                                      .isNotEmpty,
+                              onRequestAddToJournal: () =>
+                                  _openAddWatchRecordSheet(context, movieData),
+                            ),
+                          ],
+
+                          MovieDetailTimelineSection(
+                            watchRecordsAsync: watchRecordsAsync,
+                            onDelete: (record) =>
+                                _deleteRecord(context, ref, record),
+                          ),
+
+                          // TMDB Atıf
+                          const SizedBox(height: 20),
+                          Center(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                // One sentence under the logo rather than two Text
+                                // widgets either side of it — word order around
+                                // the brand name differs by language.
+                                Image.asset(
+                                  'assets/images/tmdb_logo.png',
+                                  height: 10,
+                                  fit: BoxFit.contain,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  AppLocalizations.of(
+                                    context,
+                                  ).detailTmdbAttribution,
+                                  style: Theme.of(context).textTheme.labelSmall,
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 40),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
 
-              // 3. Sticky Floating Header Buttons
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: MovieDetailFloatingHeader(
-                  onBack: () => Navigator.pop(context),
-                  onToggleWatchlist: () => _toggleWatchlist(ref, movieData),
-                  isReWatchList: isReWatchList,
-                  onToggleFavorite: () => _toggleFavorite(ref, movieData),
-                  isFavorite: isFavorite,
-                  onRankTap: () => showRankDialog(context, ref, tmdbId: tmdbId, isTv: isTv, movieData: movieData, settings: settingsAsync.value),
-                  personalRanking: settingsAsync.value?.personalRanking,
+                // 3. Sticky Floating Header Buttons
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: MovieDetailFloatingHeader(
+                    onBack: () => Navigator.pop(context),
+                    onToggleWatchlist: () => _toggleWatchlist(ref, movieData),
+                    isReWatchList: isReWatchList,
+                    onToggleFavorite: () => _toggleFavorite(ref, movieData),
+                    isFavorite: isFavorite,
+                    onRankTap: () => showRankDialog(
+                      context,
+                      ref,
+                      tmdbId: tmdbId,
+                      isTv: isTv,
+                      movieData: movieData,
+                      settings: settingsAsync.value,
+                    ),
+                    personalRanking: settingsAsync.value?.personalRanking,
+                  ),
                 ),
-              ),
-            ],
-          );
-        },
+              ],
+            );
+          },
+        ),
       ),
-    ),
     );
   }
 
-  void _openAddWatchRecordSheet(BuildContext context, Map<String, dynamic> movieData) {
+  void _openAddWatchRecordSheet(
+    BuildContext context,
+    Map<String, dynamic> movieData,
+  ) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -540,7 +664,9 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
 
   Future<void> _shareMovie(String title, int tmdbId) async {
     await SharePlus.instance.share(
-      ShareParams(text: '$title — CineFile\nhttps://www.themoviedb.org/movie/$tmdbId'),
+      ShareParams(
+        text: '$title — CineFile\nhttps://www.themoviedb.org/movie/$tmdbId',
+      ),
     );
   }
 }

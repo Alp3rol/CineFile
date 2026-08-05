@@ -12,6 +12,7 @@ import 'movie_repository.dart';
 import 'web_local_store.dart';
 
 part 'watch_record_providers.dart';
+part 'watch_record_service.dart';
 part 'movie_settings_providers.dart';
 part 'collection_providers.dart';
 part 'follow_repository.dart';
