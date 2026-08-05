@@ -19,6 +19,7 @@ import {
 } from '@firebase/rules-unit-testing';
 import {
   doc, getDoc, setDoc, updateDoc, deleteDoc, collection, addDoc,
+  writeBatch, serverTimestamp, increment,
 } from 'firebase/firestore';
 
 let env;
@@ -182,9 +183,26 @@ describe('users — username is bound to the /usernames claim', () => {
     );
   });
 
-  it('still allows the follow-counter step on another user', async () => {
-    await assertSucceeds(
-      updateDoc(doc(asBob(), 'users', ALICE), { followerCount: 1 }),
+  it('rejects a counter step without the matching follow edge', async () => {
+    await assertFails(updateDoc(doc(asBob(), 'users', ALICE), { followerCount: 1 }));
+  });
+
+  it('allows counters to move with a matching follow edge in one batch', async () => {
+    const db = asBob();
+    const batch = writeBatch(db);
+    batch.set(doc(db, `follows/${BOB}_${ALICE}`), {
+      followerId: BOB, followingId: ALICE, createdAt: serverTimestamp(),
+    });
+    batch.update(doc(db, 'users', BOB), {
+      followingCount: increment(1), lastFollowTargetId: ALICE,
+    });
+    batch.update(doc(db, 'users', ALICE), { followerCount: increment(1) });
+    await assertSucceeds(batch.commit());
+  });
+
+  it('rejects an owner directly changing their own counters', async () => {
+    await assertFails(
+      updateDoc(doc(asAlice(), 'users', ALICE), { followingCount: 10 }),
     );
   });
 
@@ -270,6 +288,35 @@ describe('posts — author fields and social counters', () => {
     );
   });
 
+  it('rejects the owner manufacturing stars', async () => {
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'posts/p1'), post());
+    });
+    await assertFails(
+      updateDoc(doc(asAlice(), 'posts/p1'), { starredBy: [BOB] }),
+    );
+  });
+
+  it('rejects the owner transferring authorship', async () => {
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'posts/p1'), post());
+    });
+    await assertFails(
+      updateDoc(doc(asAlice(), 'posts/p1'), {
+        userId: BOB, username: 'Bob', userAvatarUrl: BOB_AVATAR,
+      }),
+    );
+  });
+
+  it('still lets the owner edit ordinary post content', async () => {
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'posts/p1'), post());
+    });
+    await assertSucceeds(
+      updateDoc(doc(asAlice(), 'posts/p1'), { caption: 'd\u00fczenlendi' }),
+    );
+  });
+
   it('rejects deletion by a non-owner', async () => {
     await env.withSecurityRulesDisabled(async (ctx) => {
       await setDoc(doc(ctx.firestore(), 'posts/p1'), post());
@@ -335,6 +382,18 @@ describe('logs — privacy and authorship', () => {
       await setDoc(doc(ctx.firestore(), 'logs/l1'), log({ isPublic: true }));
     });
     await assertFails(deleteDoc(doc(asBob(), 'logs/l1')));
+  });
+
+  it('rejects the owner changing log identity or social counters', async () => {
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'logs/l1'), log());
+    });
+    await assertFails(
+      updateDoc(doc(asAlice(), 'logs/l1'), { commentCount: 500 }),
+    );
+    await assertFails(
+      updateDoc(doc(asAlice(), 'logs/l1'), { userId: BOB }),
+    );
   });
 });
 
@@ -472,6 +531,51 @@ describe('usernames registry', () => {
   // read access is required — locking it down would break signup.
   it('allows a signed-in read (required by the claim transaction)', async () => {
     await assertSucceeds(getDoc(doc(asAlice(), 'usernames/bob')));
+  });
+});
+
+describe('follows — edge and counters stay atomic', () => {
+  it('rejects creating an edge without moving both counters', async () => {
+    await assertFails(
+      setDoc(doc(asBob(), `follows/${BOB}_${ALICE}`), {
+        followerId: BOB, followingId: ALICE, createdAt: serverTimestamp(),
+      }),
+    );
+  });
+
+  it('rejects an edge whose document id does not match its users', async () => {
+    const db = asBob();
+    const batch = writeBatch(db);
+    batch.set(doc(db, 'follows/arbitrary-id'), {
+      followerId: BOB, followingId: ALICE, createdAt: serverTimestamp(),
+    });
+    batch.update(doc(db, 'users', BOB), {
+      followingCount: increment(1), lastFollowTargetId: ALICE,
+    });
+    batch.update(doc(db, 'users', ALICE), { followerCount: increment(1) });
+    await assertFails(batch.commit());
+  });
+
+  it('allows deleting an edge only while decrementing both counters', async () => {
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      const db = ctx.firestore();
+      await setDoc(doc(db, `follows/${BOB}_${ALICE}`), {
+        followerId: BOB, followingId: ALICE, createdAt: new Date(),
+      });
+      await updateDoc(doc(db, 'users', BOB), {
+        followingCount: 1, lastFollowTargetId: ALICE,
+      });
+      await updateDoc(doc(db, 'users', ALICE), { followerCount: 1 });
+    });
+
+    const db = asBob();
+    const batch = writeBatch(db);
+    batch.delete(doc(db, `follows/${BOB}_${ALICE}`));
+    batch.update(doc(db, 'users', BOB), {
+      followingCount: increment(-1), lastFollowTargetId: ALICE,
+    });
+    batch.update(doc(db, 'users', ALICE), { followerCount: increment(-1) });
+    await assertSucceeds(batch.commit());
   });
 });
 

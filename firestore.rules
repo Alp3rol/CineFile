@@ -60,6 +60,19 @@ service cloud.firestore {
         && request.resource.data.get('tags', '').size() <= 200;
     }
 
+    // Author identity and social proof are established independently from an
+    // owner's editable post/log body. Once created, an owner may change their
+    // caption, notes, visibility, rating, etc. but may not transfer authorship
+    // or manufacture reactions by taking the broad owner-update branch.
+    function authorAndSocialFieldsAreUnchanged() {
+      return request.resource.data.get('userId', '') == resource.data.get('userId', '')
+        && request.resource.data.get('username', '') == resource.data.get('username', '')
+        && request.resource.data.get('userAvatarUrl', '') == resource.data.get('userAvatarUrl', '')
+        && request.resource.data.get('createdAt', null) == resource.data.get('createdAt', null)
+        && request.resource.data.get('starredBy', []) == resource.data.get('starredBy', [])
+        && request.resource.data.get('commentCount', 0) == resource.data.get('commentCount', 0);
+    }
+
     // ---------------------------------------------------------------------
     // Social-interaction write guards (shared by `logs` and `posts`).
     //
@@ -95,13 +108,44 @@ service cloud.firestore {
     // Following someone touches the *other* user's followerCount. Same
     // reasoning as isCommentCountStep: allow the counter to move by one, not
     // to be set to whatever the caller likes.
-    function isFollowCounterStep() {
-      return request.resource.data.diff(resource.data).affectedKeys()
-               .hasOnly(['followerCount', 'followingCount'])
-        && (request.resource.data.get('followerCount', 0) - resource.data.get('followerCount', 0)) >= -1
-        && (request.resource.data.get('followerCount', 0) - resource.data.get('followerCount', 0)) <= 1
-        && (request.resource.data.get('followingCount', 0) - resource.data.get('followingCount', 0)) >= -1
-        && (request.resource.data.get('followingCount', 0) - resource.data.get('followingCount', 0)) <= 1;
+    function followEdge(followerId, followingId) {
+      return /databases/$(database)/documents/follows/$(followerId + '_' + followingId);
+    }
+
+    function userProfile(userId) {
+      return /databases/$(database)/documents/users/$(userId);
+    }
+
+    function edgeTransitionMatches(delta, followerId, followingId) {
+      return (delta == 1
+          && !exists(followEdge(followerId, followingId))
+          && existsAfter(followEdge(followerId, followingId)))
+        || (delta == -1
+          && exists(followEdge(followerId, followingId))
+          && !existsAfter(followEdge(followerId, followingId)));
+    }
+
+    function isFollowCounterStep(userId) {
+      let followerDelta = request.resource.data.get('followerCount', 0)
+        - resource.data.get('followerCount', 0);
+      let followingDelta = request.resource.data.get('followingCount', 0)
+        - resource.data.get('followingCount', 0);
+      let targetId = request.resource.data.get('lastFollowTargetId', '');
+      return request.resource.data.get('followerCount', 0) >= 0
+        && request.resource.data.get('followingCount', 0) >= 0
+        && (
+          (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['followerCount'])
+            && followingDelta == 0
+            && edgeTransitionMatches(followerDelta, request.auth.uid, userId))
+          ||
+          (request.auth.uid == userId
+            && targetId is string
+            && targetId.size() > 0
+            && request.resource.data.diff(resource.data).affectedKeys()
+                 .hasOnly(['followingCount', 'lastFollowTargetId'])
+            && followerDelta == 0
+            && edgeTransitionMatches(followingDelta, userId, targetId))
+        );
     }
 
     // Diary logs — the source of the Community feed. A log is world-readable
@@ -118,7 +162,9 @@ service cloud.firestore {
         && socialCountersStartEmpty()
         && withinTextLimits();
       allow update: if request.auth != null && (
-        (request.auth.uid == resource.data.userId && withinTextLimits()) ||
+        (request.auth.uid == resource.data.userId
+          && withinTextLimits()
+          && authorAndSocialFieldsAreUnchanged()) ||
         isOwnStarToggle() ||
         isCommentCountStep()
       );
@@ -147,7 +193,9 @@ service cloud.firestore {
         && socialCountersStartEmpty()
         && withinTextLimits();
       allow update: if request.auth != null && (
-        (request.auth.uid == resource.data.userId && withinTextLimits()) ||
+        (request.auth.uid == resource.data.userId
+          && withinTextLimits()
+          && authorAndSocialFieldsAreUnchanged()) ||
         isOwnStarToggle() ||
         isCommentCountStep()
       );
@@ -249,8 +297,10 @@ service cloud.firestore {
       allow update: if request.auth != null && (
         (request.auth.uid == userId
           && usernameIsClaimedByOwner(userId)
-          && profileFieldsAreSane()) ||
-        isFollowCounterStep()
+          && profileFieldsAreSane()
+          && request.resource.data.get('followerCount', 0) == resource.data.get('followerCount', 0)
+          && request.resource.data.get('followingCount', 0) == resource.data.get('followingCount', 0)) ||
+        isFollowCounterStep(userId)
       );
       allow delete: if false;
 
@@ -285,8 +335,26 @@ service cloud.firestore {
     // Follow edges, doc id "${followerId}_${followingId}".
     match /follows/{followId} {
       allow read: if request.auth != null;
-      allow create: if request.auth != null && request.auth.uid == request.resource.data.followerId;
-      allow delete: if request.auth != null && request.auth.uid == resource.data.followerId;
+      allow create: if request.auth != null
+        && request.auth.uid == request.resource.data.followerId
+        && request.resource.data.followingId is string
+        && request.resource.data.followingId != request.auth.uid
+        && followId == request.resource.data.followerId + '_' + request.resource.data.followingId
+        && request.resource.data.keys().hasOnly(['followerId', 'followingId', 'createdAt'])
+        && getAfter(userProfile(request.resource.data.followerId)).data.followingCount
+             == get(userProfile(request.resource.data.followerId)).data.followingCount + 1
+        && getAfter(userProfile(request.resource.data.followerId)).data.lastFollowTargetId
+             == request.resource.data.followingId
+        && getAfter(userProfile(request.resource.data.followingId)).data.followerCount
+             == get(userProfile(request.resource.data.followingId)).data.followerCount + 1;
+      allow delete: if request.auth != null
+        && request.auth.uid == resource.data.followerId
+        && getAfter(userProfile(resource.data.followerId)).data.followingCount
+             == get(userProfile(resource.data.followerId)).data.followingCount - 1
+        && getAfter(userProfile(resource.data.followerId)).data.lastFollowTargetId
+             == resource.data.followingId
+        && getAfter(userProfile(resource.data.followingId)).data.followerCount
+             == get(userProfile(resource.data.followingId)).data.followerCount - 1;
       allow update: if false;
     }
   }

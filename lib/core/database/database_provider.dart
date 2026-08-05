@@ -353,7 +353,10 @@ Future<void> toggleFollow(
 
   if (currentlyFollowing) {
     batch.delete(followDocRef);
-    batch.update(currentUserRef, {'followingCount': FieldValue.increment(-1)});
+    batch.update(currentUserRef, {
+      'followingCount': FieldValue.increment(-1),
+      'lastFollowTargetId': targetUserId,
+    });
     batch.update(targetUserRef, {'followerCount': FieldValue.increment(-1)});
   } else {
     batch.set(followDocRef, {
@@ -361,7 +364,10 @@ Future<void> toggleFollow(
       'followingId': targetUserId,
       'createdAt': FieldValue.serverTimestamp(),
     });
-    batch.update(currentUserRef, {'followingCount': FieldValue.increment(1)});
+    batch.update(currentUserRef, {
+      'followingCount': FieldValue.increment(1),
+      'lastFollowTargetId': targetUserId,
+    });
     batch.update(targetUserRef, {'followerCount': FieldValue.increment(1)});
   }
 
