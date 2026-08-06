@@ -320,7 +320,9 @@ service cloud.firestore {
     function profileFieldsAreSane() {
       return request.resource.data.username.size() >= 1
         && request.resource.data.username.size() <= 30
-        && request.resource.data.get('bio', '').size() <= 300
+        && (request.resource.data.get('bio', null) == null
+            || (request.resource.data.bio is string
+                && request.resource.data.bio.size() <= 300))
         && isAllowedAvatar(request.resource.data.get('avatarUrl', 'https://api.dicebear.com/'))
         && request.resource.data.get('featuredMovieIds', []).size() <= 5;
     }

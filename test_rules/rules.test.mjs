@@ -36,7 +36,8 @@ function profile(username, avatarUrl) {
     username,
     usernameLower: username.toLowerCase(),
     avatarUrl,
-    bio: '',
+    // UserModel.toMap writes null until the user adds a bio.
+    bio: null,
     followerCount: 0,
     followingCount: 0,
     featuredMovieIds: [],
