@@ -146,6 +146,18 @@ const asAnon = () => env.unauthenticatedContext().firestore();
 // ---------------------------------------------------------------------------
 
 describe('users — username is bound to the /usernames claim', () => {
+  it('allows signup to atomically create its username claim and profile', async () => {
+    const uid = 'new-user-uid';
+    const db = env.authenticatedContext(uid).firestore();
+    const batch = writeBatch(db);
+    batch.set(doc(db, 'usernames/newuser'), { uid });
+    batch.set(
+      doc(db, 'users', uid),
+      profile('NewUser', 'https://api.dicebear.com/7.x/bottts/png?seed=NewUser'),
+    );
+    await assertSucceeds(batch.commit());
+  });
+
   it('allows creating your own profile with your claimed username', async () => {
     await env.withSecurityRulesDisabled(async (ctx) => {
       await deleteDoc(doc(ctx.firestore(), 'users', ALICE));

@@ -313,8 +313,8 @@ service cloud.firestore {
     // compare against yet.
     function usernameIsClaimedOnCreate(userId) {
       return request.resource.data.usernameLower == request.resource.data.username.lower()
-        && exists(/databases/$(database)/documents/usernames/$(request.resource.data.usernameLower))
-        && get(/databases/$(database)/documents/usernames/$(request.resource.data.usernameLower)).data.uid == userId;
+        && existsAfter(/databases/$(database)/documents/usernames/$(request.resource.data.usernameLower))
+        && getAfter(/databases/$(database)/documents/usernames/$(request.resource.data.usernameLower)).data.uid == userId;
     }
 
     function profileFieldsAreSane() {

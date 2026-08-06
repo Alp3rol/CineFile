@@ -217,6 +217,30 @@ class AuthController {
   Map<String, dynamic> _userDocFor(UserModel model) =>
       model.toMap()..['usernameLower'] = model.username.toLowerCase();
 
+  /// Creates the username claim and profile together, so signup can never
+  /// leave one behind without the other.
+  Future<bool> _createProfileWithUsernameClaim(UserModel model) async {
+    final usernameLower = model.username.toLowerCase();
+    final claimRef = _firestore.collection('usernames').doc(usernameLower);
+    final profileRef = _firestore.collection('users').doc(model.id);
+
+    try {
+      await _firestore.runTransaction((tx) async {
+        final existing = await tx.get(claimRef);
+        if (existing.exists && existing.data()?['uid'] != model.id) {
+          throw _UsernameTakenException();
+        }
+        if (!existing.exists) {
+          tx.set(claimRef, {'uid': model.id});
+        }
+        tx.set(profileRef, _userDocFor(model));
+      });
+      return true;
+    } on _UsernameTakenException {
+      return false;
+    }
+  }
+
   /// Returns null on success, or why it failed. See [AuthFailure] for why this
   /// is a reason rather than a ready-made message.
   Future<AuthFailure?> signUp({
@@ -246,21 +270,17 @@ class AuthController {
         return AuthFailure.accountCreationFailed;
       }
 
-      final claimed = await _claimUsername(
-        uid: createdUser.uid,
-        usernameLower: trimmedUsername.toLowerCase(),
-      );
-      if (!claimed) {
-        await createdUser.delete();
-        return AuthFailure.usernameTaken;
-      }
-
       final newUser = UserModel(
         id: createdUser.uid,
         username: trimmedUsername,
         avatarUrl: defaultAvatarUrlFor(trimmedUsername),
       );
-      await _firestore.collection('users').doc(createdUser.uid).set(_userDocFor(newUser));
+      final claimed = await _createProfileWithUsernameClaim(newUser);
+      if (!claimed) {
+        await createdUser.delete();
+        return AuthFailure.usernameTaken;
+      }
+
       _ref.read(userModelProvider.notifier).state = newUser;
       return null;
     } on FirebaseAuthException catch (e) {
