@@ -1,6 +1,6 @@
 name: Deploy web
 
-# Replaces yayinla.bat as the way the published site is built.
+# This workflow is the canonical way the published site is built.
 #
 # The script still works and is still the right tool for a quick local preview,
 # but it was the only path to production and that made deployment fragile in
@@ -190,8 +190,8 @@ jobs:
           # force_orphan defaults to false, so gh-pages keeps its history and a
           # bad deploy can be reverted rather than only overwritten.
           commit_message: 'deploy: ${{ github.sha }}'
-          # Attributed to the repository owner, matching what yayinla.bat did
-          # when deploys ran locally. Using the default github-actions[bot]
+          # Attributed to the repository owner, matching the former local
+          # deployment flow. Using the default github-actions[bot]
           # identity instead adds a bot to the repository's contributor list.
           user_name: 'Alp3rol'
           user_email: 'alp3rol17@gmail.com'

@@ -8,9 +8,8 @@ Production events use one shared contract on web and native builds:
 
 The GitHub web deployment derives all three automatically. It stops before the
 build if version or commit cannot be derived, and verifies that a Sentry-enabled
-bundle contains the generated values. `yayinla.bat` derives the same metadata
-for local web publishing and includes `SENTRY_DSN` when that environment
-variable is set.
+bundle contains the generated values. The deployment is defined in
+`.github/workflows/deploy.yml`.
 
 Native production builds must pass the same values explicitly. Example:
 

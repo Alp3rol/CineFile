@@ -72,7 +72,7 @@ Future<void> runWithErrorReporting(AppRunner appRunner) async {
 
       // Errors only, for now. Tracing is what consumes a Sentry quota fastest,
       // and the performance work this project needs is already identified in
-      // AUDIT.md by measurement rather than by sampling.
+      // docs/architecture/AUDIT.md by measurement rather than by sampling.
       options.tracesSampleRate = 0.0;
 
       // This app is a private viewing journal sitting behind Firebase Auth.

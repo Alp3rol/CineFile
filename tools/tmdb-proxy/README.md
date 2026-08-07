@@ -69,8 +69,8 @@ builds use it too** — revoking it first would break both until they are
 rebuilt. Do it in this order:
 
 1. Deploy this worker with the current key.
-2. Rebuild and redeploy the web app with `--dart-define=TMDB_PROXY_URL=...`
-   (`yayinla.bat` accepts it), so the published bundle no longer contains a key.
+2. Set the `TMDB_PROXY_URL` GitHub secret and redeploy the web app, so the
+   published bundle no longer contains a key.
 3. Ship a native release built the same way.
 4. Only now, regenerate the key in the TMDb dashboard and
    `npx wrangler secret put TMDB_API_KEY` with the new one.

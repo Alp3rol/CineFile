@@ -143,8 +143,9 @@ Her değişiklik GitHub Actions üzerinde statik analiz ve otomatik testlerden g
 
 - [CI iş akışı](.github/workflows/ci.yml)
 - [Web yayın iş akışı](.github/workflows/deploy.yml)
-- [2026 yol haritası](ROADMAP_2026.md)
-- [Ayrıntılı geliştirme geçmişi](roadmap.md)
+- [Dokümantasyon merkezi](docs/README.md)
+- [Aktif yol haritası](docs/planning/ROADMAP.md)
+- [Ayrıntılı geliştirme geçmişi](docs/planning/HISTORY.md)
 
 ## Katkıda bulunma
 

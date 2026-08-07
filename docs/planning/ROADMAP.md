@@ -6,8 +6,8 @@
 kullanıma ve kontrollü büyümeye hazır güvenilir bir ürüne dönüştürmek.
 
 Bu dosya bundan sonraki çalışmalar için tek aktif plan kaynağıdır. Eski sürüm
-tarihçesi [`roadmap.md`](roadmap.md), ayrıntılı teknik denetim ise
-[`AUDIT.md`](AUDIT.md) içinde korunur.
+tarihçesi [`HISTORY.md`](HISTORY.md), ayrıntılı teknik denetim ise
+[`AUDIT.md`](../architecture/AUDIT.md) içinde korunur.
 
 ## Yol haritası ilkeleri
 
@@ -91,7 +91,7 @@ kapatmak; her yayın öncesinde hızlı ve güvenilir geri bildirim almak.
     Beş yeni güvenlik testi eklendi.
 - [x] Firestore kural testlerinde create/update/delete matrisini tamamla.
   - **Tamamlandı (5 Ağustos 2026):** Korunan tüm istemci yazma yüzeyleri
-    `FIRESTORE_RULES_MATRIX.md` içinde belgelendi. Kullanıcı profili, gönderi,
+    [`FIRESTORE_RULES_MATRIX.md`](../firebase/FIRESTORE_RULES_MATRIX.md) içinde belgelendi. Kullanıcı profili, gönderi,
     günlük, günlük yorumu, paylaşılan koleksiyon, kullanıcı adı, takip kenarı ve
     kullanıcıya özel alt koleksiyonlar için eksik olumlu/olumsuz create, update
     ve delete senaryoları eklendi. Emulator kural paketi 77/77 geçti.
@@ -163,7 +163,7 @@ eklenebilmesini sağlamak. Bu faz kullanıcı davranışını bilinçli olarak d
     hataları kullanıcı geri bildirimi ve/veya merkezi `reportError`
     gözlemlemesine bağlandı. Beklenen plugin tekrar kaydı, teardown ve alternatif
     veri yolu fallback'leri kod içinde gerekçeli bilinçli yoksayma olarak
-    belgelendi. Proje çapındaki karar matrisi `ERROR_HANDLING.md` dosyasına
+    belgelendi. Proje çapındaki karar matrisi [`ERROR_HANDLING.md`](../architecture/ERROR_HANDLING.md) dosyasına
     yazıldı. 271 Flutter testi geçti (1 bilinçli skip); 77 Firestore testi, tam
     analiz ve release web derlemesi temiz. Faz 2 tamamlandı.
 
@@ -187,7 +187,7 @@ senaryolarına karşı hazırlamak.
   - Önce ölçüm/enforcement kapalı mod.
   - Web için reCAPTCHA Enterprise veya uygun provider.
   - Geçerli kullanıcıların reddedilme oranı ölçüldükten sonra enforcement.
-  - **Tamamlandı (5 Ağustos 2026):** `APP_CHECK_ROLLOUT.md` içinde web için
+  - **Tamamlandı (5 Ağustos 2026):** [`APP_CHECK_ROLLOUT.md`](../firebase/APP_CHECK_ROLLOUT.md) içinde web için
     reCAPTCHA Enterprise, Android için Play Integrity, iOS için App Attest +
     DeviceCheck fallback ve yerel/CI debug token politikası tanımlandı.
     Firestore için 7 günlük monitoring-only kapısı, `%99,5` doğrulanmış meşru

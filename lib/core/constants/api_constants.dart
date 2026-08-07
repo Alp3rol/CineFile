@@ -20,8 +20,8 @@ class ApiConstants {
   /// the working tree. That matters most for the web release: TMDb takes the
   /// key as a *query parameter*, so whatever is compiled in ends up in
   /// `main.dart.js` and is served to every visitor. The web deploy therefore
-  /// passes a separate, disposable key (see yayinla.bat) instead of the
-  /// developer's own, and CI passes nothing at all.
+  /// prefers the server-side proxy configured in `.github/workflows/deploy.yml`,
+  /// and CI passes no production key at all.
   ///
   /// Still mutable: SettingsKeyNotifier overwrites it with the key the user
   /// entered in Settings, which is read back from the platform keystore.
