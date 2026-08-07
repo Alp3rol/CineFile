@@ -1,101 +1,173 @@
 <div align="center">
 
-<img src="assets/icon/splash_logo.png" alt="CineFile" width="500"/>
+<img src="assets/icon/splash_logo.png" alt="CineFile logosu" width="460">
 
-# 🎬 CineFile
+# CineFile
 
-**Film & Dizi İzleme Günlüğü**
+### İzlediklerini kaydet. Alışkanlıklarını keşfet. Sinema zevkini paylaş.
 
-Sinema ve dizi tutkunları için tasarlanmış, koyu tema ve cam efekti (glassmorphism) detaylarına sahip **premium bir kişisel izleme günlüğü, analiz ve topluluk uygulaması.**
+CineFile; filmlerini ve dizilerini kaydedebileceğin, bölüm ilerlemeni takip edebileceğin, izleme alışkanlıklarını inceleyebileceğin ve seçtiğin anları toplulukla paylaşabileceğin kişisel bir izleme günlüğüdür.
+
+*A personal movie and TV diary for tracking, discovering and sharing what you watch.*
+
+[![Canlı Demo](https://img.shields.io/badge/Canlı_Demo-Web-E8362E?style=for-the-badge&logo=googlechrome&logoColor=white)](https://Alp3rol.github.io/CineFile/)
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
-[![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS%20%7C%20Web%20%7C%20Windows-lightgrey)](#-teknolojik-altyapı)
-[![Firebase](https://img.shields.io/badge/Backend-Firebase-FFCA28?logo=firebase&logoColor=white)](https://firebase.google.com)
-[![TMDb](https://img.shields.io/badge/Data-TMDb-01B4E4?logo=themoviedatabase&logoColor=white)](https://www.themoviedb.org)
+[![Firebase](https://img.shields.io/badge/Firebase-Auth_%26_Firestore-FFCA28?logo=firebase&logoColor=black)](https://firebase.google.com)
+[![TMDb](https://img.shields.io/badge/Veri-TMDb-01B4E4?logo=themoviedatabase&logoColor=white)](https://www.themoviedb.org)
+[![CI](https://github.com/Alp3rol/CineFile/actions/workflows/ci.yml/badge.svg)](https://github.com/Alp3rol/CineFile/actions/workflows/ci.yml)
 
-### 👉 [Canlı Web Demosunu Dene](https://Alp3rol.github.io/CineFile/)
+<br>
+
+<img src="assets/screenshots/home.png" alt="CineFile ana sayfası" width="900">
 
 </div>
 
 ---
 
-## 📖 Nedir?
+## Uygulamadan görüntüler
 
-CineFile, izlediğiniz her film ve diziyi — hatta aynı yapımı birden fazla izleyişinizi bile — tarih, mekan, ruh hali, puan ve kişisel notlarla kayıt altına almanızı sağlayan bir günlük uygulamasıdır. İzleme verileriniz üzerinden zengin istatistikler çıkarır, dizilerinizi bölüm bölüm takip eder ve isterseniz izleme günlüğünüzü bir topluluk akışında arkadaşlarınızla paylaşmanıza olanak tanır.
+<div align="center">
 
-## ✨ Özellikler
+<table>
+  <tr>
+    <td align="center"><strong>Keşfet</strong></td>
+    <td align="center"><strong>Topluluk</strong></td>
+  </tr>
+  <tr>
+    <td><img src="assets/screenshots/discover.png" alt="CineFile keşfet ekranı" width="420"></td>
+    <td><img src="assets/screenshots/community.png" alt="CineFile topluluk akışı" width="420"></td>
+  </tr>
+</table>
 
-### 📖 İzleme Günlüğü & Takip
-- **Çoklu İzleme Kaydı:** Bir yapımı kaç kez, ne zaman, nerede (Sinema, Ev, Yolculukta...) ve kiminle izlediğinizi ayrı ayrı kaydedin. 1-10 puan, ruh hali emojisi, kişisel not ve özel etiketler (#tag) ekleyin.
-- **Dizi Bölüm Takibi ("Aktif İzliyorum"):** Dizileri bölüm bölüm takip edin — sistem nerede kaldığınızı hatırlar, sıradaki bölümü otomatik önerir, seri bitince durumu otomatik günceller.
-- **Hızlı Ekleme:** Ana Sayfa ve Günlük'teki tek dokunuşluk "+" rozetiyle, detay sayfasına hiç girmeden sıradaki bölümü ilerletin.
-- **Akıllı Tarih Seçici & Platform Simgeleri:** Bir yapımı vizyon tarihinden önce "izledim" diyemezsiniz; girdiğiniz mekandan (Netflix, Prime, Sinema...) platform otomatik tanınıp ikonlanır.
+</div>
 
-### 📊 Analizler & İçgörüler
-- **İzleme Yoğunluğu Haritası:** Yıllık izleme sıklığını gün gün gösteren GitHub tarzı, yıl gezinmeli bir ısı haritası.
-- **Puan Dağılımı & Eleştirmen Profili:** Verdiğiniz puanların dağılım grafiği ve ortalamanıza göre esprili bir yorum.
-- **İzleme Serileri (Streak):** Güncel ve en uzun izleme serileriniz, haftalık hedef ilerlemesi.
-- **Alışkanlık Analizi:** En çok izlenen yönetmenler/oyuncular/türler, mevsimsel dağılım, en aktif gün ve saatler, eğlenceli zaman kıyaslamaları.
+## Neden CineFile?
 
-### 👥 Topluluk & Sosyal
-- **Topluluk Akışı:** İzleme kayıtlarınızı, günlüğünüzün bir kesitini veya paylaşıma açtığınız bir koleksiyonu yapılandırılmış gönderiler olarak paylaşın.
-- **Takip Sistemi & Kullanıcı Arama:** Diğer kullanıcıları kullanıcı adına göre bulun, takip edin; akışı "Tümü" / "Takip Ettiklerim" olarak filtreleyin.
-- **Beğeni & Yorum:** Gönderilere yıldızla beğeni bırakın, gerçek zamanlı yorum yapın.
-- **Opt-in Gizlilik:** Paylaşım tamamen isteğe bağlıdır — her kayıt varsayılan olarak **gizlidir**, yalnızca açıkça paylaştığınız içerik herkese görünür (bkz. [Gizlilik](#-gizlilik--veri) bölümü).
+### Her izleyişini hatırla
 
-### 📁 Koleksiyonlar & Keşif
-- **Özel Listeler & Maratonlar:** Kendi koleksiyonlarınızı oluşturun, sürükle-bırak ile sıralayın, neon ilerleme çubuklarıyla tamamlanma oranını takip edin; isterseniz canlı senkronize şekilde toplulukla paylaşın.
-- **Engelsiz Arama ve Keşif:** Türkiye'deki TMDb erişim engellerini DNS-over-HTTPS (DoH) ve resmi domain fallback katmanıyla otomatik aşarak film/dizi arar, tür filtreleriyle keşif sunar.
+Aynı yapımı birden fazla kez izlesen bile her kaydı ayrı tut. Tarih, puan, ruh hâli, mekân, izleme arkadaşı, kişisel not ve etiketlerini ekle.
 
-## 🔒 Gizlilik & Veri
+### Dizilerde kaldığın yeri kaybetme
 
-İzleme kayıtlarınız hesabınıza bağlı olarak Cloud Firestore'da tutulur; koleksiyonlarınız ise cihazınızdaki yerel veritabanında yaşar. Her iki tarafta da varsayılan **gizliliktir** ve kayıtlarınızı yalnızca siz görürsünüz. Topluluk özellikleri tamamen **opt-in**'dir — bir kaydı ya da koleksiyonu açıkça paylaşmadığınız sürece kimse göremez; sunucu tarafında da bu kurallar [`firestore.rules`](firestore.rules) ile zorunlu kılınır.
+Sezon ve bölüm ilerlemeni takip et. CineFile sıradaki bölümü hatırlar; hızlı ekleme ile tek dokunuşta ilerleyebilirsin.
 
-E-posta adresiniz yalnızca Firebase Authentication'da tutulur, herkese açık profil dokümanınızda **saklanmaz**. Kullanıcı adı benzersizliği `usernames` koleksiyonundaki bir "claim" dokümanıyla sunucu tarafında güvence altına alınır. Verilerinizi istediğiniz zaman JSON formatında (izleme geçmişi + koleksiyonlar) dışa aktarabilir veya bir yedekten geri yükleyebilirsiniz.
+### Kendi izleme hikâyeni keşfet
 
-Yayınlanan web sürümü çökme raporlarını Sentry'ye gönderir. Gönderilen şey **teknik hata bilgisidir**: hatanın türü, yığın izi ve uygulama sürümü. Kimliğinizi belirleyecek veriler (`sendDefaultPii`) ve ekran görüntüleri kapalıdır, izleme kayıtlarınız hiçbir şekilde gönderilmez, hata metinlerindeki API anahtarı benzeri parametreler gönderilmeden önce temizlenir — bkz. [`error_reporting.dart`](lib/core/observability/error_reporting.dart). Kendi derlemenizde `SENTRY_DSN` tanımlamazsanız Sentry hiç başlatılmaz.
+Yıllık izleme haritanı, puan dağılımını, izleme serilerini ve en çok tercih ettiğin tür, oyuncu ve yönetmenleri gör.
 
-## 🛠️ Teknolojik Altyapı
+## Öne çıkan özellikler
 
-| Katman | Teknoloji |
+| | |
 |---|---|
-| Arayüz & Framework | Flutter (Android, iOS, Web, Windows) |
-| Durum Yönetimi | Riverpod |
-| Yerel Veritabanı | Drift (SQLite) — koleksiyonlar ve başlık metadata'sı; Web'de bellek içi (in-memory) simülasyon |
-| Bulut & Kimlik Doğrulama | Firebase Auth + Cloud Firestore |
-| Ağ İstemcisi | Dio — özel proxy yönlendirme ve DoH entegrasyonu ile |
-| Grafikler | `fl_chart` |
-| Çökme Raporlama | Sentry — Crashlytics'in web desteği olmadığı, yayınlanan sürümün ise web olduğu için |
-| Veri Kaynağı | [The Movie Database (TMDb)](https://www.themoviedb.org) API |
+| **Günlük ve takip** | Film ve dizi kayıtları, tekrar izlemeler, sezon/bölüm ilerlemesi ve tek dokunuşla hızlı kayıt |
+| **İçgörüler** | GitHub tarzı izleme yoğunluğu haritası, puan analizi, izleme serileri ve alışkanlık istatistikleri |
+| **Koleksiyonlar** | Kişisel listeler, sürükle-bırak sıralama, maratonlar ve tamamlanma ilerlemesi |
+| **Keşif** | Gündemdeki yapımlar, türe ve yayın platformuna göre filtreleme, oyuncu profilleri ve kişisel öneriler |
+| **Topluluk** | Kullanıcı profilleri, takip sistemi, gönderiler, yorumlar, beğeniler ve paylaşılan koleksiyonlar |
+| **Cine Twin** | Benzer sinema zevklerine sahip kullanıcıları ve onların beğenilerinden doğan önerileri keşfetme |
+| **İlişki grafiği** | İzlediğin yapımlar arasındaki ortak oyuncu bağlantılarını etkileşimli bir ağ üzerinde inceleme |
+| **Kişiselleştirme** | Türkçe ve İngilizce arayüz, dinamik arka planlar, ülkeye göre yayın seçenekleri ve bildirim tercihleri |
 
-## 🚀 Yerelde Çalıştırma
+## Gizlilik önce gelir
+
+CineFile'da izleme kayıtları **varsayılan olarak gizlidir**. Bir kaydı veya koleksiyonu açıkça paylaşmadığın sürece diğer kullanıcılar göremez.
+
+- İzleme kayıtlarına yalnızca hesap sahibi erişebilir.
+- Topluluk paylaşımları tamamen isteğe bağlıdır.
+- E-posta adresi herkese açık profil belgesinde saklanmaz.
+- İzleme geçmişi ve koleksiyonlar JSON olarak dışa aktarılıp geri yüklenebilir.
+- Sunucu tarafındaki erişim sınırları [`firestore.rules`](firestore.rules) ile uygulanır.
+- İsteğe bağlı hata raporlama, kişisel veri ve ekran görüntüsü göndermez.
+
+## Platformlar
+
+| Platform | Durum |
+|---|---|
+| Web | [Canlı sürüm](https://Alp3rol.github.io/CineFile/) |
+| Android | Kaynak koddan çalıştırılabilir |
+| iOS | Kaynak koddan çalıştırılabilir |
+| Windows | Kaynak koddan çalıştırılabilir |
+
+> Şu anda herkese açık olarak yayımlanan sürüm web uygulamasıdır. Mobil ve Windows mağaza paketleri henüz sunulmamaktadır.
+
+## Yerelde çalıştırma
+
+### Gereksinimler
+
+- Flutter SDK
+- Bir [TMDb API anahtarı](https://developer.themoviedb.org/docs/getting-started)
+- Bulut ve topluluk özellikleri için bir Firebase projesi
+
+### Hızlı başlangıç
 
 ```bash
 git clone https://github.com/Alp3rol/CineFile.git
 cd CineFile
 flutter pub get
-flutter run
+flutter run --dart-define=TMDB_API_KEY=TMDB_ANAHTARINIZ
 ```
 
-> Uygulamayı çalıştırmak için `lib/core/constants/api_key.dart` içinde bir TMDb API anahtarı gerekir; bu dosya gizlilik nedeniyle `.gitignore`'dadır. `lib/firebase_options.dart` ise repoda mevcuttur — Firebase istemci konfigürasyonu tanım gereği geneldir, erişim `firestore.rules` ile kısıtlanır. Kendi Firebase projenizi kullanacaksanız `flutterfire configure` ile bu dosyayı yeniden üretin.
->
-> **Not:** TMDb, API anahtarını sorgu parametresi olarak aldığı için web derlemesinde anahtar istemci paketine gömülür ve herkese görünürdür. Bu, tarayıcıda çalışan her istemci uygulaması için geçerlidir; anahtarı gizli tutmanız gerekiyorsa istekleri bir sunucu tarafı proxy üzerinden geçirin.
->
-> Çökme raporlama isteğe bağlıdır: `--dart-define=SENTRY_DSN=<dsn>` verilmezse Sentry hiç başlatılmaz ve uygulama eskisi gibi yalnızca konsola yazar. Yayın akışı bu değeri `SENTRY_DSN` adlı GitHub secret'ından alır. DSN bir sır değildir — yalnızca olay göndermeye yetki verir — bu yüzden derlemede anahtar arayan `Verify the bundle carries no key` adımı onu kapsamaz.
+TMDb anahtarını komuta eklemek yerine git tarafından izlenmeyen `lib/core/constants/api_key.dart` dosyasında da tanımlayabilirsin:
 
-## 🗺️ Yol Haritası
+```dart
+const String defaultTmdbApiKey = 'TMDB_ANAHTARINIZ';
+```
 
-Sürüm bazlı geliştirme geçmişi ve gelecek planları için [`roadmap.md`](roadmap.md) dosyasına bakabilirsiniz.
+Web derlemesinde anahtarı istemci paketine yerleştirmemek için projedeki [TMDb proxy yönergesini](tools/tmdb-proxy/README.md) kullanabilirsin:
 
----
+```bash
+flutter run --dart-define=TMDB_PROXY_URL=https://proxy-adresiniz.example
+```
 
-## 📝 TMDb Atfı
+Firebase istemci yapılandırması repoda bulunur. Kendi Firebase projenle çalışmak istiyorsan FlutterFire CLI üzerinden yapılandırmayı yeniden oluşturmalısın.
 
-Bu uygulama TMDB API'sini kullanır ancak TMDB tarafından desteklenmez veya onaylanmaz.
-*(This product uses the TMDB API but is not endorsed or certified by TMDB.)*
+Sentry hata raporlama isteğe bağlıdır; `SENTRY_DSN` verilmediğinde başlatılmaz.
+
+## Teknoloji altyapısı
+
+| Katman | Teknoloji |
+|---|---|
+| Uygulama | Flutter & Dart |
+| Durum yönetimi | Riverpod |
+| Yerel veri | Drift & SQLite |
+| Kimlik ve bulut | Firebase Authentication & Cloud Firestore |
+| Film ve dizi verisi | TMDb API |
+| Ağ katmanı | Dio & isteğe bağlı Cloudflare Worker proxy |
+| Grafikler | fl_chart |
+| Hata gözlemi | Sentry |
+
+## Proje kalitesi
+
+Her değişiklik GitHub Actions üzerinde statik analiz ve otomatik testlerden geçirilir. Test kapsamı; veri katmanını, arayüz davranışlarını, yedekleme akışlarını, sosyal özellikleri ve Firestore güvenlik kurallarını içerir. Canlı web sürümü ayrıca sentetik sağlık kontrolleriyle izlenir.
+
+- [CI iş akışı](.github/workflows/ci.yml)
+- [Web yayın iş akışı](.github/workflows/deploy.yml)
+- [2026 yol haritası](ROADMAP_2026.md)
+- [Ayrıntılı geliştirme geçmişi](roadmap.md)
+
+## Katkıda bulunma
+
+Hata bildirimi ve geliştirme önerileri için bir [GitHub Issue](https://github.com/Alp3rol/CineFile/issues) açabilirsin. Kod katkısı yapmadan önce mevcut issue'ları ve yol haritasını kontrol etmen önerilir.
+
+> Bu repoda henüz bir açık kaynak lisansı bulunmamaktadır. Bir lisans eklenene kadar kaynak kodun yeniden kullanımı veya dağıtımı için ayrıca izin alınmalıdır.
+
+## TMDb atfı
+
+Bu ürün TMDB API'sini kullanır ancak TMDB tarafından desteklenmez veya onaylanmaz.
+
+*This product uses the TMDB API but is not endorsed or certified by TMDB.*
 
 <p align="center">
   <a href="https://www.themoviedb.org/">
-    <img src="assets/images/tmdb_logo.png" alt="The Movie Database" width="120"/>
+    <img src="assets/images/tmdb_logo.png" alt="The Movie Database" width="120">
   </a>
 </p>
+
+---
+
+<div align="center">
+
+**CineFile — izlediklerinin arşivi, sinema zevkinin haritası.**
+
+</div>
