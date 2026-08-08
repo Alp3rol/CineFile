@@ -1351,5 +1351,9 @@
   "onboardingFeature2Desc": "GitHub tarzı izleme yoğunluğu haritanı, puan dağılımını ve en sevdiğin oyuncuları keşfet.",
   "onboardingFeature3Title": "Gizlilik Önce Gelir",
   "onboardingFeature3Desc": "İzleme kayıtların varsayılan olarak gizlidir. İstediğin zaman JSON olarak dışa aktar veya toplulukta paylaş.",
-  "settingsRerunOnboarding": "Uygulama Turunu Başlat"
+  "settingsRerunOnboarding": "Uygulama Turunu Başlat",
+  "journalAddFirstRecordCTA": "İlk Kaydını Ekle",
+  "journalClearFiltersCTA": "Filtreleri Temizle",
+  "collectionAddMoviesCTA": "Film/Dizi Ekle",
+  "communityFollowingEmptyHint": "Takip ettiğin kullanıcılar henüz izleme kaydı paylaşmadı. Yeni arkadaşlar keşfedebilirsin."
 }

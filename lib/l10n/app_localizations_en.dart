@@ -3143,4 +3143,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsRerunOnboarding => 'Run Onboarding Tour';
+
+  @override
+  String get journalAddFirstRecordCTA => 'Add Your First Record';
+
+  @override
+  String get journalClearFiltersCTA => 'Clear Filters';
+
+  @override
+  String get collectionAddMoviesCTA => 'Add Titles';
+
+  @override
+  String get communityFollowingEmptyHint =>
+      'Users you follow haven\'t shared watch records yet. Discover new friends!';
 }

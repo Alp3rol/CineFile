@@ -240,7 +240,10 @@ class _JournalScreenState extends ConsumerState<JournalScreen>
                           error: (err, stack) => Center(child: Text(AppLocalizations.of(context).journalLoadFailed, style: Theme.of(context).textTheme.bodyLarge)),
                           data: (records) {
                             if (records.isEmpty) {
-                              return JournalEmptyState(activeFilter: _activeFilter, searchQuery: _searchQuery);
+                              return JournalEmptyState(
+                                activeFilter: _activeFilter,
+                                searchQuery: _searchQuery,
+                              );
                             }
 
                             final filtered = filterJournalRecords(
@@ -249,6 +252,20 @@ class _JournalScreenState extends ConsumerState<JournalScreen>
                               favorites: favorites,
                               searchQuery: _searchQuery,
                             );
+
+                            if (filtered.isEmpty) {
+                              return JournalEmptyState(
+                                activeFilter: _activeFilter,
+                                searchQuery: _searchQuery,
+                                onClearFilters: () {
+                                  setState(() {
+                                    _searchQuery = '';
+                                    _searchController.clear();
+                                  });
+                                },
+                              );
+                            }
+
                             final stats = computeJournalInsights(filtered);
 
                             if (isTableView) {

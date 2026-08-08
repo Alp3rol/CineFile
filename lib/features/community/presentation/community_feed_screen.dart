@@ -10,6 +10,7 @@ import '../../../core/database/database_provider.dart';
 import '../../auth/controllers/auth_controller.dart';
 import '../../auth/presentation/widgets/user_profile_avatar_button.dart';
 import 'community_feed_provider.dart';
+import '../../main_shell.dart';
 
 import 'widgets/community_post_card.dart';
 import 'widgets/share_options_sheet.dart';
@@ -333,6 +334,10 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
                           icon: Icons.movie_filter_outlined,
                           title: AppLocalizations.of(context).communityEmptyTitle,
                           subtitle: AppLocalizations.of(context).communityEmptyHint,
+                          ctaLabel: AppLocalizations.of(context).journalAddFirstRecordCTA,
+                          onCta: () {
+                            ref.read(mainShellTabIndexProvider.notifier).state = 1;
+                          },
                         );
                       }
                       if (followedIds.isEmpty) {

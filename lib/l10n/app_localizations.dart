@@ -5227,6 +5227,30 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Uygulama Turunu Başlat'**
   String get settingsRerunOnboarding;
+
+  /// No description provided for @journalAddFirstRecordCTA.
+  ///
+  /// In tr, this message translates to:
+  /// **'İlk Kaydını Ekle'**
+  String get journalAddFirstRecordCTA;
+
+  /// No description provided for @journalClearFiltersCTA.
+  ///
+  /// In tr, this message translates to:
+  /// **'Filtreleri Temizle'**
+  String get journalClearFiltersCTA;
+
+  /// No description provided for @collectionAddMoviesCTA.
+  ///
+  /// In tr, this message translates to:
+  /// **'Film/Dizi Ekle'**
+  String get collectionAddMoviesCTA;
+
+  /// No description provided for @communityFollowingEmptyHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Takip ettiğin kullanıcılar henüz izleme kaydı paylaşmadı. Yeni arkadaşlar keşfedebilirsin.'**
+  String get communityFollowingEmptyHint;
 }
 
 class _AppLocalizationsDelegate

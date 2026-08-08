@@ -929,5 +929,9 @@
   "onboardingFeature2Desc": "Discover your GitHub-style heatmap, rating distribution, and top actors.",
   "onboardingFeature3Title": "Privacy First",
   "onboardingFeature3Desc": "Your diary is private by default. Export as JSON anytime or share with community optionally.",
-  "settingsRerunOnboarding": "Run Onboarding Tour"
+  "settingsRerunOnboarding": "Run Onboarding Tour",
+  "journalAddFirstRecordCTA": "Add Your First Record",
+  "journalClearFiltersCTA": "Clear Filters",
+  "collectionAddMoviesCTA": "Add Titles",
+  "communityFollowingEmptyHint": "Users you follow haven't shared watch records yet. Discover new friends!"
 }

@@ -2957,4 +2957,17 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get settingsRerunOnboarding => 'Uygulama Turunu Başlat';
+
+  @override
+  String get journalAddFirstRecordCTA => 'İlk Kaydını Ekle';
+
+  @override
+  String get journalClearFiltersCTA => 'Filtreleri Temizle';
+
+  @override
+  String get collectionAddMoviesCTA => 'Film/Dizi Ekle';
+
+  @override
+  String get communityFollowingEmptyHint =>
+      'Takip ettiğin kullanıcılar henüz izleme kaydı paylaşmadı. Yeni arkadaşlar keşfedebilirsin.';
 }

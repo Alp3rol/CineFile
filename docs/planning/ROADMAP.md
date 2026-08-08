@@ -253,8 +253,9 @@ dönmek için net nedenler bulması.
   - İlk üç favori veya izlenen yapımı ekleme.
   - Günlük, bölüm takibi ve gizlilik modelini kısa anlatım.
   - **Tamamlandı (8 Ağustos 2026):** `OnboardingScreen` (3 adımlı PageView) geliştirildi. Tercihler (dil & bölge), favori arama & ekleme (TMDb trend/arama & Firestore favori toggle), ve GlassCard özellik turları eklendi. `AuthGate` ilk girişte kontrol eder; `onboardingCompletedProvider` durum store'una kaydeder. Ayarlar ekranından tekrar çalıştırılabilir. `onboarding_screen_test.dart` dahil 274 Flutter testi ve static analysis geçti.
-- [ ] Boş ekranları eyleme dönük hâle getir.
+- [x] **Boş ekranları eyleme dönük hâle getir.**
   - “İlk kaydını ekle”, “koleksiyon oluştur”, “arkadaş bul” girişleri.
+  - **Tamamlandı (8 Ağustos 2026):** `JournalEmptyState`, `CustomListEmptyState`, `CustomListsTab` ve `CommunityFeedScreen` içerisindeki pasif boş ekranlar etkileşimli CTA butonlarıyla geliştirildi. Günlük boşken veya filtre sonuç vermediğinde ("İlk Kaydını Ekle", "Filtreleri Temizle"), koleksiyon boşken ("Koleksiyon Oluştur", "Film/Dizi Ekle") ve topluluk akışı boşken ("İçerik Paylaş / Arama Yap", "Kullanıcı Ara") doğrudan ilgili tab ve ekranlara yönlendiren eylem kartları bağlandı. `empty_states_action_test.dart` ve `community_feed_empty_state_render_test.dart` dahil 277 Flutter testi ve static analysis geçti.
 - [ ] İlk oturum kontrol listesi ve ilerleme göstergesi.
 - [ ] Arama → detay → kayıt ekleme yolundaki gereksiz adımları ölç ve azalt.
 - [ ] Erişilebilirlik turu.
