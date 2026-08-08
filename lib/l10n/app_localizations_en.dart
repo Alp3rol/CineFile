@@ -3201,4 +3201,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorRetryCTA => 'Try Again';
+
+  @override
+  String get privacyCenterTitle => 'Privacy Center';
+
+  @override
+  String get privacyCenterSubtitle =>
+      'Transparently see where your data is stored and managed.';
+
+  @override
+  String get privacyLocalSection => 'Local Data (On-Device)';
+
+  @override
+  String get privacyLocalDesc =>
+      'Your diary, ratings and notes are stored locally in your SQLite database. Accessible offline.';
+
+  @override
+  String get privacyCloudSection => 'Cloud Sync';
+
+  @override
+  String get privacyCloudDesc =>
+      'Favorites and profile settings sync securely across your devices via Firebase Firestore.';
+
+  @override
+  String get privacyPublicSection => 'Community & Privacy Model';
+
+  @override
+  String get privacyPublicDesc =>
+      'All records are PRIVATE by default. Only posts you explicitly share are visible in community.';
+
+  @override
+  String get privacyExportCTA => 'Export My Data as JSON';
 }

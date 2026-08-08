@@ -5335,6 +5335,60 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Tekrar Deneyin'**
   String get errorRetryCTA;
+
+  /// No description provided for @privacyCenterTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Gizlilik Merkezi'**
+  String get privacyCenterTitle;
+
+  /// No description provided for @privacyCenterSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Verilerinin nerede saklandığını ve nasıl yönetildiğini şeffafça gör.'**
+  String get privacyCenterSubtitle;
+
+  /// No description provided for @privacyLocalSection.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yerel Veriler (Cihaz İçi)'**
+  String get privacyLocalSection;
+
+  /// No description provided for @privacyLocalDesc.
+  ///
+  /// In tr, this message translates to:
+  /// **'İzleme günlüğün, notların ve puanların cihazındaki yerel SQLite veritabanında saklanır. İnternet olmadan da erişilebilir.'**
+  String get privacyLocalDesc;
+
+  /// No description provided for @privacyCloudSection.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bulut Senkronizasyonu'**
+  String get privacyCloudSection;
+
+  /// No description provided for @privacyCloudDesc.
+  ///
+  /// In tr, this message translates to:
+  /// **'Favori listelerin ve profil bilgilerin Firebase Firestore ile cihazların arasında güvenle senkronize edilir.'**
+  String get privacyCloudDesc;
+
+  /// No description provided for @privacyPublicSection.
+  ///
+  /// In tr, this message translates to:
+  /// **'Topluluk ve Gizlilik Modelimiz'**
+  String get privacyPublicSection;
+
+  /// No description provided for @privacyPublicDesc.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tüm kayıtların varsayılan olarak GİZLİDİR. Sadece açık paylaşmayı seçtiğin gönderiler toplulukta görünür.'**
+  String get privacyPublicDesc;
+
+  /// No description provided for @privacyExportCTA.
+  ///
+  /// In tr, this message translates to:
+  /// **'Verilerimi JSON Olarak İndir'**
+  String get privacyExportCTA;
 }
 
 class _AppLocalizationsDelegate

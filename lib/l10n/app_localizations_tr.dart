@@ -3015,4 +3015,35 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get errorRetryCTA => 'Tekrar Deneyin';
+
+  @override
+  String get privacyCenterTitle => 'Gizlilik Merkezi';
+
+  @override
+  String get privacyCenterSubtitle =>
+      'Verilerinin nerede saklandığını ve nasıl yönetildiğini şeffafça gör.';
+
+  @override
+  String get privacyLocalSection => 'Yerel Veriler (Cihaz İçi)';
+
+  @override
+  String get privacyLocalDesc =>
+      'İzleme günlüğün, notların ve puanların cihazındaki yerel SQLite veritabanında saklanır. İnternet olmadan da erişilebilir.';
+
+  @override
+  String get privacyCloudSection => 'Bulut Senkronizasyonu';
+
+  @override
+  String get privacyCloudDesc =>
+      'Favori listelerin ve profil bilgilerin Firebase Firestore ile cihazların arasında güvenle senkronize edilir.';
+
+  @override
+  String get privacyPublicSection => 'Topluluk ve Gizlilik Modelimiz';
+
+  @override
+  String get privacyPublicDesc =>
+      'Tüm kayıtların varsayılan olarak GİZLİDİR. Sadece açık paylaşmayı seçtiğin gönderiler toplulukta görünür.';
+
+  @override
+  String get privacyExportCTA => 'Verilerimi JSON Olarak İndir';
 }

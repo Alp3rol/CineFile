@@ -5,6 +5,7 @@ import '../../../../core/ui/ui.dart';
 import '../../../../core/services/notification_service.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../onboarding/presentation/onboarding_screen.dart';
+import '../privacy_center_screen.dart';
 import '../settings_provider.dart';
 import 'settings_section.dart';
 
@@ -291,6 +292,20 @@ class SettingsPreferencesSection extends ConsumerWidget {
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (_) => const OnboardingScreen(isModal: true),
+                ),
+              );
+            },
+          ),
+          _divider(),
+          _navRow(
+            context,
+            icon: Icons.security_rounded,
+            label: l10n.privacyCenterTitle,
+            trailingText: '',
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const PrivacyCenterScreen(),
                 ),
               );
             },

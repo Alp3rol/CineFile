@@ -953,5 +953,14 @@
   "errorOfflineTitle": "You're Offline",
   "errorOfflineSubtitle": "Your watch records are saved safely on device. They will sync with community when online.",
   "errorGenericTitle": "Something Went Wrong",
-  "errorRetryCTA": "Try Again"
+  "errorRetryCTA": "Try Again",
+  "privacyCenterTitle": "Privacy Center",
+  "privacyCenterSubtitle": "Transparently see where your data is stored and managed.",
+  "privacyLocalSection": "Local Data (On-Device)",
+  "privacyLocalDesc": "Your diary, ratings and notes are stored locally in your SQLite database. Accessible offline.",
+  "privacyCloudSection": "Cloud Sync",
+  "privacyCloudDesc": "Favorites and profile settings sync securely across your devices via Firebase Firestore.",
+  "privacyPublicSection": "Community & Privacy Model",
+  "privacyPublicDesc": "All records are PRIVATE by default. Only posts you explicitly share are visible in community.",
+  "privacyExportCTA": "Export My Data as JSON"
 }

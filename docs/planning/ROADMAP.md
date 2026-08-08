@@ -266,8 +266,8 @@ dönmek için net nedenler bulması.
   - **Tamamlandı (8 Ağustos 2026):** Ekran okuyucu (TalkBack / VoiceOver) ve erişilebilirlik desteği için `MainShell` alt gezinti sekmelerine, `PosterGrid` film afişlerine ve ana etkileşim bileşenlerine açık `Semantics` (buton, etiket, durum) yapılandırmaları bağlandı. `accessibility_semantics_test.dart` dahil 283 Flutter testi ve static analysis geçti.
 - [x] **Hata/çevrimdışı durumlarını ortak UI bileşenlerine bağla.**
   - **Tamamlandı (8 Ağustos 2026):** Yeniden kullanılabilir `AppErrorState` bileşeni geliştirildi ve `ui.dart` sistemine eklendi. Ağ kopmaları, çevrimdışı durumlar ("Çevrimdışısınız, verileriniz yerelde güvende") ve genel API hataları standart görsel ikonu, açık bilgilendirme metni ve "Tekrar Deneyin" CTA butonu ile ortaklaştırıldı. `SearchResultsView` bileşenine bağlandı. `app_error_state_test.dart` dahil 285 Flutter testi ve static analysis geçti.
-- [ ] Gizlilik merkezi: hangi verinin yerel, bulut veya herkese açık olduğunu
-  kullanıcıya tek ekranda göster.
+- [x] **Gizlilik merkezi: hangi verinin yerel, bulut veya herkese açık olduğunu kullanıcıya tek ekranda göster.**
+  - **Tamamlandı (8 Ağustos 2026):** `PrivacyCenterScreen` geliştirildi ve Ayarlar ekranına bağlandı. Kullanıcı verilerinin yerel veritabanı (SQLite / Günlük / Notlar), bulut senkronizasyonu (Firebase / Favoriler) ve topluluk paylaşım sınırları görsel statü rozetleri ile şeffafça sunuldu. JSON dışa aktarma aksiyonu bağlandı. `privacy_center_screen_test.dart` dahil 286 Flutter testi ve static analysis geçti.
 
 ### Ölçülecek ürün metrikleri
 
