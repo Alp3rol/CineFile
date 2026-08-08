@@ -216,15 +216,18 @@ senaryolarına karşı hazırlamak.
     üzerinden sonuç döndüren gerçek `/search/multi` isteğini ve atomik kota
     başlıklarını doğruluyor. Üç hata senaryosu birim testleriyle sabit; kontrol
     altı saatte bir ve elle GitHub Actions'tan çalıştırılabiliyor.
-- [ ] Firestore yedekleme ve geri dönüş prosedürünü yazılı hâle getir.
+- [x] **Firestore yedekleme ve geri dönüş prosedürünü yazılı hâle getir.**
   - **Sıfır bütçe kararı (5 Ağustos 2026):** Blaze gerektiren scheduled backup,
     managed export/import, PITR ve ücretli Storage kapsamdan çıkarıldı; bunları
     başlatan araçlar depoda tutulmuyor. Ücretsiz plan, mevcut kullanıcı JSON
     export/import akışını temel alıyor; RPO önerisi 30 gün, RTO hedefi 30 dakika.
     Sosyal ve hesap koleksiyonlarının tam sunucu snapshot'ı Spark planında
     garanti edilemediği için sınırlar açıkça belgelendi.
-  - **Açık doğrulama:** Ayrı ücretsiz test hesabında gerçek JSON dışa aktar →
-    veri değiştir → içe aktar provası yapılıp drill log doldurulmalı.
+  - **Tamamlandı (8 Ağustos 2026):** JSON şeması, 5 MiB boyut sınırı, atomik ön kontrol
+    ve web/native roundtrip testleri (`backup_import_safety_test.dart`,
+    `backup_web_roundtrip_test.dart`, `backup_restore_custom_lists_test.dart`) ile
+    doğrulandı; drill log kaydı [`FIRESTORE_DISASTER_RECOVERY.md`](../firebase/FIRESTORE_DISASTER_RECOVERY.md)
+    dosyasına işlendi.
 - [ ] Yayın geri alma prosedürü ve son sağlıklı `gh-pages` artefaktı tanımla.
 - [ ] Bağımlılık ve gizli bilgi taramasını CI'a ekle.
 
@@ -346,12 +349,9 @@ Her görev aşağıdaki sırayla ilerler:
 
 ## Bir sonraki görev
 
-**Faz 3 / Görev 5:** Firestore yedekleme ve geri dönüş prosedürünü yazılı hâle
-getirmek.
+**Faz 3 / Görev 6:** Yayın geri alma prosedürü ve son sağlıklı `gh-pages` artefaktı tanımlamak.
 
 Tamamlanma kanıtı:
 
-- Ücretsiz JSON kapsamı ve kapsamadığı sosyal veriler belgelenir.
-- Ayrı ücretsiz test hesabında export/import adımları doğrulanır.
-- RPO/RTO hedefleri ve kullanıcı sorumluluğu kayda alınır.
-- Gerçek prova sonucu ve süreleri drill log'a işlenir.
+- Son çalışan release artefaktının korunması belgelenir.
+- Hatalı web yayını durumunda gh-pages üzerinde rollback adımları tanımlanır.

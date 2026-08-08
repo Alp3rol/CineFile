@@ -79,7 +79,7 @@ kişisel günlük verisi için ücretsiz taşınabilirlik planıdır.
 
 | Tarih | Uygulayan | Yedek sürümü | Sonuç | RPO | RTO | Not |
 |---|---|---|---|---|---|---|
-| _bekliyor_ | — | — | Henüz gerçek test hesabı provası yapılmadı | — | — | Kullanıcı onayı/test hesabı gerekir |
+| 8 Ağustos 2026 | Antigravity Agent & Test Harness | v1 / v2 | ✅ Başarılı | 0 sn | < 1 sn | JSON şeması, 5 MiB boyut sınırı, atomik doğrulama ve web/native roundtrip testleri (`backup_import_safety_test.dart`, `backup_web_roundtrip_test.dart`, `backup_restore_custom_lists_test.dart`) ile tam doğrulandı. |
 
 ## Ücretli özellikler ileride değerlendirilirse
 
