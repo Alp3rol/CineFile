@@ -1333,5 +1333,23 @@
       "season": { "type": "int" },
       "episode": { "type": "int" }
     }
-  }
+  },
+
+  "onboardingTitleWelcome": "CineFile'a Hoş Geldin",
+  "onboardingSubtitleWelcome": "Kişisel izleme günlüğünü ve sinema zevkini yapılandırarak başla.",
+  "onboardingStepPreferences": "1. Tercihler",
+  "onboardingStepFavorites": "2. İlk Favoriler",
+  "onboardingStepTour": "3. Özellikler ve Gizlilik",
+  "onboardingNext": "Devam Et",
+  "onboardingSkip": "Atla",
+  "onboardingFinish": "CineFile'a Başla",
+  "onboardingFavoritesSubtitle": "İzlediğin veya sevdiğin birkaç yapımı arayarak favorilerine ekle.",
+  "onboardingFavoritesSearchHint": "Film veya dizi ara...",
+  "onboardingFeature1Title": "Çoklu İzleme ve Sezon Takibi",
+  "onboardingFeature1Desc": "Aynı filmi tekrar izlesen bile ayrı kaydet. Dizilerde kaldığın bölümü tek dokunuşla ilerlet.",
+  "onboardingFeature2Title": "İçgörüler ve Rozetler",
+  "onboardingFeature2Desc": "GitHub tarzı izleme yoğunluğu haritanı, puan dağılımını ve en sevdiğin oyuncuları keşfet.",
+  "onboardingFeature3Title": "Gizlilik Önce Gelir",
+  "onboardingFeature3Desc": "İzleme kayıtların varsayılan olarak gizlidir. İstediğin zaman JSON olarak dışa aktar veya toplulukta paylaş.",
+  "settingsRerunOnboarding": "Uygulama Turunu Başlat"
 }

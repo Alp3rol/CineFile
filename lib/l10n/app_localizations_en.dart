@@ -3087,4 +3087,60 @@ class AppLocalizationsEn extends AppLocalizations {
   String notificationEpisodeBody(String show, int season, int episode) {
     return 'Season $season, episode $episode of \"$show\" airs today.';
   }
+
+  @override
+  String get onboardingTitleWelcome => 'Welcome to CineFile';
+
+  @override
+  String get onboardingSubtitleWelcome =>
+      'Get started by customizing your movie diary and preferences.';
+
+  @override
+  String get onboardingStepPreferences => '1. Preferences';
+
+  @override
+  String get onboardingStepFavorites => '2. Initial Favorites';
+
+  @override
+  String get onboardingStepTour => '3. Features & Privacy';
+
+  @override
+  String get onboardingNext => 'Continue';
+
+  @override
+  String get onboardingSkip => 'Skip';
+
+  @override
+  String get onboardingFinish => 'Start Using CineFile';
+
+  @override
+  String get onboardingFavoritesSubtitle =>
+      'Search and add a few titles you\'ve watched or love to your favorites.';
+
+  @override
+  String get onboardingFavoritesSearchHint => 'Search movie or TV show...';
+
+  @override
+  String get onboardingFeature1Title => 'Multi-Watch & Season Tracking';
+
+  @override
+  String get onboardingFeature1Desc =>
+      'Record rewatches separately. Advance TV episodes with a single tap.';
+
+  @override
+  String get onboardingFeature2Title => 'Insights & Badges';
+
+  @override
+  String get onboardingFeature2Desc =>
+      'Discover your GitHub-style heatmap, rating distribution, and top actors.';
+
+  @override
+  String get onboardingFeature3Title => 'Privacy First';
+
+  @override
+  String get onboardingFeature3Desc =>
+      'Your diary is private by default. Export as JSON anytime or share with community optionally.';
+
+  @override
+  String get settingsRerunOnboarding => 'Run Onboarding Tour';
 }

@@ -52,6 +52,9 @@ void main() {
           localeProvider.overrideWith(
             (ref) => LocaleNotifier(AppSettingsStore())..setLocale(const Locale('tr')),
           ),
+          onboardingCompletedProvider.overrideWith(
+            (ref) => OnboardingCompletedNotifier(AppSettingsStore())..setCompleted(true),
+          ),
           firebaseAuthProvider
               .overrideWithValue(MockFirebaseAuth(signedIn: true, mockUser: MockUser(uid: 'test-uid', email: 'test@test.com'))),
           firestoreProvider.overrideWithValue(firestore),

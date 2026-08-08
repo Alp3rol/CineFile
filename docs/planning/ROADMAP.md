@@ -248,10 +248,11 @@ dönmek için net nedenler bulması.
 
 ### İş paketleri
 
-- [ ] **Kısa onboarding akışı.**
+- [x] **Kısa onboarding akışı.**
   - Dil/bölge seçimi.
   - İlk üç favori veya izlenen yapımı ekleme.
   - Günlük, bölüm takibi ve gizlilik modelini kısa anlatım.
+  - **Tamamlandı (8 Ağustos 2026):** `OnboardingScreen` (3 adımlı PageView) geliştirildi. Tercihler (dil & bölge), favori arama & ekleme (TMDb trend/arama & Firestore favori toggle), ve GlassCard özellik turları eklendi. `AuthGate` ilk girişte kontrol eder; `onboardingCompletedProvider` durum store'una kaydeder. Ayarlar ekranından tekrar çalıştırılabilir. `onboarding_screen_test.dart` dahil 274 Flutter testi ve static analysis geçti.
 - [ ] Boş ekranları eyleme dönük hâle getir.
   - “İlk kaydını ekle”, “koleksiyon oluştur”, “arkadaş bul” girişleri.
 - [ ] İlk oturum kontrol listesi ve ilerleme göstergesi.

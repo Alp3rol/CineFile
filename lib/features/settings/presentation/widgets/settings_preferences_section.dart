@@ -4,6 +4,7 @@ import '../../../../core/constants/watch_regions.dart';
 import '../../../../core/ui/ui.dart';
 import '../../../../core/services/notification_service.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../onboarding/presentation/onboarding_screen.dart';
 import '../settings_provider.dart';
 import 'settings_section.dart';
 
@@ -279,6 +280,20 @@ class SettingsPreferencesSection extends ConsumerWidget {
               ref.watch(effectiveWatchRegionProvider),
             ),
             onTap: () => _showRegionPicker(context, ref),
+          ),
+          _divider(),
+          _navRow(
+            context,
+            icon: Icons.auto_awesome_rounded,
+            label: l10n.settingsRerunOnboarding,
+            trailingText: '',
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const OnboardingScreen(isModal: true),
+                ),
+              );
+            },
           ),
         ],
       ),

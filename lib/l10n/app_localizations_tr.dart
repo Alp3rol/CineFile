@@ -2901,4 +2901,60 @@ class AppLocalizationsTr extends AppLocalizations {
   String notificationEpisodeBody(String show, int season, int episode) {
     return '\"$show\" dizisinin $season. sezon $episode. bölümü bugün yayınlanıyor.';
   }
+
+  @override
+  String get onboardingTitleWelcome => 'CineFile\'a Hoş Geldin';
+
+  @override
+  String get onboardingSubtitleWelcome =>
+      'Kişisel izleme günlüğünü ve sinema zevkini yapılandırarak başla.';
+
+  @override
+  String get onboardingStepPreferences => '1. Tercihler';
+
+  @override
+  String get onboardingStepFavorites => '2. İlk Favoriler';
+
+  @override
+  String get onboardingStepTour => '3. Özellikler ve Gizlilik';
+
+  @override
+  String get onboardingNext => 'Devam Et';
+
+  @override
+  String get onboardingSkip => 'Atla';
+
+  @override
+  String get onboardingFinish => 'CineFile\'a Başla';
+
+  @override
+  String get onboardingFavoritesSubtitle =>
+      'İzlediğin veya sevdiğin birkaç yapımı arayarak favorilerine ekle.';
+
+  @override
+  String get onboardingFavoritesSearchHint => 'Film veya dizi ara...';
+
+  @override
+  String get onboardingFeature1Title => 'Çoklu İzleme ve Sezon Takibi';
+
+  @override
+  String get onboardingFeature1Desc =>
+      'Aynı filmi tekrar izlesen bile ayrı kaydet. Dizilerde kaldığın bölümü tek dokunuşla ilerlet.';
+
+  @override
+  String get onboardingFeature2Title => 'İçgörüler ve Rozetler';
+
+  @override
+  String get onboardingFeature2Desc =>
+      'GitHub tarzı izleme yoğunluğu haritanı, puan dağılımını ve en sevdiğin oyuncuları keşfet.';
+
+  @override
+  String get onboardingFeature3Title => 'Gizlilik Önce Gelir';
+
+  @override
+  String get onboardingFeature3Desc =>
+      'İzleme kayıtların varsayılan olarak gizlidir. İstediğin zaman JSON olarak dışa aktar veya toplulukta paylaş.';
+
+  @override
+  String get settingsRerunOnboarding => 'Uygulama Turunu Başlat';
 }

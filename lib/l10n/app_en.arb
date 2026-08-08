@@ -911,5 +911,23 @@
   "tagSciFi": "#scifi",
   "tagHorror": "#horror",
   "tagClassic": "#classic",
-  "tagNewDiscovery": "#newdiscovery"
+  "tagNewDiscovery": "#newdiscovery",
+
+  "onboardingTitleWelcome": "Welcome to CineFile",
+  "onboardingSubtitleWelcome": "Get started by customizing your movie diary and preferences.",
+  "onboardingStepPreferences": "1. Preferences",
+  "onboardingStepFavorites": "2. Initial Favorites",
+  "onboardingStepTour": "3. Features & Privacy",
+  "onboardingNext": "Continue",
+  "onboardingSkip": "Skip",
+  "onboardingFinish": "Start Using CineFile",
+  "onboardingFavoritesSubtitle": "Search and add a few titles you've watched or love to your favorites.",
+  "onboardingFavoritesSearchHint": "Search movie or TV show...",
+  "onboardingFeature1Title": "Multi-Watch & Season Tracking",
+  "onboardingFeature1Desc": "Record rewatches separately. Advance TV episodes with a single tap.",
+  "onboardingFeature2Title": "Insights & Badges",
+  "onboardingFeature2Desc": "Discover your GitHub-style heatmap, rating distribution, and top actors.",
+  "onboardingFeature3Title": "Privacy First",
+  "onboardingFeature3Desc": "Your diary is private by default. Export as JSON anytime or share with community optionally.",
+  "settingsRerunOnboarding": "Run Onboarding Tour"
 }

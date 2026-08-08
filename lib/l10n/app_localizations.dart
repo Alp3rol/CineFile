@@ -5125,6 +5125,108 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'\"{show}\" dizisinin {season}. sezon {episode}. bölümü bugün yayınlanıyor.'**
   String notificationEpisodeBody(String show, int season, int episode);
+
+  /// No description provided for @onboardingTitleWelcome.
+  ///
+  /// In tr, this message translates to:
+  /// **'CineFile\'a Hoş Geldin'**
+  String get onboardingTitleWelcome;
+
+  /// No description provided for @onboardingSubtitleWelcome.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kişisel izleme günlüğünü ve sinema zevkini yapılandırarak başla.'**
+  String get onboardingSubtitleWelcome;
+
+  /// No description provided for @onboardingStepPreferences.
+  ///
+  /// In tr, this message translates to:
+  /// **'1. Tercihler'**
+  String get onboardingStepPreferences;
+
+  /// No description provided for @onboardingStepFavorites.
+  ///
+  /// In tr, this message translates to:
+  /// **'2. İlk Favoriler'**
+  String get onboardingStepFavorites;
+
+  /// No description provided for @onboardingStepTour.
+  ///
+  /// In tr, this message translates to:
+  /// **'3. Özellikler ve Gizlilik'**
+  String get onboardingStepTour;
+
+  /// No description provided for @onboardingNext.
+  ///
+  /// In tr, this message translates to:
+  /// **'Devam Et'**
+  String get onboardingNext;
+
+  /// No description provided for @onboardingSkip.
+  ///
+  /// In tr, this message translates to:
+  /// **'Atla'**
+  String get onboardingSkip;
+
+  /// No description provided for @onboardingFinish.
+  ///
+  /// In tr, this message translates to:
+  /// **'CineFile\'a Başla'**
+  String get onboardingFinish;
+
+  /// No description provided for @onboardingFavoritesSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'İzlediğin veya sevdiğin birkaç yapımı arayarak favorilerine ekle.'**
+  String get onboardingFavoritesSubtitle;
+
+  /// No description provided for @onboardingFavoritesSearchHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Film veya dizi ara...'**
+  String get onboardingFavoritesSearchHint;
+
+  /// No description provided for @onboardingFeature1Title.
+  ///
+  /// In tr, this message translates to:
+  /// **'Çoklu İzleme ve Sezon Takibi'**
+  String get onboardingFeature1Title;
+
+  /// No description provided for @onboardingFeature1Desc.
+  ///
+  /// In tr, this message translates to:
+  /// **'Aynı filmi tekrar izlesen bile ayrı kaydet. Dizilerde kaldığın bölümü tek dokunuşla ilerlet.'**
+  String get onboardingFeature1Desc;
+
+  /// No description provided for @onboardingFeature2Title.
+  ///
+  /// In tr, this message translates to:
+  /// **'İçgörüler ve Rozetler'**
+  String get onboardingFeature2Title;
+
+  /// No description provided for @onboardingFeature2Desc.
+  ///
+  /// In tr, this message translates to:
+  /// **'GitHub tarzı izleme yoğunluğu haritanı, puan dağılımını ve en sevdiğin oyuncuları keşfet.'**
+  String get onboardingFeature2Desc;
+
+  /// No description provided for @onboardingFeature3Title.
+  ///
+  /// In tr, this message translates to:
+  /// **'Gizlilik Önce Gelir'**
+  String get onboardingFeature3Title;
+
+  /// No description provided for @onboardingFeature3Desc.
+  ///
+  /// In tr, this message translates to:
+  /// **'İzleme kayıtların varsayılan olarak gizlidir. İstediğin zaman JSON olarak dışa aktar veya toplulukta paylaş.'**
+  String get onboardingFeature3Desc;
+
+  /// No description provided for @settingsRerunOnboarding.
+  ///
+  /// In tr, this message translates to:
+  /// **'Uygulama Turunu Başlat'**
+  String get settingsRerunOnboarding;
 }
 
 class _AppLocalizationsDelegate

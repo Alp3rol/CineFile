@@ -5,6 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../controllers/auth_controller.dart';
 import 'login_screen.dart';
 import '../../main_shell.dart';
+import '../../onboarding/presentation/onboarding_screen.dart';
+import '../../settings/presentation/settings_provider.dart';
 import '../../../core/theme/app_theme.dart';
 
 class AuthGate extends ConsumerWidget {
@@ -29,6 +31,10 @@ class AuthGate extends ConsumerWidget {
                 ),
               ),
             );
+          }
+          final onboardingCompleted = ref.watch(onboardingCompletedProvider);
+          if (!onboardingCompleted) {
+            return const OnboardingScreen();
           }
           return const MainShell();
         }

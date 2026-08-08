@@ -301,3 +301,15 @@ class DynamicBackgroundEnabledNotifier extends _StoredPreferenceNotifier<bool> {
 
   Future<void> setEnabled(bool enabled) => _save(enabled);
 }
+
+final onboardingCompletedProvider =
+    StateNotifierProvider<OnboardingCompletedNotifier, bool>((ref) {
+      return OnboardingCompletedNotifier(ref.watch(appSettingsStoreProvider));
+    });
+
+class OnboardingCompletedNotifier extends _StoredPreferenceNotifier<bool> {
+  OnboardingCompletedNotifier(AppSettingsStore store)
+    : super(store, 'onboarding_completed', false);
+
+  Future<void> setCompleted(bool completed) => _save(completed);
+}
