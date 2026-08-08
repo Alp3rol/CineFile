@@ -22,6 +22,7 @@ Bu klasör, uygulamanın ürün planlarını ve geliştirici belgelerini konu ba
 
 - [Sentry sürüm bilgileri](operations/SENTRY_RELEASES.md)
 - [Sentetik sağlık kontrolü](operations/SYNTHETIC_HEALTH.md)
+- [Web yayın geri alma (rollback) prosedürü](operations/WEB_ROLLBACK_PROCEDURE.md)
 
 ## Kalite
 

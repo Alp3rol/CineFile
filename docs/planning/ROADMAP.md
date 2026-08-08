@@ -228,7 +228,8 @@ senaryolarına karşı hazırlamak.
     `backup_web_roundtrip_test.dart`, `backup_restore_custom_lists_test.dart`) ile
     doğrulandı; drill log kaydı [`FIRESTORE_DISASTER_RECOVERY.md`](../firebase/FIRESTORE_DISASTER_RECOVERY.md)
     dosyasına işlendi.
-- [ ] Yayın geri alma prosedürü ve son sağlıklı `gh-pages` artefaktı tanımla.
+- [x] **Yayın geri alma prosedürü ve son sağlıklı `gh-pages` artefaktı tanımla.**
+  - **Tamamlandı (8 Ağustos 2026):** `deploy.yml` tarihçe koruma (`force_orphan: false`), `workflow_dispatch` üzerinden etikete/commit'e geri dönüş, acil durum `gh-pages` revert adımları ve artefakt saklama prosedürü [`WEB_ROLLBACK_PROCEDURE.md`](../operations/WEB_ROLLBACK_PROCEDURE.md) dosyasına yazıldı.
 - [ ] Bağımlılık ve gizli bilgi taramasını CI'a ekle.
 
 ### Faz 3 kabul kriterleri
@@ -349,9 +350,9 @@ Her görev aşağıdaki sırayla ilerler:
 
 ## Bir sonraki görev
 
-**Faz 3 / Görev 6:** Yayın geri alma prosedürü ve son sağlıklı `gh-pages` artefaktı tanımlamak.
+**Faz 4 / Görev 1:** Kısa onboarding akışı (dil/bölge seçimi, ilk 3 favori ekleme, günlük/bölüm takibi ve gizlilik anlatımı).
 
 Tamamlanma kanıtı:
 
-- Son çalışan release artefaktının korunması belgelenir.
-- Hatalı web yayını durumunda gh-pages üzerinde rollback adımları tanımlanır.
+- Yeni kullanıcının rehbersiz 3 adımda ilk izleme kaydına veya favorilerine ulaşması sağlanır.
+- Onboarding ekranlarının Türkçe ve İngilizce testleri yazılır.
