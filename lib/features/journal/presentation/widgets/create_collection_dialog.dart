@@ -83,6 +83,20 @@ class _CreateCollectionDialogState extends ConsumerState<CreateCollectionDialog>
     }
   }
 
+  Widget _templateChip(String name, String desc) {
+    return ActionChip(
+      label: Text(name, style: const TextStyle(fontSize: 12, color: Colors.white)),
+      backgroundColor: AppColors.accent.withValues(alpha: 0.15),
+      side: BorderSide(color: AppColors.accent.withValues(alpha: 0.4)),
+      onPressed: () {
+        setState(() {
+          _nameController.text = name;
+          _descController.text = desc;
+        });
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isEditMode = widget.list != null;
@@ -151,7 +165,29 @@ class _CreateCollectionDialogState extends ConsumerState<CreateCollectionDialog>
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.textSecondary, height: 1.4),
             ),
-            const SizedBox(height: 24),
+            // Templates for new collections
+            if (!isEditMode) ...[
+              Text(
+                'Hızlı Şablonlar',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.textSecondary),
+              ),
+              const SizedBox(height: 8),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    _templateChip('🏆 Tüm Zamanların En İyileri', 'İzlediğim veya izlemek istediğim efsanevi yapımlar.'),
+                    const SizedBox(width: 8),
+                    _templateChip('🍿 Hafta Sonu Maratonu', 'Bu hafta sonu izlenecek film ve diziler.'),
+                    const SizedBox(width: 8),
+                    _templateChip('🌌 Bilim Kurgu & Şaşırtıcı Sonlar', 'Uzay, zaman yolculuğu ve sürpriz sonlu yapımlar.'),
+                    const SizedBox(width: 8),
+                    _templateChip('🎬 Oscar Ödüllü Başyapıtlar', 'Akademi ödüllü sinema eserleri.'),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
 
             // Name Field
             TextField(

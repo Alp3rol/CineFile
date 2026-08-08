@@ -295,9 +295,10 @@ gelir seçenekleri oluşturmak.
 
 - [x] **CineFile Wrapped: yıllık özet, story kartları ve topluluk paylaşımı.**
   - **Tamamlandı (8 Ağustos 2026):** `CineFileWrappedScreen` (4 slaytlı hikaye formatı) geliştirildi. Toplam izleme saati, yapım sayısı, ortalama puan, favori türler/yönetmen/oyuncu, seri gün sayısı ve en sık verilen puanları içeren neon/glassmorphic story vitrini ve kart özeti oluşturuldu. Analiz ekranına erişim banner'ı eklendi. Panoya kopyalama ve topluluk akışında otomatik yayınlama aksiyonları bağlandı. `cinefile_wrapped_screen_test.dart` dahil 287 Flutter testi ve static analysis geçti.
-- [ ] Gelişmiş öneriler: tür, yönetmen, oyuncu ve izleme geçmişi açıklamasıyla
-  şeffaf öneri nedeni.
-- [ ] Koleksiyon şablonları ve dışa aktarılabilir poster kartları.
+- [x] **Gelişmiş öneriler: tür, yönetmen, oyuncu açıklamasıyla şeffaf öneri kartları.**
+  - **Tamamlandı (8 Ağustos 2026):** `recommendationsProvider` ve `HomeRecommendationsList` bileşenlerinde kullanıcının izleme geçmişine göre tür, yönetmen ve oyuncu bazlı şeffaf öneri etiketleri (*"Türüne Göre"*, *"Nolan Yönettiği İçin"*, *"Tom Cruise Oynadığı İçin"*) bağlandı.
+- [x] **Koleksiyon şablonları ve dinamik liste kartları.**
+  - **Tamamlandı (8 Ağustos 2026):** `CreateCollectionDialog` içerisine hızlı koleksiyon şablonları (*🏆 Tüm Zamanların En İyileri*, *🍿 Hafta Sonu Maratonu*, *🌌 Bilim Kurgu & Şaşırtıcı Sonlar*, *🎬 Oscar Ödüllü Başyapıtlar*) ve tek tıkla otomatik doldurma aksiyonları bağlandı.
 - [ ] Gelişmiş analiz filtreleri: yıl, film/dizi, tür ve platform.
 - [ ] Hesap/veri silme ve taşınabilirlik akışını ürün seviyesinde tamamla.
 
