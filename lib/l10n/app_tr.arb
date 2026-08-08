@@ -1403,5 +1403,8 @@
   "insightsFilterAllYears": "Tüm Yıllar",
   "insightsFilterAllTypes": "Tüm Yapımlar",
   "insightsFilterMoviesOnly": "Sadece Filmler",
-  "insightsFilterTvOnly": "Sadece Diziler"
+  "insightsFilterTvOnly": "Sadece Diziler",
+  "privacyDeleteAccountCTA": "Tüm Verilerimi Cihazdan Sil",
+  "privacyDeleteConfirmTitle": "Tüm Veriler Silinecek",
+  "privacyDeleteConfirmDesc": "Cihazınızdaki tüm izleme günlükleri, notlar ve yerel veriler kalıcı olarak sıfırlanacaktır. Bu işlem geri alınamaz."
 }

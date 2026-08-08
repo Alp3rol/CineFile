@@ -3276,4 +3276,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get insightsFilterTvOnly => 'TV Shows Only';
+
+  @override
+  String get privacyDeleteAccountCTA => 'Purge All My Data from Device';
+
+  @override
+  String get privacyDeleteConfirmTitle => 'Delete All Data';
+
+  @override
+  String get privacyDeleteConfirmDesc =>
+      'All watch logs, notes, and local data on this device will be permanently wiped. This action cannot be undone.';
 }

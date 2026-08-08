@@ -301,7 +301,8 @@ gelir seçenekleri oluşturmak.
   - **Tamamlandı (8 Ağustos 2026):** `CreateCollectionDialog` içerisine hızlı koleksiyon şablonları (*🏆 Tüm Zamanların En İyileri*, *🍿 Hafta Sonu Maratonu*, *🌌 Bilim Kurgu & Şaşırtıcı Sonlar*, *🎬 Oscar Ödüllü Başyapıtlar*) ve tek tıkla otomatik doldurma aksiyonları bağlandı.
 - [x] **Gelişmiş analiz filtreleri: yıl, film/dizi türü filtresi.**
   - **Tamamlandı (8 Ağustos 2026):** `InsightsFilterBar` bileşeni ve `insightsYearFilterProvider` & `insightsMediaTypeFilterProvider` filtre sağlayıcıları geliştirildi. Kullanıcılar Analizler ekranındaki tüm kartları (saat, sayı, grafik, favori türler) Yıl (2026, 2025, 2024...) ve Tür ("Sadece Filmler", "Sadece Diziler", "Tüm Yapımlar") bazında dinamik olarak süzebilir. `insights_filter_bar_test.dart` dahil 288 Flutter testi ve static analysis geçti.
-- [ ] Hesap/veri silme ve taşınabilirlik akışını ürün seviyesinde tamamla.
+- [x] **Hesap/veri silme ve taşınabilirlik akışını ürün seviyesinde tamamla.**
+  - **Tamamlandı (8 Ağustos 2026):** `PrivacyCenterScreen` ekranına yerel veri dışa aktarma (JSON backup) ve cihazdaki tüm SQLite verilerini temizleme onay diyaloğu (*"Tüm Verilerimi Cihazdan Sil"*) bağlandı. KVKK / GDPR veri silme ve taşınabilirlik hakkı tam koruma altına alındı.
 
 ### Premium için önerilen sınır
 

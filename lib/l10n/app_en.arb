@@ -981,5 +981,8 @@
   "insightsFilterAllYears": "All Years",
   "insightsFilterAllTypes": "All Titles",
   "insightsFilterMoviesOnly": "Movies Only",
-  "insightsFilterTvOnly": "TV Shows Only"
+  "insightsFilterTvOnly": "TV Shows Only",
+  "privacyDeleteAccountCTA": "Purge All My Data from Device",
+  "privacyDeleteConfirmTitle": "Delete All Data",
+  "privacyDeleteConfirmDesc": "All watch logs, notes, and local data on this device will be permanently wiped. This action cannot be undone."
 }

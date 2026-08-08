@@ -3090,4 +3090,14 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get insightsFilterTvOnly => 'Sadece Diziler';
+
+  @override
+  String get privacyDeleteAccountCTA => 'Tüm Verilerimi Cihazdan Sil';
+
+  @override
+  String get privacyDeleteConfirmTitle => 'Tüm Veriler Silinecek';
+
+  @override
+  String get privacyDeleteConfirmDesc =>
+      'Cihazınızdaki tüm izleme günlükleri, notlar ve yerel veriler kalıcı olarak sıfırlanacaktır. Bu işlem geri alınamaz.';
 }

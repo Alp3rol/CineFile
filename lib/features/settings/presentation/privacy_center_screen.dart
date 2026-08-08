@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../../core/database/database_provider.dart';
 import '../../../../core/ui/ui.dart';
 import '../../../../core/widgets/glass_container.dart';
+import '../../../../core/widgets/premium_toast.dart';
 import '../../../../l10n/app_localizations.dart';
 import 'widgets/settings_backup_dialogs.dart';
 
@@ -102,6 +104,15 @@ class PrivacyCenterScreen extends ConsumerWidget {
                       variant: AppButtonVariant.primary,
                       onPressed: () => exportBackup(context, ref),
                     ),
+                    const SizedBox(height: AppSpacing.md),
+
+                    // Direct Action: Purge All Data
+                    AppButton(
+                      label: l10n.privacyDeleteAccountCTA,
+                      icon: Icons.delete_forever_rounded,
+                      variant: AppButtonVariant.secondary,
+                      onPressed: () => _confirmPurgeAllData(context, ref),
+                    ),
                   ],
                 ),
               ),
@@ -110,6 +121,37 @@ class PrivacyCenterScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _confirmPurgeAllData(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: Text(l10n.privacyDeleteConfirmTitle, style: const TextStyle(color: Colors.white)),
+        content: Text(l10n.privacyDeleteConfirmDesc, style: const TextStyle(color: AppColors.textSecondary)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.commonCancel, style: const TextStyle(color: AppColors.textSecondary)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.commonDelete, style: const TextStyle(color: AppColors.error, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      final db = ref.read(databaseProvider);
+      await db.delete(db.watchRecords).go();
+      await db.delete(db.movies).go();
+      if (context.mounted) {
+        showPremiumToast(context, 'Tüm veriler cihazdan silindi.');
+      }
+    }
   }
 
   Widget _buildPrivacyCard({

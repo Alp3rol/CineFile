@@ -5473,6 +5473,24 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Sadece Diziler'**
   String get insightsFilterTvOnly;
+
+  /// No description provided for @privacyDeleteAccountCTA.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tüm Verilerimi Cihazdan Sil'**
+  String get privacyDeleteAccountCTA;
+
+  /// No description provided for @privacyDeleteConfirmTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tüm Veriler Silinecek'**
+  String get privacyDeleteConfirmTitle;
+
+  /// No description provided for @privacyDeleteConfirmDesc.
+  ///
+  /// In tr, this message translates to:
+  /// **'Cihazınızdaki tüm izleme günlükleri, notlar ve yerel veriler kalıcı olarak sıfırlanacaktır. Bu işlem geri alınamaz.'**
+  String get privacyDeleteConfirmDesc;
 }
 
 class _AppLocalizationsDelegate
