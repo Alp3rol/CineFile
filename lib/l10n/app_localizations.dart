@@ -1046,6 +1046,126 @@ abstract class AppLocalizations {
   /// **'Bu kategoride sonuç bulunamadı'**
   String get discoverFilterEmpty;
 
+  /// No description provided for @swipeDiscoverTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kaydır & Keşfet'**
+  String get swipeDiscoverTitle;
+
+  /// No description provided for @swipeDiscoverEntryHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'İlgini çekenleri İzleme Listesi\'ne ekle'**
+  String get swipeDiscoverEntryHint;
+
+  /// No description provided for @swipeDiscoverHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sağa kaydır: İzleme Listesi\'ne ekle • Sola kaydır: geç'**
+  String get swipeDiscoverHint;
+
+  /// No description provided for @swipeInterested.
+  ///
+  /// In tr, this message translates to:
+  /// **'İlgimi çekti'**
+  String get swipeInterested;
+
+  /// No description provided for @swipeNotInterested.
+  ///
+  /// In tr, this message translates to:
+  /// **'İlgilenmiyorum'**
+  String get swipeNotInterested;
+
+  /// No description provided for @swipeWatched.
+  ///
+  /// In tr, this message translates to:
+  /// **'İzledim'**
+  String get swipeWatched;
+
+  /// No description provided for @swipeAddedToWatchlist.
+  ///
+  /// In tr, this message translates to:
+  /// **'İzleme Listesi\'ne eklendi'**
+  String get swipeAddedToWatchlist;
+
+  /// No description provided for @swipePassed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu yapımı geçtin'**
+  String get swipePassed;
+
+  /// No description provided for @swipeUndo.
+  ///
+  /// In tr, this message translates to:
+  /// **'Geri al'**
+  String get swipeUndo;
+
+  /// No description provided for @swipeSaveFailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tercihin kaydedilemedi. Lütfen tekrar dene.'**
+  String get swipeSaveFailed;
+
+  /// No description provided for @swipeDeckFinished.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şimdilik hepsi bu!'**
+  String get swipeDeckFinished;
+
+  /// No description provided for @swipeDeckFinishedHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni öneriler geldiğinde burada seni bekliyor olacak.'**
+  String get swipeDeckFinishedHint;
+
+  /// No description provided for @swipeMoreOptions.
+  ///
+  /// In tr, this message translates to:
+  /// **'Diğer seçenekler'**
+  String get swipeMoreOptions;
+
+  /// No description provided for @swipeResetTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kaydırma tercihleri sıfırlansın mı?'**
+  String get swipeResetTitle;
+
+  /// No description provided for @swipeResetMessage.
+  ///
+  /// In tr, this message translates to:
+  /// **'İlgilenmediğin içerikler yeniden önerilebilir. İzleme Listen ve izleme geçmişin değişmez.'**
+  String get swipeResetMessage;
+
+  /// No description provided for @swipeResetAction.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tercihleri sıfırla'**
+  String get swipeResetAction;
+
+  /// No description provided for @swipeResetDone.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kaydırma tercihlerin sıfırlandı'**
+  String get swipeResetDone;
+
+  /// No description provided for @swipeRemaining.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} öneri kaldı'**
+  String swipeRemaining(int count);
+
+  /// No description provided for @swipeLoadMore.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni öneriler getir'**
+  String get swipeLoadMore;
+
+  /// No description provided for @swipeRefreshFailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni öneriler yüklenemedi. Lütfen tekrar dene.'**
+  String get swipeRefreshFailed;
+
   /// Replaces a sentence that was split around an inline TMDB logo image — the two halves could not be reordered for another language.
   ///
   /// In tr, this message translates to:

@@ -8,6 +8,7 @@ import '../../../core/observability/error_reporting.dart';
 import '../../insights/presentation/insights_provider.dart';
 import '../../settings/presentation/settings_provider.dart';
 import '../data/recommendation_model.dart';
+import '../../swipe_discovery/data/swipe_preference_signal.dart';
 
 final recommendationsProvider = FutureProvider<List<RecommendationItem>>((
   ref,
@@ -20,14 +21,36 @@ final recommendationsProvider = FutureProvider<List<RecommendationItem>>((
   final watchRecords = ref.watch(allWatchRecordsProvider).value ?? [];
   final movieSettings = ref.watch(allMovieSettingsProvider).value ?? {};
   final insights = ref.watch(insightsProvider);
+  final swipeSignals =
+      ref.watch(swipePreferenceSignalsProvider).value ?? const [];
+
+  // A right swipe is a stronger signal than a single left swipe. This lets
+  // repeated passes gently lower a genre without one poster choice banning an
+  // entire category from future recommendations.
+  final swipeGenreIds = rankedSwipeGenreIds(swipeSignals);
 
   // Set of all tmdbIds already in library
   final libraryKeys = <String>{};
   for (final r in watchRecords) {
     libraryKeys.add('${r.movie.tmdbId}_${r.movie.isTv}');
   }
-  for (final key in movieSettings.keys) {
-    libraryKeys.add('${key.tmdbId}_${key.isTv}');
+  for (final entry in movieSettings.entries) {
+    final setting = entry.value;
+    final hasUserData =
+        setting.isFavorite ||
+        setting.isReWatchList ||
+        setting.isActivelyWatching ||
+        setting.personalRanking != null ||
+        setting.personalNotes != null ||
+        setting.personalTags != null ||
+        setting.lastWatchedEpisode != null;
+    if (hasUserData) {
+      libraryKeys.add('${entry.key.tmdbId}_${entry.key.isTv}');
+    }
+  }
+  for (final signal in swipeSignals) {
+    final key = signal.key;
+    if (key != null) libraryKeys.add('${key.tmdbId}_${key.isTv}');
   }
 
   final uniqueRecordsCount = watchRecords
@@ -36,7 +59,7 @@ final recommendationsProvider = FutureProvider<List<RecommendationItem>>((
       .length;
 
   // Fallback for new/inactive users
-  if (uniqueRecordsCount < 5 || insights == null) {
+  if ((uniqueRecordsCount < 5 || insights == null) && swipeGenreIds.isEmpty) {
     try {
       final popularMovies = await tmdbService.getPopularMovies();
       final popularTv = await tmdbService.getPopularTvShows();
@@ -77,17 +100,22 @@ final recommendationsProvider = FutureProvider<List<RecommendationItem>>((
   }
 
   // Large enough library -> Personal recommendation logic
-  final Map<String, RecommendationItem> recommendationsMap = {};
+  final recommendationsMap = <String, RecommendationItem>{};
 
   // 1. Discover by top genres
-  if (insights.topGenres.isNotEmpty) {
+  final preferredGenreIds = rankedBlendedGenreIds(
+    watchedGenres: insights?.topGenres ?? const <MapEntry<int, int>>[],
+    swipeSignals: swipeSignals,
+  );
+  if (preferredGenreIds.isNotEmpty) {
     // Ids come straight from the stats now — no name→id table to keep in sync.
     // Each id is only valid against the endpoint whose vocabulary contains it,
     // so a TV-only genre isn't sent to discover/movie and vice versa.
-    final top2Genres = insights.topGenres.take(2).map((e) => e.key).toList();
-    final topGenreLabel = genreName(l10n, top2Genres.first);
-    final movieGenreIds = top2Genres.where(kMovieGenreIds.contains).join(',');
-    final tvGenreIds = top2Genres.where(kTvGenreIds.contains).join(',');
+    final topGenreLabel = genreName(l10n, preferredGenreIds.first);
+    final movieGenreIds = preferredGenreIds
+        .where(kMovieGenreIds.contains)
+        .join(',');
+    final tvGenreIds = preferredGenreIds.where(kTvGenreIds.contains).join(',');
 
     try {
       if (movieGenreIds.isNotEmpty) {
@@ -129,7 +157,7 @@ final recommendationsProvider = FutureProvider<List<RecommendationItem>>((
   }
 
   // 2. Discover by top director
-  if (insights.topDirectors.isNotEmpty) {
+  if (insights != null && insights.topDirectors.isNotEmpty) {
     final topDirector = insights.topDirectors.first.key;
     // 'Bilinmiyor' is not something the stats produce — it leaks in from rows
     // cached before this guard existed, where movie_detail_provider.dart
@@ -162,7 +190,7 @@ final recommendationsProvider = FutureProvider<List<RecommendationItem>>((
   }
 
   // 3. Discover by top actor
-  if (insights.topActors.isNotEmpty) {
+  if (insights != null && insights.topActors.isNotEmpty) {
     final topActor = insights.topActors.first.key;
     if (topActor != 'Bilinmiyor' && topActor.isNotEmpty) {
       try {

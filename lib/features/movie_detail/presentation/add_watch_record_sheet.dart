@@ -370,7 +370,7 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
       debugPrint('Saved watch record #$watchNumber for "$movieTitle"');
 
       if (mounted) {
-        Navigator.pop(context);
+        Navigator.pop(context, true);
         showPremiumToast(
           context,
           AppLocalizations.of(context).addRecordSuccess(

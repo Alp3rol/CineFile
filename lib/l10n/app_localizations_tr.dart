@@ -546,6 +546,73 @@ class AppLocalizationsTr extends AppLocalizations {
   String get discoverFilterEmpty => 'Bu kategoride sonuç bulunamadı';
 
   @override
+  String get swipeDiscoverTitle => 'Kaydır & Keşfet';
+
+  @override
+  String get swipeDiscoverEntryHint =>
+      'İlgini çekenleri İzleme Listesi\'ne ekle';
+
+  @override
+  String get swipeDiscoverHint =>
+      'Sağa kaydır: İzleme Listesi\'ne ekle • Sola kaydır: geç';
+
+  @override
+  String get swipeInterested => 'İlgimi çekti';
+
+  @override
+  String get swipeNotInterested => 'İlgilenmiyorum';
+
+  @override
+  String get swipeWatched => 'İzledim';
+
+  @override
+  String get swipeAddedToWatchlist => 'İzleme Listesi\'ne eklendi';
+
+  @override
+  String get swipePassed => 'Bu yapımı geçtin';
+
+  @override
+  String get swipeUndo => 'Geri al';
+
+  @override
+  String get swipeSaveFailed => 'Tercihin kaydedilemedi. Lütfen tekrar dene.';
+
+  @override
+  String get swipeDeckFinished => 'Şimdilik hepsi bu!';
+
+  @override
+  String get swipeDeckFinishedHint =>
+      'Yeni öneriler geldiğinde burada seni bekliyor olacak.';
+
+  @override
+  String get swipeMoreOptions => 'Diğer seçenekler';
+
+  @override
+  String get swipeResetTitle => 'Kaydırma tercihleri sıfırlansın mı?';
+
+  @override
+  String get swipeResetMessage =>
+      'İlgilenmediğin içerikler yeniden önerilebilir. İzleme Listen ve izleme geçmişin değişmez.';
+
+  @override
+  String get swipeResetAction => 'Tercihleri sıfırla';
+
+  @override
+  String get swipeResetDone => 'Kaydırma tercihlerin sıfırlandı';
+
+  @override
+  String swipeRemaining(int count) {
+    return '$count öneri kaldı';
+  }
+
+  @override
+  String get swipeLoadMore => 'Yeni öneriler getir';
+
+  @override
+  String get swipeRefreshFailed =>
+      'Yeni öneriler yüklenemedi. Lütfen tekrar dene.';
+
+  @override
   String get searchTmdbAttribution => 'Veriler TMDB tarafından sağlanmaktadır.';
 
   @override

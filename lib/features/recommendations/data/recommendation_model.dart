@@ -5,6 +5,7 @@ class RecommendationItem {
   final String? backdropPath;
   final double voteAverage;
   final bool isTv;
+  final List<int> genreIds;
   final String reason; // E.g., "Nolan Yönettiği İçin"
 
   const RecommendationItem({
@@ -15,6 +16,7 @@ class RecommendationItem {
     required this.voteAverage,
     required this.isTv,
     required this.reason,
+    this.genreIds = const [],
   });
 
   /// [fallbackTitle] is supplied by the caller rather than defaulted here so
@@ -28,12 +30,21 @@ class RecommendationItem {
     final isTv = isTvOverride ?? (json['media_type'] == 'tv');
     return RecommendationItem(
       tmdbId: (json['id'] as num).toInt(),
-      title: (isTv ? (json['name'] ?? json['original_name']) : (json['title'] ?? json['original_title'])) as String? ?? fallbackTitle,
+      title:
+          (isTv
+                  ? (json['name'] ?? json['original_name'])
+                  : (json['title'] ?? json['original_title']))
+              as String? ??
+          fallbackTitle,
       posterPath: json['poster_path'] as String?,
       backdropPath: json['backdrop_path'] as String?,
       voteAverage: (json['vote_average'] as num?)?.toDouble() ?? 0.0,
       isTv: isTv,
       reason: reason,
+      genreIds: (json['genre_ids'] as List<dynamic>? ?? const [])
+          .whereType<num>()
+          .map((id) => id.toInt())
+          .toList(growable: false),
     );
   }
 }

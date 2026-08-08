@@ -551,6 +551,79 @@ class AppLocalizationsEn extends AppLocalizations {
   String get discoverFilterEmpty => 'Nothing in this category';
 
   @override
+  String get swipeDiscoverTitle => 'Swipe & Discover';
+
+  @override
+  String get swipeDiscoverEntryHint =>
+      'Add interesting titles straight to your watchlist';
+
+  @override
+  String get swipeDiscoverHint =>
+      'Swipe right: add to Watchlist • Swipe left: pass';
+
+  @override
+  String get swipeInterested => 'I\'m interested';
+
+  @override
+  String get swipeNotInterested => 'Not for me';
+
+  @override
+  String get swipeWatched => 'Watched';
+
+  @override
+  String get swipeAddedToWatchlist => 'Added to your Watchlist';
+
+  @override
+  String get swipePassed => 'Title passed';
+
+  @override
+  String get swipeUndo => 'Undo';
+
+  @override
+  String get swipeSaveFailed => 'Couldn\'t save your choice. Please try again.';
+
+  @override
+  String get swipeDeckFinished => 'That\'s all for now!';
+
+  @override
+  String get swipeDeckFinishedHint =>
+      'Fresh recommendations will be waiting here when they arrive.';
+
+  @override
+  String get swipeMoreOptions => 'More options';
+
+  @override
+  String get swipeResetTitle => 'Reset swipe preferences?';
+
+  @override
+  String get swipeResetMessage =>
+      'Titles you passed may be recommended again. Your Watchlist and viewing history won\'t change.';
+
+  @override
+  String get swipeResetAction => 'Reset preferences';
+
+  @override
+  String get swipeResetDone => 'Your swipe preferences were reset';
+
+  @override
+  String swipeRemaining(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recommendations left',
+      one: '1 recommendation left',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get swipeLoadMore => 'Get fresh recommendations';
+
+  @override
+  String get swipeRefreshFailed =>
+      'Couldn\'t load fresh recommendations. Please try again.';
+
+  @override
   String get searchTmdbAttribution => 'Data provided by TMDB.';
 
   @override
