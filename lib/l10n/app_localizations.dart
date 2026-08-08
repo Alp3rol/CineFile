@@ -5287,6 +5287,30 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'İlk koleksiyonunu oluştur veya arkadaş edin'**
   String get checklistStep4;
+
+  /// No description provided for @quickActionTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hızlı İşlemler'**
+  String get quickActionTitle;
+
+  /// No description provided for @quickActionAddRecord.
+  ///
+  /// In tr, this message translates to:
+  /// **'İzleme Kaydı Ekle'**
+  String get quickActionAddRecord;
+
+  /// No description provided for @quickActionToggleFavorite.
+  ///
+  /// In tr, this message translates to:
+  /// **'Favorilere Ekle / Çıkar'**
+  String get quickActionToggleFavorite;
+
+  /// No description provided for @quickActionViewDetail.
+  ///
+  /// In tr, this message translates to:
+  /// **'Detayları Gör'**
+  String get quickActionViewDetail;
 }
 
 class _AppLocalizationsDelegate

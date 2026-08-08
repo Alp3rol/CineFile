@@ -3176,4 +3176,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get checklistStep4 => 'Create a collection or follow a friend';
+
+  @override
+  String get quickActionTitle => 'Quick Actions';
+
+  @override
+  String get quickActionAddRecord => 'Add Watch Record';
+
+  @override
+  String get quickActionToggleFavorite => 'Toggle Favorite';
+
+  @override
+  String get quickActionViewDetail => 'View Details';
 }

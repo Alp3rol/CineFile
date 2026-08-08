@@ -2990,4 +2990,16 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get checklistStep4 => 'İlk koleksiyonunu oluştur veya arkadaş edin';
+
+  @override
+  String get quickActionTitle => 'Hızlı İşlemler';
+
+  @override
+  String get quickActionAddRecord => 'İzleme Kaydı Ekle';
+
+  @override
+  String get quickActionToggleFavorite => 'Favorilere Ekle / Çıkar';
+
+  @override
+  String get quickActionViewDetail => 'Detayları Gör';
 }

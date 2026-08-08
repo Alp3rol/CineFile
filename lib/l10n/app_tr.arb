@@ -1367,5 +1367,9 @@
   "checklistStep1": "İzleme bölgeni ve dilini belirle",
   "checklistStep2": "İlk film veya dizi kaydını ekle",
   "checklistStep3": "En sevdiğin yapımı favorilerine ekle",
-  "checklistStep4": "İlk koleksiyonunu oluştur veya arkadaş edin"
+  "checklistStep4": "İlk koleksiyonunu oluştur veya arkadaş edin",
+  "quickActionTitle": "Hızlı İşlemler",
+  "quickActionAddRecord": "İzleme Kaydı Ekle",
+  "quickActionToggleFavorite": "Favorilere Ekle / Çıkar",
+  "quickActionViewDetail": "Detayları Gör"
 }

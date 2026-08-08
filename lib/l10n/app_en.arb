@@ -945,5 +945,9 @@
   "checklistStep1": "Set your watch region and language",
   "checklistStep2": "Add your first watch record",
   "checklistStep3": "Mark your first favorite title",
-  "checklistStep4": "Create a collection or follow a friend"
+  "checklistStep4": "Create a collection or follow a friend",
+  "quickActionTitle": "Quick Actions",
+  "quickActionAddRecord": "Add Watch Record",
+  "quickActionToggleFavorite": "Toggle Favorite",
+  "quickActionViewDetail": "View Details"
 }

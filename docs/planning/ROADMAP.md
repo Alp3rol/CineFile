@@ -258,7 +258,8 @@ dönmek için net nedenler bulması.
   - **Tamamlandı (8 Ağustos 2026):** `JournalEmptyState`, `CustomListEmptyState`, `CustomListsTab` ve `CommunityFeedScreen` içerisindeki pasif boş ekranlar etkileşimli CTA butonlarıyla geliştirildi. Günlük boşken veya filtre sonuç vermediğinde ("İlk Kaydını Ekle", "Filtreleri Temizle"), koleksiyon boşken ("Koleksiyon Oluştur", "Film/Dizi Ekle") ve topluluk akışı boşken ("İçerik Paylaş / Arama Yap", "Kullanıcı Ara") doğrudan ilgili tab ve ekranlara yönlendiren eylem kartları bağlandı. `empty_states_action_test.dart` ve `community_feed_empty_state_render_test.dart` dahil 277 Flutter testi ve static analysis geçti.
 - [x] **İlk oturum kontrol listesi ve ilerleme göstergesi.**
   - **Tamamlandı (8 Ağustos 2026):** `FirstSessionChecklistCard` bileşeni geliştirildi. Ana ekranda yeni/onboarding durumundaki kullanıcılara 4 adımlı dinamik başlangıç rehberi (Tercihler, İlk İzleme Kaydı, Favori Ekleme, Koleksiyon/Arkadaş edinme) ve ilerleme çubuğu gösterilir. Tamamlandığında veya 'X' ile gizlendiğinde `firstSessionChecklistDismissedProvider` saklayarak kartı kaldırır. `first_session_checklist_test.dart` dahil 279 Flutter testi ve static analysis geçti.
-- [ ] Arama → detay → kayıt ekleme yolundaki gereksiz adımları ölç ve azalt.
+- [x] **Arama → detay → kayıt ekleme yolundaki gereksiz adımları ölç ve azalt.**
+  - **Tamamlandı (8 Ağustos 2026):** `MovieQuickActionSheet` ve `PosterGrid` basılı tutma (long press) kısayol aksiyonları eklendi. Kullanıcılar Arama veya Keşfet ızgaralarındaki afişlere basılı tutarak detay ekranına geçiş yapmadan 1 dokunuşla İzleme Kaydı ekleyebilir (`AddWatchRecordSheet`), Favori durumunu değiştirebilir veya Detay ekranına gidebilir. `quick_action_sheet_test.dart` dahil 281 Flutter testi ve static analysis geçti.
 - [ ] Erişilebilirlik turu.
   - Semantics etiketleri, klavye gezinmesi, odak sırası.
   - Metin ölçekleme, minimum dokunma alanı ve renk kontrastı.

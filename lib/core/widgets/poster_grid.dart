@@ -5,6 +5,7 @@ import '../theme/app_theme.dart';
 import '../constants/api_constants.dart';
 import 'app_network_image.dart';
 import '../../features/movie_detail/presentation/movie_detail_screen.dart';
+import 'movie_quick_action_sheet.dart';
 
 class PosterGrid extends StatelessWidget {
   final List<Map<String, dynamic>> items;
@@ -47,6 +48,14 @@ class PosterGrid extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => MovieDetailScreen(tmdbId: movieId, isTv: isTv),
               ),
+            );
+          },
+          onLongPress: () {
+            showModalBottomSheet(
+              context: context,
+              backgroundColor: Colors.transparent,
+              isScrollControlled: true,
+              builder: (context) => MovieQuickActionSheet(movieData: movie),
             );
           },
           child: Column(
