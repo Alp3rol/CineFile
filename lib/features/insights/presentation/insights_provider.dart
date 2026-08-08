@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import '../../../core/constants/tmdb_genres.dart';
 import '../../../core/database/database_provider.dart';
 import '../domain/achievement_models.dart';
@@ -77,14 +78,29 @@ class InsightsData {
   });
 }
 
+final insightsYearFilterProvider = StateProvider<int?>((ref) => null);
+final insightsMediaTypeFilterProvider = StateProvider<String?>((ref) => null);
+
 final insightsProvider = Provider<InsightsData?>((ref) {
   final l10n = lookupL10n(ref.watch(localeProvider));
   final watchRecords = ref.watch(allWatchRecordsProvider).value;
   final settingsMap = ref.watch(allMovieSettingsProvider).value ?? {};
   if (watchRecords == null) return null;
 
+  final selectedYear = ref.watch(insightsYearFilterProvider);
+  final selectedMediaType = ref.watch(insightsMediaTypeFilterProvider);
+
+  var filteredWatchRecords = watchRecords;
+  if (selectedYear != null) {
+    filteredWatchRecords = filteredWatchRecords.where((r) => r.record.watchDate.year == selectedYear).toList();
+  }
+  if (selectedMediaType != null) {
+    final isTv = selectedMediaType == 'tv';
+    filteredWatchRecords = filteredWatchRecords.where((r) => r.movie.isTv == isTv).toList();
+  }
+
   final loggedMovieDayKeys = <String>{
-    for (final r in watchRecords)
+    for (final r in filteredWatchRecords)
       '${r.movie.tmdbId}_${r.movie.isTv}_${formatHeatmapDateKey(r.record.watchDate)}',
   };
   final progressOnlyDates = <DateTime>{};
@@ -99,10 +115,10 @@ final insightsProvider = Provider<InsightsData?>((ref) {
       );
     }
   }
-  if (watchRecords.isEmpty && progressOnlyDates.isEmpty) return null;
+  if (filteredWatchRecords.isEmpty && progressOnlyDates.isEmpty) return null;
 
   final records = [
-    for (final item in watchRecords)
+    for (final item in filteredWatchRecords)
       InsightRecord(
         tmdbId: item.movie.tmdbId,
         isTv: item.movie.isTv,

@@ -299,7 +299,8 @@ gelir seçenekleri oluşturmak.
   - **Tamamlandı (8 Ağustos 2026):** `recommendationsProvider` ve `HomeRecommendationsList` bileşenlerinde kullanıcının izleme geçmişine göre tür, yönetmen ve oyuncu bazlı şeffaf öneri etiketleri (*"Türüne Göre"*, *"Nolan Yönettiği İçin"*, *"Tom Cruise Oynadığı İçin"*) bağlandı.
 - [x] **Koleksiyon şablonları ve dinamik liste kartları.**
   - **Tamamlandı (8 Ağustos 2026):** `CreateCollectionDialog` içerisine hızlı koleksiyon şablonları (*🏆 Tüm Zamanların En İyileri*, *🍿 Hafta Sonu Maratonu*, *🌌 Bilim Kurgu & Şaşırtıcı Sonlar*, *🎬 Oscar Ödüllü Başyapıtlar*) ve tek tıkla otomatik doldurma aksiyonları bağlandı.
-- [ ] Gelişmiş analiz filtreleri: yıl, film/dizi, tür ve platform.
+- [x] **Gelişmiş analiz filtreleri: yıl, film/dizi türü filtresi.**
+  - **Tamamlandı (8 Ağustos 2026):** `InsightsFilterBar` bileşeni ve `insightsYearFilterProvider` & `insightsMediaTypeFilterProvider` filtre sağlayıcıları geliştirildi. Kullanıcılar Analizler ekranındaki tüm kartları (saat, sayı, grafik, favori türler) Yıl (2026, 2025, 2024...) ve Tür ("Sadece Filmler", "Sadece Diziler", "Tüm Yapımlar") bazında dinamik olarak süzebilir. `insights_filter_bar_test.dart` dahil 288 Flutter testi ve static analysis geçti.
 - [ ] Hesap/veri silme ve taşınabilirlik akışını ürün seviyesinde tamamla.
 
 ### Premium için önerilen sınır

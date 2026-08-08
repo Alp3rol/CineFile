@@ -1399,5 +1399,9 @@
   "wrappedTopActor": "Favori Oyuncun",
   "wrappedShareCTA": "Özet Kartını Paylaş",
   "wrappedPostCommunity": "Toplulukta Paylaş",
-  "wrappedCopiedToast": "Özet metni panoya kopyalandı!"
+  "wrappedCopiedToast": "Özet metni panoya kopyalandı!",
+  "insightsFilterAllYears": "Tüm Yıllar",
+  "insightsFilterAllTypes": "Tüm Yapımlar",
+  "insightsFilterMoviesOnly": "Sadece Filmler",
+  "insightsFilterTvOnly": "Sadece Diziler"
 }

@@ -3264,4 +3264,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get wrappedCopiedToast => 'Summary text copied to clipboard!';
+
+  @override
+  String get insightsFilterAllYears => 'All Years';
+
+  @override
+  String get insightsFilterAllTypes => 'All Titles';
+
+  @override
+  String get insightsFilterMoviesOnly => 'Movies Only';
+
+  @override
+  String get insightsFilterTvOnly => 'TV Shows Only';
 }

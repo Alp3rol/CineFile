@@ -3078,4 +3078,16 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get wrappedCopiedToast => 'Özet metni panoya kopyalandı!';
+
+  @override
+  String get insightsFilterAllYears => 'Tüm Yıllar';
+
+  @override
+  String get insightsFilterAllTypes => 'Tüm Yapımlar';
+
+  @override
+  String get insightsFilterMoviesOnly => 'Sadece Filmler';
+
+  @override
+  String get insightsFilterTvOnly => 'Sadece Diziler';
 }

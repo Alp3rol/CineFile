@@ -8,6 +8,7 @@ import '../../wrapped/presentation/cinefile_wrapped_screen.dart';
 import 'insights_provider.dart';
 import 'widgets/contribution_heatmap.dart';
 import 'widgets/insights_charts.dart';
+import 'widgets/insights_filter_bar.dart';
 import 'widgets/insights_lists.dart';
 import 'widgets/seasonal_trends_card.dart';
 import 'widgets/summary_cards_grid.dart';
@@ -97,6 +98,11 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen>
             ),
           ),
           const SizedBox(height: 12),
+
+          // 0b. Insights Filter Bar
+          const InsightsFilterBar(),
+          const SizedBox(height: 12),
+
           // 1. Summary Cards Grid
           SummaryCardsGrid(data: insights),
           const SizedBox(height: 12),

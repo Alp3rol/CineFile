@@ -977,5 +977,9 @@
   "wrappedTopActor": "Favorite Actor",
   "wrappedShareCTA": "Share Summary Card",
   "wrappedPostCommunity": "Share with Community",
-  "wrappedCopiedToast": "Summary text copied to clipboard!"
+  "wrappedCopiedToast": "Summary text copied to clipboard!",
+  "insightsFilterAllYears": "All Years",
+  "insightsFilterAllTypes": "All Titles",
+  "insightsFilterMoviesOnly": "Movies Only",
+  "insightsFilterTvOnly": "TV Shows Only"
 }

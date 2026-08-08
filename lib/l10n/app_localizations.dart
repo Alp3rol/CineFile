@@ -5449,6 +5449,30 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Özet metni panoya kopyalandı!'**
   String get wrappedCopiedToast;
+
+  /// No description provided for @insightsFilterAllYears.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tüm Yıllar'**
+  String get insightsFilterAllYears;
+
+  /// No description provided for @insightsFilterAllTypes.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tüm Yapımlar'**
+  String get insightsFilterAllTypes;
+
+  /// No description provided for @insightsFilterMoviesOnly.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sadece Filmler'**
+  String get insightsFilterMoviesOnly;
+
+  /// No description provided for @insightsFilterTvOnly.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sadece Diziler'**
+  String get insightsFilterTvOnly;
 }
 
 class _AppLocalizationsDelegate
