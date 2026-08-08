@@ -3046,4 +3046,36 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get privacyExportCTA => 'Verilerimi JSON Olarak İndir';
+
+  @override
+  String get wrappedTitle => 'CineFile Özet';
+
+  @override
+  String get wrappedIntro => 'Sinema Yolculuğun';
+
+  @override
+  String get wrappedTotalTime => 'Toplam İzleme Süresi';
+
+  @override
+  String wrappedTotalHours(int hours) {
+    return '$hours Saat';
+  }
+
+  @override
+  String get wrappedTopGenres => 'En Çok İzlediğin Türler';
+
+  @override
+  String get wrappedTopDirector => 'Favori Yönetmenin';
+
+  @override
+  String get wrappedTopActor => 'Favori Oyuncun';
+
+  @override
+  String get wrappedShareCTA => 'Özet Kartını Paylaş';
+
+  @override
+  String get wrappedPostCommunity => 'Toplulukta Paylaş';
+
+  @override
+  String get wrappedCopiedToast => 'Özet metni panoya kopyalandı!';
 }

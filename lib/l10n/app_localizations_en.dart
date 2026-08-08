@@ -3232,4 +3232,36 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacyExportCTA => 'Export My Data as JSON';
+
+  @override
+  String get wrappedTitle => 'CineFile Wrapped';
+
+  @override
+  String get wrappedIntro => 'Your Cinema Journey';
+
+  @override
+  String get wrappedTotalTime => 'Total Watch Time';
+
+  @override
+  String wrappedTotalHours(int hours) {
+    return '$hours Hours';
+  }
+
+  @override
+  String get wrappedTopGenres => 'Top Watched Genres';
+
+  @override
+  String get wrappedTopDirector => 'Favorite Director';
+
+  @override
+  String get wrappedTopActor => 'Favorite Actor';
+
+  @override
+  String get wrappedShareCTA => 'Share Summary Card';
+
+  @override
+  String get wrappedPostCommunity => 'Share with Community';
+
+  @override
+  String get wrappedCopiedToast => 'Summary text copied to clipboard!';
 }

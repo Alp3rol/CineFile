@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/ui/ui.dart';
+import '../../../../core/widgets/glass_container.dart';
+import '../../wrapped/presentation/cinefile_wrapped_screen.dart';
 import 'insights_provider.dart';
 import 'widgets/contribution_heatmap.dart';
 import 'widgets/insights_charts.dart';
@@ -42,6 +45,58 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // 0. CineFile Wrapped Banner
+          AppPressable(
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const CineFileWrappedScreen(),
+                ),
+              );
+            },
+            borderRadius: AppRadius.lg,
+            child: GlassContainer(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              borderRadius: AppRadius.lg,
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.auto_awesome_rounded,
+                    color: AppColors.accent,
+                    size: 28,
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'CineFile Wrapped',
+                          style: GoogleFonts.outfit(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        Text(
+                          'Yıllık sinema özetini ve özel kartını keşfet!',
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(
+                    Icons.chevron_right_rounded,
+                    color: AppColors.textSecondary,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
           // 1. Summary Cards Grid
           SummaryCardsGrid(data: insights),
           const SizedBox(height: 12),

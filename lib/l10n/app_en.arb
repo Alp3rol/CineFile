@@ -962,5 +962,20 @@
   "privacyCloudDesc": "Favorites and profile settings sync securely across your devices via Firebase Firestore.",
   "privacyPublicSection": "Community & Privacy Model",
   "privacyPublicDesc": "All records are PRIVATE by default. Only posts you explicitly share are visible in community.",
-  "privacyExportCTA": "Export My Data as JSON"
+  "privacyExportCTA": "Export My Data as JSON",
+  "wrappedTitle": "CineFile Wrapped",
+  "wrappedIntro": "Your Cinema Journey",
+  "wrappedTotalTime": "Total Watch Time",
+  "wrappedTotalHours": "{hours} Hours",
+  "@wrappedTotalHours": {
+    "placeholders": {
+      "hours": { "type": "int" }
+    }
+  },
+  "wrappedTopGenres": "Top Watched Genres",
+  "wrappedTopDirector": "Favorite Director",
+  "wrappedTopActor": "Favorite Actor",
+  "wrappedShareCTA": "Share Summary Card",
+  "wrappedPostCommunity": "Share with Community",
+  "wrappedCopiedToast": "Summary text copied to clipboard!"
 }

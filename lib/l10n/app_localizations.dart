@@ -5389,6 +5389,66 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Verilerimi JSON Olarak İndir'**
   String get privacyExportCTA;
+
+  /// No description provided for @wrappedTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'CineFile Özet'**
+  String get wrappedTitle;
+
+  /// No description provided for @wrappedIntro.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sinema Yolculuğun'**
+  String get wrappedIntro;
+
+  /// No description provided for @wrappedTotalTime.
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplam İzleme Süresi'**
+  String get wrappedTotalTime;
+
+  /// No description provided for @wrappedTotalHours.
+  ///
+  /// In tr, this message translates to:
+  /// **'{hours} Saat'**
+  String wrappedTotalHours(int hours);
+
+  /// No description provided for @wrappedTopGenres.
+  ///
+  /// In tr, this message translates to:
+  /// **'En Çok İzlediğin Türler'**
+  String get wrappedTopGenres;
+
+  /// No description provided for @wrappedTopDirector.
+  ///
+  /// In tr, this message translates to:
+  /// **'Favori Yönetmenin'**
+  String get wrappedTopDirector;
+
+  /// No description provided for @wrappedTopActor.
+  ///
+  /// In tr, this message translates to:
+  /// **'Favori Oyuncun'**
+  String get wrappedTopActor;
+
+  /// No description provided for @wrappedShareCTA.
+  ///
+  /// In tr, this message translates to:
+  /// **'Özet Kartını Paylaş'**
+  String get wrappedShareCTA;
+
+  /// No description provided for @wrappedPostCommunity.
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplulukta Paylaş'**
+  String get wrappedPostCommunity;
+
+  /// No description provided for @wrappedCopiedToast.
+  ///
+  /// In tr, this message translates to:
+  /// **'Özet metni panoya kopyalandı!'**
+  String get wrappedCopiedToast;
 }
 
 class _AppLocalizationsDelegate

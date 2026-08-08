@@ -1384,5 +1384,20 @@
   "privacyCloudDesc": "Favori listelerin ve profil bilgilerin Firebase Firestore ile cihazların arasında güvenle senkronize edilir.",
   "privacyPublicSection": "Topluluk ve Gizlilik Modelimiz",
   "privacyPublicDesc": "Tüm kayıtların varsayılan olarak GİZLİDİR. Sadece açık paylaşmayı seçtiğin gönderiler toplulukta görünür.",
-  "privacyExportCTA": "Verilerimi JSON Olarak İndir"
+  "privacyExportCTA": "Verilerimi JSON Olarak İndir",
+  "wrappedTitle": "CineFile Özet",
+  "wrappedIntro": "Sinema Yolculuğun",
+  "wrappedTotalTime": "Toplam İzleme Süresi",
+  "wrappedTotalHours": "{hours} Saat",
+  "@wrappedTotalHours": {
+    "placeholders": {
+      "hours": { "type": "int" }
+    }
+  },
+  "wrappedTopGenres": "En Çok İzlediğin Türler",
+  "wrappedTopDirector": "Favori Yönetmenin",
+  "wrappedTopActor": "Favori Oyuncun",
+  "wrappedShareCTA": "Özet Kartını Paylaş",
+  "wrappedPostCommunity": "Toplulukta Paylaş",
+  "wrappedCopiedToast": "Özet metni panoya kopyalandı!"
 }
