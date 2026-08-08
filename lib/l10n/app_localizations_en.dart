@@ -3188,4 +3188,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get quickActionViewDetail => 'View Details';
+
+  @override
+  String get errorOfflineTitle => 'You\'re Offline';
+
+  @override
+  String get errorOfflineSubtitle =>
+      'Your watch records are saved safely on device. They will sync with community when online.';
+
+  @override
+  String get errorGenericTitle => 'Something Went Wrong';
+
+  @override
+  String get errorRetryCTA => 'Try Again';
 }

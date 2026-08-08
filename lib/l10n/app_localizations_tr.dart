@@ -3002,4 +3002,17 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get quickActionViewDetail => 'Detayları Gör';
+
+  @override
+  String get errorOfflineTitle => 'Çevrimdışısınız';
+
+  @override
+  String get errorOfflineSubtitle =>
+      'İzleme kayıtların cihazında güvende. İnternet bağlandığında toplulukla senkronize edilecek.';
+
+  @override
+  String get errorGenericTitle => 'Bir Hata Oluştu';
+
+  @override
+  String get errorRetryCTA => 'Tekrar Deneyin';
 }

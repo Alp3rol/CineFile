@@ -949,5 +949,9 @@
   "quickActionTitle": "Quick Actions",
   "quickActionAddRecord": "Add Watch Record",
   "quickActionToggleFavorite": "Toggle Favorite",
-  "quickActionViewDetail": "View Details"
+  "quickActionViewDetail": "View Details",
+  "errorOfflineTitle": "You're Offline",
+  "errorOfflineSubtitle": "Your watch records are saved safely on device. They will sync with community when online.",
+  "errorGenericTitle": "Something Went Wrong",
+  "errorRetryCTA": "Try Again"
 }

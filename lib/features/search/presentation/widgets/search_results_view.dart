@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/ui/ui.dart';
 import '../../../../core/widgets/poster_grid.dart';
 import '../../../../core/network/tmdb_exception.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -36,19 +37,14 @@ class SearchResultsView extends ConsumerWidget {
 
     final failure = state.failure;
     if (failure != null) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32),
-          child: Text(
-            switch (failure) {
-              TmdbFailure.network => l10n.searchErrorNetwork,
-              TmdbFailure.invalidApiKey => l10n.searchErrorInvalidApiKey,
-              TmdbFailure.unknown => l10n.searchErrorUnknown,
-            },
-            style: GoogleFonts.inter(color: Colors.redAccent),
-            textAlign: TextAlign.center,
-          ),
-        ),
+      return AppErrorState(
+        isOffline: failure == TmdbFailure.network,
+        title: switch (failure) {
+          TmdbFailure.network => l10n.searchErrorNetwork,
+          TmdbFailure.invalidApiKey => l10n.searchErrorInvalidApiKey,
+          TmdbFailure.unknown => l10n.searchErrorUnknown,
+        },
+        onRetry: () => ref.read(searchProvider.notifier).search(state.query),
       );
     }
 

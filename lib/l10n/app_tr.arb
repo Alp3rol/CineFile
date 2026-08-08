@@ -1371,5 +1371,9 @@
   "quickActionTitle": "Hızlı İşlemler",
   "quickActionAddRecord": "İzleme Kaydı Ekle",
   "quickActionToggleFavorite": "Favorilere Ekle / Çıkar",
-  "quickActionViewDetail": "Detayları Gör"
+  "quickActionViewDetail": "Detayları Gör",
+  "errorOfflineTitle": "Çevrimdışısınız",
+  "errorOfflineSubtitle": "İzleme kayıtların cihazında güvende. İnternet bağlandığında toplulukla senkronize edilecek.",
+  "errorGenericTitle": "Bir Hata Oluştu",
+  "errorRetryCTA": "Tekrar Deneyin"
 }

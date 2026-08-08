@@ -5311,6 +5311,30 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Detayları Gör'**
   String get quickActionViewDetail;
+
+  /// No description provided for @errorOfflineTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Çevrimdışısınız'**
+  String get errorOfflineTitle;
+
+  /// No description provided for @errorOfflineSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'İzleme kayıtların cihazında güvende. İnternet bağlandığında toplulukla senkronize edilecek.'**
+  String get errorOfflineSubtitle;
+
+  /// No description provided for @errorGenericTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bir Hata Oluştu'**
+  String get errorGenericTitle;
+
+  /// No description provided for @errorRetryCTA.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tekrar Deneyin'**
+  String get errorRetryCTA;
 }
 
 class _AppLocalizationsDelegate

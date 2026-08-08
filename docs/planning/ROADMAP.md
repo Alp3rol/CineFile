@@ -264,7 +264,8 @@ dönmek için net nedenler bulması.
   - Semantics etiketleri, klavye gezinmesi, odak sırası.
   - Metin ölçekleme, minimum dokunma alanı ve renk kontrastı.
   - **Tamamlandı (8 Ağustos 2026):** Ekran okuyucu (TalkBack / VoiceOver) ve erişilebilirlik desteği için `MainShell` alt gezinti sekmelerine, `PosterGrid` film afişlerine ve ana etkileşim bileşenlerine açık `Semantics` (buton, etiket, durum) yapılandırmaları bağlandı. `accessibility_semantics_test.dart` dahil 283 Flutter testi ve static analysis geçti.
-- [ ] Hata/çevrimdışı durumlarını ortak UI bileşenlerine bağla.
+- [x] **Hata/çevrimdışı durumlarını ortak UI bileşenlerine bağla.**
+  - **Tamamlandı (8 Ağustos 2026):** Yeniden kullanılabilir `AppErrorState` bileşeni geliştirildi ve `ui.dart` sistemine eklendi. Ağ kopmaları, çevrimdışı durumlar ("Çevrimdışısınız, verileriniz yerelde güvende") ve genel API hataları standart görsel ikonu, açık bilgilendirme metni ve "Tekrar Deneyin" CTA butonu ile ortaklaştırıldı. `SearchResultsView` bileşenine bağlandı. `app_error_state_test.dart` dahil 285 Flutter testi ve static analysis geçti.
 - [ ] Gizlilik merkezi: hangi verinin yerel, bulut veya herkese açık olduğunu
   kullanıcıya tek ekranda göster.
 
