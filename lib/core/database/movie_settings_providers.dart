@@ -7,7 +7,8 @@ part of 'database_provider.dart';
 // this file's documented exception (see CLAUDE.md).
 final movieSettingsSnapshotProvider =
     Provider.family<AsyncValue<UserMovieSetting?>, MovieKey>((ref, key) {
-      if (kIsWeb) {
+      final user = ref.watch(authStateProvider).value;
+      if (kIsWeb && user == null) {
         return AsyncValue.data(ref.watch(webMovieSettingsProvider)[key]);
       }
       return ref.watch(movieSettingsProvider(key));
