@@ -13,7 +13,6 @@ import 'widgets/search_results_view.dart';
 import '../../auth/presentation/widgets/user_profile_avatar_button.dart';
 import '../../../../core/widgets/scroll_to_top_button.dart';
 
-
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});
 
@@ -60,7 +59,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     // Only update the background when the API results list itself changes —
@@ -69,7 +67,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     // trigger a background update at all.
     ref.listen<SearchState>(searchProvider, (prev, next) {
       // Skip if results haven't changed (e.g. only query text changed mid-typing)
-      if (prev?.results == next.results && prev?.selectedGenreId == next.selectedGenreId) return;
+      if (prev?.results == next.results &&
+          prev?.selectedGenreId == next.selectedGenreId) {
+        return;
+      }
 
       final query = next.query.trim();
       var filtered = next.results;
@@ -81,7 +82,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       }
 
       if (query.isNotEmpty && filtered.isNotEmpty) {
-        ref.read(dynamicBackgroundProvider.notifier).updateMoviesFromMapList([filtered.first]);
+        ref.read(dynamicBackgroundProvider.notifier).updateMoviesFromMapList([
+          filtered.first,
+        ]);
       } else if (query.isEmpty) {
         ref.read(dynamicBackgroundProvider.notifier).clearColors();
       }
@@ -91,14 +94,15 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
     final searchState = ref.watch(searchProvider);
     final searchNotifier = ref.read(searchProvider.notifier);
-    final isApiKeyEmpty = ApiConstants.tmdbApiKey.isEmpty;
+    final isDemoMode = !ApiConstants.hasTmdbAccess;
 
     // Filter results locally
     var displayResults = searchState.results;
     if (searchState.selectedGenreId != null) {
       displayResults = displayResults.where((movie) {
         final genreIds = movie['genre_ids'] as List<dynamic>?;
-        return genreIds != null && genreIds.contains(searchState.selectedGenreId);
+        return genreIds != null &&
+            genreIds.contains(searchState.selectedGenreId);
       }).toList();
     }
 
@@ -111,7 +115,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           children: [
             // Header Title
             Padding(
-              padding: const EdgeInsets.only(left: 20, right: 20, top: 16, bottom: 8),
+              padding: const EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 16,
+                bottom: 8,
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -126,7 +135,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             ),
 
             // Demo Mode Warning Banner
-            if (isApiKeyEmpty) const SearchApiKeyWarningBanner(),
+            if (isDemoMode) const SearchApiKeyWarningBanner(),
 
             // Search Bar Input
             Padding(
@@ -137,10 +146,16 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 decoration: InputDecoration(
                   hintText: AppLocalizations.of(context).searchHint,
                   hintStyle: GoogleFonts.inter(color: AppTheme.textSecondary),
-                  prefixIcon: const Icon(Icons.search_rounded, color: AppTheme.textSecondary),
+                  prefixIcon: const Icon(
+                    Icons.search_rounded,
+                    color: AppTheme.textSecondary,
+                  ),
                   suffixIcon: _searchController.text.isNotEmpty
                       ? IconButton(
-                          icon: const Icon(Icons.clear_rounded, color: AppTheme.textSecondary),
+                          icon: const Icon(
+                            Icons.clear_rounded,
+                            color: AppTheme.textSecondary,
+                          ),
                           onPressed: () {
                             _searchController.clear();
                             searchNotifier.reset();
