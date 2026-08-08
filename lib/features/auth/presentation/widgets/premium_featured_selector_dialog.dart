@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/database/database_provider.dart';
+import '../../../../core/constants/api_constants.dart';
 
 class PremiumFeaturedSelectorDialog extends StatefulWidget {
   final List<WatchRecordWithMovie> records;
@@ -18,10 +19,12 @@ class PremiumFeaturedSelectorDialog extends StatefulWidget {
   });
 
   @override
-  State<PremiumFeaturedSelectorDialog> createState() => _PremiumFeaturedSelectorDialogState();
+  State<PremiumFeaturedSelectorDialog> createState() =>
+      _PremiumFeaturedSelectorDialogState();
 }
 
-class _PremiumFeaturedSelectorDialogState extends State<PremiumFeaturedSelectorDialog> {
+class _PremiumFeaturedSelectorDialogState
+    extends State<PremiumFeaturedSelectorDialog> {
   late List<String> _selectedIds;
 
   @override
@@ -59,7 +62,9 @@ class _PremiumFeaturedSelectorDialogState extends State<PremiumFeaturedSelectorD
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      AppLocalizations.of(context).profileShowcasePickCount(_selectedIds.length),
+                      AppLocalizations.of(
+                        context,
+                      ).profileShowcasePickCount(_selectedIds.length),
                       style: GoogleFonts.inter(
                         fontSize: 12,
                         color: Colors.white54,
@@ -68,7 +73,11 @@ class _PremiumFeaturedSelectorDialogState extends State<PremiumFeaturedSelectorD
                   ],
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close_rounded, color: Colors.white70, size: 20),
+                  icon: const Icon(
+                    Icons.close_rounded,
+                    color: Colors.white70,
+                    size: 20,
+                  ),
                   onPressed: () => Navigator.pop(context),
                 ),
               ],
@@ -107,7 +116,11 @@ class _PremiumFeaturedSelectorDialogState extends State<PremiumFeaturedSelectorD
                                   if (_selectedIds.length >= 5) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                        content: Text(AppLocalizations.of(context).profileShowcaseLimit),
+                                        content: Text(
+                                          AppLocalizations.of(
+                                            context,
+                                          ).profileShowcaseLimit,
+                                        ),
                                         duration: const Duration(seconds: 2),
                                       ),
                                     );
@@ -123,12 +136,16 @@ class _PremiumFeaturedSelectorDialogState extends State<PremiumFeaturedSelectorD
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
                                 color: isSelected
-                                    ? AppTheme.accentColor.withValues(alpha: 0.05)
+                                    ? AppTheme.accentColor.withValues(
+                                        alpha: 0.05,
+                                      )
                                     : Colors.white.withValues(alpha: 0.02),
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
                                   color: isSelected
-                                      ? AppTheme.accentColor.withValues(alpha: 0.3)
+                                      ? AppTheme.accentColor.withValues(
+                                          alpha: 0.3,
+                                        )
                                       : Colors.white.withValues(alpha: 0.05),
                                   width: 1.2,
                                 ),
@@ -142,14 +159,21 @@ class _PremiumFeaturedSelectorDialogState extends State<PremiumFeaturedSelectorD
                                       width: 40,
                                       height: 60,
                                       child: Image.network(
-                                        posterPath != null && posterPath.isNotEmpty
-                                            ? 'https://image.tmdb.org/t/p/w92$posterPath'
+                                        posterPath != null &&
+                                                posterPath.isNotEmpty
+                                            ? '${ApiConstants.imagePathW185}$posterPath'
                                             : 'https://images.unsplash.com/photo-1594909122845-11baa439b7bf?q=80&w=92',
                                         fit: BoxFit.cover,
-                                        errorBuilder: (context, error, stackTrace) => Container(
-                                          color: AppTheme.surfaceColor,
-                                          child: const Icon(Icons.movie_rounded, color: Colors.white24, size: 16),
-                                        ),
+                                        errorBuilder:
+                                            (context, error, stackTrace) =>
+                                                Container(
+                                                  color: AppTheme.surfaceColor,
+                                                  child: const Icon(
+                                                    Icons.movie_rounded,
+                                                    color: Colors.white24,
+                                                    size: 16,
+                                                  ),
+                                                ),
                                       ),
                                     ),
                                   ),
@@ -158,7 +182,8 @@ class _PremiumFeaturedSelectorDialogState extends State<PremiumFeaturedSelectorD
                                   // Movie Title & Type
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           item.movie.title,
@@ -173,17 +198,28 @@ class _PremiumFeaturedSelectorDialogState extends State<PremiumFeaturedSelectorD
                                         const SizedBox(height: 6),
                                         // Mini Tag Capsule
                                         Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 3,
+                                          ),
                                           decoration: BoxDecoration(
-                                            color: (item.movie.isTv ? Colors.blue : Colors.purple).withValues(alpha: 0.15),
-                                            borderRadius: BorderRadius.circular(20),
+                                            color:
+                                                (item.movie.isTv
+                                                        ? Colors.blue
+                                                        : Colors.purple)
+                                                    .withValues(alpha: 0.15),
+                                            borderRadius: BorderRadius.circular(
+                                              20,
+                                            ),
                                           ),
                                           child: Text(
                                             item.movie.isTv ? 'Dizi' : 'Film',
                                             style: GoogleFonts.inter(
                                               fontSize: 10,
                                               fontWeight: FontWeight.w600,
-                                              color: item.movie.isTv ? Colors.blueAccent : Colors.purpleAccent,
+                                              color: item.movie.isTv
+                                                  ? Colors.blueAccent
+                                                  : Colors.purpleAccent,
                                             ),
                                           ),
                                         ),
@@ -197,9 +233,13 @@ class _PremiumFeaturedSelectorDialogState extends State<PremiumFeaturedSelectorD
                                     height: 22,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
-                                      color: isSelected ? AppTheme.accentColor : Colors.transparent,
+                                      color: isSelected
+                                          ? AppTheme.accentColor
+                                          : Colors.transparent,
                                       border: Border.all(
-                                        color: isSelected ? AppTheme.accentColor : Colors.white30,
+                                        color: isSelected
+                                            ? AppTheme.accentColor
+                                            : Colors.white30,
                                         width: 1.5,
                                       ),
                                     ),
@@ -248,10 +288,7 @@ class _PremiumFeaturedSelectorDialogState extends State<PremiumFeaturedSelectorD
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16),
                       gradient: const LinearGradient(
-                        colors: [
-                          AppTheme.accentColor,
-                          Colors.amberAccent,
-                        ],
+                        colors: [AppTheme.accentColor, Colors.amberAccent],
                       ),
                       boxShadow: [
                         BoxShadow(

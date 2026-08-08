@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/api_constants.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/database/database_provider.dart';
 import '../../../movie_detail/presentation/movie_detail_screen.dart';
@@ -36,7 +37,10 @@ class _FeaturedMoviesStackState extends State<FeaturedMoviesStack> {
 
         // Calculate overlap spacing dynamically to fit perfectly inside the parent container without overflow
         final double spacing = totalCount > 1
-            ? ((availableWidth - cardWidth - 24) / (totalCount - 1)).clamp(30.0, 60.0)
+            ? ((availableWidth - cardWidth - 24) / (totalCount - 1)).clamp(
+                30.0,
+                60.0,
+              )
             : 0.0;
 
         final double stackWidth = totalCount > 1
@@ -56,7 +60,8 @@ class _FeaturedMoviesStackState extends State<FeaturedMoviesStack> {
               return AnimatedPositioned(
                 key: ValueKey('${item.movie.tmdbId}_$i'),
                 duration: const Duration(milliseconds: 250),
-                curve: Curves.easeOutBack, // Premium spring curve for a high-end feel
+                curve: Curves
+                    .easeOutBack, // Premium spring curve for a high-end feel
                 left: i * spacing + (isHovered ? 5.0 : 0.0),
                 top: isHovered ? 5.0 : 25.0,
                 child: MouseRegion(
@@ -92,7 +97,9 @@ class _FeaturedMoviesStackState extends State<FeaturedMoviesStack> {
                             ),
                           ],
                           border: Border.all(
-                            color: isHovered ? AppTheme.accentColor : Colors.transparent,
+                            color: isHovered
+                                ? AppTheme.accentColor
+                                : Colors.transparent,
                             width: 1.5,
                           ),
                         ),
@@ -100,13 +107,17 @@ class _FeaturedMoviesStackState extends State<FeaturedMoviesStack> {
                           borderRadius: BorderRadius.circular(10),
                           child: Image.network(
                             posterPath != null && posterPath.isNotEmpty
-                                ? 'https://image.tmdb.org/t/p/w342$posterPath'
+                                ? '${ApiConstants.imagePathW500}$posterPath'
                                 : 'https://images.unsplash.com/photo-1594909122845-11baa439b7bf?q=80&w=342',
                             fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) => Container(
-                              color: AppTheme.surfaceColor,
-                              child: const Icon(Icons.movie_rounded, color: Colors.white24),
-                            ),
+                            errorBuilder: (context, error, stackTrace) =>
+                                Container(
+                                  color: AppTheme.surfaceColor,
+                                  child: const Icon(
+                                    Icons.movie_rounded,
+                                    color: Colors.white24,
+                                  ),
+                                ),
                           ),
                         ),
                       ),

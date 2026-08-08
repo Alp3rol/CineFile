@@ -14,6 +14,7 @@ import '../shared_collection_detail_screen.dart';
 import '../user_public_diary_screen.dart';
 import 'comments_sheet.dart';
 import 'poster_filmstrip.dart';
+import '../../../../core/constants/api_constants.dart';
 
 // Renders a single feed entry, dispatching on post.type to one of the three
 // card layouts (movie/tv log, diary snapshot, shared collection). Extracted
@@ -23,7 +24,11 @@ class CommunityPostCard extends ConsumerWidget {
   final CommunityPost post;
   final User? currentUser;
 
-  const CommunityPostCard({super.key, required this.post, required this.currentUser});
+  const CommunityPostCard({
+    super.key,
+    required this.post,
+    required this.currentUser,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -37,8 +42,15 @@ class CommunityPostCard extends ConsumerWidget {
     }
   }
 
-  Future<void> _toggleStar(WidgetRef ref, String postId, List<String> starredBy, String currentUserId) {
-    return ref.read(socialRepositoryProvider).toggleStar(
+  Future<void> _toggleStar(
+    WidgetRef ref,
+    String postId,
+    List<String> starredBy,
+    String currentUserId,
+  ) {
+    return ref
+        .read(socialRepositoryProvider)
+        .toggleStar(
           postId: postId,
           currentlyStarred: starredBy.contains(currentUserId),
         );
@@ -49,7 +61,9 @@ class CommunityPostCard extends ConsumerWidget {
       children: [
         GestureDetector(
           onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => UserProfileScreen(userId: post.userId)),
+            MaterialPageRoute(
+              builder: (context) => UserProfileScreen(userId: post.userId),
+            ),
           ),
           child: CircleAvatar(
             radius: 18,
@@ -64,16 +78,23 @@ class CommunityPostCard extends ConsumerWidget {
             children: [
               GestureDetector(
                 onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => UserProfileScreen(userId: post.userId)),
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        UserProfileScreen(userId: post.userId),
+                  ),
                 ),
                 child: Text(
                   post.username,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(color: AppColors.textPrimary),
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: AppColors.textPrimary,
+                  ),
                 ),
               ),
               Text(
                 formatRelativeTime(context, post.createdAt),
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.textSecondary),
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
               ),
             ],
           ),
@@ -82,14 +103,22 @@ class CommunityPostCard extends ConsumerWidget {
     );
   }
 
-  Widget _buildInteractionRow(BuildContext context, WidgetRef ref, bool isStarred) {
+  Widget _buildInteractionRow(
+    BuildContext context,
+    WidgetRef ref,
+    bool isStarred,
+  ) {
     return Row(
       children: [
         GestureDetector(
           onTap: () {
             if (currentUser == null) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(AppLocalizations.of(context).communitySignInToLike)),
+                SnackBar(
+                  content: Text(
+                    AppLocalizations.of(context).communitySignInToLike,
+                  ),
+                ),
               );
               return;
             }
@@ -98,10 +127,14 @@ class CommunityPostCard extends ConsumerWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: isStarred ? AppColors.accent.withValues(alpha: 0.15) : AppColors.transparent,
+              color: isStarred
+                  ? AppColors.accent.withValues(alpha: 0.15)
+                  : AppColors.transparent,
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: isStarred ? AppColors.accent.withValues(alpha: 0.3) : AppColors.border,
+                color: isStarred
+                    ? AppColors.accent.withValues(alpha: 0.3)
+                    : AppColors.border,
                 width: 0.8,
               ),
             ),
@@ -115,7 +148,12 @@ class CommunityPostCard extends ConsumerWidget {
                 const SizedBox(width: 6),
                 Text(
                   '${post.starredBy.length}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold, color: isStarred ? AppColors.accent : AppColors.textSecondary),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: isStarred
+                        ? AppColors.accent
+                        : AppColors.textSecondary,
+                  ),
                 ),
               ],
             ),
@@ -133,11 +171,18 @@ class CommunityPostCard extends ConsumerWidget {
             ),
             child: Row(
               children: [
-                const Icon(Icons.chat_bubble_outline_rounded, color: AppColors.textSecondary, size: 16),
+                const Icon(
+                  Icons.chat_bubble_outline_rounded,
+                  color: AppColors.textSecondary,
+                  size: 16,
+                ),
                 const SizedBox(width: 6),
                 Text(
                   '${post.commentCount}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold, color: AppColors.textSecondary),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ],
             ),
@@ -148,7 +193,8 @@ class CommunityPostCard extends ConsumerWidget {
   }
 
   Widget _buildMovieCard(BuildContext context, WidgetRef ref) {
-    final isStarred = currentUser != null && post.starredBy.contains(currentUser!.uid);
+    final isStarred =
+        currentUser != null && post.starredBy.contains(currentUser!.uid);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -167,14 +213,18 @@ class CommunityPostCard extends ConsumerWidget {
                 GestureDetector(
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (context) => MovieDetailScreen(tmdbId: post.movieId!, isTv: post.isTv!),
+                      builder: (context) => MovieDetailScreen(
+                        tmdbId: post.movieId!,
+                        isTv: post.isTv!,
+                      ),
                     ),
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),
                     child: Image.network(
-                      post.moviePosterPath != null && post.moviePosterPath!.isNotEmpty
-                          ? 'https://image.tmdb.org/t/p/w185${post.moviePosterPath}'
+                      post.moviePosterPath != null &&
+                              post.moviePosterPath!.isNotEmpty
+                          ? '${ApiConstants.imagePathW185}${post.moviePosterPath}'
                           : 'https://images.unsplash.com/photo-1594909122845-11baa439b7bf?q=80&w=185',
                       width: 80,
                       height: 120,
@@ -183,7 +233,10 @@ class CommunityPostCard extends ConsumerWidget {
                         width: 80,
                         height: 120,
                         color: AppColors.surface,
-                        child: const Icon(Icons.movie_rounded, color: AppColors.textTertiary),
+                        child: const Icon(
+                          Icons.movie_rounded,
+                          color: AppColors.textTertiary,
+                        ),
                       ),
                     ),
                   ),
@@ -196,7 +249,10 @@ class CommunityPostCard extends ConsumerWidget {
                       GestureDetector(
                         onTap: () => Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (context) => MovieDetailScreen(tmdbId: post.movieId!, isTv: post.isTv!),
+                            builder: (context) => MovieDetailScreen(
+                              tmdbId: post.movieId!,
+                              isTv: post.isTv!,
+                            ),
                           ),
                         ),
                         child: Text(
@@ -210,20 +266,35 @@ class CommunityPostCard extends ConsumerWidget {
                           if (post.releaseYear != null)
                             Text(
                               '${post.releaseYear}',
-                              style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.textSecondary),
+                              style: Theme.of(context).textTheme.labelLarge
+                                  ?.copyWith(color: AppColors.textSecondary),
                             ),
-                          if (post.releaseYear != null && post.isTv == true) const SizedBox(width: 6),
+                          if (post.releaseYear != null && post.isTv == true)
+                            const SizedBox(width: 6),
                           if (post.isTv == true)
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
                                 color: AppColors.accent.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(4),
-                                border: Border.all(color: AppColors.accent.withValues(alpha: 0.4), width: 0.5),
+                                border: Border.all(
+                                  color: AppColors.accent.withValues(
+                                    alpha: 0.4,
+                                  ),
+                                  width: 0.5,
+                                ),
                               ),
                               child: Text(
                                 AppLocalizations.of(context).communityShowLabel,
-                                style: Theme.of(context).textTheme.labelSmall?.copyWith(fontSize: 8, fontWeight: FontWeight.bold, color: AppColors.accent),
+                                style: Theme.of(context).textTheme.labelSmall
+                                    ?.copyWith(
+                                      fontSize: 8,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.accent,
+                                    ),
                               ),
                             ),
                         ],
@@ -232,16 +303,31 @@ class CommunityPostCard extends ConsumerWidget {
                       if (post.rating != null)
                         Row(
                           children: [
-                            const Icon(Icons.star_rounded, color: AppColors.rating, size: 18),
+                            const Icon(
+                              Icons.star_rounded,
+                              color: AppColors.rating,
+                              size: 18,
+                            ),
                             const SizedBox(width: 4),
                             Text(
                               post.rating!.toStringAsFixed(1),
-                              style: Theme.of(context).textTheme.titleSmall?.copyWith(color: AppColors.textPrimary),
+                              style: Theme.of(context).textTheme.titleSmall
+                                  ?.copyWith(color: AppColors.textPrimary),
                             ),
-                            Text('/10', style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.textSecondary)),
+                            Text(
+                              '/10',
+                              style: Theme.of(context).textTheme.labelSmall
+                                  ?.copyWith(color: AppColors.textSecondary),
+                            ),
                             if (post.mood != null) ...[
                               const SizedBox(width: 12),
-                              Text(AppLocalizations.of(context).communityPostMood(post.mood!), style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.textSecondary)),
+                              Text(
+                                AppLocalizations.of(
+                                  context,
+                                ).communityPostMood(post.mood!),
+                                style: Theme.of(context).textTheme.labelLarge
+                                    ?.copyWith(color: AppColors.textSecondary),
+                              ),
                             ],
                           ],
                         ),
@@ -257,11 +343,20 @@ class CommunityPostCard extends ConsumerWidget {
               decoration: BoxDecoration(
                 color: AppColors.shadow.withValues(alpha: AppOpacity.soft),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.textPrimary.withValues(alpha: AppOpacity.faint), width: 0.5),
+                border: Border.all(
+                  color: AppColors.textPrimary.withValues(
+                    alpha: AppOpacity.faint,
+                  ),
+                  width: 0.5,
+                ),
               ),
               child: Text(
                 '"${post.caption}"',
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.textSecondary, fontStyle: FontStyle.italic, height: 1.4),
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: AppColors.textSecondary,
+                  fontStyle: FontStyle.italic,
+                  height: 1.4,
+                ),
               ),
             ),
             const SizedBox(height: 14),
@@ -275,7 +370,8 @@ class CommunityPostCard extends ConsumerWidget {
   }
 
   Widget _buildDiarySnapshotCard(BuildContext context, WidgetRef ref) {
-    final isStarred = currentUser != null && post.starredBy.contains(currentUser!.uid);
+    final isStarred =
+        currentUser != null && post.starredBy.contains(currentUser!.uid);
     final previewPosters = post.entries
         .map((e) => e['moviePosterPath'] as String?)
         .whereType<String>()
@@ -297,7 +393,10 @@ class CommunityPostCard extends ConsumerWidget {
             GestureDetector(
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (_) => UserPublicDiaryScreen(username: post.username, entries: post.entries),
+                  builder: (_) => UserPublicDiaryScreen(
+                    username: post.username,
+                    entries: post.entries,
+                  ),
                 ),
               ),
               child: Column(
@@ -305,16 +404,28 @@ class CommunityPostCard extends ConsumerWidget {
                 children: [
                   Text(
                     post.caption,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary, height: 1.4),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.textSecondary,
+                      height: 1.4,
+                    ),
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    AppLocalizations.of(context).communityDiaryEntriesLink(post.entries.length),
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(color: AppColors.accent, fontWeight: FontWeight.bold),
+                    AppLocalizations.of(
+                      context,
+                    ).communityDiaryEntriesLink(post.entries.length),
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: AppColors.accent,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   if (previewPosters.isNotEmpty) ...[
                     const SizedBox(height: 12),
-                    PosterFilmstrip(posterPaths: previewPosters, remainingCount: post.entries.length - previewPosters.length),
+                    PosterFilmstrip(
+                      posterPaths: previewPosters,
+                      remainingCount:
+                          post.entries.length - previewPosters.length,
+                    ),
                   ],
                 ],
               ),
@@ -336,8 +447,11 @@ class CommunityPostCard extends ConsumerWidget {
   // after this post was created; that's rendered as a graceful notice
   // rather than an error or a crash.
   Widget _buildCollectionCard(BuildContext context, WidgetRef ref) {
-    final isStarred = currentUser != null && post.starredBy.contains(currentUser!.uid);
-    final dataAsync = ref.watch(sharedCollectionProvider(post.collectionRefId!));
+    final isStarred =
+        currentUser != null && post.starredBy.contains(currentUser!.uid);
+    final dataAsync = ref.watch(
+      sharedCollectionProvider(post.collectionRefId!),
+    );
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -353,19 +467,32 @@ class CommunityPostCard extends ConsumerWidget {
             dataAsync.when(
               loading: () => const Padding(
                 padding: EdgeInsets.symmetric(vertical: 12),
-                child: Center(child: CircularProgressIndicator(color: AppColors.accent)),
+                child: Center(
+                  child: CircularProgressIndicator(color: AppColors.accent),
+                ),
               ),
-              error: (err, stack) => Text(AppLocalizations.of(context).commonErrorWithDetail('$err'), style: const TextStyle(color: AppColors.error)),
+              error: (err, stack) => Text(
+                AppLocalizations.of(context).commonErrorWithDetail('$err'),
+                style: const TextStyle(color: AppColors.error),
+              ),
               data: (data) {
                 if (data == null) {
                   return Row(
                     children: [
-                      Icon(Icons.collections_bookmark_outlined, color: AppColors.textSecondary, size: 18),
+                      Icon(
+                        Icons.collections_bookmark_outlined,
+                        color: AppColors.textSecondary,
+                        size: 18,
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           AppLocalizations.of(context).sharedCollectionUnshared,
-                          style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.textSecondary, fontStyle: FontStyle.italic),
+                          style: Theme.of(context).textTheme.labelLarge
+                              ?.copyWith(
+                                color: AppColors.textSecondary,
+                                fontStyle: FontStyle.italic,
+                              ),
                         ),
                       ),
                     ],
@@ -384,7 +511,9 @@ class CommunityPostCard extends ConsumerWidget {
                 return GestureDetector(
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) => SharedCollectionDetailScreen(collectionRefId: post.collectionRefId!),
+                      builder: (_) => SharedCollectionDetailScreen(
+                        collectionRefId: post.collectionRefId!,
+                      ),
                     ),
                   ),
                   child: Column(
@@ -392,16 +521,26 @@ class CommunityPostCard extends ConsumerWidget {
                     children: [
                       Text(
                         post.caption,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary, height: 1.4),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.textSecondary,
+                          height: 1.4,
+                        ),
                       ),
                       const SizedBox(height: 6),
                       Text(
                         '$name · ${movies.length} film/dizi',
-                        style: Theme.of(context).textTheme.labelMedium?.copyWith(color: AppColors.accent, fontWeight: FontWeight.bold),
+                        style: Theme.of(context).textTheme.labelMedium
+                            ?.copyWith(
+                              color: AppColors.accent,
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
                       if (previewPosters.isNotEmpty) ...[
                         const SizedBox(height: 12),
-                        PosterFilmstrip(posterPaths: previewPosters, remainingCount: movies.length - previewPosters.length),
+                        PosterFilmstrip(
+                          posterPaths: previewPosters,
+                          remainingCount: movies.length - previewPosters.length,
+                        ),
                       ],
                     ],
                   ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/ui/ui.dart';
+import '../../../../core/constants/api_constants.dart';
 
 // The premium film-strip preview shown on both "diary_snapshot" and
 // "collection" post cards (was duplicated identically in both — now
@@ -14,7 +15,11 @@ import '../../../../core/ui/ui.dart';
 class PosterFilmstrip extends StatefulWidget {
   final List<String> posterPaths;
   final int remainingCount;
-  const PosterFilmstrip({super.key, required this.posterPaths, this.remainingCount = 0});
+  const PosterFilmstrip({
+    super.key,
+    required this.posterPaths,
+    this.remainingCount = 0,
+  });
 
   @override
   State<PosterFilmstrip> createState() => _PosterFilmstripState();
@@ -38,14 +43,17 @@ class _PosterFilmstripState extends State<PosterFilmstrip> {
       height: _posterHeight + _hoverLift,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
-        clipBehavior: Clip.none, // lets a hovered/pressed poster lift above the row
+        clipBehavior:
+            Clip.none, // lets a hovered/pressed poster lift above the row
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             for (var i = 0; i < posters.length; i++) ...[
               if (i > 0) const SizedBox(width: _gap),
               Padding(
-                padding: EdgeInsets.only(top: _hoveredIndex == i ? 0 : _hoverLift),
+                padding: EdgeInsets.only(
+                  top: _hoveredIndex == i ? 0 : _hoverLift,
+                ),
                 child: Listener(
                   onPointerDown: (_) => setState(() => _hoveredIndex = i),
                   onPointerUp: (_) => setState(() => _hoveredIndex = null),
@@ -64,7 +72,9 @@ class _PosterFilmstripState extends State<PosterFilmstrip> {
                           boxShadow: _hoveredIndex == i
                               ? [
                                   BoxShadow(
-                                    color: AppColors.shadow.withValues(alpha: AppOpacity.strong),
+                                    color: AppColors.shadow.withValues(
+                                      alpha: AppOpacity.strong,
+                                    ),
                                     blurRadius: 12,
                                     offset: const Offset(0, 4),
                                   ),
@@ -74,12 +84,16 @@ class _PosterFilmstripState extends State<PosterFilmstrip> {
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(10),
                           child: Image.network(
-                            'https://image.tmdb.org/t/p/w185${posters[i]}',
+                            '${ApiConstants.imagePathW185}${posters[i]}',
                             width: _posterWidth,
                             height: _posterHeight,
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) =>
-                                Container(width: _posterWidth, height: _posterHeight, color: AppColors.surface),
+                                Container(
+                                  width: _posterWidth,
+                                  height: _posterHeight,
+                                  color: AppColors.surface,
+                                ),
                           ),
                         ),
                       ),
@@ -102,7 +116,9 @@ class _PosterFilmstripState extends State<PosterFilmstrip> {
                   alignment: Alignment.center,
                   child: Text(
                     '+${widget.remainingCount}',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppColors.textSecondary),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                 ),
               ),

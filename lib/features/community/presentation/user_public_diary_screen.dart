@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/constants/api_constants.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../../core/ui/ui.dart';
 import '../../movie_detail/presentation/movie_detail_screen.dart';
@@ -12,14 +13,21 @@ import '../../relationship_graph/presentation/screens/cine_twin_screen.dart';
 class UserPublicDiaryScreen extends StatelessWidget {
   final String username;
   final List<Map<String, dynamic>> entries;
-  const UserPublicDiaryScreen({super.key, required this.username, required this.entries});
+  const UserPublicDiaryScreen({
+    super.key,
+    required this.username,
+    required this.entries,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text('@$username', style: Theme.of(context).textTheme.titleSmall),
+        title: Text(
+          '@$username',
+          style: Theme.of(context).textTheme.titleSmall,
+        ),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
@@ -40,7 +48,9 @@ class UserPublicDiaryScreen extends StatelessWidget {
             ? Center(
                 child: Text(
                   AppLocalizations.of(context).publicDiaryEmpty,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               )
             : GridView.builder(
@@ -63,7 +73,8 @@ class UserPublicDiaryScreen extends StatelessWidget {
                     onTap: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (context) => MovieDetailScreen(tmdbId: movieId, isTv: isTv),
+                          builder: (context) =>
+                              MovieDetailScreen(tmdbId: movieId, isTv: isTv),
                         ),
                       );
                     },
@@ -74,13 +85,17 @@ class UserPublicDiaryScreen extends StatelessWidget {
                             borderRadius: BorderRadius.circular(10),
                             child: Image.network(
                               posterPath != null && posterPath.isNotEmpty
-                                  ? 'https://image.tmdb.org/t/p/w185$posterPath'
+                                  ? '${ApiConstants.imagePathW185}$posterPath'
                                   : 'https://images.unsplash.com/photo-1594909122845-11baa439b7bf?q=80&w=185',
                               fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) => Container(
-                                color: AppColors.surface,
-                                child: const Icon(Icons.movie_rounded, color: AppColors.textTertiary),
-                              ),
+                              errorBuilder: (context, error, stackTrace) =>
+                                  Container(
+                                    color: AppColors.surface,
+                                    child: const Icon(
+                                      Icons.movie_rounded,
+                                      color: AppColors.textTertiary,
+                                    ),
+                                  ),
                             ),
                           ),
                         ),
@@ -89,19 +104,34 @@ class UserPublicDiaryScreen extends StatelessWidget {
                             top: 6,
                             right: 6,
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
-                                color: AppColors.shadow.withValues(alpha: AppOpacity.heavy),
+                                color: AppColors.shadow.withValues(
+                                  alpha: AppOpacity.heavy,
+                                ),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Icon(Icons.star_rounded, color: AppColors.rating, size: 10),
+                                  const Icon(
+                                    Icons.star_rounded,
+                                    color: AppColors.rating,
+                                    size: 10,
+                                  ),
                                   const SizedBox(width: 2),
                                   Text(
                                     rating.toStringAsFixed(1),
-                                    style: Theme.of(context).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelSmall
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.textPrimary,
+                                        ),
                                   ),
                                 ],
                               ),

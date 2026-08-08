@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/api_constants.dart';
 import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/tmdb_service.dart';
@@ -95,8 +96,10 @@ class _DiscoverModeSheetState extends ConsumerState<DiscoverModeSheet> {
       }
 
       // Sort by vote average (popularity)
-      unwatched.sort((a, b) => (b['voteAverage'] as double)
-          .compareTo(a['voteAverage'] as double));
+      unwatched.sort(
+        (a, b) =>
+            (b['voteAverage'] as double).compareTo(a['voteAverage'] as double),
+      );
 
       setState(() {
         _unwatchedCredits = unwatched.take(6).toList();
@@ -141,23 +144,29 @@ class _DiscoverModeSheetState extends ConsumerState<DiscoverModeSheet> {
           const SizedBox(height: 16),
           Row(
             children: [
-              const Icon(Icons.stars_rounded, color: Color(0xFFFFC107), size: 24),
+              const Icon(
+                Icons.stars_rounded,
+                color: Color(0xFFFFC107),
+                size: 24,
+              ),
               const SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      AppLocalizations.of(context).discoverEngineTitle(widget.personNode.label),
+                      AppLocalizations.of(
+                        context,
+                      ).discoverEngineTitle(widget.personNode.label),
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     Text(
                       AppLocalizations.of(context).discoverSubtitle,
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: AppTheme.textSecondary,
-                          ),
+                        color: AppTheme.textSecondary,
+                      ),
                     ),
                   ],
                 ),
@@ -174,11 +183,16 @@ class _DiscoverModeSheetState extends ConsumerState<DiscoverModeSheet> {
                   // Watched Section
                   Row(
                     children: [
-                      const Icon(Icons.check_circle_rounded,
-                          size: 16, color: AppTheme.accentColor),
+                      const Icon(
+                        Icons.check_circle_rounded,
+                        size: 16,
+                        color: AppTheme.accentColor,
+                      ),
                       const SizedBox(width: 6),
                       Text(
-                        AppLocalizations.of(context).discoverWatchedCount(widget.watchedNeighbors.length),
+                        AppLocalizations.of(
+                          context,
+                        ).discoverWatchedCount(widget.watchedNeighbors.length),
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 13,
@@ -233,8 +247,9 @@ class _DiscoverModeSheetState extends ConsumerState<DiscoverModeSheet> {
                                   overflow: TextOverflow.ellipsis,
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(
-                                      fontSize: 10,
-                                      color: AppTheme.textSecondary),
+                                    fontSize: 10,
+                                    color: AppTheme.textSecondary,
+                                  ),
                                 ),
                               ),
                             ],
@@ -248,8 +263,11 @@ class _DiscoverModeSheetState extends ConsumerState<DiscoverModeSheet> {
                   // Unwatched Recommendations Section
                   Row(
                     children: [
-                      const Icon(Icons.stars_rounded,
-                          size: 16, color: Color(0xFFFFC107)),
+                      const Icon(
+                        Icons.stars_rounded,
+                        size: 16,
+                        color: Color(0xFFFFC107),
+                      ),
                       const SizedBox(width: 6),
                       Text(
                         AppLocalizations.of(context).discoverUnwatchedPopular,
@@ -270,7 +288,8 @@ class _DiscoverModeSheetState extends ConsumerState<DiscoverModeSheet> {
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
                           valueColor: AlwaysStoppedAnimation<Color>(
-                              AppTheme.accentColor),
+                            AppTheme.accentColor,
+                          ),
                         ),
                       ),
                     )
@@ -279,7 +298,10 @@ class _DiscoverModeSheetState extends ConsumerState<DiscoverModeSheet> {
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       child: Text(
                         _error!,
-                        style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12),
+                        style: const TextStyle(
+                          color: AppTheme.textSecondary,
+                          fontSize: 12,
+                        ),
                       ),
                     )
                   else if (_unwatchedCredits.isEmpty)
@@ -294,7 +316,9 @@ class _DiscoverModeSheetState extends ConsumerState<DiscoverModeSheet> {
                         AppLocalizations.of(context).discoverAllWatched,
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                            fontSize: 12, color: AppTheme.textSecondary),
+                          fontSize: 12,
+                          color: AppTheme.textSecondary,
+                        ),
                       ),
                     )
                   else
@@ -303,16 +327,16 @@ class _DiscoverModeSheetState extends ConsumerState<DiscoverModeSheet> {
                       physics: const NeverScrollableScrollPhysics(),
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 3,
-                        childAspectRatio: 0.65,
-                        crossAxisSpacing: 10,
-                        mainAxisSpacing: 10,
-                      ),
+                            crossAxisCount: 3,
+                            childAspectRatio: 0.65,
+                            crossAxisSpacing: 10,
+                            mainAxisSpacing: 10,
+                          ),
                       itemCount: _unwatchedCredits.length,
                       itemBuilder: (context, i) {
                         final item = _unwatchedCredits[i];
                         final posterUrl =
-                            'https://image.tmdb.org/t/p/w185${item['posterPath']}';
+                            '${ApiConstants.imagePathW185}${item['posterPath']}';
                         return GestureDetector(
                           onTap: () {
                             Navigator.pop(context);
@@ -335,7 +359,8 @@ class _DiscoverModeSheetState extends ConsumerState<DiscoverModeSheet> {
                                 Expanded(
                                   child: ClipRRect(
                                     borderRadius: const BorderRadius.vertical(
-                                        top: Radius.circular(10)),
+                                      top: Radius.circular(10),
+                                    ),
                                     child: AppNetworkImage(
                                       imageUrl: posterUrl,
                                       seed: item['title'] as String,
@@ -361,9 +386,11 @@ class _DiscoverModeSheetState extends ConsumerState<DiscoverModeSheet> {
                                       ),
                                       Row(
                                         children: [
-                                          const Icon(Icons.star_rounded,
-                                              size: 11,
-                                              color: Color(0xFFFFC107)),
+                                          const Icon(
+                                            Icons.star_rounded,
+                                            size: 11,
+                                            color: Color(0xFFFFC107),
+                                          ),
                                           const SizedBox(width: 2),
                                           Text(
                                             (item['voteAverage'] as double)
