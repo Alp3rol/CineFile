@@ -2970,4 +2970,24 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get communityFollowingEmptyHint =>
       'Takip ettiğin kullanıcılar henüz izleme kaydı paylaşmadı. Yeni arkadaşlar keşfedebilirsin.';
+
+  @override
+  String get checklistTitle => 'Hoş Geldin! Başlangıç Rehberi';
+
+  @override
+  String checklistProgress(int completed, int total) {
+    return '$completed/$total Tamamlandı';
+  }
+
+  @override
+  String get checklistStep1 => 'İzleme bölgeni ve dilini belirle';
+
+  @override
+  String get checklistStep2 => 'İlk film veya dizi kaydını ekle';
+
+  @override
+  String get checklistStep3 => 'En sevdiğin yapımı favorilerine ekle';
+
+  @override
+  String get checklistStep4 => 'İlk koleksiyonunu oluştur veya arkadaş edin';
 }

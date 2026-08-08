@@ -7,7 +7,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'support/localized_app.dart';
 import 'package:cinefile/core/database/app_database.dart';
 import 'package:cinefile/core/database/database_provider.dart';
+import 'package:cinefile/core/services/app_settings_store.dart';
 import 'package:cinefile/features/home/presentation/home_screen.dart';
+import 'package:cinefile/features/settings/presentation/settings_provider.dart';
 
 Movie _movie(int id, String title, {String? director, int? releaseYear}) {
   return Movie(
@@ -64,6 +66,9 @@ void main() {
           // dedup) — overridden for the same Firebase-avoidance reason as
           // activelyWatchingProvider above.
           allMovieSettingsProvider.overrideWith((ref) => Stream.value(const {})),
+          firstSessionChecklistDismissedProvider.overrideWith(
+            (ref) => FirstSessionChecklistDismissedNotifier(AppSettingsStore())..setDismissed(true),
+          ),
         ],
         child: const LocalizedTestApp(locale: Locale('tr'), home: HomeScreen()),
       ),
@@ -105,6 +110,9 @@ void main() {
           // dedup) — overridden for the same Firebase-avoidance reason as
           // activelyWatchingProvider above.
           allMovieSettingsProvider.overrideWith((ref) => Stream.value(const {})),
+          firstSessionChecklistDismissedProvider.overrideWith(
+            (ref) => FirstSessionChecklistDismissedNotifier(AppSettingsStore())..setDismissed(true),
+          ),
         ],
         child: const LocalizedTestApp(locale: Locale('tr'), home: HomeScreen()),
       ),
@@ -141,6 +149,9 @@ void main() {
           // dedup) — overridden for the same Firebase-avoidance reason as
           // activelyWatchingProvider above.
           allMovieSettingsProvider.overrideWith((ref) => Stream.value(const {})),
+          firstSessionChecklistDismissedProvider.overrideWith(
+            (ref) => FirstSessionChecklistDismissedNotifier(AppSettingsStore())..setDismissed(true),
+          ),
         ],
         child: const LocalizedTestApp(locale: Locale('tr'), home: HomeScreen()),
       ),

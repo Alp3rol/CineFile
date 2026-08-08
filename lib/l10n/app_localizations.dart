@@ -5251,6 +5251,42 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Takip ettiğin kullanıcılar henüz izleme kaydı paylaşmadı. Yeni arkadaşlar keşfedebilirsin.'**
   String get communityFollowingEmptyHint;
+
+  /// No description provided for @checklistTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hoş Geldin! Başlangıç Rehberi'**
+  String get checklistTitle;
+
+  /// No description provided for @checklistProgress.
+  ///
+  /// In tr, this message translates to:
+  /// **'{completed}/{total} Tamamlandı'**
+  String checklistProgress(int completed, int total);
+
+  /// No description provided for @checklistStep1.
+  ///
+  /// In tr, this message translates to:
+  /// **'İzleme bölgeni ve dilini belirle'**
+  String get checklistStep1;
+
+  /// No description provided for @checklistStep2.
+  ///
+  /// In tr, this message translates to:
+  /// **'İlk film veya dizi kaydını ekle'**
+  String get checklistStep2;
+
+  /// No description provided for @checklistStep3.
+  ///
+  /// In tr, this message translates to:
+  /// **'En sevdiğin yapımı favorilerine ekle'**
+  String get checklistStep3;
+
+  /// No description provided for @checklistStep4.
+  ///
+  /// In tr, this message translates to:
+  /// **'İlk koleksiyonunu oluştur veya arkadaş edin'**
+  String get checklistStep4;
 }
 
 class _AppLocalizationsDelegate

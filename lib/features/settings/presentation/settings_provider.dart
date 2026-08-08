@@ -313,3 +313,18 @@ class OnboardingCompletedNotifier extends _StoredPreferenceNotifier<bool> {
 
   Future<void> setCompleted(bool completed) => _save(completed);
 }
+
+final firstSessionChecklistDismissedProvider =
+    StateNotifierProvider<FirstSessionChecklistDismissedNotifier, bool>((ref) {
+      return FirstSessionChecklistDismissedNotifier(
+        ref.watch(appSettingsStoreProvider),
+      );
+    });
+
+class FirstSessionChecklistDismissedNotifier
+    extends _StoredPreferenceNotifier<bool> {
+  FirstSessionChecklistDismissedNotifier(AppSettingsStore store)
+    : super(store, 'first_session_checklist_dismissed', false);
+
+  Future<void> setDismissed(bool dismissed) => _save(dismissed);
+}

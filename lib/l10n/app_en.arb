@@ -933,5 +933,17 @@
   "journalAddFirstRecordCTA": "Add Your First Record",
   "journalClearFiltersCTA": "Clear Filters",
   "collectionAddMoviesCTA": "Add Titles",
-  "communityFollowingEmptyHint": "Users you follow haven't shared watch records yet. Discover new friends!"
+  "communityFollowingEmptyHint": "Users you follow haven't shared watch records yet. Discover new friends!",
+  "checklistTitle": "Welcome! Getting Started Guide",
+  "checklistProgress": "{completed}/{total} Completed",
+  "@checklistProgress": {
+    "placeholders": {
+      "completed": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "checklistStep1": "Set your watch region and language",
+  "checklistStep2": "Add your first watch record",
+  "checklistStep3": "Mark your first favorite title",
+  "checklistStep4": "Create a collection or follow a friend"
 }

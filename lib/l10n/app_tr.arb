@@ -1355,5 +1355,17 @@
   "journalAddFirstRecordCTA": "İlk Kaydını Ekle",
   "journalClearFiltersCTA": "Filtreleri Temizle",
   "collectionAddMoviesCTA": "Film/Dizi Ekle",
-  "communityFollowingEmptyHint": "Takip ettiğin kullanıcılar henüz izleme kaydı paylaşmadı. Yeni arkadaşlar keşfedebilirsin."
+  "communityFollowingEmptyHint": "Takip ettiğin kullanıcılar henüz izleme kaydı paylaşmadı. Yeni arkadaşlar keşfedebilirsin.",
+  "checklistTitle": "Hoş Geldin! Başlangıç Rehberi",
+  "checklistProgress": "{completed}/{total} Tamamlandı",
+  "@checklistProgress": {
+    "placeholders": {
+      "completed": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "checklistStep1": "İzleme bölgeni ve dilini belirle",
+  "checklistStep2": "İlk film veya dizi kaydını ekle",
+  "checklistStep3": "En sevdiğin yapımı favorilerine ekle",
+  "checklistStep4": "İlk koleksiyonunu oluştur veya arkadaş edin"
 }

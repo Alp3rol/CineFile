@@ -18,6 +18,7 @@ import 'widgets/home_hero_carousel.dart';
 import 'widgets/home_hero_shell.dart';
 import 'widgets/home_stats_dashboard.dart';
 import 'widgets/home_content_lists.dart';
+import 'widgets/first_session_checklist_card.dart';
 import '../../recommendations/presentation/widgets/home_recommendations_list.dart';
 
 // Lets the user tap "Başka Öner" on the suggestion card to cycle to a
@@ -194,6 +195,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         );
                       },
                     ),
+
+                    const FirstSessionChecklistCard(),
 
                     const SizedBox(height: AppSpacing.xl),
 

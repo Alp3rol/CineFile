@@ -3156,4 +3156,24 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get communityFollowingEmptyHint =>
       'Users you follow haven\'t shared watch records yet. Discover new friends!';
+
+  @override
+  String get checklistTitle => 'Welcome! Getting Started Guide';
+
+  @override
+  String checklistProgress(int completed, int total) {
+    return '$completed/$total Completed';
+  }
+
+  @override
+  String get checklistStep1 => 'Set your watch region and language';
+
+  @override
+  String get checklistStep2 => 'Add your first watch record';
+
+  @override
+  String get checklistStep3 => 'Mark your first favorite title';
+
+  @override
+  String get checklistStep4 => 'Create a collection or follow a friend';
 }
