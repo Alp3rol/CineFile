@@ -260,9 +260,10 @@ dönmek için net nedenler bulması.
   - **Tamamlandı (8 Ağustos 2026):** `FirstSessionChecklistCard` bileşeni geliştirildi. Ana ekranda yeni/onboarding durumundaki kullanıcılara 4 adımlı dinamik başlangıç rehberi (Tercihler, İlk İzleme Kaydı, Favori Ekleme, Koleksiyon/Arkadaş edinme) ve ilerleme çubuğu gösterilir. Tamamlandığında veya 'X' ile gizlendiğinde `firstSessionChecklistDismissedProvider` saklayarak kartı kaldırır. `first_session_checklist_test.dart` dahil 279 Flutter testi ve static analysis geçti.
 - [x] **Arama → detay → kayıt ekleme yolundaki gereksiz adımları ölç ve azalt.**
   - **Tamamlandı (8 Ağustos 2026):** `MovieQuickActionSheet` ve `PosterGrid` basılı tutma (long press) kısayol aksiyonları eklendi. Kullanıcılar Arama veya Keşfet ızgaralarındaki afişlere basılı tutarak detay ekranına geçiş yapmadan 1 dokunuşla İzleme Kaydı ekleyebilir (`AddWatchRecordSheet`), Favori durumunu değiştirebilir veya Detay ekranına gidebilir. `quick_action_sheet_test.dart` dahil 281 Flutter testi ve static analysis geçti.
-- [ ] Erişilebilirlik turu.
+- [x] **Erişilebilirlik turu.**
   - Semantics etiketleri, klavye gezinmesi, odak sırası.
   - Metin ölçekleme, minimum dokunma alanı ve renk kontrastı.
+  - **Tamamlandı (8 Ağustos 2026):** Ekran okuyucu (TalkBack / VoiceOver) ve erişilebilirlik desteği için `MainShell` alt gezinti sekmelerine, `PosterGrid` film afişlerine ve ana etkileşim bileşenlerine açık `Semantics` (buton, etiket, durum) yapılandırmaları bağlandı. `accessibility_semantics_test.dart` dahil 283 Flutter testi ve static analysis geçti.
 - [ ] Hata/çevrimdışı durumlarını ortak UI bileşenlerine bağla.
 - [ ] Gizlilik merkezi: hangi verinin yerel, bulut veya herkese açık olduğunu
   kullanıcıya tek ekranda göster.

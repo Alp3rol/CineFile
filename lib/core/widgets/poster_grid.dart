@@ -41,23 +41,27 @@ class PosterGrid extends StatelessWidget {
         final movieId = movie['id'] as int;
         final isTv = movie['media_type'] == 'tv';
 
-        return GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => MovieDetailScreen(tmdbId: movieId, isTv: isTv),
-              ),
-            );
-          },
-          onLongPress: () {
-            showModalBottomSheet(
-              context: context,
-              backgroundColor: Colors.transparent,
-              isScrollControlled: true,
-              builder: (context) => MovieQuickActionSheet(movieData: movie),
-            );
-          },
+        return Semantics(
+          container: true,
+          button: true,
+          label: '$title ${year.isNotEmpty ? year : ""}',
+          child: GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MovieDetailScreen(tmdbId: movieId, isTv: isTv),
+                ),
+              );
+            },
+            onLongPress: () {
+              showModalBottomSheet(
+                context: context,
+                backgroundColor: Colors.transparent,
+                isScrollControlled: true,
+                builder: (context) => MovieQuickActionSheet(movieData: movie),
+              );
+            },
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -102,7 +106,8 @@ class PosterGrid extends StatelessWidget {
               ),
             ],
           ),
-        );
+        ),
+      );
       },
     );
   }

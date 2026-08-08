@@ -134,33 +134,41 @@ class _MainShellState extends ConsumerState<MainShell> {
   Widget _buildNavItem(int selectedIndex, int index, IconData activeIcon, IconData inactiveIcon, String label) {
     final isSelected = selectedIndex == index;
 
-    return GestureDetector(
-      onTap: () => ref.read(mainShellTabIndexProvider.notifier).state = index,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeInOut,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                isSelected ? activeIcon : inactiveIcon,
-                color: isSelected ? AppTheme.accentColor : AppTheme.textSecondary,
-                size: isSelected ? 24 : 22,
+    return Semantics(
+      container: true,
+      button: true,
+      selected: isSelected,
+      label: label,
+      child: ExcludeSemantics(
+        child: GestureDetector(
+          onTap: () => ref.read(mainShellTabIndexProvider.notifier).state = index,
+          behavior: HitTestBehavior.opaque,
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeInOut,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    isSelected ? activeIcon : inactiveIcon,
+                    color: isSelected ? AppTheme.accentColor : AppTheme.textSecondary,
+                    size: isSelected ? 24 : 22,
+                  ),
+                  const SizedBox(height: 4),
+                  AnimatedDefaultTextStyle(
+                    duration: const Duration(milliseconds: 200),
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      color: isSelected ? AppTheme.accentColor : AppTheme.textSecondary,
+                    ),
+                    child: Text(label),
+                  ),
+                ],
               ),
-              const SizedBox(height: 4),
-              AnimatedDefaultTextStyle(
-                duration: const Duration(milliseconds: 200),
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  color: isSelected ? AppTheme.accentColor : AppTheme.textSecondary,
-                ),
-                child: Text(label),
-              ),
-            ],
+            ),
           ),
         ),
       ),
