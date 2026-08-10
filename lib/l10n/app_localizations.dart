@@ -1112,6 +1112,30 @@ abstract class AppLocalizations {
   /// **'{count} Sezon'**
   String swipeSeasonCount(int count);
 
+  /// No description provided for @swipeSessionSummary.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu Oturumda'**
+  String get swipeSessionSummary;
+
+  /// No description provided for @swipeSessionAdded.
+  ///
+  /// In tr, this message translates to:
+  /// **'Listeye'**
+  String get swipeSessionAdded;
+
+  /// No description provided for @swipeSessionPassed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Geçildi'**
+  String get swipeSessionPassed;
+
+  /// No description provided for @swipeSessionWatched.
+  ///
+  /// In tr, this message translates to:
+  /// **'İzlendi'**
+  String get swipeSessionWatched;
+
   /// No description provided for @swipeSaveFailed.
   ///
   /// In tr, this message translates to:

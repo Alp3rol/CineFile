@@ -583,6 +583,18 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String get swipeSessionSummary => 'Bu Oturumda';
+
+  @override
+  String get swipeSessionAdded => 'Listeye';
+
+  @override
+  String get swipeSessionPassed => 'Geçildi';
+
+  @override
+  String get swipeSessionWatched => 'İzlendi';
+
+  @override
   String get swipeSaveFailed => 'Tercihin kaydedilemedi. Lütfen tekrar dene.';
 
   @override

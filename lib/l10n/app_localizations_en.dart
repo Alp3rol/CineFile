@@ -594,6 +594,18 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get swipeSessionSummary => 'This Session';
+
+  @override
+  String get swipeSessionAdded => 'Added';
+
+  @override
+  String get swipeSessionPassed => 'Passed';
+
+  @override
+  String get swipeSessionWatched => 'Watched';
+
+  @override
   String get swipeSaveFailed => 'Couldn\'t save your choice. Please try again.';
 
   @override

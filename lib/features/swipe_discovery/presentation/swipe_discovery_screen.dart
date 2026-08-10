@@ -50,6 +50,7 @@ class _SwipeDiscoveryScreenState extends ConsumerState<SwipeDiscoveryScreen> {
   final List<_SwipeAction> _history = [];
   bool _isWriting = false;
   bool _showGestureGuide = false;
+  int _sessionWatched = 0;
 
   @override
   void initState() {
@@ -285,7 +286,10 @@ class _SwipeDiscoveryScreenState extends ConsumerState<SwipeDiscoveryScreen> {
       builder: (_) => AddWatchRecordSheet(movieData: item),
     );
     if (saved == true && mounted) {
-      setState(() => _remaining.remove(item));
+      setState(() {
+        _remaining.remove(item);
+        _sessionWatched += 1;
+      });
     }
   }
 
@@ -299,6 +303,7 @@ class _SwipeDiscoveryScreenState extends ConsumerState<SwipeDiscoveryScreen> {
       setState(() {
         _remaining = List<Map<String, dynamic>>.from(items);
         _history.clear();
+        _sessionWatched = 0;
       });
     } catch (_) {
       if (mounted) {
@@ -370,6 +375,7 @@ class _SwipeDiscoveryScreenState extends ConsumerState<SwipeDiscoveryScreen> {
       setState(() {
         _history.clear();
         _remaining = List<Map<String, dynamic>>.from(widget.items);
+        _sessionWatched = 0;
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(AppLocalizations.of(context).swipeResetDone)),
@@ -389,6 +395,12 @@ class _SwipeDiscoveryScreenState extends ConsumerState<SwipeDiscoveryScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final items = _visibleItems(ref);
+    final sessionAdded = _history
+        .where((action) => action.choice == _SwipeChoice.interested)
+        .length;
+    final sessionPassed = _history
+        .where((action) => action.choice == _SwipeChoice.notInterested)
+        .length;
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
@@ -426,6 +438,9 @@ class _SwipeDiscoveryScreenState extends ConsumerState<SwipeDiscoveryScreen> {
                 onUndo: _history.isEmpty ? null : _undo,
                 onRefresh: widget.onRefresh == null ? null : _refreshDeck,
                 isLoading: _isWriting,
+                addedCount: sessionAdded,
+                passedCount: sessionPassed,
+                watchedCount: _sessionWatched,
               )
             : Column(
                 children: [
@@ -1413,15 +1428,72 @@ class _ActionButton extends StatelessWidget {
   );
 }
 
+class _SessionStat extends StatelessWidget {
+  const _SessionStat({
+    required this.icon,
+    required this.color,
+    required this.value,
+    required this.label,
+  });
+
+  final IconData icon;
+  final Color color;
+  final int value;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => Expanded(
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.09),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withValues(alpha: 0.24)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: color, size: 20),
+          const SizedBox(height: 5),
+          Text(
+            '$value',
+            style: GoogleFonts.outfit(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.inter(
+              color: AppTheme.textSecondary,
+              fontSize: 9.5,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
 class _EmptyDeck extends StatelessWidget {
   const _EmptyDeck({
     required this.onUndo,
     required this.onRefresh,
     required this.isLoading,
+    required this.addedCount,
+    required this.passedCount,
+    required this.watchedCount,
   });
   final VoidCallback? onUndo;
   final VoidCallback? onRefresh;
   final bool isLoading;
+  final int addedCount;
+  final int passedCount;
+  final int watchedCount;
 
   @override
   Widget build(BuildContext context) {
@@ -1449,6 +1521,43 @@ class _EmptyDeck extends StatelessWidget {
               textAlign: TextAlign.center,
               style: GoogleFonts.inter(color: AppTheme.textSecondary),
             ),
+            if (addedCount + passedCount + watchedCount > 0) ...[
+              const SizedBox(height: 24),
+              Text(
+                l10n.swipeSessionSummary,
+                style: GoogleFonts.outfit(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _SessionStat(
+                    icon: Icons.bookmark_added_rounded,
+                    color: const Color(0xFF39C987),
+                    value: addedCount,
+                    label: l10n.swipeSessionAdded,
+                  ),
+                  const SizedBox(width: 10),
+                  _SessionStat(
+                    icon: Icons.close_rounded,
+                    color: const Color(0xFFE35D6A),
+                    value: passedCount,
+                    label: l10n.swipeSessionPassed,
+                  ),
+                  const SizedBox(width: 10),
+                  _SessionStat(
+                    icon: Icons.visibility_rounded,
+                    color: AppTheme.accentColor,
+                    value: watchedCount,
+                    label: l10n.swipeSessionWatched,
+                  ),
+                ],
+              ),
+            ],
             if (onUndo != null) ...[
               const SizedBox(height: 20),
               OutlinedButton.icon(

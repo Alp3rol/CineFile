@@ -1,5 +1,6 @@
 import 'package:cinefile/core/database/database_provider.dart';
 import 'package:cinefile/core/database/app_database.dart';
+import 'package:cinefile/features/auth/controllers/auth_controller.dart';
 import 'package:cinefile/features/swipe_discovery/presentation/swipe_discovery_screen.dart';
 import 'package:cinefile/features/swipe_discovery/data/swipe_preference_signal.dart';
 import 'package:cinefile/features/movie_detail/presentation/movie_detail_provider.dart';
@@ -8,6 +9,8 @@ import 'package:cinefile/features/movie_detail/domain/watch_provider_models.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
+import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'support/localized_app.dart';
@@ -28,6 +31,8 @@ Widget _app({
   required Map<MovieKey, String> decisions,
   List<Map<String, dynamic>>? items,
   Future<List<Map<String, dynamic>>> Function()? onRefresh,
+  MockFirebaseAuth? auth,
+  FakeFirebaseFirestore? firestore,
 }) {
   return ProviderScope(
     overrides: [
@@ -81,6 +86,9 @@ Widget _app({
           },
         ),
       ),
+      if (auth != null) firebaseAuthProvider.overrideWithValue(auth),
+      if (firestore != null)
+        firestoreProvider.overrideWithValue(firestore),
     ],
     child: LocalizedTestApp(
       locale: const Locale('tr'),
@@ -245,5 +253,28 @@ void main() {
 
     expect(find.text('Yeni Öneri'), findsOneWidget);
     expect(find.text('1 öneri kaldı'), findsOneWidget);
+  });
+
+  testWidgets('summarizes the decisions when the session deck is complete', (
+    tester,
+  ) async {
+    final auth = MockFirebaseAuth(
+      signedIn: true,
+      mockUser: MockUser(uid: 'swipe-user'),
+    );
+    final firestore = FakeFirebaseFirestore();
+
+    await tester.pumpWidget(
+      _app(decisions: const {}, auth: auth, firestore: firestore),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Geç'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Bu Oturumda'), findsOneWidget);
+    expect(find.text('Geçildi'), findsOneWidget);
+    expect(find.text('1'), findsOneWidget);
+    expect(find.text('Şimdilik hepsi bu!'), findsOneWidget);
   });
 }
