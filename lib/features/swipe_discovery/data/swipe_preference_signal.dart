@@ -17,6 +17,39 @@ class SwipePreferenceSignal {
   final String? skipReason;
 }
 
+class SwipeTasteProfile {
+  const SwipeTasteProfile({
+    required this.genreIds,
+    required this.interestedCount,
+    required this.passedCount,
+    required this.genreRejectionCount,
+  });
+
+  final List<int> genreIds;
+  final int interestedCount;
+  final int passedCount;
+  final int genreRejectionCount;
+
+  bool get isEmpty => interestedCount + passedCount == 0;
+}
+
+SwipeTasteProfile buildSwipeTasteProfile(
+  Iterable<SwipePreferenceSignal> signals, {
+  int genreLimit = 3,
+}) {
+  final snapshot = signals.toList(growable: false);
+  return SwipeTasteProfile(
+    genreIds: rankedSwipeGenreIds(
+      snapshot,
+    ).take(genreLimit).toList(growable: false),
+    interestedCount: snapshot.where((signal) => signal.isInterested).length,
+    passedCount: snapshot.where((signal) => !signal.isInterested).length,
+    genreRejectionCount: snapshot
+        .where((signal) => signal.skipReason == 'dislikeGenre')
+        .length,
+  );
+}
+
 int _genreScoreDelta(SwipePreferenceSignal signal) {
   if (signal.isInterested) return 2;
   return switch (signal.skipReason) {

@@ -1136,6 +1136,30 @@ abstract class AppLocalizations {
   /// **'Tercihin önerilerine yansıtılacak'**
   String get swipeSkipReasonSaved;
 
+  /// No description provided for @swipeTasteProfileTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kaydırmalardan Öğrenilen Zevkin'**
+  String get swipeTasteProfileTitle;
+
+  /// No description provided for @swipeTasteProfileSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu sinyaller kişisel önerilerini şekillendiriyor'**
+  String get swipeTasteProfileSubtitle;
+
+  /// No description provided for @swipeTasteProfileCounts.
+  ///
+  /// In tr, this message translates to:
+  /// **'{liked} beğeni • {passed} geçiş'**
+  String swipeTasteProfileCounts(int liked, int passed);
+
+  /// No description provided for @swipeTasteProfileGenreFeedback.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} tür geri bildirimi önerilerini hassaslaştırdı'**
+  String swipeTasteProfileGenreFeedback(int count);
+
   /// No description provided for @swipeUndo.
   ///
   /// In tr, this message translates to:

@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/ui/ui.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../wrapped/presentation/cinefile_wrapped_screen.dart';
+import '../../swipe_discovery/data/swipe_preference_signal.dart';
 import 'insights_provider.dart';
 import 'widgets/contribution_heatmap.dart';
 import 'widgets/insights_charts.dart';
@@ -12,6 +13,7 @@ import 'widgets/insights_filter_bar.dart';
 import 'widgets/insights_lists.dart';
 import 'widgets/seasonal_trends_card.dart';
 import 'widgets/summary_cards_grid.dart';
+import 'widgets/swipe_taste_profile_card.dart';
 import 'widgets/time_of_day_card.dart';
 import 'widgets/time_visualizer_card.dart';
 import 'widgets/weekly_goal_card.dart';
@@ -33,6 +35,9 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen>
   Widget build(BuildContext context) {
     super.build(context); // Required by AutomaticKeepAliveClientMixin
     final insights = ref.watch(insightsProvider);
+    final swipeSignals =
+        ref.watch(swipePreferenceSignalsProvider).value ?? const [];
+    final tasteProfile = buildSwipeTasteProfile(swipeSignals);
 
     if (insights == null) {
       return _buildEmptyState(context);
@@ -41,7 +46,12 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen>
     return SingleChildScrollView(
       controller: widget.scrollController,
       physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 100), // Extra bottom padding for bottom navigation bar
+      padding: const EdgeInsets.fromLTRB(
+        16,
+        8,
+        16,
+        100,
+      ), // Extra bottom padding for bottom navigation bar
 
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -102,6 +112,11 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen>
           // 0b. Insights Filter Bar
           const InsightsFilterBar(),
           const SizedBox(height: 12),
+
+          if (!tasteProfile.isEmpty) ...[
+            SwipeTasteProfileCard(profile: tasteProfile),
+            const SizedBox(height: 12),
+          ],
 
           // 1. Summary Cards Grid
           SummaryCardsGrid(data: insights),
@@ -170,13 +185,19 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen>
             const SizedBox(height: 20),
             Text(
               AppLocalizations.of(context).insightsInsufficientData,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               AppLocalizations.of(context).insightsEmptyBody,
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary, height: 1.5),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: AppColors.textSecondary,
+                height: 1.5,
+              ),
             ),
           ],
         ),

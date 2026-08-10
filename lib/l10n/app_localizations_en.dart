@@ -600,6 +600,23 @@ class AppLocalizationsEn extends AppLocalizations {
       'Your recommendations will reflect this choice';
 
   @override
+  String get swipeTasteProfileTitle => 'Taste Learned from Swipes';
+
+  @override
+  String get swipeTasteProfileSubtitle =>
+      'These signals shape your personal recommendations';
+
+  @override
+  String swipeTasteProfileCounts(int liked, int passed) {
+    return '$liked liked • $passed passed';
+  }
+
+  @override
+  String swipeTasteProfileGenreFeedback(int count) {
+    return '$count genre feedback refined your recommendations';
+  }
+
+  @override
   String get swipeUndo => 'Undo';
 
   @override

@@ -78,4 +78,27 @@ void main() {
     ]);
     expect(temporaryPass, [18, 878]);
   });
+
+  test('builds a persistent taste profile from swipe history', () {
+    final profile = buildSwipeTasteProfile(const [
+      SwipePreferenceSignal(isInterested: true, genreIds: [18, 878]),
+      SwipePreferenceSignal(isInterested: true, genreIds: [878]),
+      SwipePreferenceSignal(
+        isInterested: false,
+        genreIds: [35],
+        skipReason: 'dislikeGenre',
+      ),
+      SwipePreferenceSignal(
+        isInterested: false,
+        genreIds: [18],
+        skipReason: 'notNow',
+      ),
+    ]);
+
+    expect(profile.genreIds, [878, 18]);
+    expect(profile.interestedCount, 2);
+    expect(profile.passedCount, 2);
+    expect(profile.genreRejectionCount, 1);
+    expect(profile.isEmpty, isFalse);
+  });
 }

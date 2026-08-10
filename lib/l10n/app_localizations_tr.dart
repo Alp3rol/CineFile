@@ -594,6 +594,23 @@ class AppLocalizationsTr extends AppLocalizations {
   String get swipeSkipReasonSaved => 'Tercihin önerilerine yansıtılacak';
 
   @override
+  String get swipeTasteProfileTitle => 'Kaydırmalardan Öğrenilen Zevkin';
+
+  @override
+  String get swipeTasteProfileSubtitle =>
+      'Bu sinyaller kişisel önerilerini şekillendiriyor';
+
+  @override
+  String swipeTasteProfileCounts(int liked, int passed) {
+    return '$liked beğeni • $passed geçiş';
+  }
+
+  @override
+  String swipeTasteProfileGenreFeedback(int count) {
+    return '$count tür geri bildirimi önerilerini hassaslaştırdı';
+  }
+
+  @override
   String get swipeUndo => 'Geri al';
 
   @override
