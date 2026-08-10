@@ -6,6 +6,7 @@ import 'package:cinefile/features/movie_detail/presentation/movie_detail_provide
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'support/localized_app.dart';
 
@@ -74,6 +75,12 @@ Widget _app({
 }
 
 void main() {
+  setUp(() {
+    SharedPreferences.setMockInitialValues({
+      'swipe_gesture_guide_seen_v1': true,
+    });
+  });
+
   testWidgets('shows an unseen title as the active swipe card', (tester) async {
     await tester.pumpWidget(_app(decisions: const {}));
     await tester.pumpAndSettle();
@@ -107,6 +114,23 @@ void main() {
     expect(find.text('Test Yönetmen'), findsOneWidget);
     expect(find.text('Oyuncu Bir, Oyuncu İki'), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('shows the gesture guide once and remembers its dismissal', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    await tester.pumpWidget(_app(decisions: const {}));
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.swipe_rounded), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Kapat'));
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.swipe_rounded), findsNothing);
+    final preferences = await SharedPreferences.getInstance();
+    expect(preferences.getBool('swipe_gesture_guide_seen_v1'), isTrue);
   });
 
   testWidgets('reveals a decision stamp while dragging and springs back', (

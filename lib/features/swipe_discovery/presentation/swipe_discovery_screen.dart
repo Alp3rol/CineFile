@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/constants/api_constants.dart';
 import '../../../core/database/database_provider.dart';
@@ -39,14 +43,33 @@ class SwipeDiscoveryScreen extends ConsumerStatefulWidget {
 }
 
 class _SwipeDiscoveryScreenState extends ConsumerState<SwipeDiscoveryScreen> {
+  static const _gestureGuideKey = 'swipe_gesture_guide_seen_v1';
+
   late List<Map<String, dynamic>> _remaining;
   final List<_SwipeAction> _history = [];
   bool _isWriting = false;
+  bool _showGestureGuide = false;
 
   @override
   void initState() {
     super.initState();
     _remaining = List<Map<String, dynamic>>.from(widget.items);
+    unawaited(_loadGestureGuide());
+  }
+
+  Future<void> _loadGestureGuide() async {
+    final preferences = await SharedPreferences.getInstance();
+    if (!mounted || preferences.getBool(_gestureGuideKey) == true) return;
+    setState(() => _showGestureGuide = true);
+  }
+
+  void _dismissGestureGuide() {
+    if (_showGestureGuide) setState(() => _showGestureGuide = false);
+    unawaited(
+      SharedPreferences.getInstance().then(
+        (preferences) => preferences.setBool(_gestureGuideKey, true),
+      ),
+    );
   }
 
   MovieKey _keyFor(Map<String, dynamic> item) =>
@@ -73,6 +96,7 @@ class _SwipeDiscoveryScreenState extends ConsumerState<SwipeDiscoveryScreen> {
 
   Future<void> _choose(Map<String, dynamic> item, _SwipeChoice choice) async {
     if (_isWriting) return;
+    _dismissGestureGuide();
     setState(() {
       _isWriting = true;
       _remaining.remove(item);
@@ -252,6 +276,7 @@ class _SwipeDiscoveryScreenState extends ConsumerState<SwipeDiscoveryScreen> {
 
   Future<void> _markWatched(Map<String, dynamic> item) async {
     if (_isWriting) return;
+    _dismissGestureGuide();
     final saved = await showModalBottomSheet<bool>(
       context: context,
       backgroundColor: Colors.transparent,
@@ -425,6 +450,17 @@ class _SwipeDiscoveryScreenState extends ConsumerState<SwipeDiscoveryScreen> {
                       ],
                     ),
                   ),
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 220),
+                    curve: Curves.easeOutCubic,
+                    child: _showGestureGuide
+                        ? _GestureGuide(
+                            text: l10n.swipeDiscoverHint,
+                            closeLabel: l10n.commonClose,
+                            onClose: _dismissGestureGuide,
+                          )
+                        : const SizedBox.shrink(),
+                  ),
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -455,6 +491,7 @@ class _SwipeDiscoveryScreenState extends ConsumerState<SwipeDiscoveryScreen> {
                               enabled: !_isWriting,
                               interestedLabel: l10n.swipeInterested,
                               notInterestedLabel: l10n.swipeNotInterested,
+                              onInteractionStarted: _dismissGestureGuide,
                               onChoice: (choice) =>
                                   _choose(items.first, choice),
                               child: _PremiumDiscoveryCard(item: items.first),
@@ -1084,12 +1121,64 @@ class _DetailLine extends StatelessWidget {
   );
 }
 
+class _GestureGuide extends StatelessWidget {
+  const _GestureGuide({
+    required this.text,
+    required this.closeLabel,
+    required this.onClose,
+  });
+
+  final String text;
+  final String closeLabel;
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+    child: Container(
+      padding: const EdgeInsets.fromLTRB(12, 8, 4, 8),
+      decoration: BoxDecoration(
+        color: AppTheme.accentColor.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppTheme.accentColor.withValues(alpha: 0.22)),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.swipe_rounded,
+            color: AppTheme.accentColor,
+            size: 18,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: GoogleFonts.inter(
+                color: Colors.white.withValues(alpha: 0.76),
+                fontSize: 10.5,
+                height: 1.25,
+              ),
+            ),
+          ),
+          IconButton(
+            tooltip: closeLabel,
+            visualDensity: VisualDensity.compact,
+            onPressed: onClose,
+            icon: const Icon(Icons.close_rounded, size: 17),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
 class _SwipeableDiscoveryCard extends StatefulWidget {
   const _SwipeableDiscoveryCard({
     super.key,
     required this.child,
     required this.interestedLabel,
     required this.notInterestedLabel,
+    required this.onInteractionStarted,
     required this.onChoice,
     required this.enabled,
   });
@@ -1097,6 +1186,7 @@ class _SwipeableDiscoveryCard extends StatefulWidget {
   final Widget child;
   final String interestedLabel;
   final String notInterestedLabel;
+  final VoidCallback onInteractionStarted;
   final ValueChanged<_SwipeChoice> onChoice;
   final bool enabled;
 
@@ -1109,12 +1199,23 @@ class _SwipeableDiscoveryCardState extends State<_SwipeableDiscoveryCard> {
   double _dragX = 0;
   bool _isDragging = false;
   bool _isExiting = false;
+  bool _thresholdFeedbackSent = false;
 
   void _onDragUpdate(DragUpdateDetails details) {
     if (!widget.enabled || _isExiting) return;
+    if (!_isDragging) widget.onInteractionStarted();
+    final width = context.size?.width ?? 320;
+    final nextDragX = _dragX + details.delta.dx;
+    final reachedThreshold = nextDragX.abs() >= width * 0.22;
+    if (reachedThreshold && !_thresholdFeedbackSent) {
+      _thresholdFeedbackSent = true;
+      unawaited(HapticFeedback.selectionClick());
+    } else if (!reachedThreshold) {
+      _thresholdFeedbackSent = false;
+    }
     setState(() {
       _isDragging = true;
-      _dragX += details.delta.dx;
+      _dragX = nextDragX;
     });
   }
 
@@ -1127,6 +1228,7 @@ class _SwipeableDiscoveryCardState extends State<_SwipeableDiscoveryCard> {
       setState(() {
         _isDragging = false;
         _dragX = 0;
+        _thresholdFeedbackSent = false;
       });
       return;
     }
@@ -1140,6 +1242,7 @@ class _SwipeableDiscoveryCardState extends State<_SwipeableDiscoveryCard> {
       _isExiting = true;
       _dragX = direction * (width + 140);
     });
+    unawaited(HapticFeedback.mediumImpact());
     await Future<void>.delayed(const Duration(milliseconds: 220));
     if (mounted) widget.onChoice(choice);
   }
