@@ -293,6 +293,16 @@ class _SwipeDiscoveryScreenState extends ConsumerState<SwipeDiscoveryScreen> {
     }
   }
 
+  void _showQuickLook(Map<String, dynamic> item) {
+    final isTv = item['media_type'] == 'tv';
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => _QuickLookSheet(item: item, isTv: isTv),
+    );
+  }
+
   Future<void> _refreshDeck() async {
     final refresh = widget.onRefresh;
     if (refresh == null || _isWriting) return;
@@ -432,141 +442,173 @@ class _SwipeDiscoveryScreenState extends ConsumerState<SwipeDiscoveryScreen> {
           ),
         ],
       ),
-      body: SafeArea(
-        child: items.isEmpty
-            ? _EmptyDeck(
-                onUndo: _history.isEmpty ? null : _undo,
-                onRefresh: widget.onRefresh == null ? null : _refreshDeck,
-                isLoading: _isWriting,
-                addedCount: sessionAdded,
-                passedCount: sessionPassed,
-                watchedCount: _sessionWatched,
-              )
-            : Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.auto_awesome_rounded,
-                          color: AppTheme.accentColor,
-                          size: 14,
+      body: CallbackShortcuts(
+        bindings: {
+          const SingleActivator(LogicalKeyboardKey.arrowLeft): () {
+            if (items.isNotEmpty && !_isWriting) {
+              _choose(items.first, _SwipeChoice.notInterested);
+            }
+          },
+          const SingleActivator(LogicalKeyboardKey.arrowRight): () {
+            if (items.isNotEmpty && !_isWriting) {
+              _choose(items.first, _SwipeChoice.interested);
+            }
+          },
+          const SingleActivator(LogicalKeyboardKey.arrowUp): () {
+            if (items.isNotEmpty && !_isWriting) {
+              _markWatched(items.first);
+            }
+          },
+          const SingleActivator(LogicalKeyboardKey.space): () {
+            if (items.isNotEmpty && !_isWriting) {
+              _showQuickLook(items.first);
+            }
+          },
+          const SingleActivator(LogicalKeyboardKey.keyZ, control: true): () {
+            if (_history.isNotEmpty && !_isWriting) _undo();
+          },
+        },
+        child: Focus(
+          autofocus: true,
+          child: SafeArea(
+            child: items.isEmpty
+                ? _EmptyDeck(
+                    onUndo: _history.isEmpty ? null : _undo,
+                    onRefresh: widget.onRefresh == null ? null : _refreshDeck,
+                    isLoading: _isWriting,
+                    addedCount: sessionAdded,
+                    passedCount: sessionPassed,
+                    watchedCount: _sessionWatched,
+                  )
+                : Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              Icons.auto_awesome_rounded,
+                              color: AppTheme.accentColor,
+                              size: 14,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              l10n.swipeRemaining(items.length),
+                              style: GoogleFonts.inter(
+                                color: AppTheme.textSecondary,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 6),
-                        Text(
-                          l10n.swipeRemaining(items.length),
-                          style: GoogleFonts.inter(
-                            color: AppTheme.textSecondary,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  AnimatedSize(
-                    duration: const Duration(milliseconds: 220),
-                    curve: Curves.easeOutCubic,
-                    child: _showGestureGuide
-                        ? _GestureGuide(
-                            text: l10n.swipeDiscoverHint,
-                            closeLabel: l10n.commonClose,
-                            onClose: _dismissGestureGuide,
-                          )
-                        : const SizedBox.shrink(),
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          if (items.length > 1)
-                            Positioned.fill(
-                              top: 14,
-                              left: 10,
-                              right: 10,
-                              child: Transform.scale(
-                                scale: 0.96,
-                                child: IgnorePointer(
-                                  child: Opacity(
-                                    opacity: 0.7,
-                                    child: _PremiumDiscoveryCard(
-                                      item: items[1],
+                      ),
+                      AnimatedSize(
+                        duration: const Duration(milliseconds: 220),
+                        curve: Curves.easeOutCubic,
+                        child: _showGestureGuide
+                            ? _GestureGuide(
+                                text: l10n.swipeDiscoverHint,
+                                closeLabel: l10n.commonClose,
+                                onClose: _dismissGestureGuide,
+                              )
+                            : const SizedBox.shrink(),
+                      ),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              if (items.length > 1)
+                                Positioned.fill(
+                                  top: 14,
+                                  left: 10,
+                                  right: 10,
+                                  child: Transform.scale(
+                                    scale: 0.96,
+                                    child: IgnorePointer(
+                                      child: Opacity(
+                                        opacity: 0.7,
+                                        child: _PremiumDiscoveryCard(
+                                          item: items[1],
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ),
+                              Positioned.fill(
+                                bottom: items.length > 1 ? 12 : 0,
+                                child: _SwipeableDiscoveryCard(
+                                  key: ValueKey('${_keyFor(items.first)}'),
+                                  enabled: !_isWriting,
+                                  interestedLabel: l10n.swipeInterested,
+                                  notInterestedLabel: l10n.swipeNotInterested,
+                                  onInteractionStarted: _dismissGestureGuide,
+                                  onChoice: (choice) =>
+                                      _choose(items.first, choice),
+                                  child: _PremiumDiscoveryCard(
+                                    item: items.first,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(18, 14, 18, 18),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: _ActionButton(
+                                tooltip: l10n.swipeNotInterested,
+                                label: l10n.swipeNotInterested,
+                                icon: Icons.close_rounded,
+                                color: const Color(0xFFE35D6A),
+                                onPressed: _isWriting
+                                    ? null
+                                    : () => _choose(
+                                        items.first,
+                                        _SwipeChoice.notInterested,
+                                      ),
                               ),
                             ),
-                          Positioned.fill(
-                            bottom: items.length > 1 ? 12 : 0,
-                            child: _SwipeableDiscoveryCard(
-                              key: ValueKey('${_keyFor(items.first)}'),
-                              enabled: !_isWriting,
-                              interestedLabel: l10n.swipeInterested,
-                              notInterestedLabel: l10n.swipeNotInterested,
-                              onInteractionStarted: _dismissGestureGuide,
-                              onChoice: (choice) =>
-                                  _choose(items.first, choice),
-                              child: _PremiumDiscoveryCard(item: items.first),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: _ActionButton(
+                                tooltip: l10n.swipeWatched,
+                                label: l10n.swipeWatched,
+                                icon: Icons.visibility_rounded,
+                                color: AppTheme.accentColor,
+                                onPressed: _isWriting
+                                    ? null
+                                    : () => _markWatched(items.first),
+                              ),
                             ),
-                          ),
-                        ],
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: _ActionButton(
+                                tooltip: l10n.swipeInterested,
+                                label: l10n.swipeInterested,
+                                icon: Icons.bookmark_add_rounded,
+                                color: const Color(0xFF39C987),
+                                onPressed: _isWriting
+                                    ? null
+                                    : () => _choose(
+                                        items.first,
+                                        _SwipeChoice.interested,
+                                      ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(18, 14, 18, 18),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: _ActionButton(
-                            tooltip: l10n.swipeNotInterested,
-                            label: l10n.swipeNotInterested,
-                            icon: Icons.close_rounded,
-                            color: const Color(0xFFE35D6A),
-                            onPressed: _isWriting
-                                ? null
-                                : () => _choose(
-                                    items.first,
-                                    _SwipeChoice.notInterested,
-                                  ),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: _ActionButton(
-                            tooltip: l10n.swipeWatched,
-                            label: l10n.swipeWatched,
-                            icon: Icons.visibility_rounded,
-                            color: AppTheme.accentColor,
-                            onPressed: _isWriting
-                                ? null
-                                : () => _markWatched(items.first),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: _ActionButton(
-                            tooltip: l10n.swipeInterested,
-                            label: l10n.swipeInterested,
-                            icon: Icons.bookmark_add_rounded,
-                            color: const Color(0xFF39C987),
-                            onPressed: _isWriting
-                                ? null
-                                : () => _choose(
-                                    items.first,
-                                    _SwipeChoice.interested,
-                                  ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+          ),
+        ),
       ),
     );
   }

@@ -7,6 +7,7 @@ import 'package:cinefile/features/movie_detail/presentation/movie_detail_provide
 import 'package:cinefile/features/movie_detail/presentation/watch_providers_provider.dart';
 import 'package:cinefile/features/movie_detail/domain/watch_provider_models.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
@@ -87,8 +88,7 @@ Widget _app({
         ),
       ),
       if (auth != null) firebaseAuthProvider.overrideWithValue(auth),
-      if (firestore != null)
-        firestoreProvider.overrideWithValue(firestore),
+      if (firestore != null) firestoreProvider.overrideWithValue(firestore),
     ],
     child: LocalizedTestApp(
       locale: const Locale('tr'),
@@ -276,5 +276,26 @@ void main() {
     expect(find.text('Geçildi'), findsOneWidget);
     expect(find.text('1'), findsOneWidget);
     expect(find.text('Şimdilik hepsi bu!'), findsOneWidget);
+  });
+
+  testWidgets('supports keyboard decisions without adding visual clutter', (
+    tester,
+  ) async {
+    final auth = MockFirebaseAuth(
+      signedIn: true,
+      mockUser: MockUser(uid: 'keyboard-user'),
+    );
+    final firestore = FakeFirebaseFirestore();
+
+    await tester.pumpWidget(
+      _app(decisions: const {}, auth: auth, firestore: firestore),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Şimdilik hepsi bu!'), findsOneWidget);
+    expect(find.text('Geçildi'), findsOneWidget);
   });
 }
