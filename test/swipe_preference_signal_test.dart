@@ -56,4 +56,26 @@ void main() {
       expect(adapted, [878, 18]);
     },
   );
+
+  test('skip reasons apply different genre-learning weights', () {
+    final genreRejection = rankedSwipeGenreIds(const [
+      SwipePreferenceSignal(isInterested: true, genreIds: [18]),
+      SwipePreferenceSignal(
+        isInterested: false,
+        genreIds: [18],
+        skipReason: 'dislikeGenre',
+      ),
+    ]);
+    expect(genreRejection, isEmpty);
+
+    final temporaryPass = rankedSwipeGenreIds(const [
+      SwipePreferenceSignal(isInterested: true, genreIds: [18, 878]),
+      SwipePreferenceSignal(
+        isInterested: false,
+        genreIds: [18],
+        skipReason: 'notNow',
+      ),
+    ]);
+    expect(temporaryPass, [18, 878]);
+  });
 }

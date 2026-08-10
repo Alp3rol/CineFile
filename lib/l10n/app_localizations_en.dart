@@ -577,6 +577,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get swipePassed => 'Title passed';
 
   @override
+  String get swipeWhy => 'Why?';
+
+  @override
+  String get swipeSkipReasonTitle => 'Why did you pass?';
+
+  @override
+  String get swipeSkipReasonHint =>
+      'Optional, and helps improve your recommendations.';
+
+  @override
+  String get swipeSkipReasonGenre => 'This genre isn\'t for me';
+
+  @override
+  String get swipeSkipReasonTitleSpecific => 'This title didn\'t interest me';
+
+  @override
+  String get swipeSkipReasonNotNow => 'Not right now';
+
+  @override
+  String get swipeSkipReasonSaved =>
+      'Your recommendations will reflect this choice';
+
+  @override
   String get swipeUndo => 'Undo';
 
   @override

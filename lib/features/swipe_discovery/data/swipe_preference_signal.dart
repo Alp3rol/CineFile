@@ -8,22 +8,30 @@ class SwipePreferenceSignal {
     required this.isInterested,
     required this.genreIds,
     this.key,
+    this.skipReason,
   });
 
   final bool isInterested;
   final List<int> genreIds;
   final MovieKey? key;
+  final String? skipReason;
+}
+
+int _genreScoreDelta(SwipePreferenceSignal signal) {
+  if (signal.isInterested) return 2;
+  return switch (signal.skipReason) {
+    'dislikeGenre' => -2,
+    'notNow' => 0,
+    _ => -1,
+  };
 }
 
 List<int> rankedSwipeGenreIds(Iterable<SwipePreferenceSignal> signals) {
   final scores = <int, int>{};
   for (final signal in signals) {
+    final delta = _genreScoreDelta(signal);
     for (final genreId in signal.genreIds) {
-      scores.update(
-        genreId,
-        (score) => score + (signal.isInterested ? 2 : -1),
-        ifAbsent: () => signal.isInterested ? 2 : -1,
-      );
+      scores.update(genreId, (score) => score + delta, ifAbsent: () => delta);
     }
   }
   final ranked = scores.entries.where((entry) => entry.value > 0).toList()
@@ -45,12 +53,9 @@ List<int> rankedBlendedGenreIds({
     scores[genre.key] = genre.value * 3;
   }
   for (final signal in swipeSignals) {
+    final delta = _genreScoreDelta(signal);
     for (final genreId in signal.genreIds) {
-      scores.update(
-        genreId,
-        (score) => score + (signal.isInterested ? 2 : -1),
-        ifAbsent: () => signal.isInterested ? 2 : -1,
-      );
+      scores.update(genreId, (score) => score + delta, ifAbsent: () => delta);
     }
   }
   final ranked = scores.entries.where((entry) => entry.value > 0).toList()
@@ -87,6 +92,7 @@ final swipePreferenceSignalsProvider =
                   return SwipePreferenceSignal(
                     isInterested: decision == 'interested',
                     genreIds: genreIds,
+                    skipReason: data['swipeSkipReason']?.toString(),
                     key: (
                       tmdbId: movieId,
                       isTv: data['isTv'] == true || data['isTv'] == 1,

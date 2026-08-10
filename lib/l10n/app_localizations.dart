@@ -1094,6 +1094,48 @@ abstract class AppLocalizations {
   /// **'Bu yapımı geçtin'**
   String get swipePassed;
 
+  /// No description provided for @swipeWhy.
+  ///
+  /// In tr, this message translates to:
+  /// **'Neden?'**
+  String get swipeWhy;
+
+  /// No description provided for @swipeSkipReasonTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Neden geçtin?'**
+  String get swipeSkipReasonTitle;
+
+  /// No description provided for @swipeSkipReasonHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'İsteğe bağlıdır ve önerilerini iyileştirir.'**
+  String get swipeSkipReasonHint;
+
+  /// No description provided for @swipeSkipReasonGenre.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu tür bana göre değil'**
+  String get swipeSkipReasonGenre;
+
+  /// No description provided for @swipeSkipReasonTitleSpecific.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu yapım ilgimi çekmedi'**
+  String get swipeSkipReasonTitleSpecific;
+
+  /// No description provided for @swipeSkipReasonNotNow.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şimdilik istemiyorum'**
+  String get swipeSkipReasonNotNow;
+
+  /// No description provided for @swipeSkipReasonSaved.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tercihin önerilerine yansıtılacak'**
+  String get swipeSkipReasonSaved;
+
   /// No description provided for @swipeUndo.
   ///
   /// In tr, this message translates to:

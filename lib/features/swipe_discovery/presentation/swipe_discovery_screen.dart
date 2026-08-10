@@ -111,12 +111,21 @@ class _SwipeDiscoveryScreenState extends ConsumerState<SwipeDiscoveryScreen> {
       final l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          duration: const Duration(seconds: 3),
-          content: Text(
-            choice == _SwipeChoice.interested
-                ? l10n.swipeAddedToWatchlist
-                : l10n.swipePassed,
-          ),
+          duration: const Duration(seconds: 4),
+          content: choice == _SwipeChoice.interested
+              ? Text(l10n.swipeAddedToWatchlist)
+              : Row(
+                  children: [
+                    Expanded(child: Text(l10n.swipePassed)),
+                    TextButton(
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                        _askSkipReason(item);
+                      },
+                      child: Text(l10n.swipeWhy),
+                    ),
+                  ],
+                ),
           action: SnackBarAction(label: l10n.swipeUndo, onPressed: _undo),
         ),
       );
@@ -155,6 +164,7 @@ class _SwipeDiscoveryScreenState extends ConsumerState<SwipeDiscoveryScreen> {
           .whereType<num>()
           .map((id) => id.toInt())
           .toList(growable: false),
+      'swipeSkipReason': FieldValue.delete(),
       'updatedAt': FieldValue.serverTimestamp(),
     };
     if (choice == _SwipeChoice.interested) {
@@ -191,6 +201,86 @@ class _SwipeDiscoveryScreenState extends ConsumerState<SwipeDiscoveryScreen> {
         key: key,
         releaseDate: releaseDate,
       );
+    }
+  }
+
+  Future<void> _askSkipReason(Map<String, dynamic> item) async {
+    final l10n = AppLocalizations.of(context);
+    final reason = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: const Color(0xFF171A22),
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                l10n.swipeSkipReasonTitle,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.outfit(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                l10n.swipeSkipReasonHint,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  color: AppTheme.textSecondary,
+                  fontSize: 12,
+                ),
+              ),
+              const SizedBox(height: 14),
+              _SkipReasonTile(
+                icon: Icons.category_outlined,
+                label: l10n.swipeSkipReasonGenre,
+                onTap: () => Navigator.pop(sheetContext, 'dislikeGenre'),
+              ),
+              _SkipReasonTile(
+                icon: Icons.sentiment_dissatisfied_outlined,
+                label: l10n.swipeSkipReasonTitleSpecific,
+                onTap: () => Navigator.pop(sheetContext, 'notForMe'),
+              ),
+              _SkipReasonTile(
+                icon: Icons.schedule_rounded,
+                label: l10n.swipeSkipReasonNotNow,
+                onTap: () => Navigator.pop(sheetContext, 'notNow'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (reason == null || !mounted) return;
+
+    final user = ref.currentUser;
+    if (user == null) return;
+    final key = _keyFor(item);
+    try {
+      await ref
+          .read(firestoreProvider)
+          .collection('users')
+          .doc(user.uid)
+          .collection('movie_settings')
+          .doc('${key.tmdbId}_${key.isTv}')
+          .set({
+            'swipeSkipReason': reason,
+            'updatedAt': FieldValue.serverTimestamp(),
+          }, SetOptions(merge: true));
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.swipeSkipReasonSaved)));
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.swipeSaveFailed)));
     }
   }
 
@@ -242,6 +332,7 @@ class _SwipeDiscoveryScreenState extends ConsumerState<SwipeDiscoveryScreen> {
         'swipeDecision': FieldValue.delete(),
         'swipeDecidedAt': FieldValue.delete(),
         'swipeGenreIds': FieldValue.delete(),
+        'swipeSkipReason': FieldValue.delete(),
         'updatedAt': FieldValue.serverTimestamp(),
       };
       if (action.choice == _SwipeChoice.interested) {
@@ -376,6 +467,7 @@ class _SwipeDiscoveryScreenState extends ConsumerState<SwipeDiscoveryScreen> {
             'swipeDecision': FieldValue.delete(),
             'swipeDecidedAt': FieldValue.delete(),
             'swipeGenreIds': FieldValue.delete(),
+            'swipeSkipReason': FieldValue.delete(),
             'updatedAt': FieldValue.serverTimestamp(),
           }, SetOptions(merge: true));
         }
@@ -1425,6 +1517,56 @@ class _DecisionStamp extends StatelessWidget {
       ),
     ),
   );
+}
+
+class _SkipReasonTile extends StatelessWidget {
+  const _SkipReasonTile({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Material(
+        color: Colors.white.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(14),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(14),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+            child: Row(
+              children: [
+                Icon(icon, color: AppTheme.accentColor, size: 21),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: GoogleFonts.inter(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                const Icon(
+                  Icons.chevron_right_rounded,
+                  color: AppTheme.textSecondary,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _ActionButton extends StatelessWidget {

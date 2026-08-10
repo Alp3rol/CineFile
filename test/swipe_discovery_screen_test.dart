@@ -323,4 +323,39 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets('optionally records why a title was passed', (tester) async {
+    final auth = MockFirebaseAuth(
+      signedIn: true,
+      mockUser: MockUser(uid: 'reason-user'),
+    );
+    final firestore = FakeFirebaseFirestore();
+
+    await tester.pumpWidget(
+      _app(decisions: const {}, auth: auth, firestore: firestore),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Geç'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 800));
+    await tester.tap(find.text('Neden?').hitTestable());
+    await tester.pumpAndSettle();
+
+    expect(find.text('Neden geçtin?'), findsOneWidget);
+    expect(find.text('Bu tür bana göre değil'), findsOneWidget);
+    expect(find.text('Bu yapım ilgimi çekmedi'), findsOneWidget);
+    expect(find.text('Şimdilik istemiyorum'), findsOneWidget);
+
+    await tester.tap(find.text('Bu tür bana göre değil'));
+    await tester.pumpAndSettle();
+
+    final saved = await firestore
+        .collection('users')
+        .doc('reason-user')
+        .collection('movie_settings')
+        .doc('42_false')
+        .get();
+    expect(saved.data()?['swipeSkipReason'], 'dislikeGenre');
+  });
 }

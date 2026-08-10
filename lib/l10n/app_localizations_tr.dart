@@ -572,6 +572,28 @@ class AppLocalizationsTr extends AppLocalizations {
   String get swipePassed => 'Bu yapımı geçtin';
 
   @override
+  String get swipeWhy => 'Neden?';
+
+  @override
+  String get swipeSkipReasonTitle => 'Neden geçtin?';
+
+  @override
+  String get swipeSkipReasonHint =>
+      'İsteğe bağlıdır ve önerilerini iyileştirir.';
+
+  @override
+  String get swipeSkipReasonGenre => 'Bu tür bana göre değil';
+
+  @override
+  String get swipeSkipReasonTitleSpecific => 'Bu yapım ilgimi çekmedi';
+
+  @override
+  String get swipeSkipReasonNotNow => 'Şimdilik istemiyorum';
+
+  @override
+  String get swipeSkipReasonSaved => 'Tercihin önerilerine yansıtılacak';
+
+  @override
   String get swipeUndo => 'Geri al';
 
   @override
