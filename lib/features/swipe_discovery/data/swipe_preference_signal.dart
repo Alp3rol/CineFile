@@ -136,3 +136,16 @@ final swipePreferenceSignalsProvider =
                 .toList(growable: false),
           );
     });
+
+final swipeTasteSharingProvider = StreamProvider<bool>((ref) {
+  final user = ref.watch(authStateProvider).value;
+  if (user == null) return Stream.value(false);
+  return ref
+      .read(firestoreProvider)
+      .collection('users')
+      .doc(user.uid)
+      .snapshots()
+      .map(
+        (document) => document.data()?['shareSwipeTasteForMatching'] == true,
+      );
+});

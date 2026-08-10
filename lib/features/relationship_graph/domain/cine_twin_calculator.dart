@@ -45,20 +45,20 @@ enum CineTwinBadge {
 
 extension CineTwinBadgeLabels on CineTwinBadge {
   String title(AppLocalizations l10n) => switch (this) {
-        CineTwinBadge.soulmates => l10n.cineTwinBadgeSoulmatesTitle,
-        CineTwinBadge.buddies => l10n.cineTwinBadgeBuddiesTitle,
-        CineTwinBadge.genreMatch => l10n.cineTwinBadgeGenreMatchTitle,
-        CineTwinBadge.complements => l10n.cineTwinBadgeComplementsTitle,
-        CineTwinBadge.opposites => l10n.cineTwinBadgeOppositesTitle,
-      };
+    CineTwinBadge.soulmates => l10n.cineTwinBadgeSoulmatesTitle,
+    CineTwinBadge.buddies => l10n.cineTwinBadgeBuddiesTitle,
+    CineTwinBadge.genreMatch => l10n.cineTwinBadgeGenreMatchTitle,
+    CineTwinBadge.complements => l10n.cineTwinBadgeComplementsTitle,
+    CineTwinBadge.opposites => l10n.cineTwinBadgeOppositesTitle,
+  };
 
   String description(AppLocalizations l10n) => switch (this) {
-        CineTwinBadge.soulmates => l10n.cineTwinBadgeSoulmatesDescription,
-        CineTwinBadge.buddies => l10n.cineTwinBadgeBuddiesDescription,
-        CineTwinBadge.genreMatch => l10n.cineTwinBadgeGenreMatchDescription,
-        CineTwinBadge.complements => l10n.cineTwinBadgeComplementsDescription,
-        CineTwinBadge.opposites => l10n.cineTwinBadgeOppositesDescription,
-      };
+    CineTwinBadge.soulmates => l10n.cineTwinBadgeSoulmatesDescription,
+    CineTwinBadge.buddies => l10n.cineTwinBadgeBuddiesDescription,
+    CineTwinBadge.genreMatch => l10n.cineTwinBadgeGenreMatchDescription,
+    CineTwinBadge.complements => l10n.cineTwinBadgeComplementsDescription,
+    CineTwinBadge.opposites => l10n.cineTwinBadgeOppositesDescription,
+  };
 }
 
 /// Rating disagreement item for shared watch titles.
@@ -123,12 +123,17 @@ class CineTwinCalculator {
     required List<CineTwinUserRecord> userBLogs,
     required String userAName,
     required String userBName,
+    List<String> userATasteGenres = const [],
+    List<String> userBTasteGenres = const [],
+
     /// Recommendation reasons are sentences, so the calculator needs the
     /// user's language; the provider resolves it and passes it in.
     required AppLocalizations l10n,
   }) {
     // If either user has no records, match is 0%
-    if (userALogs.isEmpty || userBLogs.isEmpty) {
+    final userAHasTaste = userALogs.isNotEmpty || userATasteGenres.isNotEmpty;
+    final userBHasTaste = userBLogs.isNotEmpty || userBTasteGenres.isNotEmpty;
+    if (!userAHasTaste || !userBHasTaste) {
       return CineTwinResult(
         matchPercentage: 0,
         badge: CineTwinBadge.opposites,
@@ -140,14 +145,20 @@ class CineTwinCalculator {
       );
     }
 
-    final mapA = <int, CineTwinUserRecord>{for (final r in userALogs) r.tmdbId: r};
-    final mapB = <int, CineTwinUserRecord>{for (final r in userBLogs) r.tmdbId: r};
+    final mapA = <int, CineTwinUserRecord>{
+      for (final r in userALogs) r.tmdbId: r,
+    };
+    final mapB = <int, CineTwinUserRecord>{
+      for (final r in userBLogs) r.tmdbId: r,
+    };
 
     final sharedIds = mapA.keys.toSet().intersection(mapB.keys.toSet());
     final allIds = mapA.keys.toSet().union(mapB.keys.toSet());
 
     // 1. Overlap Score (25% weight if shared titles exist, else 0%)
-    final overlapRatio = allIds.isEmpty ? 0.0 : (sharedIds.length / allIds.length);
+    final overlapRatio = allIds.isEmpty
+        ? 0.0
+        : (sharedIds.length / allIds.length);
 
     // 2. Rating Correlation / Similarity (45% weight if shared titles exist, else 0%)
     double ratingSimilarity = 0.0;
@@ -168,7 +179,13 @@ class CineTwinCalculator {
           ratedCount++;
 
           if (diff >= 2.5) {
-            disputes.add(CineTwinDispute(recordA: recA, recordB: recB, ratingDifference: diff));
+            disputes.add(
+              CineTwinDispute(
+                recordA: recA,
+                recordB: recB,
+                ratingDifference: diff,
+              ),
+            );
           }
 
           if (recA.rating! >= 7.5 && recB.rating! >= 7.5) {
@@ -193,12 +210,21 @@ class CineTwinCalculator {
     // 3. Genre Affinity (30% weight)
     final genresA = _extractGenreCounts(userALogs);
     final genresB = _extractGenreCounts(userBLogs);
+    for (final genre in userATasteGenres) {
+      genresA[genre] = (genresA[genre] ?? 0) + 1;
+    }
+    for (final genre in userBTasteGenres) {
+      genresB[genre] = (genresB[genre] ?? 0) + 1;
+    }
     final genreSimilarity = _computeJaccardGenreSimilarity(genresA, genresB);
 
     // Combine Weighted Score
     double totalScore;
     if (sharedIds.isNotEmpty) {
-      totalScore = (overlapRatio * 0.25) + (ratingSimilarity * 0.45) + (genreSimilarity * 0.30);
+      totalScore =
+          (overlapRatio * 0.25) +
+          (ratingSimilarity * 0.45) +
+          (genreSimilarity * 0.30);
     } else {
       // 0 shared movies: score comes strictly from shared genre overlap (max 30%)
       totalScore = genreSimilarity * 0.30;
@@ -218,17 +244,23 @@ class CineTwinCalculator {
 
     // High rated by B, not seen by A
     for (final recB in userBLogs) {
-      if (!mapA.containsKey(recB.tmdbId) && (recB.rating == null || recB.rating! >= 7.5)) {
-        recs.add(CineTwinRecommendation(
-          tmdbId: recB.tmdbId,
-          title: recB.title,
-          isTv: recB.isTv,
-          posterPath: recB.posterPath,
-          reason: recB.rating != null
-              ? l10n.cineTwinReasonRated(userBName, recB.rating!.toStringAsFixed(1))
-              : l10n.cineTwinReasonRatedHighly(userBName),
-          ratingByFriend: recB.rating,
-        ));
+      if (!mapA.containsKey(recB.tmdbId) &&
+          (recB.rating == null || recB.rating! >= 7.5)) {
+        recs.add(
+          CineTwinRecommendation(
+            tmdbId: recB.tmdbId,
+            title: recB.title,
+            isTv: recB.isTv,
+            posterPath: recB.posterPath,
+            reason: recB.rating != null
+                ? l10n.cineTwinReasonRated(
+                    userBName,
+                    recB.rating!.toStringAsFixed(1),
+                  )
+                : l10n.cineTwinReasonRatedHighly(userBName),
+            ratingByFriend: recB.rating,
+          ),
+        );
       }
     }
 
@@ -251,7 +283,9 @@ class CineTwinCalculator {
     );
   }
 
-  static Map<String, int> _extractGenreCounts(List<CineTwinUserRecord> records) {
+  static Map<String, int> _extractGenreCounts(
+    List<CineTwinUserRecord> records,
+  ) {
     final counts = <String, int>{};
     for (final r in records) {
       for (final g in r.genres) {
@@ -261,7 +295,10 @@ class CineTwinCalculator {
     return counts;
   }
 
-  static double _computeJaccardGenreSimilarity(Map<String, int> a, Map<String, int> b) {
+  static double _computeJaccardGenreSimilarity(
+    Map<String, int> a,
+    Map<String, int> b,
+  ) {
     if (a.isEmpty || b.isEmpty) return 0.0;
     final keysA = a.keys.toSet();
     final keysB = b.keys.toSet();

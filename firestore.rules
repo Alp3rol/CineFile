@@ -324,7 +324,10 @@ service cloud.firestore {
             || (request.resource.data.bio is string
                 && request.resource.data.bio.size() <= 300))
         && isAllowedAvatar(request.resource.data.get('avatarUrl', 'https://api.dicebear.com/'))
-        && request.resource.data.get('featuredMovieIds', []).size() <= 5;
+        && request.resource.data.get('featuredMovieIds', []).size() <= 5
+        && request.resource.data.get('shareSwipeTasteForMatching', false) is bool
+        && request.resource.data.get('publicSwipeTasteGenreIds', []) is list
+        && request.resource.data.get('publicSwipeTasteGenreIds', []).size() <= 3;
     }
 
     match /users/{userId} {

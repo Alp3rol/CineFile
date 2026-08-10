@@ -1,18 +1,22 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/l10n/l10n_lookup.dart';
+import '../../../core/l10n/genre_names.dart';
 import '../../settings/presentation/settings_provider.dart';
 import '../../../core/database/database_provider.dart';
 import '../../auth/controllers/auth_controller.dart';
 import '../domain/cine_twin_calculator.dart';
+import '../../swipe_discovery/data/swipe_preference_signal.dart';
 
 /// Argument parameter for CineTwin comparison.
 class CineTwinParams {
   final String targetUsername;
   final List<Map<String, dynamic>> targetEntries;
+  final List<int> targetTasteGenreIds;
 
   const CineTwinParams({
     required this.targetUsername,
     required this.targetEntries,
+    this.targetTasteGenreIds = const [],
   });
 
   @override
@@ -21,20 +25,39 @@ class CineTwinParams {
       other is CineTwinParams &&
           runtimeType == other.runtimeType &&
           targetUsername == other.targetUsername &&
-          targetEntries.length == other.targetEntries.length;
+          targetEntries.length == other.targetEntries.length &&
+          _sameIds(targetTasteGenreIds, other.targetTasteGenreIds);
 
   @override
-  int get hashCode => targetUsername.hashCode ^ targetEntries.length.hashCode;
+  int get hashCode => Object.hash(
+    targetUsername,
+    targetEntries.length,
+    Object.hashAll(targetTasteGenreIds),
+  );
+
+  static bool _sameIds(List<int> a, List<int> b) {
+    if (a.length != b.length) return false;
+    for (var index = 0; index < a.length; index++) {
+      if (a[index] != b[index]) return false;
+    }
+    return true;
+  }
 }
 
 /// Provider that converts local user logs and target user logs into CineTwinResult.
-final cineTwinProvider = Provider.family<CineTwinResult?, CineTwinParams>((ref, params) {
+final cineTwinProvider = Provider.family<CineTwinResult?, CineTwinParams>((
+  ref,
+  params,
+) {
   // Recommendation reasons and the fallback labels below are user-facing, and
   // this is a provider — there is no BuildContext to read them from.
   final l10n = lookupL10n(ref.watch(localeProvider));
   final localWatchAsync = ref.watch(allWatchRecordsProvider);
   final authState = ref.watch(authStateProvider);
   final currentUserName = authState.value?.displayName ?? l10n.cineTwinYou;
+  final localTasteProfile = buildSwipeTasteProfile(
+    ref.watch(swipePreferenceSignalsProvider).value ?? const [],
+  );
 
   final localRecords = localWatchAsync.value ?? [];
 
@@ -47,14 +70,21 @@ final cineTwinProvider = Provider.family<CineTwinResult?, CineTwinParams>((ref, 
       posterPath: w.movie.posterPath,
       rating: w.record.rating,
       director: w.movie.director,
-      genres: w.movie.genres?.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList() ?? [],
+      genres:
+          w.movie.genres
+              ?.split(',')
+              .map((e) => e.trim())
+              .where((e) => e.isNotEmpty)
+              .toList() ??
+          [],
     );
   }).toList();
 
   // Convert target user's public entries
   final userBLogs = params.targetEntries.map((e) {
     final movieId = ((e['movieId'] ?? e['tmdbId'] ?? 0) as num).toInt();
-    final title = (e['title'] ?? e['movieTitle'] ?? l10n.graphNodeMovie) as String;
+    final title =
+        (e['title'] ?? e['movieTitle'] ?? l10n.graphNodeMovie) as String;
     final isTv = e['isTv'] == true || e['isTv'] == 1;
     final posterPath = e['moviePosterPath'] as String?;
     final rating = (e['rating'] as num?)?.toDouble();
@@ -78,7 +108,11 @@ final cineTwinProvider = Provider.family<CineTwinResult?, CineTwinParams>((ref, 
     );
   }).toList();
 
-  if (userALogs.isEmpty && userBLogs.isEmpty) {
+  final localHasTaste =
+      userALogs.isNotEmpty || localTasteProfile.genreIds.isNotEmpty;
+  final targetHasTaste =
+      userBLogs.isNotEmpty || params.targetTasteGenreIds.isNotEmpty;
+  if (!localHasTaste || !targetHasTaste) {
     return null;
   }
 
@@ -87,6 +121,12 @@ final cineTwinProvider = Provider.family<CineTwinResult?, CineTwinParams>((ref, 
     userBLogs: userBLogs,
     userAName: currentUserName,
     userBName: '@${params.targetUsername}',
+    userATasteGenres: localTasteProfile.genreIds
+        .map((id) => genreName(l10n, id))
+        .toList(growable: false),
+    userBTasteGenres: params.targetTasteGenreIds
+        .map((id) => genreName(l10n, id))
+        .toList(growable: false),
     l10n: l10n,
   );
 });

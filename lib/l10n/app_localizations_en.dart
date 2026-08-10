@@ -2491,6 +2491,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'There isn\'t enough watch data yet to work out a match.';
 
   @override
+  String get cineTwinSwipeTasteIncluded =>
+      'Shared swipe taste is included in this match.';
+
+  @override
   String get cineTwinSharedTitles => 'Shared';
 
   @override
@@ -3373,6 +3377,20 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get privacyPublicDesc =>
       'All records are PRIVATE by default. Only posts you explicitly share are visible in community.';
+
+  @override
+  String get privacySwipeMatchingTitle => 'Use my swipe taste in CineTwin';
+
+  @override
+  String get privacySwipeMatchingDesc =>
+      'When enabled, only your top three genres are shared for matching. Your title choices and individual swipes remain private.';
+
+  @override
+  String get privacySwipeMatchingEnabled => 'CineTwin genre sharing enabled';
+
+  @override
+  String get privacySwipeMatchingDisabled =>
+      'CineTwin genre sharing disabled and summary removed';
 
   @override
   String get privacyExportCTA => 'Export My Data as JSON';

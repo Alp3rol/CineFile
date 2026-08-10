@@ -22,7 +22,9 @@ class UserSearchResultTile extends StatelessWidget {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => UserProfileScreen(userId: user.id)),
+            MaterialPageRoute(
+              builder: (_) => UserProfileScreen(userId: user.id),
+            ),
           );
         },
         child: Row(
@@ -31,7 +33,8 @@ class UserSearchResultTile extends StatelessWidget {
               radius: 24,
               backgroundColor: AppColors.border,
               backgroundImage: NetworkImage(
-                user.avatarUrl ?? 'https://api.dicebear.com/7.x/bottts/png?seed=${user.username}',
+                user.avatarUrl ??
+                    'https://api.dicebear.com/7.x/bottts/png?seed=${user.username}',
               ),
             ),
             const SizedBox(width: 12),
@@ -41,22 +44,39 @@ class UserSearchResultTile extends StatelessWidget {
                 children: [
                   Text(
                     '@${user.username}',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppColors.textPrimary),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    AppLocalizations.of(context).userFollowerCount(user.followerCount),
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.textSecondary),
+                    AppLocalizations.of(
+                      context,
+                    ).userFollowerCount(user.followerCount),
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                 ],
               ),
             ),
             const SizedBox(width: 12),
             IconButton(
-              icon: const Icon(Icons.bolt_rounded, color: AppColors.accent, size: 20),
+              icon: const Icon(
+                Icons.bolt_rounded,
+                color: AppColors.accent,
+                size: 20,
+              ),
               tooltip: AppLocalizations.of(context).cineTwinSeeMatch,
               onPressed: () {
-                CineTwinScreen.navigate(context, user.username, []);
+                CineTwinScreen.navigate(
+                  context,
+                  user.username,
+                  [],
+                  targetTasteGenreIds: user.shareSwipeTasteForMatching
+                      ? user.publicSwipeTasteGenreIds
+                      : const [],
+                );
               },
             ),
             SizedBox(width: 100, child: FollowButton(targetUserId: user.id)),

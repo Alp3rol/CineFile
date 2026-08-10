@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -7,6 +8,8 @@ import '../../../../core/ui/ui.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/widgets/premium_toast.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../auth/controllers/auth_controller.dart';
+import '../../swipe_discovery/data/swipe_preference_signal.dart';
 import 'widgets/settings_backup_dialogs.dart';
 
 class PrivacyCenterScreen extends ConsumerWidget {
@@ -95,6 +98,41 @@ class PrivacyCenterScreen extends ConsumerWidget {
                       title: l10n.privacyPublicSection,
                       description: l10n.privacyPublicDesc,
                     ),
+                    const SizedBox(height: AppSpacing.lg),
+                    GlassContainer(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.lg,
+                        vertical: AppSpacing.sm,
+                      ),
+                      borderRadius: AppRadius.lg,
+                      child: SwitchListTile.adaptive(
+                        contentPadding: EdgeInsets.zero,
+                        secondary: const Icon(
+                          Icons.people_alt_rounded,
+                          color: AppColors.accent,
+                        ),
+                        title: Text(
+                          l10n.privacySwipeMatchingTitle,
+                          style: GoogleFonts.outfit(
+                            color: Colors.white,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        subtitle: Text(
+                          l10n.privacySwipeMatchingDesc,
+                          style: GoogleFonts.inter(
+                            color: AppColors.textSecondary,
+                            fontSize: 11,
+                            height: 1.35,
+                          ),
+                        ),
+                        value:
+                            ref.watch(swipeTasteSharingProvider).value ?? false,
+                        onChanged: (enabled) =>
+                            _setSwipeTasteSharing(context, ref, enabled),
+                      ),
+                    ),
                     const SizedBox(height: AppSpacing.xxl),
 
                     // Direct Action: Export JSON
@@ -123,22 +161,70 @@ class PrivacyCenterScreen extends ConsumerWidget {
     );
   }
 
+  Future<void> _setSwipeTasteSharing(
+    BuildContext context,
+    WidgetRef ref,
+    bool enabled,
+  ) async {
+    final user = ref.currentUser;
+    if (user == null) return;
+    final profile = buildSwipeTasteProfile(
+      ref.read(swipePreferenceSignalsProvider).value ?? const [],
+    );
+    try {
+      await ref.read(firestoreProvider).collection('users').doc(user.uid).set({
+        'shareSwipeTasteForMatching': enabled,
+        'publicSwipeTasteGenreIds': enabled
+            ? profile.genreIds
+            : FieldValue.delete(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+      if (context.mounted) {
+        showPremiumToast(
+          context,
+          enabled
+              ? AppLocalizations.of(context).privacySwipeMatchingEnabled
+              : AppLocalizations.of(context).privacySwipeMatchingDisabled,
+        );
+      }
+    } catch (_) {
+      if (context.mounted) {
+        showPremiumToast(context, AppLocalizations.of(context).swipeSaveFailed);
+      }
+    }
+  }
+
   Future<void> _confirmPurgeAllData(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context);
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surface,
-        title: Text(l10n.privacyDeleteConfirmTitle, style: const TextStyle(color: Colors.white)),
-        content: Text(l10n.privacyDeleteConfirmDesc, style: const TextStyle(color: AppColors.textSecondary)),
+        title: Text(
+          l10n.privacyDeleteConfirmTitle,
+          style: const TextStyle(color: Colors.white),
+        ),
+        content: Text(
+          l10n.privacyDeleteConfirmDesc,
+          style: const TextStyle(color: AppColors.textSecondary),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.commonCancel, style: const TextStyle(color: AppColors.textSecondary)),
+            child: Text(
+              l10n.commonCancel,
+              style: const TextStyle(color: AppColors.textSecondary),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text(l10n.commonDelete, style: const TextStyle(color: AppColors.error, fontWeight: FontWeight.bold)),
+            child: Text(
+              l10n.commonDelete,
+              style: const TextStyle(
+                color: AppColors.error,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
@@ -183,7 +269,10 @@ class PrivacyCenterScreen extends ConsumerWidget {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: statusColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(AppRadius.sm),

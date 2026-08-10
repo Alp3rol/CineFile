@@ -358,4 +358,22 @@ void main() {
         .get();
     expect(saved.data()?['swipeSkipReason'], 'dislikeGenre');
   });
+
+  testWidgets('fits the complete swipe flow on a compact phone', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 568);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(_app(decisions: const {}));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Test Filmi'), findsOneWidget);
+    expect(find.text('Geç'), findsOneWidget);
+    expect(find.text('İzledim'), findsOneWidget);
+    expect(find.text('Listeme Ekle'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }

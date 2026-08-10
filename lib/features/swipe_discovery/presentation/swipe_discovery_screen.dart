@@ -180,6 +180,20 @@ class _SwipeDiscoveryScreenState extends ConsumerState<SwipeDiscoveryScreen> {
         .doc('${key.tmdbId}_${key.isTv}')
         .set(data, SetOptions(merge: true));
 
+    unawaited(
+      _publishPublicTasteIfEnabled(
+        removeKey: key,
+        replacement: SwipePreferenceSignal(
+          isInterested: choice == _SwipeChoice.interested,
+          genreIds: (item['genre_ids'] as List<dynamic>? ?? const [])
+              .whereType<num>()
+              .map((id) => id.toInt())
+              .toList(growable: false),
+          key: key,
+        ),
+      ),
+    );
+
     if (choice == _SwipeChoice.interested) {
       // The Firestore write above is the user's actual intent. Metadata is a
       // best-effort offline cache and must not turn a successful watchlist
@@ -272,6 +286,20 @@ class _SwipeDiscoveryScreenState extends ConsumerState<SwipeDiscoveryScreen> {
             'swipeSkipReason': reason,
             'updatedAt': FieldValue.serverTimestamp(),
           }, SetOptions(merge: true));
+      unawaited(
+        _publishPublicTasteIfEnabled(
+          removeKey: key,
+          replacement: SwipePreferenceSignal(
+            isInterested: false,
+            genreIds: (item['genre_ids'] as List<dynamic>? ?? const [])
+                .whereType<num>()
+                .map((id) => id.toInt())
+                .toList(growable: false),
+            key: key,
+            skipReason: reason,
+          ),
+        ),
+      );
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
@@ -281,6 +309,39 @@ class _SwipeDiscoveryScreenState extends ConsumerState<SwipeDiscoveryScreen> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(l10n.swipeSaveFailed)));
+    }
+  }
+
+  Future<void> _publishPublicTasteIfEnabled({
+    required MovieKey removeKey,
+    SwipePreferenceSignal? replacement,
+  }) async {
+    final user = ref.currentUser;
+    if (user == null) return;
+    try {
+      final userReference = ref
+          .read(firestoreProvider)
+          .collection('users')
+          .doc(user.uid);
+      final userDocument = await userReference.get();
+      if (userDocument.data()?['shareSwipeTasteForMatching'] != true) return;
+
+      final signals = [
+        for (final signal
+            in ref.read(swipePreferenceSignalsProvider).value ??
+                const <SwipePreferenceSignal>[])
+          if (signal.key != removeKey) signal,
+        ?replacement,
+      ];
+      final profile = buildSwipeTasteProfile(signals);
+      await userReference.set({
+        'publicSwipeTasteGenreIds': profile.genreIds,
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+    } catch (error) {
+      // Public matching is optional. Its sync must never turn a successful
+      // private swipe decision into an apparent failure.
+      debugPrint('Publishing swipe taste profile failed: $error');
     }
   }
 
@@ -345,6 +406,7 @@ class _SwipeDiscoveryScreenState extends ConsumerState<SwipeDiscoveryScreen> {
           .collection('movie_settings')
           .doc('${key.tmdbId}_${key.isTv}')
           .set(changes, SetOptions(merge: true));
+      await _publishPublicTasteIfEnabled(removeKey: key);
       if (action.choice == _SwipeChoice.interested &&
           ref.read(releaseRemindersEnabledProvider)) {
         try {
@@ -472,6 +534,16 @@ class _SwipeDiscoveryScreenState extends ConsumerState<SwipeDiscoveryScreen> {
           }, SetOptions(merge: true));
         }
         await batch.commit();
+      }
+      final userDocument = await firestore
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      if (userDocument.data()?['shareSwipeTasteForMatching'] == true) {
+        await userDocument.reference.set({
+          'publicSwipeTasteGenreIds': <int>[],
+          'updatedAt': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
       }
       if (!mounted) return;
       setState(() {
@@ -893,6 +965,7 @@ class _PremiumDiscoveryCard extends StatelessWidget {
         .map((id) => id.toInt())
         .take(3)
         .toList(growable: false);
+    final compactHeight = MediaQuery.sizeOf(context).height < 650;
 
     return GestureDetector(
       onTap: () => showModalBottomSheet<void>(
@@ -918,7 +991,7 @@ class _PremiumDiscoveryCard extends StatelessWidget {
           child: Column(
             children: [
               Expanded(
-                flex: 6,
+                flex: compactHeight ? 5 : 6,
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
@@ -959,7 +1032,7 @@ class _PremiumDiscoveryCard extends StatelessWidget {
                 ),
               ),
               Expanded(
-                flex: 4,
+                flex: compactHeight ? 5 : 4,
                 child: Container(
                   width: double.infinity,
                   padding: const EdgeInsets.fromLTRB(18, 15, 18, 11),

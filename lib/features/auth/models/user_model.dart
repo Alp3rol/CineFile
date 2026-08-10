@@ -16,6 +16,8 @@ class UserModel {
   final int followerCount;
   final int followingCount;
   final List<String> featuredMovieIds;
+  final bool shareSwipeTasteForMatching;
+  final List<int> publicSwipeTasteGenreIds;
 
   UserModel({
     required this.id,
@@ -25,6 +27,8 @@ class UserModel {
     this.followerCount = 0,
     this.followingCount = 0,
     this.featuredMovieIds = const [],
+    this.shareSwipeTasteForMatching = false,
+    this.publicSwipeTasteGenreIds = const [],
   });
 
   factory UserModel.fromMap(Map<String, dynamic> map, String id) {
@@ -36,6 +40,12 @@ class UserModel {
       followerCount: map['followerCount'] ?? 0,
       followingCount: map['followingCount'] ?? 0,
       featuredMovieIds: List<String>.from(map['featuredMovieIds'] ?? []),
+      shareSwipeTasteForMatching: map['shareSwipeTasteForMatching'] == true,
+      publicSwipeTasteGenreIds:
+          (map['publicSwipeTasteGenreIds'] as List<dynamic>? ?? const [])
+              .whereType<num>()
+              .map((id) => id.toInt())
+              .toList(growable: false),
     );
   }
 
@@ -47,6 +57,8 @@ class UserModel {
       'followerCount': followerCount,
       'followingCount': followingCount,
       'featuredMovieIds': featuredMovieIds,
+      'shareSwipeTasteForMatching': shareSwipeTasteForMatching,
+      'publicSwipeTasteGenreIds': publicSwipeTasteGenreIds,
     };
   }
 
@@ -58,6 +70,8 @@ class UserModel {
     int? followerCount,
     int? followingCount,
     List<String>? featuredMovieIds,
+    bool? shareSwipeTasteForMatching,
+    List<int>? publicSwipeTasteGenreIds,
   }) {
     return UserModel(
       id: id ?? this.id,
@@ -67,6 +81,10 @@ class UserModel {
       followerCount: followerCount ?? this.followerCount,
       followingCount: followingCount ?? this.followingCount,
       featuredMovieIds: featuredMovieIds ?? this.featuredMovieIds,
+      shareSwipeTasteForMatching:
+          shareSwipeTasteForMatching ?? this.shareSwipeTasteForMatching,
+      publicSwipeTasteGenreIds:
+          publicSwipeTasteGenreIds ?? this.publicSwipeTasteGenreIds,
     );
   }
 }

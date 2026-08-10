@@ -2382,6 +2382,10 @@ class AppLocalizationsTr extends AppLocalizations {
       'Uyum hesabı için henüz yeterli izleme verisi bulunmuyor.';
 
   @override
+  String get cineTwinSwipeTasteIncluded =>
+      'Paylaşılan kaydırma zevki uyum hesabına dahil edildi.';
+
+  @override
   String get cineTwinSharedTitles => 'Ortak Film';
 
   @override
@@ -3174,6 +3178,21 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get privacyPublicDesc =>
       'Tüm kayıtların varsayılan olarak GİZLİDİR. Sadece açık paylaşmayı seçtiğin gönderiler toplulukta görünür.';
+
+  @override
+  String get privacySwipeMatchingTitle =>
+      'Kaydırma zevkimi CineTwin\'de kullan';
+
+  @override
+  String get privacySwipeMatchingDesc =>
+      'Açarsan yalnızca en güçlü üç türün eşleşme için paylaşılır. Film seçimlerin ve sağ/sol hareketlerin gizli kalır.';
+
+  @override
+  String get privacySwipeMatchingEnabled => 'CineTwin tür paylaşımı açıldı';
+
+  @override
+  String get privacySwipeMatchingDisabled =>
+      'CineTwin tür paylaşımı kapatıldı ve özet silindi';
 
   @override
   String get privacyExportCTA => 'Verilerimi JSON Olarak İndir';

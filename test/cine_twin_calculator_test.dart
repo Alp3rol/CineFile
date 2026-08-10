@@ -12,7 +12,11 @@ void main() {
     test('Empty watch histories return 0% match percentage', () {
       final result = CineTwinCalculator.calculate(
         userALogs: [
-          const CineTwinUserRecord(tmdbId: 101, title: 'Inception', rating: 9.0),
+          const CineTwinUserRecord(
+            tmdbId: 101,
+            title: 'Inception',
+            rating: 9.0,
+          ),
         ],
         userBLogs: [],
         userAName: 'Sen',
@@ -27,27 +31,45 @@ void main() {
       expect(result.badge, equals(CineTwinBadge.opposites));
     });
 
-    test('Identical watch histories with high ratings return top match score and soulmates badge', () {
-      final logsA = [
-        const CineTwinUserRecord(tmdbId: 101, title: 'Inception', rating: 9.0, genres: ['Bilim Kurgu', 'Aksiyon']),
-        const CineTwinUserRecord(tmdbId: 102, title: 'Interstellar', rating: 9.5, genres: ['Bilim Kurgu', 'Drama']),
-        const CineTwinUserRecord(tmdbId: 103, title: 'The Dark Knight', rating: 10.0, genres: ['Aksiyon', 'Suç']),
-      ];
+    test(
+      'Identical watch histories with high ratings return top match score and soulmates badge',
+      () {
+        final logsA = [
+          const CineTwinUserRecord(
+            tmdbId: 101,
+            title: 'Inception',
+            rating: 9.0,
+            genres: ['Bilim Kurgu', 'Aksiyon'],
+          ),
+          const CineTwinUserRecord(
+            tmdbId: 102,
+            title: 'Interstellar',
+            rating: 9.5,
+            genres: ['Bilim Kurgu', 'Drama'],
+          ),
+          const CineTwinUserRecord(
+            tmdbId: 103,
+            title: 'The Dark Knight',
+            rating: 10.0,
+            genres: ['Aksiyon', 'Suç'],
+          ),
+        ];
 
-      final result = CineTwinCalculator.calculate(
-        userALogs: logsA,
-        userBLogs: logsA,
-        userAName: 'Ahmet',
-        userBName: 'Mehmet',
-        l10n: _l10n,
-      );
+        final result = CineTwinCalculator.calculate(
+          userALogs: logsA,
+          userBLogs: logsA,
+          userAName: 'Ahmet',
+          userBName: 'Mehmet',
+          l10n: _l10n,
+        );
 
-      expect(result.matchPercentage, greaterThanOrEqualTo(85));
-      expect(result.badge, equals(CineTwinBadge.soulmates));
-      expect(result.sharedCount, equals(3));
-      expect(result.ratingDisputes, isEmpty);
-      expect(result.sharedFavorites.length, equals(3));
-    });
+        expect(result.matchPercentage, greaterThanOrEqualTo(85));
+        expect(result.badge, equals(CineTwinBadge.soulmates));
+        expect(result.sharedCount, equals(3));
+        expect(result.ratingDisputes, isEmpty);
+        expect(result.sharedFavorites.length, equals(3));
+      },
+    );
 
     test('Disagreeing ratings create disputes list', () {
       final logsA = [
@@ -78,7 +100,11 @@ void main() {
       ];
       final logsB = [
         const CineTwinUserRecord(tmdbId: 101, title: 'Movie A', rating: 9.0),
-        const CineTwinUserRecord(tmdbId: 201, title: 'Recommended Movie', rating: 9.5),
+        const CineTwinUserRecord(
+          tmdbId: 201,
+          title: 'Recommended Movie',
+          rating: 9.5,
+        ),
       ];
 
       final result = CineTwinCalculator.calculate(
@@ -92,6 +118,25 @@ void main() {
       expect(result.recommendations.length, equals(1));
       expect(result.recommendations.first.tmdbId, equals(201));
       expect(result.recommendations.first.title, equals('Recommended Movie'));
+    });
+
+    test('opted-in swipe genres can create a privacy-safe taste match', () {
+      final result = CineTwinCalculator.calculate(
+        userALogs: const [],
+        userBLogs: const [],
+        userAName: 'UserA',
+        userBName: 'UserB',
+        userATasteGenres: const ['Science Fiction', 'Drama'],
+        userBTasteGenres: const ['Science Fiction', 'Drama'],
+        l10n: _l10n,
+      );
+
+      expect(result.matchPercentage, 30);
+      expect(
+        result.sharedGenres.keys,
+        containsAll(['Science Fiction', 'Drama']),
+      );
+      expect(result.sharedCount, 0);
     });
   });
 }
