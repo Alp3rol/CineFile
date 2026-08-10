@@ -19,6 +19,7 @@ import '../../auth/controllers/auth_controller.dart';
 import '../../movie_detail/presentation/add_watch_record_sheet.dart';
 import '../../movie_detail/presentation/movie_detail_provider.dart';
 import '../../movie_detail/presentation/movie_detail_screen.dart';
+import '../../movie_detail/presentation/widgets/movie_detail_watch_providers_section.dart';
 import '../../settings/presentation/settings_provider.dart';
 import '../data/swipe_preference_signal.dart';
 
@@ -1057,7 +1058,18 @@ class _QuickLookSheet extends ConsumerWidget {
                       ),
                     ),
                   ],
+                  if (detailAsync.hasError) ...[
+                    const SizedBox(height: 14),
+                    OutlinedButton.icon(
+                      onPressed: () => ref.invalidate(
+                        movieDetailProvider((tmdbId: tmdbId, isTv: isTv)),
+                      ),
+                      icon: const Icon(Icons.refresh_rounded),
+                      label: Text(l10n.commonRetry),
+                    ),
+                  ],
                   const SizedBox(height: 22),
+                  MovieDetailWatchProvidersSection(tmdbId: tmdbId, isTv: isTv),
                   SizedBox(
                     width: double.infinity,
                     child: FilledButton.icon(

@@ -3,6 +3,8 @@ import 'package:cinefile/core/database/app_database.dart';
 import 'package:cinefile/features/swipe_discovery/presentation/swipe_discovery_screen.dart';
 import 'package:cinefile/features/swipe_discovery/data/swipe_preference_signal.dart';
 import 'package:cinefile/features/movie_detail/presentation/movie_detail_provider.dart';
+import 'package:cinefile/features/movie_detail/presentation/watch_providers_provider.dart';
+import 'package:cinefile/features/movie_detail/domain/watch_provider_models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -63,6 +65,22 @@ Widget _app({
           },
         },
       ),
+      watchProvidersProvider((tmdbId: 42, isTv: false)).overrideWith(
+        (ref) async => const WatchAvailability(
+          region: 'TR',
+          link: null,
+          byCategory: {
+            WatchProviderCategory.flatrate: [
+              WatchProvider(
+                providerId: 8,
+                name: 'TestFlix',
+                logoPath: null,
+                displayPriority: 1,
+              ),
+            ],
+          },
+        ),
+      ),
     ],
     child: LocalizedTestApp(
       locale: const Locale('tr'),
@@ -111,6 +129,7 @@ void main() {
     expect(find.text('Tüm Detayları Gör'), findsOneWidget);
     expect(find.text('A test overview'), findsWidgets);
     expect(find.text('126dk'), findsOneWidget);
+    expect(find.text('TestFlix'), findsOneWidget);
     expect(find.text('Test Yönetmen'), findsOneWidget);
     expect(find.text('Oyuncu Bir, Oyuncu İki'), findsOneWidget);
     expect(tester.takeException(), isNull);
