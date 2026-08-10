@@ -10,6 +10,15 @@ import '../../settings/presentation/settings_provider.dart';
 import '../data/recommendation_model.dart';
 import '../../swipe_discovery/data/swipe_preference_signal.dart';
 
+List<({int genreId, bool isTv})> recommendationGenreTargets(
+  Iterable<int> preferredGenreIds,
+) => [
+  for (final genreId in preferredGenreIds) ...[
+    if (kMovieGenreIds.contains(genreId)) (genreId: genreId, isTv: false),
+    if (kTvGenreIds.contains(genreId)) (genreId: genreId, isTv: true),
+  ],
+];
+
 final recommendationsProvider = FutureProvider<List<RecommendationItem>>((
   ref,
 ) async {
@@ -108,52 +117,44 @@ final recommendationsProvider = FutureProvider<List<RecommendationItem>>((
     swipeSignals: swipeSignals,
   );
   if (preferredGenreIds.isNotEmpty) {
-    // Ids come straight from the stats now — no name→id table to keep in sync.
-    // Each id is only valid against the endpoint whose vocabulary contains it,
-    // so a TV-only genre isn't sent to discover/movie and vice versa.
-    final topGenreLabel = genreName(l10n, preferredGenreIds.first);
-    final movieGenreIds = preferredGenreIds
-        .where(kMovieGenreIds.contains)
-        .join(',');
-    final tvGenreIds = preferredGenreIds.where(kTvGenreIds.contains).join(',');
-
-    try {
-      if (movieGenreIds.isNotEmpty) {
-        final genreMovies = await tmdbService.discoverMovies(
-          withGenres: movieGenreIds,
-        );
-        for (final m in genreMovies) {
-          final id = m['id'] as int;
-          if (!libraryKeys.contains('${id}_false')) {
-            recommendationsMap['${id}_false'] = RecommendationItem.fromJson(
-              m,
-              reason: l10n.recommendationReasonGenre(topGenreLabel),
-              fallbackTitle: l10n.titleUnknown,
-              isTvOverride: false,
-            );
+    // Query each learned genre independently. Combining the strongest genres
+    // into one request narrows the pool and labels every result with only the
+    // first genre. Separate requests preserve variety and honest reasons.
+    await Future.wait(
+      recommendationGenreTargets(preferredGenreIds).map((target) async {
+        final genreLabel = genreName(l10n, target.genreId);
+        try {
+          final results = target.isTv
+              ? await tmdbService.discoverTvShows(
+                  withGenres: '${target.genreId}',
+                )
+              : await tmdbService.discoverMovies(
+                  withGenres: '${target.genreId}',
+                );
+          for (final item in results) {
+            final id = item['id'] as int;
+            final key = '${id}_${target.isTv}';
+            if (!libraryKeys.contains(key)) {
+              recommendationsMap.putIfAbsent(
+                key,
+                () => RecommendationItem.fromJson(
+                  item,
+                  reason: l10n.recommendationReasonGenre(genreLabel),
+                  fallbackTitle: l10n.titleUnknown,
+                  isTvOverride: target.isTv,
+                ),
+              );
+            }
           }
+        } catch (error, stackTrace) {
+          reportError(
+            error,
+            stackTrace,
+            where: 'recommendations.byGenre.${target.genreId}.${target.isTv}',
+          );
         }
-      }
-
-      if (tvGenreIds.isNotEmpty) {
-        final genreTv = await tmdbService.discoverTvShows(
-          withGenres: tvGenreIds,
-        );
-        for (final tv in genreTv) {
-          final id = tv['id'] as int;
-          if (!libraryKeys.contains('${id}_true')) {
-            recommendationsMap['${id}_true'] = RecommendationItem.fromJson(
-              tv,
-              reason: l10n.recommendationReasonGenre(topGenreLabel),
-              fallbackTitle: l10n.titleUnknown,
-              isTvOverride: true,
-            );
-          }
-        }
-      }
-    } catch (error, stackTrace) {
-      reportError(error, stackTrace, where: 'recommendations.byGenre');
-    }
+      }),
+    );
   }
 
   // 2. Discover by top director
