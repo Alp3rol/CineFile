@@ -1067,13 +1067,13 @@ abstract class AppLocalizations {
   /// No description provided for @swipeInterested.
   ///
   /// In tr, this message translates to:
-  /// **'İlgimi çekti'**
+  /// **'Listeme Ekle'**
   String get swipeInterested;
 
   /// No description provided for @swipeNotInterested.
   ///
   /// In tr, this message translates to:
-  /// **'İlgilenmiyorum'**
+  /// **'Geç'**
   String get swipeNotInterested;
 
   /// No description provided for @swipeWatched.
@@ -1099,6 +1099,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Geri al'**
   String get swipeUndo;
+
+  /// No description provided for @swipeViewDetails.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tüm Detayları Gör'**
+  String get swipeViewDetails;
 
   /// No description provided for @swipeSaveFailed.
   ///

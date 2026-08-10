@@ -562,10 +562,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Swipe right: add to Watchlist • Swipe left: pass';
 
   @override
-  String get swipeInterested => 'I\'m interested';
+  String get swipeInterested => 'Add to List';
 
   @override
-  String get swipeNotInterested => 'Not for me';
+  String get swipeNotInterested => 'Pass';
 
   @override
   String get swipeWatched => 'Watched';
@@ -578,6 +578,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get swipeUndo => 'Undo';
+
+  @override
+  String get swipeViewDetails => 'View Full Details';
 
   @override
   String get swipeSaveFailed => 'Couldn\'t save your choice. Please try again.';

@@ -557,10 +557,10 @@ class AppLocalizationsTr extends AppLocalizations {
       'Sağa kaydır: İzleme Listesi\'ne ekle • Sola kaydır: geç';
 
   @override
-  String get swipeInterested => 'İlgimi çekti';
+  String get swipeInterested => 'Listeme Ekle';
 
   @override
-  String get swipeNotInterested => 'İlgilenmiyorum';
+  String get swipeNotInterested => 'Geç';
 
   @override
   String get swipeWatched => 'İzledim';
@@ -573,6 +573,9 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get swipeUndo => 'Geri al';
+
+  @override
+  String get swipeViewDetails => 'Tüm Detayları Gör';
 
   @override
   String get swipeSaveFailed => 'Tercihin kaydedilemedi. Lütfen tekrar dene.';

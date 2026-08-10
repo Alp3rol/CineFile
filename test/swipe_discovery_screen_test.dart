@@ -16,6 +16,7 @@ Map<String, dynamic> _movie(int id, String title) => {
   'media_type': 'movie',
   'overview': 'A test overview',
   'vote_average': 8.2,
+  'genre_ids': [18, 878],
   'recommendation_reason': 'Bilim kurgu sevdiğin için',
 };
 
@@ -66,6 +67,27 @@ void main() {
     expect(find.text('1 öneri kaldı'), findsOneWidget);
     expect(find.byIcon(Icons.close_rounded), findsOneWidget);
     expect(find.byIcon(Icons.bookmark_add_rounded), findsOneWidget);
+    expect(find.text('Geç'), findsOneWidget);
+    expect(find.text('Listeme Ekle'), findsOneWidget);
+  });
+
+  testWidgets('opens the premium quick look without leaving the deck', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(_app(decisions: const {}));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Test Filmi'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Tüm Detayları Gör'), findsOneWidget);
+    expect(find.text('A test overview'), findsWidgets);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('previews the next card behind the active recommendation', (

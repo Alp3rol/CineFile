@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/api_constants.dart';
 import '../../../core/database/database_provider.dart';
 import '../../../core/database/movie_repository.dart';
+import '../../../core/l10n/genre_names.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_network_image.dart';
@@ -401,35 +402,22 @@ class _SwipeDiscoveryScreenState extends ConsumerState<SwipeDiscoveryScreen> {
             : Column(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 4, 24, 12),
-                    child: Column(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
+                        const Icon(
+                          Icons.auto_awesome_rounded,
+                          color: AppTheme.accentColor,
+                          size: 14,
+                        ),
+                        const SizedBox(width: 6),
                         Text(
-                          l10n.swipeDiscoverHint,
-                          textAlign: TextAlign.center,
+                          l10n.swipeRemaining(items.length),
                           style: GoogleFonts.inter(
                             color: AppTheme.textSecondary,
-                            fontSize: 12,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.06),
-                            borderRadius: BorderRadius.circular(100),
-                            border: Border.all(color: AppTheme.borderColor),
-                          ),
-                          child: Text(
-                            l10n.swipeRemaining(items.length),
-                            style: GoogleFonts.inter(
-                              color: AppTheme.textSecondary,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ],
@@ -451,7 +439,9 @@ class _SwipeDiscoveryScreenState extends ConsumerState<SwipeDiscoveryScreen> {
                                 child: IgnorePointer(
                                   child: Opacity(
                                     opacity: 0.7,
-                                    child: _DiscoveryCard(item: items[1]),
+                                    child: _PremiumDiscoveryCard(
+                                      item: items[1],
+                                    ),
                                   ),
                                 ),
                               ),
@@ -479,7 +469,7 @@ class _SwipeDiscoveryScreenState extends ConsumerState<SwipeDiscoveryScreen> {
                                     ? _SwipeChoice.interested
                                     : _SwipeChoice.notInterested,
                               ),
-                              child: _DiscoveryCard(item: items.first),
+                              child: _PremiumDiscoveryCard(item: items.first),
                             ),
                           ),
                         ],
@@ -487,40 +477,49 @@ class _SwipeDiscoveryScreenState extends ConsumerState<SwipeDiscoveryScreen> {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+                    padding: const EdgeInsets.fromLTRB(18, 14, 18, 18),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        _ActionButton(
-                          tooltip: l10n.swipeNotInterested,
-                          icon: Icons.close_rounded,
-                          color: const Color(0xFFE35D6A),
-                          onPressed: _isWriting
-                              ? null
-                              : () => _choose(
-                                  items.first,
-                                  _SwipeChoice.notInterested,
-                                ),
+                        Expanded(
+                          child: _ActionButton(
+                            tooltip: l10n.swipeNotInterested,
+                            label: l10n.swipeNotInterested,
+                            icon: Icons.close_rounded,
+                            color: const Color(0xFFE35D6A),
+                            onPressed: _isWriting
+                                ? null
+                                : () => _choose(
+                                    items.first,
+                                    _SwipeChoice.notInterested,
+                                  ),
+                          ),
                         ),
-                        _ActionButton(
-                          tooltip: l10n.swipeWatched,
-                          icon: Icons.visibility_rounded,
-                          color: AppTheme.accentColor,
-                          size: 54,
-                          onPressed: _isWriting
-                              ? null
-                              : () => _markWatched(items.first),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: _ActionButton(
+                            tooltip: l10n.swipeWatched,
+                            label: l10n.swipeWatched,
+                            icon: Icons.visibility_rounded,
+                            color: AppTheme.accentColor,
+                            onPressed: _isWriting
+                                ? null
+                                : () => _markWatched(items.first),
+                          ),
                         ),
-                        _ActionButton(
-                          tooltip: l10n.swipeInterested,
-                          icon: Icons.bookmark_add_rounded,
-                          color: const Color(0xFF39C987),
-                          onPressed: _isWriting
-                              ? null
-                              : () => _choose(
-                                  items.first,
-                                  _SwipeChoice.interested,
-                                ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: _ActionButton(
+                            tooltip: l10n.swipeInterested,
+                            label: l10n.swipeInterested,
+                            icon: Icons.bookmark_add_rounded,
+                            color: const Color(0xFF39C987),
+                            onPressed: _isWriting
+                                ? null
+                                : () => _choose(
+                                    items.first,
+                                    _SwipeChoice.interested,
+                                  ),
+                          ),
                         ),
                       ],
                     ),
@@ -532,6 +531,7 @@ class _SwipeDiscoveryScreenState extends ConsumerState<SwipeDiscoveryScreen> {
   }
 }
 
+// ignore: unused_element
 class _DiscoveryCard extends StatelessWidget {
   const _DiscoveryCard({required this.item});
 
@@ -682,6 +682,339 @@ class _InfoPill extends StatelessWidget {
   );
 }
 
+class _PremiumDiscoveryCard extends StatelessWidget {
+  const _PremiumDiscoveryCard({required this.item});
+
+  final Map<String, dynamic> item;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final title = (item['title'] ?? item['name'] ?? l10n.titleUnknown)
+        .toString();
+    final date = (item['release_date'] ?? item['first_air_date'] ?? '')
+        .toString();
+    final year = date.length >= 4 ? date.substring(0, 4) : '';
+    final overview = (item['overview'] ?? '').toString();
+    final reason = item['recommendation_reason']?.toString();
+    final rating = (item['vote_average'] as num?)?.toDouble();
+    final isTv = item['media_type'] == 'tv';
+    final poster = (item['poster_path'] ?? '').toString();
+    final backdrop = (item['backdrop_path'] ?? '').toString();
+    final genreIds = (item['genre_ids'] as List<dynamic>? ?? const [])
+        .whereType<num>()
+        .map((id) => id.toInt())
+        .take(3)
+        .toList(growable: false);
+
+    return GestureDetector(
+      onTap: () => showModalBottomSheet<void>(
+        context: context,
+        backgroundColor: Colors.transparent,
+        isScrollControlled: true,
+        builder: (_) => _QuickLookSheet(item: item, isTv: isTv),
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(26),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.42),
+              blurRadius: 28,
+              offset: const Offset(0, 14),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(25),
+          child: Column(
+            children: [
+              Expanded(
+                flex: 6,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    AppNetworkImage(
+                      imageUrl: backdrop.isNotEmpty
+                          ? '${ApiConstants.imagePathW780}$backdrop'
+                          : poster.isEmpty
+                          ? ''
+                          : '${ApiConstants.imagePathW500}$poster',
+                      seed: title,
+                      fit: BoxFit.cover,
+                    ),
+                    const DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [Colors.transparent, Color(0xB80B0D13)],
+                          stops: [0.55, 1],
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 14,
+                      right: 14,
+                      child: _RatingBadge(rating: rating),
+                    ),
+                    Positioned(
+                      left: 16,
+                      bottom: 14,
+                      child: _InfoPill(
+                        isTv
+                            ? l10n.discoverFilterShows
+                            : l10n.discoverFilterMovies,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                flex: 4,
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.fromLTRB(18, 15, 18, 11),
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [Color(0xFF1B1E28), Color(0xFF101219)],
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.outfit(
+                          color: Colors.white,
+                          fontSize: 23,
+                          height: 1.05,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 6,
+                        children: [
+                          if (year.isNotEmpty) _InfoPill(year),
+                          ...genreIds.map(
+                            (id) => _InfoPill(genreName(l10n, id)),
+                          ),
+                        ],
+                      ),
+                      if (reason != null && reason.isNotEmpty) ...[
+                        const SizedBox(height: 9),
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.auto_awesome_rounded,
+                              color: AppTheme.accentColor,
+                              size: 15,
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                reason,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.inter(
+                                  color: AppTheme.accentColor,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                      if (overview.isNotEmpty) ...[
+                        const SizedBox(height: 7),
+                        Expanded(
+                          child: Text(
+                            overview,
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.inter(
+                              color: Colors.white.withValues(alpha: 0.72),
+                              fontSize: 11.5,
+                              height: 1.32,
+                            ),
+                          ),
+                        ),
+                      ] else
+                        const Spacer(),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: Icon(
+                          Icons.keyboard_arrow_up_rounded,
+                          color: Colors.white.withValues(alpha: 0.38),
+                          size: 18,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RatingBadge extends StatelessWidget {
+  const _RatingBadge({required this.rating});
+
+  final double? rating;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+    decoration: BoxDecoration(
+      color: const Color(0xD90B0D12),
+      borderRadius: BorderRadius.circular(100),
+      border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Icon(Icons.star_rounded, color: Color(0xFFFFCF4A), size: 16),
+        const SizedBox(width: 4),
+        Text(
+          rating != null && rating! > 0 ? rating!.toStringAsFixed(1) : '—',
+          style: GoogleFonts.inter(
+            color: Colors.white,
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+class _QuickLookSheet extends StatelessWidget {
+  const _QuickLookSheet({required this.item, required this.isTv});
+
+  final Map<String, dynamic> item;
+  final bool isTv;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final title = (item['title'] ?? item['name'] ?? l10n.titleUnknown)
+        .toString();
+    final overview = (item['overview'] ?? '').toString();
+    final imagePath = (item['backdrop_path'] ?? item['poster_path'] ?? '')
+        .toString();
+    final genreIds = (item['genre_ids'] as List<dynamic>? ?? const [])
+        .whereType<num>()
+        .map((id) => id.toInt())
+        .take(4);
+
+    return DraggableScrollableSheet(
+      initialChildSize: 0.68,
+      minChildSize: 0.45,
+      maxChildSize: 0.92,
+      expand: false,
+      builder: (context, controller) => Container(
+        decoration: const BoxDecoration(
+          color: Color(0xFF11131A),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        child: ListView(
+          controller: controller,
+          padding: EdgeInsets.zero,
+          children: [
+            Center(
+              child: Container(
+                width: 42,
+                height: 4,
+                margin: const EdgeInsets.symmetric(vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.white24,
+                  borderRadius: BorderRadius.circular(100),
+                ),
+              ),
+            ),
+            AspectRatio(
+              aspectRatio: 2,
+              child: AppNetworkImage(
+                imageUrl: imagePath.isEmpty
+                    ? ''
+                    : '${ApiConstants.imagePathW780}$imagePath',
+                seed: title,
+                fit: BoxFit.cover,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(22, 20, 22, 28),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.outfit(
+                      color: Colors.white,
+                      fontSize: 27,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 7,
+                    runSpacing: 7,
+                    children: genreIds
+                        .map((id) => _InfoPill(genreName(l10n, id)))
+                        .toList(growable: false),
+                  ),
+                  if (overview.isNotEmpty) ...[
+                    const SizedBox(height: 18),
+                    Text(
+                      overview,
+                      style: GoogleFonts.inter(
+                        color: Colors.white.withValues(alpha: 0.78),
+                        fontSize: 14,
+                        height: 1.5,
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 22),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => MovieDetailScreen(
+                              tmdbId: (item['id'] as num).toInt(),
+                              isTv: isTv,
+                            ),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.open_in_new_rounded),
+                      label: Text(l10n.swipeViewDetails),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _SwipeBackground extends StatelessWidget {
   const _SwipeBackground({
     required this.alignment,
@@ -723,28 +1056,53 @@ class _SwipeBackground extends StatelessWidget {
 class _ActionButton extends StatelessWidget {
   const _ActionButton({
     required this.tooltip,
+    required this.label,
     required this.icon,
     required this.color,
     required this.onPressed,
-    this.size = 64,
   });
   final String tooltip;
+  final String label;
   final IconData icon;
   final Color color;
   final VoidCallback? onPressed;
-  final double size;
 
   @override
   Widget build(BuildContext context) => Tooltip(
     message: tooltip,
-    child: IconButton.filled(
-      onPressed: onPressed,
-      icon: Icon(icon, size: 32),
-      style: IconButton.styleFrom(
-        backgroundColor: color.withValues(alpha: 0.16),
-        foregroundColor: color,
-        side: BorderSide(color: color.withValues(alpha: 0.5)),
-        minimumSize: Size(size, size),
+    child: Material(
+      color: color.withValues(alpha: 0.13),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+        side: BorderSide(color: color.withValues(alpha: 0.42)),
+      ),
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(18),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                color: onPressed == null ? Colors.white24 : color,
+                size: 25,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.inter(
+                  color: onPressed == null ? Colors.white24 : Colors.white,
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     ),
   );
