@@ -1106,6 +1106,12 @@ abstract class AppLocalizations {
   /// **'Tüm Detayları Gör'**
   String get swipeViewDetails;
 
+  /// No description provided for @swipeSeasonCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} Sezon'**
+  String swipeSeasonCount(int count);
+
   /// No description provided for @swipeSaveFailed.
   ///
   /// In tr, this message translates to:

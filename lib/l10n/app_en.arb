@@ -187,6 +187,8 @@
   "swipePassed": "Title passed",
   "swipeUndo": "Undo",
   "swipeViewDetails": "View Full Details",
+  "swipeSeasonCount": "{count, plural, =1{1 Season} other{{count} Seasons}}",
+  "@swipeSeasonCount": { "placeholders": { "count": { "type": "int" } } },
   "swipeSaveFailed": "Couldn't save your choice. Please try again.",
   "swipeDeckFinished": "That's all for now!",
   "swipeDeckFinishedHint": "Fresh recommendations will be waiting here when they arrive.",

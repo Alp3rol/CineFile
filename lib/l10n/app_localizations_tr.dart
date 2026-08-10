@@ -578,6 +578,11 @@ class AppLocalizationsTr extends AppLocalizations {
   String get swipeViewDetails => 'Tüm Detayları Gör';
 
   @override
+  String swipeSeasonCount(int count) {
+    return '$count Sezon';
+  }
+
+  @override
   String get swipeSaveFailed => 'Tercihin kaydedilemedi. Lütfen tekrar dene.';
 
   @override

@@ -583,6 +583,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get swipeViewDetails => 'View Full Details';
 
   @override
+  String swipeSeasonCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Seasons',
+      one: '1 Season',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get swipeSaveFailed => 'Couldn\'t save your choice. Please try again.';
 
   @override

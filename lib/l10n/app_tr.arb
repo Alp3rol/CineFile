@@ -290,6 +290,8 @@
   "swipePassed": "Bu yapımı geçtin",
   "swipeUndo": "Geri al",
   "swipeViewDetails": "Tüm Detayları Gör",
+  "swipeSeasonCount": "{count} Sezon",
+  "@swipeSeasonCount": { "placeholders": { "count": { "type": "int" } } },
   "swipeSaveFailed": "Tercihin kaydedilemedi. Lütfen tekrar dene.",
   "swipeDeckFinished": "Şimdilik hepsi bu!",
   "swipeDeckFinishedHint": "Yeni öneriler geldiğinde burada seni bekliyor olacak.",

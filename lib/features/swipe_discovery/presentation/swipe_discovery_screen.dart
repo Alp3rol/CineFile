@@ -13,6 +13,7 @@ import '../../../core/widgets/app_network_image.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/controllers/auth_controller.dart';
 import '../../movie_detail/presentation/add_watch_record_sheet.dart';
+import '../../movie_detail/presentation/movie_detail_provider.dart';
 import '../../movie_detail/presentation/movie_detail_screen.dart';
 import '../../settings/presentation/settings_provider.dart';
 import '../data/swipe_preference_signal.dart';
@@ -84,12 +85,13 @@ class _SwipeDiscoveryScreenState extends ConsumerState<SwipeDiscoveryScreen> {
       final l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          duration: const Duration(milliseconds: 1200),
+          duration: const Duration(seconds: 3),
           content: Text(
             choice == _SwipeChoice.interested
                 ? l10n.swipeAddedToWatchlist
                 : l10n.swipePassed,
           ),
+          action: SnackBarAction(label: l10n.swipeUndo, onPressed: _undo),
         ),
       );
     } catch (error) {
@@ -900,24 +902,54 @@ class _RatingBadge extends StatelessWidget {
   );
 }
 
-class _QuickLookSheet extends StatelessWidget {
+class _QuickLookSheet extends ConsumerWidget {
   const _QuickLookSheet({required this.item, required this.isTv});
 
   final Map<String, dynamic> item;
   final bool isTv;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final title = (item['title'] ?? item['name'] ?? l10n.titleUnknown)
+    final tmdbId = (item['id'] as num).toInt();
+    final detailAsync = ref.watch(
+      movieDetailProvider((tmdbId: tmdbId, isTv: isTv)),
+    );
+    final details = detailAsync.value ?? item;
+    final title = (details['title'] ?? details['name'] ?? l10n.titleUnknown)
         .toString();
-    final overview = (item['overview'] ?? '').toString();
-    final imagePath = (item['backdrop_path'] ?? item['poster_path'] ?? '')
-        .toString();
-    final genreIds = (item['genre_ids'] as List<dynamic>? ?? const [])
-        .whereType<num>()
-        .map((id) => id.toInt())
-        .take(4);
+    final overview = (details['overview'] ?? item['overview'] ?? '').toString();
+    final imagePath =
+        (details['backdrop_path'] ??
+                details['poster_path'] ??
+                item['backdrop_path'] ??
+                item['poster_path'] ??
+                '')
+            .toString();
+    final genreIds =
+        (details['genre_ids'] as List<dynamic>? ??
+                item['genre_ids'] as List<dynamic>? ??
+                const [])
+            .whereType<num>()
+            .map((id) => id.toInt())
+            .take(4);
+    final runtime = (details['runtime'] as num?)?.toInt();
+    final seasons = (details['number_of_seasons'] as num?)?.toInt();
+    final crew = details['credits']?['crew'] as List<dynamic>? ?? const [];
+    final director = crew
+        .whereType<Map<String, dynamic>>()
+        .where((person) => person['job'] == 'Director')
+        .map((person) => person['name']?.toString())
+        .whereType<String>()
+        .where((name) => name.isNotEmpty)
+        .firstOrNull;
+    final cast = (details['credits']?['cast'] as List<dynamic>? ?? const [])
+        .whereType<Map<String, dynamic>>()
+        .map((person) => person['name']?.toString())
+        .whereType<String>()
+        .where((name) => name.isNotEmpty)
+        .take(3)
+        .join(', ');
 
     return DraggableScrollableSheet(
       initialChildSize: 0.68,
@@ -971,10 +1003,26 @@ class _QuickLookSheet extends StatelessWidget {
                   Wrap(
                     spacing: 7,
                     runSpacing: 7,
-                    children: genreIds
-                        .map((id) => _InfoPill(genreName(l10n, id)))
-                        .toList(growable: false),
+                    children: [
+                      if (runtime != null && runtime > 0)
+                        _InfoPill(l10n.durationMinutes(runtime)),
+                      if (seasons != null && seasons > 0)
+                        _InfoPill(l10n.swipeSeasonCount(seasons)),
+                      ...genreIds.map((id) => _InfoPill(genreName(l10n, id))),
+                    ],
                   ),
+                  if (detailAsync.isLoading) ...[
+                    const SizedBox(height: 14),
+                    const LinearProgressIndicator(minHeight: 2),
+                  ],
+                  if (director != null) ...[
+                    const SizedBox(height: 18),
+                    _DetailLine(label: l10n.detailDirector, value: director),
+                  ],
+                  if (cast.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    _DetailLine(label: l10n.detailCast, value: cast),
+                  ],
                   if (overview.isNotEmpty) ...[
                     const SizedBox(height: 18),
                     Text(
@@ -1013,6 +1061,41 @@ class _QuickLookSheet extends StatelessWidget {
       ),
     );
   }
+}
+
+class _DetailLine extends StatelessWidget {
+  const _DetailLine({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      SizedBox(
+        width: 82,
+        child: Text(
+          label,
+          style: GoogleFonts.inter(
+            color: AppTheme.textSecondary,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      Expanded(
+        child: Text(
+          value,
+          style: GoogleFonts.inter(
+            color: Colors.white,
+            fontSize: 13,
+            height: 1.35,
+          ),
+        ),
+      ),
+    ],
+  );
 }
 
 class _SwipeBackground extends StatelessWidget {
