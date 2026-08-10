@@ -298,4 +298,29 @@ void main() {
     expect(find.text('Şimdilik hepsi bu!'), findsOneWidget);
     expect(find.text('Geçildi'), findsOneWidget);
   });
+
+  testWidgets('explains which taste signals will shape recommendations', (
+    tester,
+  ) async {
+    final auth = MockFirebaseAuth(
+      signedIn: true,
+      mockUser: MockUser(uid: 'taste-user'),
+    );
+    final firestore = FakeFirebaseFirestore();
+
+    await tester.pumpWidget(
+      _app(decisions: const {}, auth: auth, firestore: firestore),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Listeme Ekle'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(
+        'Dram • Bilim Kurgu seçimlerin sonraki önerilerini güçlendirecek',
+      ),
+      findsOneWidget,
+    );
+  });
 }

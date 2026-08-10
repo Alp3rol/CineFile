@@ -606,6 +606,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get swipeSessionWatched => 'Watched';
 
   @override
+  String swipeSessionTasteHint(String genres) {
+    return 'Your $genres choices will shape your next recommendations';
+  }
+
+  @override
   String get swipeSaveFailed => 'Couldn\'t save your choice. Please try again.';
 
   @override

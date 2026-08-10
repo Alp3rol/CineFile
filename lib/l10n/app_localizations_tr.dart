@@ -595,6 +595,11 @@ class AppLocalizationsTr extends AppLocalizations {
   String get swipeSessionWatched => 'İzlendi';
 
   @override
+  String swipeSessionTasteHint(String genres) {
+    return '$genres seçimlerin sonraki önerilerini güçlendirecek';
+  }
+
+  @override
   String get swipeSaveFailed => 'Tercihin kaydedilemedi. Lütfen tekrar dene.';
 
   @override

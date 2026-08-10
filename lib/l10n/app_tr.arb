@@ -296,6 +296,8 @@
   "swipeSessionAdded": "Listeye",
   "swipeSessionPassed": "Geçildi",
   "swipeSessionWatched": "İzlendi",
+  "swipeSessionTasteHint": "{genres} seçimlerin sonraki önerilerini güçlendirecek",
+  "@swipeSessionTasteHint": { "placeholders": { "genres": { "type": "String" } } },
   "swipeSaveFailed": "Tercihin kaydedilemedi. Lütfen tekrar dene.",
   "swipeDeckFinished": "Şimdilik hepsi bu!",
   "swipeDeckFinishedHint": "Yeni öneriler geldiğinde burada seni bekliyor olacak.",

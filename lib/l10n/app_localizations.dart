@@ -1136,6 +1136,12 @@ abstract class AppLocalizations {
   /// **'İzlendi'**
   String get swipeSessionWatched;
 
+  /// No description provided for @swipeSessionTasteHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'{genres} seçimlerin sonraki önerilerini güçlendirecek'**
+  String swipeSessionTasteHint(String genres);
+
   /// No description provided for @swipeSaveFailed.
   ///
   /// In tr, this message translates to:

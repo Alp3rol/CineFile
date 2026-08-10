@@ -411,6 +411,17 @@ class _SwipeDiscoveryScreenState extends ConsumerState<SwipeDiscoveryScreen> {
     final sessionPassed = _history
         .where((action) => action.choice == _SwipeChoice.notInterested)
         .length;
+    final sessionGenreIds = rankedSwipeGenreIds(
+      _history.map(
+        (action) => SwipePreferenceSignal(
+          isInterested: action.choice == _SwipeChoice.interested,
+          genreIds: (action.item['genre_ids'] as List<dynamic>? ?? const [])
+              .whereType<num>()
+              .map((id) => id.toInt())
+              .toList(growable: false),
+        ),
+      ),
+    ).take(2).toList(growable: false);
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
@@ -479,6 +490,7 @@ class _SwipeDiscoveryScreenState extends ConsumerState<SwipeDiscoveryScreen> {
                     addedCount: sessionAdded,
                     passedCount: sessionPassed,
                     watchedCount: _sessionWatched,
+                    preferredGenreIds: sessionGenreIds,
                   )
                 : Column(
                     children: [
@@ -1529,6 +1541,7 @@ class _EmptyDeck extends StatelessWidget {
     required this.addedCount,
     required this.passedCount,
     required this.watchedCount,
+    required this.preferredGenreIds,
   });
   final VoidCallback? onUndo;
   final VoidCallback? onRefresh;
@@ -1536,6 +1549,7 @@ class _EmptyDeck extends StatelessWidget {
   final int addedCount;
   final int passedCount;
   final int watchedCount;
+  final List<int> preferredGenreIds;
 
   @override
   Widget build(BuildContext context) {
@@ -1599,6 +1613,48 @@ class _EmptyDeck extends StatelessWidget {
                   ),
                 ],
               ),
+              if (preferredGenreIds.isNotEmpty) ...[
+                const SizedBox(height: 14),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 11,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppTheme.accentColor.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: AppTheme.accentColor.withValues(alpha: 0.2),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.auto_awesome_rounded,
+                        size: 17,
+                        color: AppTheme.accentColor,
+                      ),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          l10n.swipeSessionTasteHint(
+                            preferredGenreIds
+                                .map((id) => genreName(l10n, id))
+                                .join(' • '),
+                          ),
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.inter(
+                            color: AppTheme.textSecondary,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ],
             if (onUndo != null) ...[
               const SizedBox(height: 20),

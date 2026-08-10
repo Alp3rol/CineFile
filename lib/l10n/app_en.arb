@@ -193,6 +193,8 @@
   "swipeSessionAdded": "Added",
   "swipeSessionPassed": "Passed",
   "swipeSessionWatched": "Watched",
+  "swipeSessionTasteHint": "Your {genres} choices will shape your next recommendations",
+  "@swipeSessionTasteHint": { "placeholders": { "genres": { "type": "String" } } },
   "swipeSaveFailed": "Couldn't save your choice. Please try again.",
   "swipeDeckFinished": "That's all for now!",
   "swipeDeckFinishedHint": "Fresh recommendations will be waiting here when they arrive.",
