@@ -109,6 +109,35 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('reveals a decision stamp while dragging and springs back', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(_app(decisions: const {}));
+    await tester.pumpAndSettle();
+
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byKey(const ValueKey('(isTv: false, tmdbId: 42)'))),
+    );
+    await gesture.moveBy(const Offset(25, 0));
+    await tester.pump();
+    await gesture.moveBy(const Offset(45, 0));
+    await tester.pump();
+
+    expect(find.text('Listeme Ekle'), findsNWidgets(2));
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Listeme Ekle'), findsOneWidget);
+    expect(find.text('Test Filmi'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('previews the next card behind the active recommendation', (
     tester,
   ) async {

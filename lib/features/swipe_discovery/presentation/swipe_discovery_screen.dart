@@ -450,27 +450,13 @@ class _SwipeDiscoveryScreenState extends ConsumerState<SwipeDiscoveryScreen> {
                             ),
                           Positioned.fill(
                             bottom: items.length > 1 ? 12 : 0,
-                            child: Dismissible(
+                            child: _SwipeableDiscoveryCard(
                               key: ValueKey('${_keyFor(items.first)}'),
-                              direction: DismissDirection.horizontal,
-                              background: _SwipeBackground(
-                                alignment: Alignment.centerLeft,
-                                color: const Color(0xFF168C5B),
-                                icon: Icons.bookmark_add_rounded,
-                                label: l10n.swipeInterested,
-                              ),
-                              secondaryBackground: _SwipeBackground(
-                                alignment: Alignment.centerRight,
-                                color: const Color(0xFF9E3540),
-                                icon: Icons.close_rounded,
-                                label: l10n.swipeNotInterested,
-                              ),
-                              onDismissed: (direction) => _choose(
-                                items.first,
-                                direction == DismissDirection.startToEnd
-                                    ? _SwipeChoice.interested
-                                    : _SwipeChoice.notInterested,
-                              ),
+                              enabled: !_isWriting,
+                              interestedLabel: l10n.swipeInterested,
+                              notInterestedLabel: l10n.swipeNotInterested,
+                              onChoice: (choice) =>
+                                  _choose(items.first, choice),
                               child: _PremiumDiscoveryCard(item: items.first),
                             ),
                           ),
@@ -1098,40 +1084,161 @@ class _DetailLine extends StatelessWidget {
   );
 }
 
-class _SwipeBackground extends StatelessWidget {
-  const _SwipeBackground({
-    required this.alignment,
-    required this.color,
-    required this.icon,
-    required this.label,
+class _SwipeableDiscoveryCard extends StatefulWidget {
+  const _SwipeableDiscoveryCard({
+    super.key,
+    required this.child,
+    required this.interestedLabel,
+    required this.notInterestedLabel,
+    required this.onChoice,
+    required this.enabled,
   });
-  final Alignment alignment;
-  final Color color;
-  final IconData icon;
-  final String label;
+
+  final Widget child;
+  final String interestedLabel;
+  final String notInterestedLabel;
+  final ValueChanged<_SwipeChoice> onChoice;
+  final bool enabled;
 
   @override
-  Widget build(BuildContext context) => Container(
-    alignment: alignment,
-    padding: const EdgeInsets.symmetric(horizontal: 32),
-    decoration: BoxDecoration(
-      color: color,
-      borderRadius: BorderRadius.circular(24),
-    ),
-    child: Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, color: Colors.white, size: 42),
-        const SizedBox(height: 6),
-        Text(
-          label,
-          style: GoogleFonts.outfit(
-            color: Colors.white,
-            fontSize: 13,
-            fontWeight: FontWeight.bold,
+  State<_SwipeableDiscoveryCard> createState() =>
+      _SwipeableDiscoveryCardState();
+}
+
+class _SwipeableDiscoveryCardState extends State<_SwipeableDiscoveryCard> {
+  double _dragX = 0;
+  bool _isDragging = false;
+  bool _isExiting = false;
+
+  void _onDragUpdate(DragUpdateDetails details) {
+    if (!widget.enabled || _isExiting) return;
+    setState(() {
+      _isDragging = true;
+      _dragX += details.delta.dx;
+    });
+  }
+
+  Future<void> _onDragEnd(DragEndDetails details) async {
+    if (!widget.enabled || _isExiting) return;
+    final width = context.size?.width ?? 320;
+    final velocity = details.primaryVelocity ?? 0;
+    final commits = _dragX.abs() >= width * 0.22 || velocity.abs() >= 900;
+    if (!commits) {
+      setState(() {
+        _isDragging = false;
+        _dragX = 0;
+      });
+      return;
+    }
+
+    final direction = _dragX == 0 ? velocity.sign : _dragX.sign;
+    final choice = direction > 0
+        ? _SwipeChoice.interested
+        : _SwipeChoice.notInterested;
+    setState(() {
+      _isDragging = false;
+      _isExiting = true;
+      _dragX = direction * (width + 140);
+    });
+    await Future<void>.delayed(const Duration(milliseconds: 220));
+    if (mounted) widget.onChoice(choice);
+  }
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      final width = constraints.maxWidth.isFinite ? constraints.maxWidth : 320;
+      final progress = (_dragX / width).clamp(-1.0, 1.0);
+      final isInterested = progress > 0;
+      final showDecision = progress.abs() > 0.06;
+
+      return GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onHorizontalDragUpdate: widget.enabled ? _onDragUpdate : null,
+        onHorizontalDragEnd: widget.enabled ? _onDragEnd : null,
+        child: AnimatedContainer(
+          duration: _isDragging
+              ? Duration.zero
+              : const Duration(milliseconds: 220),
+          curve: Curves.easeOutCubic,
+          transformAlignment: Alignment.center,
+          transform: Matrix4.translationValues(_dragX, 0, 0)
+            ..rotateZ(progress * 0.075),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              widget.child,
+              if (showDecision)
+                Positioned(
+                  top: 22,
+                  left: isInterested ? 20 : null,
+                  right: isInterested ? null : 20,
+                  child: _DecisionStamp(
+                    label: isInterested
+                        ? widget.interestedLabel
+                        : widget.notInterestedLabel,
+                    icon: isInterested
+                        ? Icons.bookmark_add_rounded
+                        : Icons.close_rounded,
+                    color: isInterested
+                        ? const Color(0xFF39C987)
+                        : const Color(0xFFE35D6A),
+                    opacity: progress.abs(),
+                  ),
+                ),
+            ],
           ),
         ),
-      ],
+      );
+    },
+  );
+}
+
+class _DecisionStamp extends StatelessWidget {
+  const _DecisionStamp({
+    required this.label,
+    required this.icon,
+    required this.color,
+    required this.opacity,
+  });
+
+  final String label;
+  final IconData icon;
+  final Color color;
+  final double opacity;
+
+  @override
+  Widget build(BuildContext context) => Opacity(
+    opacity: opacity.clamp(0.25, 1.0),
+    child: Transform.rotate(
+      angle: -0.08,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+        decoration: BoxDecoration(
+          color: const Color(0xE6111319),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: color, width: 2),
+          boxShadow: [
+            BoxShadow(color: color.withValues(alpha: 0.24), blurRadius: 16),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: color, size: 20),
+            const SizedBox(width: 7),
+            Text(
+              label,
+              style: GoogleFonts.outfit(
+                color: color,
+                fontSize: 13,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.6,
+              ),
+            ),
+          ],
+        ),
+      ),
     ),
   );
 }
