@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/icon/splash_logo.png" alt="CineFile logosu" width="460">
+<img src="assets/icon/app_icon.png" alt="CineFile app icon" width="180">
 
 # CineFile
 
@@ -16,6 +16,10 @@ CineFile; filmlerini ve dizilerini kaydedebileceğin, bölüm ilerlemeni takip e
 [![Firebase](https://img.shields.io/badge/Firebase-Auth_%26_Firestore-FFCA28?logo=firebase&logoColor=black)](https://firebase.google.com)
 [![TMDb](https://img.shields.io/badge/Veri-TMDb-01B4E4?logo=themoviedatabase&logoColor=white)](https://www.themoviedb.org)
 [![CI](https://github.com/Alp3rol/CineFile/actions/workflows/ci.yml/badge.svg)](https://github.com/Alp3rol/CineFile/actions/workflows/ci.yml)
+
+<br>
+
+<img src="assets/icon/splash_logo.png" alt="CineFile ticket brand artwork" width="380">
 
 <br>
 
