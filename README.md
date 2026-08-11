@@ -1,6 +1,18 @@
 <div align="center">
 
-<img src="assets/readme/cinefile_brand_showcase.png" alt="CineFile bilet ve uygulama ikonları" width="960">
+<table>
+  <tr>
+    <td align="center" valign="middle" width="25%">
+      <img src="assets/readme/cinefile_icon_play.png" alt="CineFile oynat ikonu" width="210">
+    </td>
+    <td align="center" valign="middle" width="50%">
+      <img src="assets/icon/splash_logo.png" alt="CineFile bilet logosu" width="340">
+    </td>
+    <td align="center" valign="middle" width="25%">
+      <img src="assets/readme/cinefile_icon_filmstrip.png" alt="CineFile film şeridi ikonu" width="210">
+    </td>
+  </tr>
+</table>
 
 # CineFile
 
