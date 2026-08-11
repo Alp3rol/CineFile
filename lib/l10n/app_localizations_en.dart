@@ -1091,6 +1091,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get collectionsTitle => 'My Collections';
 
   @override
+  String get watchlistTitle => 'My Watchlist';
+
+  @override
+  String watchlistItemCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count titles',
+      one: '1 title',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get watchlistEmptyTitle => 'Your Watchlist Is Empty';
+
+  @override
+  String get watchlistEmptyHint =>
+      'Titles you swipe right on in Swipe & Discover or save from a detail page will appear here.';
+
+  @override
+  String get watchlistRemove => 'Remove from Watchlist';
+
+  @override
+  String get watchlistRemoved => 'Removed from Watchlist';
+
+  @override
   String get collectionsEmptyTitle => 'No Collections Yet';
 
   @override

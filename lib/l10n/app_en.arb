@@ -353,6 +353,13 @@
   "journalColumnWatchOrder": "Watch No.",
 
   "collectionsTitle": "My Collections",
+  "watchlistTitle": "My Watchlist",
+  "watchlistItemCount": "{count, plural, =1{1 title} other{{count} titles}}",
+  "@watchlistItemCount": { "placeholders": { "count": { "type": "int" } } },
+  "watchlistEmptyTitle": "Your Watchlist Is Empty",
+  "watchlistEmptyHint": "Titles you swipe right on in Swipe & Discover or save from a detail page will appear here.",
+  "watchlistRemove": "Remove from Watchlist",
+  "watchlistRemoved": "Removed from Watchlist",
   "collectionsEmptyTitle": "No Collections Yet",
   "collectionsCreate": "Create a Collection",
   "collectionsLoadFailed": "Couldn't load your collections.",

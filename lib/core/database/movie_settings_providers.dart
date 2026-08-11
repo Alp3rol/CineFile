@@ -94,6 +94,40 @@ final allMovieSettingsProvider =
           .map(_movieSettingsMapFromSnapshot);
     });
 
+/// Movies and shows the user saved to the built-in Watchlist, newest first.
+/// Metadata comes from the same local cache populated by movie details and
+/// Swipe Discovery, so rendering this section adds no TMDb requests.
+final watchlistMoviesProvider = StreamProvider<List<Movie>>((ref) {
+  final settings = ref.watch(allMovieSettingsProvider).value;
+  if (settings == null) return Stream.value(<Movie>[]);
+
+  final watchlistEntries =
+      settings.entries.where((entry) => entry.value.isReWatchList).toList()
+        ..sort((a, b) => b.value.updatedAt.compareTo(a.value.updatedAt));
+
+  if (kIsWeb) {
+    final movies = ref.watch(webMoviesProvider);
+    return Stream.value(
+      watchlistEntries
+          .map((entry) => movies[entry.key])
+          .whereType<Movie>()
+          .toList(growable: false),
+    );
+  }
+
+  final db = ref.watch(databaseProvider);
+  return db.select(db.movies).watch().map((movies) {
+    final movieByKey = {
+      for (final movie in movies)
+        (tmdbId: movie.tmdbId, isTv: movie.isTv): movie,
+    };
+    return watchlistEntries
+        .map((entry) => movieByKey[entry.key])
+        .whereType<Movie>()
+        .toList(growable: false);
+  });
+});
+
 // Stream provider to get all watch records with movie details (current
 
 final favoriteMovieIdsProvider = StreamProvider<Set<MovieKey>>((ref) {

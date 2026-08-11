@@ -8,6 +8,7 @@ import '../../../../core/database/database_provider.dart';
 import '../../../../core/database/app_database.dart';
 import 'custom_list_detail_screen.dart';
 import 'create_collection_dialog.dart';
+import 'watchlist_detail_screen.dart';
 
 class CustomListsTab extends ConsumerStatefulWidget {
   final ScrollController? scrollController;
@@ -27,35 +28,53 @@ class _CustomListsTabState extends ConsumerState<CustomListsTab>
     super.build(context); // Required by AutomaticKeepAliveClientMixin
     final customListsAsync = ref.watch(customListsProvider);
     final allWatchRecordsAsync = ref.watch(allWatchRecordsProvider);
+    final watchlistAsync = ref.watch(watchlistMoviesProvider);
 
     return Scaffold(
       backgroundColor: AppColors.transparent,
       body: customListsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator(color: AppColors.accent)),
-        error: (err, stack) => Center(child: Text(AppLocalizations.of(context).collectionsLoadFailed, style: const TextStyle(color: AppColors.textPrimary))),
+        loading: () => const Center(
+          child: CircularProgressIndicator(color: AppColors.accent),
+        ),
+        error: (err, stack) => Center(
+          child: Text(
+            AppLocalizations.of(context).collectionsLoadFailed,
+            style: const TextStyle(color: AppColors.textPrimary),
+          ),
+        ),
         data: (lists) {
-          if (lists.isEmpty) {
-            return _buildEmptyState(context, ref);
-          }
-
           // Build a list of all watched movie IDs to calculate progress
           final watchedMovieIds =
-              allWatchRecordsAsync.value?.map((r) => (tmdbId: r.movie.tmdbId, isTv: r.movie.isTv)).toSet() ?? {};
+              allWatchRecordsAsync.value
+                  ?.map((r) => (tmdbId: r.movie.tmdbId, isTv: r.movie.isTv))
+                  .toSet() ??
+              {};
 
           return Column(
             children: [
+              _buildWatchlistCard(context, watchlistAsync),
+
               // Add List button row
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
                       AppLocalizations.of(context).collectionsTitle,
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(color: AppColors.textSecondary),
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.add_box_rounded, color: AppColors.accent, size: 28),
+                      icon: const Icon(
+                        Icons.add_box_rounded,
+                        color: AppColors.accent,
+                        size: 28,
+                      ),
                       onPressed: () => _showCreateListDialog(context, ref),
                     ),
                   ],
@@ -63,22 +82,34 @@ class _CustomListsTabState extends ConsumerState<CustomListsTab>
               ),
 
               Expanded(
-                child: GridView.builder(
-                  controller: widget.scrollController,
-                  padding: const EdgeInsets.only(left: 16, right: 16, bottom: 120),
+                child: lists.isEmpty
+                    ? _buildEmptyState(context, ref)
+                    : GridView.builder(
+                        controller: widget.scrollController,
+                        padding: const EdgeInsets.only(
+                          left: 16,
+                          right: 16,
+                          bottom: 120,
+                        ),
 
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                    childAspectRatio: 0.85,
-                  ),
-                  itemCount: lists.length,
-                  itemBuilder: (context, index) {
-                    final list = lists[index];
-                    return _buildListCard(context, ref, list, watchedMovieIds);
-                  },
-                ),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 12,
+                              mainAxisSpacing: 12,
+                              childAspectRatio: 0.85,
+                            ),
+                        itemCount: lists.length,
+                        itemBuilder: (context, index) {
+                          final list = lists[index];
+                          return _buildListCard(
+                            context,
+                            ref,
+                            list,
+                            watchedMovieIds,
+                          );
+                        },
+                      ),
               ),
             ],
           );
@@ -87,8 +118,116 @@ class _CustomListsTabState extends ConsumerState<CustomListsTab>
     );
   }
 
+  Widget _buildWatchlistCard(
+    BuildContext context,
+    AsyncValue<List<Movie>> watchlistAsync,
+  ) {
+    final l10n = AppLocalizations.of(context);
+    final movies = watchlistAsync.value ?? const <Movie>[];
+    final coverPath = movies.firstOrNull?.posterPath;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+      child: Material(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(18),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(18),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const WatchlistDetailScreen()),
+          ),
+          child: Container(
+            height: 112,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(
+                color: AppColors.accent.withValues(alpha: 0.28),
+              ),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(17),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  if (coverPath != null)
+                    AppNetworkImage(
+                      imageUrl: '${ApiConstants.imagePathW500}$coverPath',
+                      seed: movies.first.title,
+                      fit: BoxFit.cover,
+                    ),
+                  const DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.centerRight,
+                        end: Alignment.centerLeft,
+                        colors: [Color(0x66101218), Color(0xFF101218)],
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: AppColors.accent.withValues(alpha: 0.14),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: AppColors.accent.withValues(alpha: 0.4),
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.bookmarks_rounded,
+                            color: AppColors.accent,
+                          ),
+                        ),
+                        const SizedBox(width: 13),
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                l10n.watchlistTitle,
+                                style: Theme.of(context).textTheme.titleMedium
+                                    ?.copyWith(fontWeight: FontWeight.w700),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                watchlistAsync.isLoading
+                                    ? '…'
+                                    : l10n.watchlistItemCount(movies.length),
+                                style: Theme.of(context).textTheme.labelMedium
+                                    ?.copyWith(color: AppColors.textSecondary),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Icon(
+                          Icons.chevron_right_rounded,
+                          color: AppColors.textSecondary,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   // Cover Card for each list
-  Widget _buildListCard(BuildContext context, WidgetRef ref, CustomList list, Set<MovieKey> watchedIds) {
+  Widget _buildListCard(
+    BuildContext context,
+    WidgetRef ref,
+    CustomList list,
+    Set<MovieKey> watchedIds,
+  ) {
     // Watch movies stream to calculate cover image & progress
     final moviesAsync = ref.watch(moviesInCustomListProvider(list.id));
 
@@ -97,12 +236,20 @@ class _CustomListsTabState extends ConsumerState<CustomListsTab>
       error: (error, stackTrace) => const Card(color: AppColors.surface),
       data: (movies) {
         final totalCount = movies.length;
-        final watchedCount =
-            movies.where((m) => watchedIds.contains((tmdbId: m.movie.tmdbId, isTv: m.movie.isTv))).length;
+        final watchedCount = movies
+            .where(
+              (m) => watchedIds.contains((
+                tmdbId: m.movie.tmdbId,
+                isTv: m.movie.isTv,
+              )),
+            )
+            .length;
         final progress = totalCount == 0 ? 0.0 : watchedCount / totalCount;
-        
+
         // Use first movie poster as cover, if exists
-        final coverPath = movies.isNotEmpty ? movies.first.movie.posterPath : null;
+        final coverPath = movies.isNotEmpty
+            ? movies.first.movie.posterPath
+            : null;
 
         return GestureDetector(
           onTap: () {
@@ -123,8 +270,12 @@ class _CustomListsTabState extends ConsumerState<CustomListsTab>
                       ? LayoutBuilder(
                           builder: (context, constraints) => AppNetworkImage(
                             imageUrl: '${ApiConstants.imagePathW500}$coverPath',
-                            width: constraints.maxWidth.isFinite ? constraints.maxWidth : null,
-                            height: constraints.maxHeight.isFinite ? constraints.maxHeight : null,
+                            width: constraints.maxWidth.isFinite
+                                ? constraints.maxWidth
+                                : null,
+                            height: constraints.maxHeight.isFinite
+                                ? constraints.maxHeight
+                                : null,
                             fit: BoxFit.cover,
                             seed: list.name,
                           ),
@@ -140,7 +291,11 @@ class _CustomListsTabState extends ConsumerState<CustomListsTab>
                               ],
                             ),
                           ),
-                          child: const Icon(Icons.collections_bookmark_rounded, color: AppColors.textTertiary, size: 40),
+                          child: const Icon(
+                            Icons.collections_bookmark_rounded,
+                            color: AppColors.textTertiary,
+                            size: 40,
+                          ),
                         ),
                 ),
 
@@ -153,7 +308,9 @@ class _CustomListsTabState extends ConsumerState<CustomListsTab>
                         end: Alignment.bottomCenter,
                         colors: [
                           AppColors.shadow.withValues(alpha: AppOpacity.subtle),
-                          AppColors.shadow.withValues(alpha: AppOpacity.overlay),
+                          AppColors.shadow.withValues(
+                            alpha: AppOpacity.overlay,
+                          ),
                         ],
                       ),
                     ),
@@ -171,15 +328,19 @@ class _CustomListsTabState extends ConsumerState<CustomListsTab>
                     children: [
                       Text(
                         list.name,
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(color: AppColors.textPrimary),
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          color: AppColors.textPrimary,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 2),
-                      if (list.description != null && list.description!.trim().isNotEmpty)
+                      if (list.description != null &&
+                          list.description!.trim().isNotEmpty)
                         Text(
                           list.description!,
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.textSecondary),
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(color: AppColors.textSecondary),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -191,11 +352,25 @@ class _CustomListsTabState extends ConsumerState<CustomListsTab>
                         children: [
                           Text(
                             '$totalCount Film',
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.bold),
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(
+                                  color: AppColors.textSecondary,
+                                  fontWeight: FontWeight.bold,
+                                ),
                           ),
                           Text(
-                            AppLocalizations.of(context).collectionProgressPercent((progress * 100).toInt()),
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(color: progress == 1.0 ? AppColors.success : AppColors.accent, fontWeight: FontWeight.bold),
+                            AppLocalizations.of(
+                              context,
+                            ).collectionProgressPercent(
+                              (progress * 100).toInt(),
+                            ),
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(
+                                  color: progress == 1.0
+                                      ? AppColors.success
+                                      : AppColors.accent,
+                                  fontWeight: FontWeight.bold,
+                                ),
                           ),
                         ],
                       ),
@@ -209,7 +384,9 @@ class _CustomListsTabState extends ConsumerState<CustomListsTab>
                           minHeight: 4,
                           backgroundColor: AppColors.border,
                           valueColor: AlwaysStoppedAnimation<Color>(
-                            progress == 1.0 ? AppColors.success : AppColors.accent,
+                            progress == 1.0
+                                ? AppColors.success
+                                : AppColors.accent,
                           ),
                         ),
                       ),

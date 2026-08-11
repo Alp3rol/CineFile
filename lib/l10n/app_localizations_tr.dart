@@ -1070,6 +1070,27 @@ class AppLocalizationsTr extends AppLocalizations {
   String get collectionsTitle => 'Koleksiyonlarım';
 
   @override
+  String get watchlistTitle => 'İzleme Listem';
+
+  @override
+  String watchlistItemCount(int count) {
+    return '$count yapım';
+  }
+
+  @override
+  String get watchlistEmptyTitle => 'İzleme Listen Boş';
+
+  @override
+  String get watchlistEmptyHint =>
+      'Kaydır & Keşfet\'te sağa kaydırdığın veya detay sayfasından kaydettiğin yapımlar burada görünür.';
+
+  @override
+  String get watchlistRemove => 'İzleme listesinden çıkar';
+
+  @override
+  String get watchlistRemoved => 'İzleme listesinden çıkarıldı';
+
+  @override
   String get collectionsEmptyTitle => 'Hiç Koleksiyonunuz Yok';
 
   @override

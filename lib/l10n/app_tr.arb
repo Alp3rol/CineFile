@@ -496,6 +496,13 @@
   "journalColumnWatchOrder": "İzleme Sırası",
 
   "collectionsTitle": "Koleksiyonlarım",
+  "watchlistTitle": "İzleme Listem",
+  "watchlistItemCount": "{count} yapım",
+  "@watchlistItemCount": { "placeholders": { "count": { "type": "int" } } },
+  "watchlistEmptyTitle": "İzleme Listen Boş",
+  "watchlistEmptyHint": "Kaydır & Keşfet'te sağa kaydırdığın veya detay sayfasından kaydettiğin yapımlar burada görünür.",
+  "watchlistRemove": "İzleme listesinden çıkar",
+  "watchlistRemoved": "İzleme listesinden çıkarıldı",
   "collectionsEmptyTitle": "Hiç Koleksiyonunuz Yok",
   "collectionsCreate": "Koleksiyon Oluştur",
   "collectionsLoadFailed": "Koleksiyonlar yüklenemedi.",

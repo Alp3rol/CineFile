@@ -2000,6 +2000,42 @@ abstract class AppLocalizations {
   /// **'Koleksiyonlarım'**
   String get collectionsTitle;
 
+  /// No description provided for @watchlistTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'İzleme Listem'**
+  String get watchlistTitle;
+
+  /// No description provided for @watchlistItemCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} yapım'**
+  String watchlistItemCount(int count);
+
+  /// No description provided for @watchlistEmptyTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'İzleme Listen Boş'**
+  String get watchlistEmptyTitle;
+
+  /// No description provided for @watchlistEmptyHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kaydır & Keşfet\'te sağa kaydırdığın veya detay sayfasından kaydettiğin yapımlar burada görünür.'**
+  String get watchlistEmptyHint;
+
+  /// No description provided for @watchlistRemove.
+  ///
+  /// In tr, this message translates to:
+  /// **'İzleme listesinden çıkar'**
+  String get watchlistRemove;
+
+  /// No description provided for @watchlistRemoved.
+  ///
+  /// In tr, this message translates to:
+  /// **'İzleme listesinden çıkarıldı'**
+  String get watchlistRemoved;
+
   /// No description provided for @collectionsEmptyTitle.
   ///
   /// In tr, this message translates to:
