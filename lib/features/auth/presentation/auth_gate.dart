@@ -6,7 +6,6 @@ import '../controllers/auth_controller.dart';
 import 'login_screen.dart';
 import '../../main_shell.dart';
 import '../../onboarding/presentation/onboarding_screen.dart';
-import '../../settings/presentation/settings_provider.dart';
 import '../../../core/theme/app_theme.dart';
 
 class AuthGate extends ConsumerWidget {
@@ -22,18 +21,20 @@ class AuthGate extends ConsumerWidget {
           final userModel = ref.watch(userModelProvider);
           if (userModel == null) {
             // We have a firebase user, load their firestore profile.
-            Future.microtask(() => ref.read(authControllerProvider).initUser(user));
+            Future.microtask(
+              () => ref.read(authControllerProvider).initUser(user),
+            );
             return const Scaffold(
               backgroundColor: AppTheme.backgroundColor,
               body: Center(
-                child: CircularProgressIndicator(
-                  color: AppTheme.accentColor,
-                ),
+                child: CircularProgressIndicator(color: AppTheme.accentColor),
               ),
             );
           }
-          final onboardingCompleted = ref.watch(onboardingCompletedProvider);
-          if (!onboardingCompleted) {
+          // New profiles are created with `false`; completing or skipping the
+          // flow writes `true`. Legacy profiles have no value (null) and are
+          // treated as complete so existing users are never onboarded again.
+          if (userModel.onboardingCompleted == false) {
             return const OnboardingScreen();
           }
           return const MainShell();
@@ -43,9 +44,7 @@ class AuthGate extends ConsumerWidget {
       loading: () => const Scaffold(
         backgroundColor: AppTheme.backgroundColor,
         body: Center(
-          child: CircularProgressIndicator(
-            color: AppTheme.accentColor,
-          ),
+          child: CircularProgressIndicator(color: AppTheme.accentColor),
         ),
       ),
       error: (err, stack) => Scaffold(
@@ -56,17 +55,28 @@ class AuthGate extends ConsumerWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.error_outline_rounded, color: AppTheme.accentColor, size: 48),
+                const Icon(
+                  Icons.error_outline_rounded,
+                  color: AppTheme.accentColor,
+                  size: 48,
+                ),
                 const SizedBox(height: 16),
                 Text(
                   AppLocalizations.of(context).authGateErrorTitle,
-                  style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                  style: GoogleFonts.outfit(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   AppLocalizations.of(context).authGateErrorMessage,
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.inter(fontSize: 12, color: AppTheme.textSecondary),
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    color: AppTheme.textSecondary,
+                  ),
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton.icon(
@@ -74,8 +84,13 @@ class AuthGate extends ConsumerWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.accentColor,
                     foregroundColor: Colors.black,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
                   ),
                   icon: const Icon(Icons.refresh_rounded, size: 18),
                   label: Text(

@@ -10,8 +10,12 @@ import 'auth_failure.dart';
 
 export 'auth_failure.dart';
 
-final firebaseAuthProvider = Provider<FirebaseAuth>((ref) => FirebaseAuth.instance);
-final firestoreProvider = Provider<FirebaseFirestore>((ref) => FirebaseFirestore.instance);
+final firebaseAuthProvider = Provider<FirebaseAuth>(
+  (ref) => FirebaseAuth.instance,
+);
+final firestoreProvider = Provider<FirebaseFirestore>(
+  (ref) => FirebaseFirestore.instance,
+);
 
 final authStateProvider = StreamProvider<User?>((ref) {
   return ref.watch(firebaseAuthProvider).authStateChanges();
@@ -40,7 +44,10 @@ extension CurrentUserOnRef on Ref {
   User? get currentUser => read(firebaseAuthProvider).currentUser;
 }
 
-final userModelStreamProvider = StreamProvider.family<UserModel?, String>((ref, userId) {
+final userModelStreamProvider = StreamProvider.family<UserModel?, String>((
+  ref,
+  userId,
+) {
   return ref
       .watch(firestoreProvider)
       .collection('users')
@@ -75,7 +82,8 @@ typedef UserIdentity = ({String username, String avatarUrl});
 
 UserIdentity resolveUserIdentity(UserModel? model, User? user) {
   final fromEmail = user == null ? '' : defaultUsernameFor(user);
-  final username = model?.username ?? (fromEmail.isEmpty ? 'Anonim' : fromEmail);
+  final username =
+      model?.username ?? (fromEmail.isEmpty ? 'Anonim' : fromEmail);
   return (
     username: username,
     avatarUrl: model?.avatarUrl ?? defaultAvatarUrlFor(username),
@@ -118,8 +126,11 @@ class AuthController {
           throw _UsernameTakenException();
         }
         tx.set(claimRef, {'uid': uid});
-        if (previousUsernameLower != null && previousUsernameLower != usernameLower) {
-          tx.delete(_firestore.collection('usernames').doc(previousUsernameLower));
+        if (previousUsernameLower != null &&
+            previousUsernameLower != usernameLower) {
+          tx.delete(
+            _firestore.collection('usernames').doc(previousUsernameLower),
+          );
         }
       });
       return true;
@@ -148,8 +159,10 @@ class AuthController {
     try {
       final claimed = await _claimUsername(uid: uid, usernameLower: lower);
       if (!claimed) {
-        debugPrint('Username "$lower" is already claimed by another account; '
-            'leaving $uid\'s profile as-is.');
+        debugPrint(
+          'Username "$lower" is already claimed by another account; '
+          'leaving $uid\'s profile as-is.',
+        );
       }
     } catch (e) {
       debugPrint('Username claim backfill failed for $uid: $e');
@@ -169,11 +182,12 @@ class AuthController {
         // the generated DiceBear URL and the server would reject the write.
         // Backfilling once, on sign-in, keeps the two sides in step.
         if (model.avatarUrl == null || model.avatarUrl!.trim().isEmpty) {
-          model = model.copyWith(avatarUrl: defaultAvatarUrlFor(model.username));
-          await _firestore
-              .collection('users')
-              .doc(user.uid)
-              .set({'avatarUrl': model.avatarUrl}, SetOptions(merge: true));
+          model = model.copyWith(
+            avatarUrl: defaultAvatarUrlFor(model.username),
+          );
+          await _firestore.collection('users').doc(user.uid).set({
+            'avatarUrl': model.avatarUrl,
+          }, SetOptions(merge: true));
         }
 
         _ref.read(userModelProvider.notifier).state = model;
@@ -190,17 +204,27 @@ class AuthController {
       // stuck on a screen they can't get past.
       final base = defaultUsernameFor(user);
       var username = base.isEmpty ? 'kullanici' : base;
-      if (!await _claimUsername(uid: user.uid, usernameLower: username.toLowerCase())) {
+      if (!await _claimUsername(
+        uid: user.uid,
+        usernameLower: username.toLowerCase(),
+      )) {
         username = '$username-${user.uid.substring(0, 6)}';
-        await _claimUsername(uid: user.uid, usernameLower: username.toLowerCase());
+        await _claimUsername(
+          uid: user.uid,
+          usernameLower: username.toLowerCase(),
+        );
       }
 
       final newUser = UserModel(
         id: user.uid,
         username: username,
         avatarUrl: defaultAvatarUrlFor(username),
+        onboardingCompleted: false,
       );
-      await _firestore.collection('users').doc(user.uid).set(_userDocFor(newUser));
+      await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .set(_userDocFor(newUser));
       _ref.read(userModelProvider.notifier).state = newUser;
     } catch (e, st) {
       // Not fatal: the app still runs signed-in with a null userModel (every
@@ -274,6 +298,7 @@ class AuthController {
         id: createdUser.uid,
         username: trimmedUsername,
         avatarUrl: defaultAvatarUrlFor(trimmedUsername),
+        onboardingCompleted: false,
       );
       final claimed = await _createProfileWithUsernameClaim(newUser);
       if (!claimed) {
@@ -303,8 +328,10 @@ class AuthController {
         // orphaned Auth account with no profile document. initUser rebuilds a
         // profile for it on the next sign-in, so the user is not stuck, but
         // this should never pass unnoticed.
-        debugPrint('signUp rollback failed; ${createdUser?.uid} is now an '
-            'Auth account with no profile: $rollbackError');
+        debugPrint(
+          'signUp rollback failed; ${createdUser?.uid} is now an '
+          'Auth account with no profile: $rollbackError',
+        );
       }
       debugPrint('signUp failed: $e');
       return AuthFailure.unknown;
@@ -327,7 +354,9 @@ class AuthController {
       }
       return null;
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found' || e.code == 'wrong-password' || e.code == 'invalid-credential') {
+      if (e.code == 'user-not-found' ||
+          e.code == 'wrong-password' ||
+          e.code == 'invalid-credential') {
         return AuthFailure.invalidCredentials;
       }
       debugPrint('signIn failed with unhandled code "${e.code}": ${e.message}');
@@ -378,7 +407,10 @@ class AuthController {
         featuredMovieIds: featuredMovieIds,
       );
 
-      await _firestore.collection('users').doc(user.uid).update(_userDocFor(updatedModel));
+      await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .update(_userDocFor(updatedModel));
 
       // Update local state
       _ref.read(userModelProvider.notifier).state = updatedModel;

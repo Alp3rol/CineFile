@@ -18,6 +18,9 @@ class UserModel {
   final List<String> featuredMovieIds;
   final bool shareSwipeTasteForMatching;
   final List<int> publicSwipeTasteGenreIds;
+  // Null identifies profiles created before account-scoped onboarding was
+  // introduced. Those users must not be forced through onboarding again.
+  final bool? onboardingCompleted;
 
   UserModel({
     required this.id,
@@ -29,6 +32,7 @@ class UserModel {
     this.featuredMovieIds = const [],
     this.shareSwipeTasteForMatching = false,
     this.publicSwipeTasteGenreIds = const [],
+    this.onboardingCompleted,
   });
 
   factory UserModel.fromMap(Map<String, dynamic> map, String id) {
@@ -46,11 +50,12 @@ class UserModel {
               .whereType<num>()
               .map((id) => id.toInt())
               .toList(growable: false),
+      onboardingCompleted: map['onboardingCompleted'] as bool?,
     );
   }
 
   Map<String, dynamic> toMap() {
-    return {
+    final map = <String, dynamic>{
       'username': username,
       'avatarUrl': avatarUrl,
       'bio': bio,
@@ -60,6 +65,10 @@ class UserModel {
       'shareSwipeTasteForMatching': shareSwipeTasteForMatching,
       'publicSwipeTasteGenreIds': publicSwipeTasteGenreIds,
     };
+    if (onboardingCompleted != null) {
+      map['onboardingCompleted'] = onboardingCompleted;
+    }
+    return map;
   }
 
   UserModel copyWith({
@@ -72,6 +81,7 @@ class UserModel {
     List<String>? featuredMovieIds,
     bool? shareSwipeTasteForMatching,
     List<int>? publicSwipeTasteGenreIds,
+    bool? onboardingCompleted,
   }) {
     return UserModel(
       id: id ?? this.id,
@@ -85,6 +95,7 @@ class UserModel {
           shareSwipeTasteForMatching ?? this.shareSwipeTasteForMatching,
       publicSwipeTasteGenreIds:
           publicSwipeTasteGenreIds ?? this.publicSwipeTasteGenreIds,
+      onboardingCompleted: onboardingCompleted ?? this.onboardingCompleted,
     );
   }
 }

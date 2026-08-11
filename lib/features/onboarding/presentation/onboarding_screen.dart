@@ -52,6 +52,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   Future<void> _finishOnboarding() async {
+    final user = ref.currentUser;
+    if (user != null) {
+      await ref.read(firestoreProvider).collection('users').doc(user.uid).set({
+        'onboardingCompleted': true,
+      }, SetOptions(merge: true));
+      final model = ref.read(userModelProvider);
+      if (model != null) {
+        ref.read(userModelProvider.notifier).state = model.copyWith(
+          onboardingCompleted: true,
+        );
+      }
+    }
+    // Kept for the first-session checklist and native backwards compatibility.
     await ref.read(onboardingCompletedProvider.notifier).setCompleted(true);
     if (!mounted) return;
 
@@ -59,9 +72,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       Navigator.of(context).pop();
     } else {
       unawaited(
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const MainShell()),
-        ),
+        Navigator.of(
+          context,
+        ).pushReplacement(MaterialPageRoute(builder: (_) => const MainShell())),
       );
     }
   }
@@ -134,7 +147,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         children: [
           // Step Progress Bar
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 24.0,
+              vertical: 8.0,
+            ),
             child: Row(
               children: List.generate(3, (index) {
                 final isActive = index <= _currentPage;
@@ -268,7 +284,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 label: 'Türkçe',
                 isSelected: currentLocale?.languageCode == 'tr',
                 onTap: () => unawaited(
-                  ref.read(localeProvider.notifier).setLocale(const Locale('tr')),
+                  ref
+                      .read(localeProvider.notifier)
+                      .setLocale(const Locale('tr')),
                 ),
               ),
               const SizedBox(width: 12),
@@ -276,7 +294,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 label: 'English',
                 isSelected: currentLocale?.languageCode == 'en',
                 onTap: () => unawaited(
-                  ref.read(localeProvider.notifier).setLocale(const Locale('en')),
+                  ref
+                      .read(localeProvider.notifier)
+                      .setLocale(const Locale('en')),
                 ),
               ),
               const SizedBox(width: 12),
@@ -408,10 +428,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 decoration: InputDecoration(
                   hintText: l10n.onboardingFavoritesSearchHint,
                   hintStyle: GoogleFonts.inter(color: AppColors.textSecondary),
-                  prefixIcon: const Icon(Icons.search_rounded, color: AppColors.textSecondary),
+                  prefixIcon: const Icon(
+                    Icons.search_rounded,
+                    color: AppColors.textSecondary,
+                  ),
                   suffixIcon: _searchQuery.isNotEmpty
                       ? IconButton(
-                          icon: const Icon(Icons.clear_rounded, color: Colors.white),
+                          icon: const Icon(
+                            Icons.clear_rounded,
+                            color: Colors.white,
+                          ),
                           onPressed: () {
                             _searchController.clear();
                             setState(() => _searchQuery = '');
@@ -478,7 +504,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final isTv = item['media_type'] == 'tv';
     final title = (item['title'] ?? item['name'] ?? 'Untitled').toString();
     final posterPath = (item['poster_path'] ?? '').toString();
-    final releaseDate = (item['release_date'] ?? item['first_air_date'] ?? '').toString();
+    final releaseDate = (item['release_date'] ?? item['first_air_date'] ?? '')
+        .toString();
     final year = releaseDate.length >= 4 ? releaseDate.substring(0, 4) : '';
 
     final key = (tmdbId: tmdbId, isTv: isTv);
@@ -505,14 +532,20 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     width: 40,
                     height: 60,
                     color: AppColors.surface,
-                    child: const Icon(Icons.movie_rounded, color: AppColors.textSecondary),
+                    child: const Icon(
+                      Icons.movie_rounded,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                 )
               : Container(
                   width: 40,
                   height: 60,
                   color: AppColors.surface,
-                  child: const Icon(Icons.movie_rounded, color: AppColors.textSecondary),
+                  child: const Icon(
+                    Icons.movie_rounded,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
         ),
         title: Text(
