@@ -734,49 +734,46 @@ class _SwipeDiscoveryScreenState extends ConsumerState<SwipeDiscoveryScreen> {
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(18, 14, 18, 18),
+                        padding: const EdgeInsets.fromLTRB(26, 12, 26, 16),
                         child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Expanded(
-                              child: _ActionButton(
-                                tooltip: l10n.swipeNotInterested,
-                                label: l10n.swipeNotInterested,
-                                icon: Icons.close_rounded,
-                                color: const Color(0xFFE35D6A),
-                                onPressed: _isWriting
-                                    ? null
-                                    : () => _choose(
-                                        items.first,
-                                        _SwipeChoice.notInterested,
-                                      ),
-                              ),
+                            _ActionButton(
+                              tooltip: l10n.swipeNotInterested,
+                              label: l10n.swipeNotInterested,
+                              icon: Icons.close_rounded,
+                              color: const Color(0xFFE35D6A),
+                              diameter: 52,
+                              onPressed: _isWriting
+                                  ? null
+                                  : () => _choose(
+                                      items.first,
+                                      _SwipeChoice.notInterested,
+                                    ),
                             ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: _ActionButton(
-                                tooltip: l10n.swipeWatched,
-                                label: l10n.swipeWatched,
-                                icon: Icons.visibility_rounded,
-                                color: AppTheme.accentColor,
-                                onPressed: _isWriting
-                                    ? null
-                                    : () => _markWatched(items.first),
-                              ),
+                            _ActionButton(
+                              tooltip: l10n.swipeWatched,
+                              label: l10n.swipeWatched,
+                              icon: Icons.visibility_rounded,
+                              color: AppTheme.accentColor,
+                              diameter: 58,
+                              onPressed: _isWriting
+                                  ? null
+                                  : () => _markWatched(items.first),
                             ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: _ActionButton(
-                                tooltip: l10n.swipeInterested,
-                                label: l10n.swipeInterested,
-                                icon: Icons.bookmark_add_rounded,
-                                color: const Color(0xFF39C987),
-                                onPressed: _isWriting
-                                    ? null
-                                    : () => _choose(
-                                        items.first,
-                                        _SwipeChoice.interested,
-                                      ),
-                              ),
+                            _ActionButton(
+                              tooltip: l10n.swipeInterested,
+                              label: l10n.swipeInterested,
+                              icon: Icons.bookmark_add_rounded,
+                              color: const Color(0xFF39C987),
+                              diameter: 64,
+                              onPressed: _isWriting
+                                  ? null
+                                  : () => _choose(
+                                      items.first,
+                                      _SwipeChoice.interested,
+                                    ),
                             ),
                           ],
                         ),
@@ -959,7 +956,6 @@ class _PremiumDiscoveryCard extends StatelessWidget {
     final rating = (item['vote_average'] as num?)?.toDouble();
     final isTv = item['media_type'] == 'tv';
     final poster = (item['poster_path'] ?? '').toString();
-    final backdrop = (item['backdrop_path'] ?? '').toString();
     final genreIds = (item['genre_ids'] as List<dynamic>? ?? const [])
         .whereType<num>()
         .map((id) => id.toInt())
@@ -988,137 +984,139 @@ class _PremiumDiscoveryCard extends StatelessWidget {
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(25),
-          child: Column(
+          child: Stack(
+            fit: StackFit.expand,
             children: [
-              Expanded(
-                flex: compactHeight ? 5 : 6,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    AppNetworkImage(
-                      imageUrl: backdrop.isNotEmpty
-                          ? '${ApiConstants.imagePathW780}$backdrop'
-                          : poster.isEmpty
-                          ? ''
-                          : '${ApiConstants.imagePathW500}$poster',
-                      seed: title,
-                      fit: BoxFit.cover,
-                    ),
-                    const DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [Colors.transparent, Color(0xB80B0D13)],
-                          stops: [0.55, 1],
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      top: 14,
-                      right: 14,
-                      child: _RatingBadge(rating: rating),
-                    ),
-                    Positioned(
-                      left: 16,
-                      bottom: 14,
-                      child: _InfoPill(
-                        isTv
-                            ? l10n.discoverFilterShows
-                            : l10n.discoverFilterMovies,
-                      ),
-                    ),
-                  ],
+              AppNetworkImage(
+                imageUrl: poster.isEmpty
+                    ? ''
+                    : '${ApiConstants.imagePathOriginal}$poster',
+                seed: title,
+                fit: BoxFit.cover,
+              ),
+              const DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Color(0x33000000),
+                      Colors.transparent,
+                      Color(0x2406080E),
+                      Color(0xE6090B11),
+                      Color(0xFF090B11),
+                    ],
+                    stops: [0, 0.38, 0.54, 0.76, 1],
+                  ),
                 ),
               ),
-              Expanded(
-                flex: compactHeight ? 5 : 4,
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.fromLTRB(18, 15, 18, 11),
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [Color(0xFF1B1E28), Color(0xFF101219)],
-                    ),
+              const DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: [Color(0x5C000000), Colors.transparent],
+                    stops: [0, 0.72],
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.outfit(
-                          color: Colors.white,
-                          fontSize: 23,
-                          height: 1.05,
-                          fontWeight: FontWeight.w700,
+                ),
+              ),
+              Positioned(
+                top: 14,
+                right: 14,
+                child: _RatingBadge(rating: rating),
+              ),
+              Positioned(
+                left: 18,
+                right: 18,
+                bottom: compactHeight ? 12 : 16,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        _InfoPill(
+                          isTv
+                              ? l10n.discoverFilterShows
+                              : l10n.discoverFilterMovies,
                         ),
+                        if (year.isNotEmpty) ...[
+                          const SizedBox(width: 6),
+                          _InfoPill(year),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 9),
+                    Text(
+                      title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.outfit(
+                        color: Colors.white,
+                        fontSize: compactHeight ? 22 : 25,
+                        height: 1.02,
+                        fontWeight: FontWeight.w700,
+                        shadows: const [
+                          Shadow(color: Colors.black87, blurRadius: 12),
+                        ],
                       ),
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 6,
-                        runSpacing: 6,
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      children: genreIds
+                          .map((id) => _InfoPill(genreName(l10n, id)))
+                          .toList(growable: false),
+                    ),
+                    if (reason != null && reason.isNotEmpty) ...[
+                      const SizedBox(height: 9),
+                      Row(
                         children: [
-                          if (year.isNotEmpty) _InfoPill(year),
-                          ...genreIds.map(
-                            (id) => _InfoPill(genreName(l10n, id)),
+                          const Icon(
+                            Icons.auto_awesome_rounded,
+                            color: AppTheme.accentColor,
+                            size: 15,
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              reason,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.inter(
+                                color: AppTheme.accentColor,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ),
                         ],
                       ),
-                      if (reason != null && reason.isNotEmpty) ...[
-                        const SizedBox(height: 9),
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.auto_awesome_rounded,
-                              color: AppTheme.accentColor,
-                              size: 15,
-                            ),
-                            const SizedBox(width: 6),
-                            Expanded(
-                              child: Text(
-                                reason,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: GoogleFonts.inter(
-                                  color: AppTheme.accentColor,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                      if (overview.isNotEmpty) ...[
-                        const SizedBox(height: 7),
-                        Expanded(
-                          child: Text(
-                            overview,
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.inter(
-                              color: Colors.white.withValues(alpha: 0.72),
-                              fontSize: 11.5,
-                              height: 1.32,
-                            ),
-                          ),
-                        ),
-                      ] else
-                        const Spacer(),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: Icon(
-                          Icons.keyboard_arrow_up_rounded,
-                          color: Colors.white.withValues(alpha: 0.38),
-                          size: 18,
+                    ],
+                    if (!compactHeight && overview.isNotEmpty) ...[
+                      const SizedBox(height: 7),
+                      Text(
+                        overview,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.inter(
+                          color: Colors.white.withValues(alpha: 0.76),
+                          fontSize: 11.5,
+                          height: 1.35,
                         ),
                       ),
                     ],
-                  ),
+                    const SizedBox(height: 5),
+                    Align(
+                      alignment: Alignment.center,
+                      child: Icon(
+                        Icons.keyboard_arrow_up_rounded,
+                        color: Colors.white.withValues(alpha: 0.42),
+                        size: 18,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -1648,49 +1646,76 @@ class _ActionButton extends StatelessWidget {
     required this.label,
     required this.icon,
     required this.color,
+    required this.diameter,
     required this.onPressed,
   });
   final String tooltip;
   final String label;
   final IconData icon;
   final Color color;
+  final double diameter;
   final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) => Tooltip(
     message: tooltip,
-    child: Material(
-      color: color.withValues(alpha: 0.13),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
-        side: BorderSide(color: color.withValues(alpha: 0.42)),
-      ),
-      child: InkWell(
+    child: Semantics(
+      button: true,
+      enabled: onPressed != null,
+      label: label,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
         onTap: onPressed,
-        borderRadius: BorderRadius.circular(18),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                icon,
-                color: onPressed == null ? Colors.white24 : color,
-                size: 25,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: diameter,
+              height: diameter,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                boxShadow: onPressed == null
+                    ? null
+                    : [
+                        BoxShadow(
+                          color: color.withValues(alpha: 0.18),
+                          blurRadius: 18,
+                          offset: const Offset(0, 7),
+                        ),
+                      ],
               ),
-              const SizedBox(height: 4),
-              Text(
+              child: Material(
+                color: color.withValues(alpha: 0.12),
+                shape: CircleBorder(
+                  side: BorderSide(color: color.withValues(alpha: 0.55)),
+                ),
+                child: Center(
+                  child: Icon(
+                    icon,
+                    color: onPressed == null ? Colors.white24 : color,
+                    size: diameter * 0.4,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 5),
+            SizedBox(
+              width: 88,
+              child: Text(
                 label,
                 maxLines: 1,
+                textAlign: TextAlign.center,
                 overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.inter(
-                  color: onPressed == null ? Colors.white24 : Colors.white,
-                  fontSize: 10.5,
+                  color: onPressed == null
+                      ? Colors.white24
+                      : Colors.white.withValues(alpha: 0.84),
+                  fontSize: 10,
                   fontWeight: FontWeight.w600,
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     ),
