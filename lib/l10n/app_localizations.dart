@@ -6025,6 +6025,102 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Cihazınızdaki tüm izleme günlükleri, notlar ve yerel veriler kalıcı olarak sıfırlanacaktır. Bu işlem geri alınamaz.'**
   String get privacyDeleteConfirmDesc;
+
+  /// No description provided for @eveningPickerTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu Akşam Ne İzlesem?'**
+  String get eveningPickerTitle;
+
+  /// No description provided for @eveningPickerDescription.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ruh hâlini, zamanını ve yapım türünü seç; sana en fazla üç güçlü öneri gösterelim.'**
+  String get eveningPickerDescription;
+
+  /// No description provided for @eveningPickerMood.
+  ///
+  /// In tr, this message translates to:
+  /// **'Nasıl bir şey istiyorsun?'**
+  String get eveningPickerMood;
+
+  /// No description provided for @eveningMoodExciting.
+  ///
+  /// In tr, this message translates to:
+  /// **'Heyecanlı'**
+  String get eveningMoodExciting;
+
+  /// No description provided for @eveningMoodLight.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hafif'**
+  String get eveningMoodLight;
+
+  /// No description provided for @eveningMoodThoughtful.
+  ///
+  /// In tr, this message translates to:
+  /// **'Düşündüren'**
+  String get eveningMoodThoughtful;
+
+  /// No description provided for @eveningMoodEmotional.
+  ///
+  /// In tr, this message translates to:
+  /// **'Duygusal'**
+  String get eveningMoodEmotional;
+
+  /// No description provided for @eveningPickerType.
+  ///
+  /// In tr, this message translates to:
+  /// **'Film mi, dizi mi?'**
+  String get eveningPickerType;
+
+  /// No description provided for @eveningPickerAny.
+  ///
+  /// In tr, this message translates to:
+  /// **'Fark etmez'**
+  String get eveningPickerAny;
+
+  /// No description provided for @eveningPickerMovie.
+  ///
+  /// In tr, this message translates to:
+  /// **'Film'**
+  String get eveningPickerMovie;
+
+  /// No description provided for @eveningPickerTv.
+  ///
+  /// In tr, this message translates to:
+  /// **'Dizi'**
+  String get eveningPickerTv;
+
+  /// No description provided for @eveningPickerDuration.
+  ///
+  /// In tr, this message translates to:
+  /// **'En fazla {minutes} dakika'**
+  String eveningPickerDuration(int minutes);
+
+  /// No description provided for @eveningPickerFind.
+  ///
+  /// In tr, this message translates to:
+  /// **'Önerileri Bul'**
+  String get eveningPickerFind;
+
+  /// No description provided for @eveningPickerNoResults.
+  ///
+  /// In tr, this message translates to:
+  /// **'Uygun sonuç bulamadık'**
+  String get eveningPickerNoResults;
+
+  /// No description provided for @eveningPickerNoResultsHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Süreyi artırmayı veya yapım türünü değiştirmeyi dene.'**
+  String get eveningPickerNoResultsHint;
+
+  /// No description provided for @eveningPickerReason.
+  ///
+  /// In tr, this message translates to:
+  /// **'{mood} ruh hâline ve {minutes} dakikalık sürene uyuyor.'**
+  String eveningPickerReason(String mood, int minutes);
 }
 
 class _AppLocalizationsDelegate

@@ -3624,4 +3624,58 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get privacyDeleteConfirmDesc =>
       'All watch logs, notes, and local data on this device will be permanently wiped. This action cannot be undone.';
+
+  @override
+  String get eveningPickerTitle => 'What Should I Watch Tonight?';
+
+  @override
+  String get eveningPickerDescription =>
+      'Choose your mood, available time and title type to get up to three strong picks.';
+
+  @override
+  String get eveningPickerMood => 'What are you in the mood for?';
+
+  @override
+  String get eveningMoodExciting => 'Exciting';
+
+  @override
+  String get eveningMoodLight => 'Light';
+
+  @override
+  String get eveningMoodThoughtful => 'Thoughtful';
+
+  @override
+  String get eveningMoodEmotional => 'Emotional';
+
+  @override
+  String get eveningPickerType => 'Movie or TV?';
+
+  @override
+  String get eveningPickerAny => 'Either';
+
+  @override
+  String get eveningPickerMovie => 'Movie';
+
+  @override
+  String get eveningPickerTv => 'TV';
+
+  @override
+  String eveningPickerDuration(int minutes) {
+    return 'Up to $minutes minutes';
+  }
+
+  @override
+  String get eveningPickerFind => 'Find Recommendations';
+
+  @override
+  String get eveningPickerNoResults => 'No suitable results found';
+
+  @override
+  String get eveningPickerNoResultsHint =>
+      'Try increasing the duration or changing the title type.';
+
+  @override
+  String eveningPickerReason(String mood, int minutes) {
+    return 'Fits your $mood mood and $minutes-minute window.';
+  }
 }

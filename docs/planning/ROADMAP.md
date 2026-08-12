@@ -207,9 +207,16 @@ izleyeceği yapımı daha hızlı seçmesini sağlamak.
   - Ruh hâli, kullanılabilir süre, film/dizi ve yayın platformu seçenekleri
   - Daha önce izlenenleri ve istenmeyen türleri dışlama
   - En fazla üç güçlü sonuç
+  - **İlerleme (13 Ağustos 2026):** Ana ekrandan açılan ilk karar akışı ruh
+    hâli, kullanılabilir süre ve film/dizi tercihini alıyor; mevcut kişisel öneri
+    havuzundaki izlenmiş yapımları dışarıda bırakıp puana göre en fazla üç sonuç
+    gösteriyor. Yayın platformu filtresi eklenene kadar bu madde açık tutulacak.
 - [ ] **Her önerinin nedenini açıkla.**
   - Tür, oyuncu/yönetmen, süre, platform ve geçmiş tercih sinyalleri
   - Kullanılmayan veya eksik veri açıkça belirtilmeli.
+  - **İlerleme (13 Ağustos 2026):** Sonuçlarda mevcut kişiselleştirme nedeni,
+    seçilen ruh hâli ve süre uyumu birlikte gösteriliyor. Platform bilgisi ve
+    eksik veri açıklaması sonraki dilimde tamamlanacak.
 - [ ] **Sonuç geri bildirimi ekle.**
   - “İlgimi çekti”, “bunu önerme” ve “başka öner” sinyalleri
   - Swipe Discovery tercihleriyle aynı veri sözleşmesini kullanmalı.

@@ -20,6 +20,7 @@ import 'widgets/home_stats_dashboard.dart';
 import 'widgets/home_content_lists.dart';
 import 'widgets/first_session_checklist_card.dart';
 import '../../recommendations/presentation/widgets/home_recommendations_list.dart';
+import '../../recommendations/presentation/evening_picker_screen.dart';
 
 // Lets the user tap "Başka Öner" on the suggestion card to cycle to a
 // different unwatched title without waiting for the next calendar day.
@@ -66,7 +67,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void _openDetail(int tmdbId, bool isTv) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => MovieDetailScreen(tmdbId: tmdbId, isTv: isTv)),
+      MaterialPageRoute(
+        builder: (context) => MovieDetailScreen(tmdbId: tmdbId, isTv: isTv),
+      ),
     );
   }
 
@@ -94,7 +97,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final favoriteIdsAsync = ref.watch(favoriteMovieIdsProvider);
     final suggestionSeed = ref.watch(_homeSuggestionSeedProvider);
     final activeShowsAsync = ref.watch(activelyWatchingProvider);
-    final activeShows = activeShowsAsync.value ?? const <ActivelyWatchingShow>[];
+    final activeShows =
+        activeShowsAsync.value ?? const <ActivelyWatchingShow>[];
 
     // allWatchRecordsProvider is already sorted by watchDate desc; keep only
     // the latest watch per movie so a re-watched title doesn't show twice.
@@ -114,8 +118,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     // on every rebuild) plus a user-controlled seed for "Başka Öner".
     final unwatched = unwatchedAsync.value ?? const <Movie>[];
     final favoriteIds = favoriteIdsAsync.value ?? const <MovieKey>{};
-    final favoriteUnwatched = unwatched.where((m) => favoriteIds.contains((tmdbId: m.tmdbId, isTv: m.isTv))).toList();
-    final suggestionCandidates = favoriteUnwatched.isNotEmpty ? favoriteUnwatched : unwatched;
+    final favoriteUnwatched = unwatched
+        .where((m) => favoriteIds.contains((tmdbId: m.tmdbId, isTv: m.isTv)))
+        .toList();
+    final suggestionCandidates = favoriteUnwatched.isNotEmpty
+        ? favoriteUnwatched
+        : unwatched;
     Movie? suggestion;
     if (suggestionCandidates.isNotEmpty) {
       final now = DateTime.now();
@@ -127,7 +135,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     // When there's nothing left unwatched to suggest, fall back to the most
     // recently watched title so the hero stays a permanent visual anchor
     // instead of disappearing once a user has watched everything they added.
-    final heroMovie = suggestion ?? (recentlyWatched.isNotEmpty ? recentlyWatched.first.movie : null);
+    final heroMovie =
+        suggestion ??
+        (recentlyWatched.isNotEmpty ? recentlyWatched.first.movie : null);
 
     return Scaffold(
       backgroundColor: AppColors.transparent,
@@ -161,7 +171,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     // unwatched is left in the library. Hidden only when
                     // there's no data at all yet.
                     if ((activeShowsAsync.isLoading && activeShows.isEmpty) ||
-                        (watchRecordsAsync.isLoading && recentlyWatched.isEmpty)) ...[
+                        (watchRecordsAsync.isLoading &&
+                            recentlyWatched.isEmpty)) ...[
                       // Reserves exactly the hero's height so the rest of the
                       // page does not jump when the hero resolves. Colour comes
                       // from progressIndicatorTheme.
@@ -171,15 +182,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                       const SizedBox(height: AppSpacing.xl),
                     ] else if (activeShows.isNotEmpty) ...[
-                      HomeActiveHeroCarousel(shows: activeShows, onTap: _openDetail),
+                      HomeActiveHeroCarousel(
+                        shows: activeShows,
+                        onTap: _openDetail,
+                      ),
                       const SizedBox(height: AppSpacing.xl),
                     ] else if (heroMovie != null) ...[
                       HomeHeroBanner(
                         movie: heroMovie,
                         isSuggestion: suggestion != null,
-                        onRefresh:
-                            suggestion != null ? () => ref.read(_homeSuggestionSeedProvider.notifier).state++ : null,
-                        onTap: () => _openDetail(heroMovie.tmdbId, heroMovie.isTv),
+                        onRefresh: suggestion != null
+                            ? () => ref
+                                  .read(_homeSuggestionSeedProvider.notifier)
+                                  .state++
+                            : null,
+                        onTap: () =>
+                            _openDetail(heroMovie.tmdbId, heroMovie.isTv),
                       ),
                       const SizedBox(height: AppSpacing.xl),
                     ],
@@ -190,8 +208,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         final insights = ref.watch(insightsProvider);
                         final weeklyGoal = ref.watch(weeklyGoalProvider);
                         return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-                          child: HomeStatsDashboard(insights: insights, weeklyGoal: weeklyGoal),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.lg,
+                          ),
+                          child: HomeStatsDashboard(
+                            insights: insights,
+                            weeklyGoal: weeklyGoal,
+                          ),
                         );
                       },
                     ),
@@ -203,15 +226,44 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     // Recently Added Section
                     HomeSectionTitle(
                       title: AppLocalizations.of(context).homeRecentlyAdded,
-                      onSeeAll: () => ref.read(mainShellTabIndexProvider.notifier).state = 2,
+                      onSeeAll: () =>
+                          ref.read(mainShellTabIndexProvider.notifier).state =
+                              2,
                     ),
                     const SizedBox(height: AppSpacing.md),
-                     recentlyAdded.isEmpty
-                        ? HomeEmptySection(message: AppLocalizations.of(context).homeNothingAdded)
-                        : HomeRecentlyAddedList(items: recentlyAdded, onOpenDetail: _openDetail),
+                    recentlyAdded.isEmpty
+                        ? HomeEmptySection(
+                            message: AppLocalizations.of(
+                              context,
+                            ).homeNothingAdded,
+                          )
+                        : HomeRecentlyAddedList(
+                            items: recentlyAdded,
+                            onOpenDetail: _openDetail,
+                          ),
 
                     const SizedBox(height: AppSpacing.xl),
                     HomeRecommendationsList(onOpenDetail: _openDetail),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.lg,
+                        AppSpacing.md,
+                        AppSpacing.lg,
+                        0,
+                      ),
+                      child: AppButton(
+                        label: AppLocalizations.of(context).eveningPickerTitle,
+                        icon: Icons.nightlight_round,
+                        variant: AppButtonVariant.secondary,
+                        isFullWidth: true,
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const EveningPickerScreen(),
+                          ),
+                        ),
+                      ),
+                    ),
 
                     // "Aktif İzlediklerin" quick-add row (hidden if nothing active).
                     // Intentionally shows all active shows even if one of

@@ -3418,4 +3418,58 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get privacyDeleteConfirmDesc =>
       'Cihazınızdaki tüm izleme günlükleri, notlar ve yerel veriler kalıcı olarak sıfırlanacaktır. Bu işlem geri alınamaz.';
+
+  @override
+  String get eveningPickerTitle => 'Bu Akşam Ne İzlesem?';
+
+  @override
+  String get eveningPickerDescription =>
+      'Ruh hâlini, zamanını ve yapım türünü seç; sana en fazla üç güçlü öneri gösterelim.';
+
+  @override
+  String get eveningPickerMood => 'Nasıl bir şey istiyorsun?';
+
+  @override
+  String get eveningMoodExciting => 'Heyecanlı';
+
+  @override
+  String get eveningMoodLight => 'Hafif';
+
+  @override
+  String get eveningMoodThoughtful => 'Düşündüren';
+
+  @override
+  String get eveningMoodEmotional => 'Duygusal';
+
+  @override
+  String get eveningPickerType => 'Film mi, dizi mi?';
+
+  @override
+  String get eveningPickerAny => 'Fark etmez';
+
+  @override
+  String get eveningPickerMovie => 'Film';
+
+  @override
+  String get eveningPickerTv => 'Dizi';
+
+  @override
+  String eveningPickerDuration(int minutes) {
+    return 'En fazla $minutes dakika';
+  }
+
+  @override
+  String get eveningPickerFind => 'Önerileri Bul';
+
+  @override
+  String get eveningPickerNoResults => 'Uygun sonuç bulamadık';
+
+  @override
+  String get eveningPickerNoResultsHint =>
+      'Süreyi artırmayı veya yapım türünü değiştirmeyi dene.';
+
+  @override
+  String eveningPickerReason(String mood, int minutes) {
+    return '$mood ruh hâline ve $minutes dakikalık sürene uyuyor.';
+  }
 }
