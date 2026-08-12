@@ -758,6 +758,54 @@ abstract class AppLocalizations {
   /// **'Hatalı: {count}'**
   String letterboxdInvalidRows(int count);
 
+  /// No description provided for @letterboxdMatchTmdb.
+  ///
+  /// In tr, this message translates to:
+  /// **'TMDb ile Eşleştir'**
+  String get letterboxdMatchTmdb;
+
+  /// No description provided for @letterboxdMatching.
+  ///
+  /// In tr, this message translates to:
+  /// **'Eşleştiriliyor: {done}/{total}'**
+  String letterboxdMatching(int done, int total);
+
+  /// No description provided for @letterboxdMatchedRows.
+  ///
+  /// In tr, this message translates to:
+  /// **'Eşleşen: {count}'**
+  String letterboxdMatchedRows(int count);
+
+  /// No description provided for @letterboxdReviewRows.
+  ///
+  /// In tr, this message translates to:
+  /// **'İncelenecek: {count}'**
+  String letterboxdReviewRows(int count);
+
+  /// No description provided for @letterboxdNeedsReview.
+  ///
+  /// In tr, this message translates to:
+  /// **'Eşleşmeyi seçmen gerekiyor'**
+  String get letterboxdNeedsReview;
+
+  /// No description provided for @letterboxdNoMatch.
+  ///
+  /// In tr, this message translates to:
+  /// **'Eşleşme bulunamadı'**
+  String get letterboxdNoMatch;
+
+  /// No description provided for @letterboxdMatchFailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Eşleştirme başarısız'**
+  String get letterboxdMatchFailed;
+
+  /// No description provided for @letterboxdChooseMatch.
+  ///
+  /// In tr, this message translates to:
+  /// **'Doğru yapımı seç'**
+  String get letterboxdChooseMatch;
+
   /// No description provided for @settingsExport.
   ///
   /// In tr, this message translates to:

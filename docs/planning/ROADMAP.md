@@ -173,10 +173,14 @@ izleyeceği yapımı daha hızlı seçmesini sağlamak.
   - **Tamamlandı (13 Ağustos 2026):** Ayarlar'a yazma yapmayan Letterboxd CSV
     önizlemesi eklendi. UTF-8, 5 MiB/10.000 satır sınırı, zorunlu sütunlar,
     tarih, yıl ve puan doğrulaması ile satır bazlı hata özeti otomatik testli.
-- [ ] **TMDb eşleştirme ve kullanıcı düzeltme akışı ekle.**
+- [x] **TMDb eşleştirme ve kullanıcı düzeltme akışı ekle.**
   - Başlık + yıl ile güven skoru üretilmeli.
   - Belirsiz sonuçlar kullanıcı onayı olmadan kaydedilmemeli.
   - Film/dizi ayrımı korunmalı.
+  - **Tamamlandı (13 Ağustos 2026):** Geçerli CSV satırları başlık + yıl güven
+    skoruyla TMDb'ye eşleniyor. Güçlü sonuçlar otomatik seçiliyor; belirsiz
+    sonuçlar film/dizi ayrımı korunarak kullanıcı onayına sunuluyor. Bu aşama
+    hâlâ yalnızca önizleme yapıyor ve kalıcı kayıt oluşturmuyor.
 - [ ] **Yinelenen kayıt politikası ekle.**
   - Tekrar izlemeler korunmalı.
   - Birebir aynı tarih/yapım kaydı için atla, birleştir veya ekle seçenekleri
@@ -406,10 +410,11 @@ Her görev aşağıdaki sırayla ilerler:
 
 ## Sıradaki iş
 
-**v2.2 / P0 — TMDb eşleştirme ve kullanıcı düzeltme akışı.**
+**v2.2 / P0 — Yinelenen kayıt politikası.**
 
 v2.1'in yayın öncesi geliştirme ve kontrollü pilot işleri tamamlandı. App Check
 gerçek trafik gözlemi yayın sonrasında ayrı takip edilecek ve enforcement o
 zamana kadar kapalı kalacak. Letterboxd CSV önizleme ve biçim doğrulama
-tamamlandı. Sonraki aktif geliştirme, geçerli satırları başlık + yıl ile TMDb'ye
-eşleyip belirsiz sonuçları kullanıcı onayına sunmaktır.
+tamamlandı. TMDb eşleştirme ve kullanıcı düzeltme akışı da hazır. Sonraki aktif
+geliştirme, tekrar izlemeleri koruyan ve aynı tarih/yapım çakışmalarında kullanıcıya
+atla, birleştir veya ekle seçeneklerini sunan yinelenen kayıt politikasıdır.

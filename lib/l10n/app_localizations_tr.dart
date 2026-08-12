@@ -362,6 +362,36 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String get letterboxdMatchTmdb => 'TMDb ile Eşleştir';
+
+  @override
+  String letterboxdMatching(int done, int total) {
+    return 'Eşleştiriliyor: $done/$total';
+  }
+
+  @override
+  String letterboxdMatchedRows(int count) {
+    return 'Eşleşen: $count';
+  }
+
+  @override
+  String letterboxdReviewRows(int count) {
+    return 'İncelenecek: $count';
+  }
+
+  @override
+  String get letterboxdNeedsReview => 'Eşleşmeyi seçmen gerekiyor';
+
+  @override
+  String get letterboxdNoMatch => 'Eşleşme bulunamadı';
+
+  @override
+  String get letterboxdMatchFailed => 'Eşleştirme başarısız';
+
+  @override
+  String get letterboxdChooseMatch => 'Doğru yapımı seç';
+
+  @override
   String get settingsExport => 'Dışa Aktar';
 
   @override

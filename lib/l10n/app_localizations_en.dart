@@ -361,6 +361,36 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get letterboxdMatchTmdb => 'Match with TMDb';
+
+  @override
+  String letterboxdMatching(int done, int total) {
+    return 'Matching: $done/$total';
+  }
+
+  @override
+  String letterboxdMatchedRows(int count) {
+    return 'Matched: $count';
+  }
+
+  @override
+  String letterboxdReviewRows(int count) {
+    return 'Needs review: $count';
+  }
+
+  @override
+  String get letterboxdNeedsReview => 'Choose the correct match';
+
+  @override
+  String get letterboxdNoMatch => 'No match found';
+
+  @override
+  String get letterboxdMatchFailed => 'Matching failed';
+
+  @override
+  String get letterboxdChooseMatch => 'Choose the correct title';
+
+  @override
   String get settingsExport => 'Export';
 
   @override
