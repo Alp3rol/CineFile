@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/analytics/product_analytics.dart';
 import '../../../core/network/tmdb_service.dart';
 import '../../../core/ui/ui.dart';
 import '../../../l10n/app_localizations.dart';
@@ -75,6 +76,9 @@ class _EveningPickerScreenState extends ConsumerState<EveningPickerScreen> {
         }
         _applyFilters();
       });
+      await ref
+          .read(productAnalyticsProvider)
+          .log(ProductEvent.eveningPickerCompleted);
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -97,6 +101,9 @@ class _EveningPickerScreenState extends ConsumerState<EveningPickerScreen> {
       await ref
           .read(eveningFeedbackServiceProvider)
           .save(candidate.item, isInterested: interested);
+      await ref
+          .read(productAnalyticsProvider)
+          .log(ProductEvent.eveningFeedbackSaved);
       if (!mounted) return;
       setState(() {
         _dismissedIds.add(candidate.item.tmdbId);

@@ -15,6 +15,9 @@ bile üretim analitiğine olay göndermez.
 | `first_collection_created` | Cihazdaki ilk koleksiyon oluşturuldu |
 | `wrapped_viewed` | Wrapped görüntülendi |
 | `wrapped_shared` | Wrapped paylaşma eylemi tamamlandı |
+| `letterboxd_import_completed` | Letterboxd içe aktarma işlemi tamamlandı |
+| `evening_picker_completed` | Akşam karar modu sonuç üretti |
+| `evening_feedback_saved` | Karar modu tercihi kaydedildi |
 
 Olaylara parametre eklenmez. Yapım adı, TMDb kimliği, arama metni, not, yorum,
 puan, kullanıcı kimliği ve serbest metin kesinlikle gönderilmez. Yeni olay veya

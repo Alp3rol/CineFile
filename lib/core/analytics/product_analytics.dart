@@ -11,7 +11,10 @@ enum ProductEvent {
   detailWatchRecorded('detail_watch_recorded'),
   firstCollectionCreated('first_collection_created'),
   wrappedViewed('wrapped_viewed'),
-  wrappedShared('wrapped_shared');
+  wrappedShared('wrapped_shared'),
+  letterboxdImportCompleted('letterboxd_import_completed'),
+  eveningPickerCompleted('evening_picker_completed'),
+  eveningFeedbackSaved('evening_feedback_saved');
 
   const ProductEvent(this.eventName);
   final String eventName;

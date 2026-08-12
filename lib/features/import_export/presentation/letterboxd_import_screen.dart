@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/analytics/product_analytics.dart';
 import '../../../core/database/database_provider.dart';
 import '../../../core/network/tmdb_service.dart';
 import '../../../core/ui/ui.dart';
@@ -11,6 +12,7 @@ import '../application/letterboxd_import_service.dart';
 import '../domain/letterboxd_csv_parser.dart';
 import '../domain/import_duplicate_policy.dart';
 import '../domain/tmdb_import_matcher.dart';
+import '../../settings/presentation/settings_provider.dart';
 
 class LetterboxdImportScreen extends ConsumerStatefulWidget {
   const LetterboxdImportScreen({super.key});
@@ -243,6 +245,9 @@ class _LetterboxdImportScreenState
             matches: _matches,
             conflicts: _conflicts,
           );
+      await ref
+          .read(productAnalyticsProvider)
+          .log(ProductEvent.letterboxdImportCompleted);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

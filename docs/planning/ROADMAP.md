@@ -235,6 +235,12 @@ izleyeceği yapımı daha hızlı seçmesini sağlamak.
 - Karar modu seçilen filtrelere uyan en fazla üç açıklanabilir sonuç üretir.
 - İçe aktarma ve öneri akışlarının temel dönüşüm olayları ölçülebilir.
 
+**Doğrulandı (13 Ağustos 2026):** Tüm kabul kriterleri otomatik testler,
+Firestore emülatörü ve release web derlemesiyle geçti. İçe aktarma tamamlanması,
+karar modu sonucu ve geri bildirim kaydı; içerik veya kimlik parametresi olmadan,
+yalnızca açık analitik izniyle ölçülebilir hâle getirildi. Ayrıntılı sonuçlar
+[`V2_2_RELEASE_CHECK.md`](V2_2_RELEASE_CHECK.md) içinde kayıtlıdır.
+
 ---
 
 ## Faz 3 — Geri dönüş ve dizi deneyimi (v2.3)

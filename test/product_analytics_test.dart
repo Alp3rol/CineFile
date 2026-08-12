@@ -69,6 +69,9 @@ void main() {
         'first_collection_created',
         'wrapped_viewed',
         'wrapped_shared',
+        'letterboxd_import_completed',
+        'evening_picker_completed',
+        'evening_feedback_saved',
       });
     },
   );
