@@ -7,6 +7,7 @@ import 'core/navigation/app_navigator.dart';
 import 'core/database/web_local_store.dart';
 import 'core/observability/error_reporting.dart';
 import 'core/platform/firebase_web_registrar.dart';
+import 'core/services/app_check_service.dart';
 import 'core/theme/app_theme.dart';
 import 'core/widgets/web_device_frame.dart';
 import 'features/auth/presentation/auth_gate.dart';
@@ -29,6 +30,7 @@ final firebaseInitProvider = FutureProvider<void>((ref) async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+    await activateAppCheck();
   } catch (error, stackTrace) {
     // Reported here rather than from [_FirebaseInitErrorScreen], which rebuilds
     // and would send a duplicate each time. This is the one failure that stops

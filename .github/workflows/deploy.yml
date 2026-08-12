@@ -55,6 +55,9 @@ jobs:
 
       - run: flutter pub get
 
+      - name: Check package and displayed version
+        run: dart run tool/check_version_sync.dart
+
       - name: Generate release metadata
         id: release
         shell: bash
@@ -119,14 +122,18 @@ jobs:
 
       - name: Build web
         env:
+          # Public reCAPTCHA Enterprise site key restricted to
+          # alp3rol.github.io. It identifies the site; it is not a credential.
+          APP_CHECK_WEB_SITE_KEY: 6Le_jYItAAAAAFTDS8bvR9FMiFG8zJn7LeHJOlQH
           SENTRY_RELEASE: ${{ steps.release.outputs.release }}
           SENTRY_COMMIT: ${{ steps.release.outputs.commit }}
           SENTRY_ENVIRONMENT: ${{ steps.release.outputs.environment }}
         run: |
-          test -n "$SENTRY_RELEASE" && test -n "$SENTRY_COMMIT" && test -n "$SENTRY_ENVIRONMENT"
+          test -n "$APP_CHECK_WEB_SITE_KEY" && test -n "$SENTRY_RELEASE" && test -n "$SENTRY_COMMIT" && test -n "$SENTRY_ENVIRONMENT"
           flutter build web --release --no-wasm-dry-run \
             --base-href "/CineFile/" \
             ${{ steps.tmdb.outputs.defines }} ${{ steps.sentry.outputs.defines }} \
+            --dart-define=APP_CHECK_WEB_SITE_KEY="$APP_CHECK_WEB_SITE_KEY" \
             --dart-define=SENTRY_RELEASE="$SENTRY_RELEASE" \
             --dart-define=SENTRY_COMMIT="$SENTRY_COMMIT" \
             --dart-define=SENTRY_ENVIRONMENT="$SENTRY_ENVIRONMENT"

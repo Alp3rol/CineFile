@@ -6,7 +6,7 @@ CineFile web sürümü GitHub Pages (`gh-pages` dalı) üzerinde barındırılı
 
 Geri alma (rollback) mimarisinin 3 temel güvencesi:
 1. **Tarihçe Korunumu (`force_orphan: false`):** `peaceiris/actions-gh-pages@v4` aracı `gh-pages` dalını sıfırlamak (`force push`) yerine her yayını bir commit olarak ekler (`deploy: <sha>`). Böylece canlı sitedeki her değişiklik geriye dönük incelenebilir veya geri alınabilir.
-2. **Release İzi (Traceability):** Her canlı derleme `pubspec.yaml` sürümü (`cinefile@v1.7.2+12`) ve 12 karakterlik Git commit SHA'sı ile damgalanır.
+2. **Release İzi (Traceability):** Her canlı derleme `pubspec.yaml` sürümü (`cinefile@2.0.0+13`) ve 12 karakterlik Git commit SHA'sı ile damgalanır.
 3. **Manuel Tetikleme Desteği (`workflow_dispatch`):** `deploy.yml` iş akışı `ref` parametresi kabul eder. Herhangi bir bilinen sağlıklı etiket (tag) veya commit istenildiği an yeniden canlıya basılabilir.
 
 ---
@@ -19,7 +19,7 @@ Canlı web sürümünde kritik bir regresyon veya hata tespit edildiğinde aşa�
 
 1. GitHub Repository -> **Actions** -> **Deploy web** sayfasına gidin.
 2. **Run workflow** butonuna tıklayın.
-3. **Branch or tag to deploy** alanına son sağlıklı sürüm etiketini veya commit SHA'sını yazın (Örnek: `v1.7.2+12` veya `618874e`).
+3. **Branch or tag to deploy** alanına son sağlıklı sürüm etiketini veya commit SHA'sını yazın (Örnek: `v2.0.0+13` veya `618874e`).
 4. **Run workflow** butonuna basarak dağıtımı başlatın.
 5. Dağıtım tamamlandığında sentetik sağlık kontrolü otomatik doğrulanacaktır.
 

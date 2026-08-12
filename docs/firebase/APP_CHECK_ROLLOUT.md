@@ -160,15 +160,18 @@ Adımlar:
 
 ## Uygulama kontrol listesi
 
-- [ ] Console provider kayıtları tamamlandı.
-- [ ] İstemci App Check aktivasyonu ve başlangıç testi eklendi.
-- [ ] Deploy workflow site anahtarını doğruluyor.
+- [x] Web Console provider kaydı tamamlandı. Android/iOS mobil yayın öncesi kalır.
+- [x] İstemci App Check aktivasyonu eklendi.
+- [x] Deploy workflow site anahtarını doğruluyor.
 - [ ] Yerel debug token prosedürü denendi ve token repoda yok.
 - [ ] Web release canlıda token üretiyor.
 - [ ] 7 günlük ölçüm tablosu eşikleri karşılıyor.
 - [ ] Firestore enforcement değişiklik kaydı ve rollback sorumlusu hazır.
 - [ ] Firestore enforcement açıldı ve 7 günlük takip tamamlandı.
 - [ ] Authentication için ayrı karar verildi.
+
+Geçiş denetimleri ve günlük metrikler
+[`APP_CHECK_ROLLOUT_LOG.md`](APP_CHECK_ROLLOUT_LOG.md) içinde kaydedilir.
 
 ## Resmî kaynaklar
 

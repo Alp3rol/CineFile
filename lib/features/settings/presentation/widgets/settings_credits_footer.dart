@@ -3,13 +3,12 @@ import '../../../../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
 
-/// The version shown in Settings. Was hardcoded as "1.5.2" and had gone stale
-/// by five releases — pubspec.yaml said 1.7.2 — because nothing tied the two
-/// together. Still manual, but now there is exactly one place to update, next
-/// to a note saying so.
+/// The public version shown in Settings (the build number is intentionally
+/// omitted). `tool/check_version_sync.dart` and CI keep this value aligned with
+/// `pubspec.yaml`.
 ///
 /// Keep in sync with `version:` in pubspec.yaml.
-const String kDisplayedAppVersion = '1.7.2';
+const String kDisplayedAppVersion = '2.0.0';
 
 class SettingsCreditsFooter extends StatelessWidget {
   const SettingsCreditsFooter({super.key});

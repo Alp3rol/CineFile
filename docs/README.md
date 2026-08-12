@@ -6,6 +6,7 @@ Bu klasör, uygulamanın ürün planlarını ve geliştirici belgelerini konu ba
 
 - [Aktif ürün ve teknik yol haritası](planning/ROADMAP.md)
 - [Sürüm geçmişi ve eski yol haritası](planning/HISTORY.md)
+- [Yayın notu şablonu](planning/RELEASE_NOTES_TEMPLATE.md)
 
 ## Mimari
 
@@ -15,6 +16,7 @@ Bu klasör, uygulamanın ürün planlarını ve geliştirici belgelerini konu ba
 ## Firebase ve veri güvenliği
 
 - [Firebase App Check geçiş planı](firebase/APP_CHECK_ROLLOUT.md)
+- [Firebase App Check geçiş ve ölçüm kaydı](firebase/APP_CHECK_ROLLOUT_LOG.md)
 - [Firestore veri koruma planı](firebase/FIRESTORE_DISASTER_RECOVERY.md)
 - [Firestore yazma izin matrisi](firebase/FIRESTORE_RULES_MATRIX.md)
 

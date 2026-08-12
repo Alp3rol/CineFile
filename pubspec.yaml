@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.7.2+12
+version: 2.0.0+13
 
 environment:
   sdk: ^3.12.2
@@ -76,6 +76,7 @@ dependencies:
   # never loads, so the cost lands entirely on a platform that has no release
   # channel yet; revisit when sentry_flutter moves to jni 1.x.
   sentry_flutter: ^9.26.0
+  firebase_app_check: ^0.4.6
 
 dev_dependencies:
   flutter_test:
