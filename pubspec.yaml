@@ -40,7 +40,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   flutter_riverpod: ^3.4.1
   drift: ^2.34.1
-  sqlite3: ^3.3.0
+  sqlite3: ^3.5.1
   path_provider: ^2.1.6
   path: ^1.9.1
   dio: ^5.10.0
