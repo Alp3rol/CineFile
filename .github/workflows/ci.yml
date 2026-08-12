@@ -131,7 +131,9 @@ jobs:
       # The package version drives store builds and Sentry releases, while the
       # Settings footer is compiled UI. Fail before release if they drift.
       - name: Check package and displayed version
-        run: dart run tool/check_version_sync.dart
+        # Direct script execution avoids invoking unrelated package build
+        # hooks (notably sqlite3's native download) for this source-only check.
+        run: dart tool/check_version_sync.dart
 
       - run: flutter analyze
 

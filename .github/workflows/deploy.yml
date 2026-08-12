@@ -56,7 +56,9 @@ jobs:
       - run: flutter pub get
 
       - name: Check package and displayed version
-        run: dart run tool/check_version_sync.dart
+        # Direct script execution avoids invoking unrelated package build
+        # hooks (notably sqlite3's native download) for this source-only check.
+        run: dart tool/check_version_sync.dart
 
       - name: Generate release metadata
         id: release
