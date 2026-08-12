@@ -128,6 +128,10 @@ ve kullanıcı akışlarının ölçülebilirliğini tamamlamak.
     test hesabıyla uçtan uca çalıştır.
   - Olayların yalnızca açık izin verildiğinde gönderildiğini kanıtla.
   - Gerçek kullanıcı trafiği oluşana kadar dönüşüm ve geri dönüş hedefi koyma.
+  - **Kod hazırlığı (12 Ağustos 2026):** Temel olaylar gerçek başarı noktalarına
+    bağlandı ve izin davranışı otomatik testlerle doğrulandı. Canlı release
+    adımları [`ANALYTICS_PILOT.md`](../privacy/ANALYTICS_PILOT.md) içinde takip
+    ediliyor.
 
 ### Yayın sonrasına ertelenen ölçümler
 

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/analytics/product_analytics.dart';
 import '../../../../core/ui/ui.dart';
 import '../../../../core/widgets/poster_grid.dart';
 import '../../../../core/network/tmdb_exception.dart';
@@ -12,6 +13,7 @@ import '../search_provider.dart';
 import '../trending_provider.dart';
 import '../../../swipe_discovery/presentation/swipe_discovery_screen.dart';
 import '../../../recommendations/presentation/recommendations_provider.dart';
+import '../../../settings/presentation/settings_provider.dart';
 
 // Loading/error/empty-query/no-results/results-grid states for
 // SearchScreen's main body, driven by SearchState plus the already
@@ -143,7 +145,13 @@ class SearchResultsView extends ConsumerWidget {
     }
 
     // Grid presentation (Letterboxd stili 3'lü poster grid)
-    return PosterGrid(items: results, scrollController: scrollController);
+    return PosterGrid(
+      items: results,
+      scrollController: scrollController,
+      onItemOpened: () => ref
+          .read(productAnalyticsProvider)
+          .log(ProductEvent.searchResultOpened),
+    );
   }
 
   Widget _buildSwipeDiscoveryEntry(

@@ -83,18 +83,30 @@ class ProductAnalytics {
     final consent = await _consentStore.read() ?? false;
     // Debug/test runs must never contaminate production metrics.
     _enabled = consent && _production;
-    await _client.setCollectionEnabled(_enabled);
+    try {
+      await _client.setCollectionEnabled(_enabled);
+    } catch (_) {
+      _enabled = false;
+    }
     return consent;
   }
 
   Future<void> setConsent(bool enabled) async {
     await _consentStore.write(enabled);
     _enabled = enabled && _production;
-    await _client.setCollectionEnabled(_enabled);
+    try {
+      await _client.setCollectionEnabled(_enabled);
+    } catch (_) {
+      _enabled = false;
+    }
   }
 
   Future<void> log(ProductEvent event) async {
     if (!_enabled) return;
-    await _client.logEvent(event.eventName);
+    try {
+      await _client.logEvent(event.eventName);
+    } catch (_) {
+      // Measurement must never interrupt the user's action.
+    }
   }
 }

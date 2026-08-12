@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/constants/api_constants.dart';
+import '../../../core/analytics/product_analytics.dart';
 import '../../../core/constants/watch_regions.dart';
 import '../../../core/database/database_provider.dart';
 import '../../../core/network/tmdb_service.dart';
@@ -66,6 +67,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     }
     // Kept for the first-session checklist and native backwards compatibility.
     await ref.read(onboardingCompletedProvider.notifier).setCompleted(true);
+    await ref
+        .read(productAnalyticsProvider)
+        .log(ProductEvent.onboardingCompleted);
     if (!mounted) return;
 
     if (widget.isModal) {

@@ -5,23 +5,34 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:cinefile/core/l10n/genre_names.dart';
+import 'package:cinefile/core/analytics/product_analytics.dart';
 import 'package:cinefile/core/ui/ui.dart';
 import 'package:cinefile/core/widgets/glass_container.dart';
 import 'package:cinefile/core/widgets/premium_toast.dart';
 import 'package:cinefile/features/auth/controllers/auth_controller.dart';
 import 'package:cinefile/features/insights/presentation/insights_provider.dart';
+import 'package:cinefile/features/settings/presentation/settings_provider.dart';
 import 'package:cinefile/l10n/app_localizations.dart';
 
 class CineFileWrappedScreen extends ConsumerStatefulWidget {
   const CineFileWrappedScreen({super.key});
 
   @override
-  ConsumerState<CineFileWrappedScreen> createState() => _CineFileWrappedScreenState();
+  ConsumerState<CineFileWrappedScreen> createState() =>
+      _CineFileWrappedScreenState();
 }
 
 class _CineFileWrappedScreenState extends ConsumerState<CineFileWrappedScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(
+      () => ref.read(productAnalyticsProvider).log(ProductEvent.wrappedViewed),
+    );
+  }
 
   @override
   void dispose() {
@@ -33,14 +44,18 @@ class _CineFileWrappedScreenState extends ConsumerState<CineFileWrappedScreen> {
     setState(() => _currentPage = index);
   }
 
-  Future<void> _shareSummaryText(BuildContext context, InsightsData insights) async {
+  Future<void> _shareSummaryText(
+    BuildContext context,
+    InsightsData insights,
+  ) async {
     final l10n = AppLocalizations.of(context);
     final hours = (insights.totalDurationMinutes / 60).round();
     final topGenreName = insights.topGenres.isNotEmpty
         ? genreName(l10n, insights.topGenres.first.key)
         : '-';
 
-    final text = '🎬 CineFile Wrapped Özetim\n'
+    final text =
+        '🎬 CineFile Wrapped Özetim\n'
         '• Toplam İzleme Süresi: $hours Saat (${insights.totalWatchCount} yapım)\n'
         '• Ortalama Puan: ${insights.averageRating.toStringAsFixed(1)} ★\n'
         '• En Favori Tür: $topGenreName\n'
@@ -48,12 +63,16 @@ class _CineFileWrappedScreenState extends ConsumerState<CineFileWrappedScreen> {
         'CineFile Uygulaması ile kaydedildi';
 
     await Clipboard.setData(ClipboardData(text: text));
+    await ref.read(productAnalyticsProvider).log(ProductEvent.wrappedShared);
     if (context.mounted) {
       showPremiumToast(context, l10n.wrappedCopiedToast);
     }
   }
 
-  Future<void> _postToCommunity(BuildContext context, InsightsData insights) async {
+  Future<void> _postToCommunity(
+    BuildContext context,
+    InsightsData insights,
+  ) async {
     final user = ref.read(authStateProvider).value;
     if (user == null) return;
 
@@ -63,7 +82,8 @@ class _CineFileWrappedScreenState extends ConsumerState<CineFileWrappedScreen> {
         ? genreName(l10n, insights.topGenres.first.key)
         : '-';
 
-    final content = '📊 CineFile Wrapped Özetim!\n'
+    final content =
+        '📊 CineFile Wrapped Özetim!\n'
         '• $hours Saat izleme (${insights.totalWatchCount} yapım)\n'
         '• Ortalama Puanım: ${insights.averageRating.toStringAsFixed(1)} ★\n'
         '• En Favori Türüm: $topGenreName\n'
@@ -72,7 +92,10 @@ class _CineFileWrappedScreenState extends ConsumerState<CineFileWrappedScreen> {
     try {
       await ref.read(firestoreProvider).collection('posts').add({
         'userId': user.uid,
-        'username': user.displayName ?? user.email?.split('@').first ?? 'CineFile Kullanıcısı',
+        'username':
+            user.displayName ??
+            user.email?.split('@').first ??
+            'CineFile Kullanıcısı',
         'userAvatar': user.photoURL ?? '',
         'type': 'text',
         'content': content,
@@ -80,6 +103,7 @@ class _CineFileWrappedScreenState extends ConsumerState<CineFileWrappedScreen> {
         'likesCount': 0,
         'commentsCount': 0,
       });
+      await ref.read(productAnalyticsProvider).log(ProductEvent.wrappedShared);
 
       if (context.mounted) {
         showPremiumToast(context, 'Toplulukta başarıyla paylaşıldı! 🚀');
@@ -87,7 +111,11 @@ class _CineFileWrappedScreenState extends ConsumerState<CineFileWrappedScreen> {
       }
     } catch (_) {
       if (context.mounted) {
-        showPremiumToast(context, 'Paylaşım yapılırken bir hata oluştu.', isError: true);
+        showPremiumToast(
+          context,
+          'Paylaşım yapılırken bir hata oluştu.',
+          isError: true,
+        );
       }
     }
   }
@@ -142,7 +170,10 @@ class _CineFileWrappedScreenState extends ConsumerState<CineFileWrappedScreen> {
               children: [
                 // Top Story Progress Indicators
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg,
+                    vertical: AppSpacing.md,
+                  ),
                   child: Row(
                     children: [
                       for (int i = 0; i < 4; i++)
@@ -151,7 +182,9 @@ class _CineFileWrappedScreenState extends ConsumerState<CineFileWrappedScreen> {
                             margin: const EdgeInsets.symmetric(horizontal: 2),
                             height: 4,
                             decoration: BoxDecoration(
-                              color: i <= _currentPage ? AppColors.accent : Colors.white.withValues(alpha: 0.2),
+                              color: i <= _currentPage
+                                  ? AppColors.accent
+                                  : Colors.white.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(2),
                             ),
                           ),
@@ -162,11 +195,16 @@ class _CineFileWrappedScreenState extends ConsumerState<CineFileWrappedScreen> {
 
                 // Top Header Row
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg,
+                  ),
                   child: Row(
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.close_rounded, color: Colors.white),
+                        icon: const Icon(
+                          Icons.close_rounded,
+                          color: Colors.white,
+                        ),
                         onPressed: () => Navigator.of(context).pop(),
                       ),
                       const SizedBox(width: AppSpacing.xs),
@@ -216,11 +254,19 @@ class _CineFileWrappedScreenState extends ConsumerState<CineFileWrappedScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.auto_awesome_rounded, size: 56, color: AppColors.accent),
+          const Icon(
+            Icons.auto_awesome_rounded,
+            size: 56,
+            color: AppColors.accent,
+          ),
           const SizedBox(height: AppSpacing.md),
           Text(
             l10n.wrappedIntro,
-            style: GoogleFonts.outfit(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white),
+            style: GoogleFonts.outfit(
+              fontSize: 26,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
           ),
           const SizedBox(height: AppSpacing.xxl),
           GlassContainer(
@@ -230,11 +276,18 @@ class _CineFileWrappedScreenState extends ConsumerState<CineFileWrappedScreen> {
               children: [
                 Text(
                   l10n.wrappedTotalHours(hours),
-                  style: GoogleFonts.outfit(fontSize: 48, fontWeight: FontWeight.w800, color: AppColors.accent),
+                  style: GoogleFonts.outfit(
+                    fontSize: 48,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.accent,
+                  ),
                 ),
                 Text(
                   l10n.wrappedTotalTime,
-                  style: GoogleFonts.inter(fontSize: 14, color: AppColors.textSecondary),
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
                 const Divider(height: 32, color: Colors.white10),
                 Row(
@@ -244,18 +297,38 @@ class _CineFileWrappedScreenState extends ConsumerState<CineFileWrappedScreen> {
                       children: [
                         Text(
                           '${insights.totalWatchCount}',
-                          style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+                          style: GoogleFonts.outfit(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
-                        Text('Yapım', style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary)),
+                        Text(
+                          'Yapım',
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
                       ],
                     ),
                     Column(
                       children: [
                         Text(
                           '${insights.averageRating.toStringAsFixed(1)} ★',
-                          style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.amberAccent),
+                          style: GoogleFonts.outfit(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.amberAccent,
+                          ),
                         ),
-                        Text('Ortalama', style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary)),
+                        Text(
+                          'Ortalama',
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
                       ],
                     ),
                   ],
@@ -269,19 +342,31 @@ class _CineFileWrappedScreenState extends ConsumerState<CineFileWrappedScreen> {
   }
 
   Widget _buildSlide2(AppLocalizations l10n, InsightsData insights) {
-    final topDirector = insights.topDirectors.isNotEmpty ? insights.topDirectors.first.key : '-';
-    final topActor = insights.topActors.isNotEmpty ? insights.topActors.first.key : '-';
+    final topDirector = insights.topDirectors.isNotEmpty
+        ? insights.topDirectors.first.key
+        : '-';
+    final topActor = insights.topActors.isNotEmpty
+        ? insights.topActors.first.key
+        : '-';
 
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.xl),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.movie_filter_rounded, size: 56, color: Colors.purpleAccent),
+          const Icon(
+            Icons.movie_filter_rounded,
+            size: 56,
+            color: Colors.purpleAccent,
+          ),
           const SizedBox(height: AppSpacing.md),
           Text(
             l10n.wrappedTopGenres,
-            style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+            style: GoogleFonts.outfit(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
           ),
           const SizedBox(height: AppSpacing.xl),
           Wrap(
@@ -304,13 +389,30 @@ class _CineFileWrappedScreenState extends ConsumerState<CineFileWrappedScreen> {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.movie_creation_rounded, color: AppColors.accent, size: 20),
+                    const Icon(
+                      Icons.movie_creation_rounded,
+                      color: AppColors.accent,
+                      size: 20,
+                    ),
                     const SizedBox(width: AppSpacing.md),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(l10n.wrappedTopDirector, style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary)),
-                        Text(topDirector, style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                        Text(
+                          l10n.wrappedTopDirector,
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                        Text(
+                          topDirector,
+                          style: GoogleFonts.outfit(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
                       ],
                     ),
                   ],
@@ -318,13 +420,30 @@ class _CineFileWrappedScreenState extends ConsumerState<CineFileWrappedScreen> {
                 const Divider(height: 24, color: Colors.white10),
                 Row(
                   children: [
-                    const Icon(Icons.person_rounded, color: Colors.amberAccent, size: 20),
+                    const Icon(
+                      Icons.person_rounded,
+                      color: Colors.amberAccent,
+                      size: 20,
+                    ),
                     const SizedBox(width: AppSpacing.md),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(l10n.wrappedTopActor, style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary)),
-                        Text(topActor, style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                        Text(
+                          l10n.wrappedTopActor,
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                        Text(
+                          topActor,
+                          style: GoogleFonts.outfit(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
                       ],
                     ),
                   ],
@@ -343,11 +462,19 @@ class _CineFileWrappedScreenState extends ConsumerState<CineFileWrappedScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.local_fire_department_rounded, size: 56, color: Colors.orangeAccent),
+          const Icon(
+            Icons.local_fire_department_rounded,
+            size: 56,
+            color: Colors.orangeAccent,
+          ),
           const SizedBox(height: AppSpacing.md),
           Text(
             'İzleme Alışkanlıkların',
-            style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+            style: GoogleFonts.outfit(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
           ),
           const SizedBox(height: AppSpacing.xxl),
           GlassContainer(
@@ -360,14 +487,40 @@ class _CineFileWrappedScreenState extends ConsumerState<CineFileWrappedScreen> {
                   children: [
                     Column(
                       children: [
-                        Text('${insights.longestStreak}', style: GoogleFonts.outfit(fontSize: 36, fontWeight: FontWeight.bold, color: Colors.orangeAccent)),
-                        Text('En Uzun Seri (Gün)', style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary)),
+                        Text(
+                          '${insights.longestStreak}',
+                          style: GoogleFonts.outfit(
+                            fontSize: 36,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.orangeAccent,
+                          ),
+                        ),
+                        Text(
+                          'En Uzun Seri (Gün)',
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
                       ],
                     ),
                     Column(
                       children: [
-                        Text('${insights.mostFrequentRating} ★', style: GoogleFonts.outfit(fontSize: 36, fontWeight: FontWeight.bold, color: Colors.amberAccent)),
-                        Text('En Sık Verdiğin Puan', style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary)),
+                        Text(
+                          '${insights.mostFrequentRating} ★',
+                          style: GoogleFonts.outfit(
+                            fontSize: 36,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.amberAccent,
+                          ),
+                        ),
+                        Text(
+                          'En Sık Verdiğin Puan',
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
                       ],
                     ),
                   ],
@@ -380,7 +533,12 @@ class _CineFileWrappedScreenState extends ConsumerState<CineFileWrappedScreen> {
     );
   }
 
-  Widget _buildSlide4(BuildContext context, AppLocalizations l10n, InsightsData insights, int hours) {
+  Widget _buildSlide4(
+    BuildContext context,
+    AppLocalizations l10n,
+    InsightsData insights,
+    int hours,
+  ) {
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.xl),
       child: Column(
@@ -393,16 +551,43 @@ class _CineFileWrappedScreenState extends ConsumerState<CineFileWrappedScreen> {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.movie_rounded, color: AppColors.accent, size: 24),
+                    const Icon(
+                      Icons.movie_rounded,
+                      color: AppColors.accent,
+                      size: 24,
+                    ),
                     const SizedBox(width: AppSpacing.xs),
-                    Text('CineFile Wrapped', style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                    Text(
+                      'CineFile Wrapped',
+                      style: GoogleFonts.outfit(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: AppSpacing.lg),
-                Text('$hours Saat', style: GoogleFonts.outfit(fontSize: 40, fontWeight: FontWeight.w800, color: AppColors.accent)),
-                Text('${insights.totalWatchCount} Film & Dizi İzledin', style: GoogleFonts.inter(fontSize: 14, color: AppColors.textSecondary)),
+                Text(
+                  '$hours Saat',
+                  style: GoogleFonts.outfit(
+                    fontSize: 40,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.accent,
+                  ),
+                ),
+                Text(
+                  '${insights.totalWatchCount} Film & Dizi İzledin',
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
                 const Divider(height: 32, color: Colors.white10),
-                Text('Ortalama Puan: ${insights.averageRating.toStringAsFixed(1)} ★ | Seri: ${insights.longestStreak} Gün', style: GoogleFonts.inter(fontSize: 13, color: Colors.white70)),
+                Text(
+                  'Ortalama Puan: ${insights.averageRating.toStringAsFixed(1)} ★ | Seri: ${insights.longestStreak} Gün',
+                  style: GoogleFonts.inter(fontSize: 13, color: Colors.white70),
+                ),
               ],
             ),
           ),

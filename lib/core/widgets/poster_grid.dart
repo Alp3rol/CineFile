@@ -11,19 +11,23 @@ class PosterGrid extends StatelessWidget {
   final List<Map<String, dynamic>> items;
   final ScrollController? scrollController;
   final EdgeInsetsGeometry? padding;
+  final VoidCallback? onItemOpened;
 
   const PosterGrid({
     super.key,
     required this.items,
     this.scrollController,
     this.padding,
+    this.onItemOpened,
   });
 
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
       controller: scrollController,
-      padding: padding ?? const EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 120),
+      padding:
+          padding ??
+          const EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 120),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
         crossAxisSpacing: 10,
@@ -34,8 +38,13 @@ class PosterGrid extends StatelessWidget {
       itemBuilder: (context, index) {
         final movie = items[index];
         final posterPath = movie['poster_path'] as String?;
-        final title = (movie['title'] ?? movie['name'] ?? AppLocalizations.of(context).titleUnknown) as String;
-        final releaseDate = (movie['release_date'] ?? movie['first_air_date'] ?? '') as String;
+        final title =
+            (movie['title'] ??
+                    movie['name'] ??
+                    AppLocalizations.of(context).titleUnknown)
+                as String;
+        final releaseDate =
+            (movie['release_date'] ?? movie['first_air_date'] ?? '') as String;
         final year = releaseDate.split('-').first;
 
         final movieId = movie['id'] as int;
@@ -47,10 +56,12 @@ class PosterGrid extends StatelessWidget {
           label: '$title ${year.isNotEmpty ? year : ""}',
           child: GestureDetector(
             onTap: () {
+              onItemOpened?.call();
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => MovieDetailScreen(tmdbId: movieId, isTv: isTv),
+                  builder: (context) =>
+                      MovieDetailScreen(tmdbId: movieId, isTv: isTv),
                 ),
               );
             },
@@ -62,52 +73,54 @@ class PosterGrid extends StatelessWidget {
                 builder: (context) => MovieQuickActionSheet(movieData: movie),
               );
             },
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Poster Frame
-              Expanded(
-                child: Hero(
-                  tag: 'poster_${movieId}_$isTv',
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: AppNetworkImage(
-                      imageUrl: posterPath != null && posterPath.isNotEmpty
-                          ? '${ApiConstants.imagePathW500}$posterPath'
-                          : '',
-                      seed: title,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Poster Frame
+                Expanded(
+                  child: Hero(
+                    tag: 'poster_${movieId}_$isTv',
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: AppNetworkImage(
+                        imageUrl: posterPath != null && posterPath.isNotEmpty
+                            ? '${ApiConstants.imagePathW500}$posterPath'
+                            : '',
+                        seed: title,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 6),
+                const SizedBox(height: 6),
 
-              // Film Title (Grid subtitle)
-              Text(
-                title,
-                style: GoogleFonts.inter(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                // Film Title (Grid subtitle)
+                Text(
+                  title,
+                  style: GoogleFonts.inter(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
 
-              // Year and Rating Info
-              Text(
-                year.isNotEmpty ? year : AppLocalizations.of(context).yearUnknown,
-                style: GoogleFonts.inter(
-                  fontSize: 9,
-                  color: AppTheme.textSecondary,
+                // Year and Rating Info
+                Text(
+                  year.isNotEmpty
+                      ? year
+                      : AppLocalizations.of(context).yearUnknown,
+                  style: GoogleFonts.inter(
+                    fontSize: 9,
+                    color: AppTheme.textSecondary,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      );
+        );
       },
     );
   }

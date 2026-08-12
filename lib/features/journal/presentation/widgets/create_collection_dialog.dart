@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/ui/ui.dart';
+import '../../../../core/analytics/product_analytics.dart';
 import '../../../../core/l10n/date_text.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/database/database_provider.dart';
 import '../../../../core/database/app_database.dart';
 import '../../../../core/widgets/premium_date_picker.dart';
+import '../../../settings/presentation/settings_provider.dart';
 
 class CreateCollectionDialog extends ConsumerStatefulWidget {
   final CustomList? list;
@@ -14,10 +16,12 @@ class CreateCollectionDialog extends ConsumerStatefulWidget {
   const CreateCollectionDialog({super.key, this.list});
 
   @override
-  ConsumerState<CreateCollectionDialog> createState() => _CreateCollectionDialogState();
+  ConsumerState<CreateCollectionDialog> createState() =>
+      _CreateCollectionDialogState();
 }
 
-class _CreateCollectionDialogState extends ConsumerState<CreateCollectionDialog> {
+class _CreateCollectionDialogState
+    extends ConsumerState<CreateCollectionDialog> {
   late final TextEditingController _nameController;
   late final TextEditingController _descController;
   DateTime? _selectedTargetDate;
@@ -26,7 +30,9 @@ class _CreateCollectionDialogState extends ConsumerState<CreateCollectionDialog>
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.list?.name ?? '');
-    _descController = TextEditingController(text: widget.list?.description ?? '');
+    _descController = TextEditingController(
+      text: widget.list?.description ?? '',
+    );
     _selectedTargetDate = widget.list?.targetDate;
   }
 
@@ -40,7 +46,8 @@ class _CreateCollectionDialogState extends ConsumerState<CreateCollectionDialog>
   Future<void> _pickTargetDate() async {
     final picked = await PremiumDatePicker.show(
       context,
-      initialDate: _selectedTargetDate ?? DateTime.now().add(const Duration(days: 30)),
+      initialDate:
+          _selectedTargetDate ?? DateTime.now().add(const Duration(days: 30)),
       firstDate: DateTime.now(),
       lastDate: DateTime(2030),
     );
@@ -71,12 +78,19 @@ class _CreateCollectionDialogState extends ConsumerState<CreateCollectionDialog>
       }
     } else {
       // Create Mode
+      final isFirstCollection =
+          (ref.read(customListsProvider).value ?? const []).isEmpty;
       await createCustomList(
         ref,
         name,
         _descController.text.trim(),
         targetDate: _selectedTargetDate,
       );
+      if (isFirstCollection) {
+        await ref
+            .read(productAnalyticsProvider)
+            .log(ProductEvent.firstCollectionCreated);
+      }
       if (mounted) {
         Navigator.pop(context); // Close dialog
       }
@@ -85,7 +99,10 @@ class _CreateCollectionDialogState extends ConsumerState<CreateCollectionDialog>
 
   Widget _templateChip(String name, String desc) {
     return ActionChip(
-      label: Text(name, style: const TextStyle(fontSize: 12, color: Colors.white)),
+      label: Text(
+        name,
+        style: const TextStyle(fontSize: 12, color: Colors.white),
+      ),
       backgroundColor: AppColors.accent.withValues(alpha: 0.15),
       side: BorderSide(color: AppColors.accent.withValues(alpha: 0.4)),
       onPressed: () {
@@ -143,7 +160,9 @@ class _CreateCollectionDialogState extends ConsumerState<CreateCollectionDialog>
                   ),
                 ),
                 child: Icon(
-                  isEditMode ? Icons.edit_note_rounded : Icons.collections_bookmark_rounded,
+                  isEditMode
+                      ? Icons.edit_note_rounded
+                      : Icons.collections_bookmark_rounded,
                   color: AppColors.accent,
                   size: 28,
                 ),
@@ -153,36 +172,57 @@ class _CreateCollectionDialogState extends ConsumerState<CreateCollectionDialog>
 
             // Title
             Text(
-              isEditMode ? AppLocalizations.of(context).collectionEditTitle : AppLocalizations.of(context).collectionCreateTitle,
+              isEditMode
+                  ? AppLocalizations.of(context).collectionEditTitle
+                  : AppLocalizations.of(context).collectionCreateTitle,
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: AppColors.textPrimary),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(color: AppColors.textPrimary),
             ),
             const SizedBox(height: 6),
             Text(
-              isEditMode 
+              isEditMode
                   ? AppLocalizations.of(context).collectionEditExplain
                   : AppLocalizations.of(context).collectionCreateExplain,
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.textSecondary, height: 1.4),
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                color: AppColors.textSecondary,
+                height: 1.4,
+              ),
             ),
             // Templates for new collections
             if (!isEditMode) ...[
               Text(
                 'Hızlı Şablonlar',
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.textSecondary),
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
               ),
               const SizedBox(height: 8),
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
-                    _templateChip('🏆 Tüm Zamanların En İyileri', 'İzlediğim veya izlemek istediğim efsanevi yapımlar.'),
+                    _templateChip(
+                      '🏆 Tüm Zamanların En İyileri',
+                      'İzlediğim veya izlemek istediğim efsanevi yapımlar.',
+                    ),
                     const SizedBox(width: 8),
-                    _templateChip('🍿 Hafta Sonu Maratonu', 'Bu hafta sonu izlenecek film ve diziler.'),
+                    _templateChip(
+                      '🍿 Hafta Sonu Maratonu',
+                      'Bu hafta sonu izlenecek film ve diziler.',
+                    ),
                     const SizedBox(width: 8),
-                    _templateChip('🌌 Bilim Kurgu & Şaşırtıcı Sonlar', 'Uzay, zaman yolculuğu ve sürpriz sonlu yapımlar.'),
+                    _templateChip(
+                      '🌌 Bilim Kurgu & Şaşırtıcı Sonlar',
+                      'Uzay, zaman yolculuğu ve sürpriz sonlu yapımlar.',
+                    ),
                     const SizedBox(width: 8),
-                    _templateChip('🎬 Oscar Ödüllü Başyapıtlar', 'Akademi ödüllü sinema eserleri.'),
+                    _templateChip(
+                      '🎬 Oscar Ödüllü Başyapıtlar',
+                      'Akademi ödüllü sinema eserleri.',
+                    ),
                   ],
                 ),
               ),
@@ -193,12 +233,20 @@ class _CreateCollectionDialogState extends ConsumerState<CreateCollectionDialog>
             TextField(
               controller: _nameController,
               autofocus: !isEditMode,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
               decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.bookmark_border_rounded, color: AppColors.textSecondary, size: 20),
+                prefixIcon: const Icon(
+                  Icons.bookmark_border_rounded,
+                  color: AppColors.textSecondary,
+                  size: 20,
+                ),
                 hintText: AppLocalizations.of(context).collectionNameHint,
                 labelText: AppLocalizations.of(context).collectionNameLabel,
-                labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+                labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
               ),
             ),
             const SizedBox(height: 16),
@@ -206,13 +254,25 @@ class _CreateCollectionDialogState extends ConsumerState<CreateCollectionDialog>
             // Description Field
             TextField(
               controller: _descController,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
               maxLines: 2,
               decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.notes_rounded, color: AppColors.textSecondary, size: 20),
-                hintText: AppLocalizations.of(context).collectionDescriptionHint,
-                labelText: AppLocalizations.of(context).collectionDescriptionLabel,
-                labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+                prefixIcon: const Icon(
+                  Icons.notes_rounded,
+                  color: AppColors.textSecondary,
+                  size: 20,
+                ),
+                hintText: AppLocalizations.of(
+                  context,
+                ).collectionDescriptionHint,
+                labelText: AppLocalizations.of(
+                  context,
+                ).collectionDescriptionLabel,
+                labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
               ),
             ),
             const SizedBox(height: 20),
@@ -220,11 +280,18 @@ class _CreateCollectionDialogState extends ConsumerState<CreateCollectionDialog>
             // Marathon Target Date Title
             Row(
               children: [
-                const Icon(Icons.flag_rounded, color: AppColors.rating, size: 18),
+                const Icon(
+                  Icons.flag_rounded,
+                  color: AppColors.rating,
+                  size: 18,
+                ),
                 const SizedBox(width: 6),
                 Text(
                   AppLocalizations.of(context).collectionTargetDateLabel,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ],
             ),
@@ -234,30 +301,48 @@ class _CreateCollectionDialogState extends ConsumerState<CreateCollectionDialog>
             GestureDetector(
               onTap: _pickTargetDate,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceSunken.withValues(alpha: AppOpacity.soft),
+                  color: AppColors.surfaceSunken.withValues(
+                    alpha: AppOpacity.soft,
+                  ),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: _selectedTargetDate != null
                         ? AppColors.accent.withValues(alpha: 0.3)
-                        : AppColors.textPrimary.withValues(alpha: AppOpacity.faint),
+                        : AppColors.textPrimary.withValues(
+                            alpha: AppOpacity.faint,
+                          ),
                   ),
                 ),
                 child: Row(
                   children: [
                     Icon(
                       Icons.calendar_today_rounded,
-                      color: _selectedTargetDate != null ? AppColors.accent : AppColors.textTertiary,
+                      color: _selectedTargetDate != null
+                          ? AppColors.accent
+                          : AppColors.textTertiary,
                       size: 16,
                     ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
                         _selectedTargetDate == null
-                            ? AppLocalizations.of(context).collectionTargetDatePick
+                            ? AppLocalizations.of(
+                                context,
+                              ).collectionTargetDatePick
                             : formatShortDate(context, _selectedTargetDate!),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: _selectedTargetDate != null ? AppColors.textPrimary : AppColors.textTertiary, fontWeight: _selectedTargetDate != null ? FontWeight.w500 : FontWeight.normal),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: _selectedTargetDate != null
+                              ? AppColors.textPrimary
+                              : AppColors.textTertiary,
+                          fontWeight: _selectedTargetDate != null
+                              ? FontWeight.w500
+                              : FontWeight.normal,
+                        ),
                       ),
                     ),
                     if (_selectedTargetDate != null)

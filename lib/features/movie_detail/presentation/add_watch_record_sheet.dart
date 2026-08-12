@@ -3,11 +3,13 @@ import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/ui/ui.dart';
+import '../../../../core/analytics/product_analytics.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/database/database_provider.dart';
 import '../../../../core/widgets/premium_date_picker.dart';
 import '../../../../core/widgets/premium_toast.dart';
 import '../../auth/controllers/auth_controller.dart';
+import '../../settings/presentation/settings_provider.dart';
 import 'widgets/add_watch_record_header.dart';
 import 'widgets/episode_tracking_section.dart';
 import 'widgets/mood_selector.dart';
@@ -329,6 +331,8 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
     final newLastWatchedEpisode = episodeFields.lastWatchedEpisode;
 
     try {
+      final isFirstWatch =
+          (ref.read(allWatchRecordsProvider).value ?? const []).isEmpty;
       final movieTitle =
           (widget.movieData['title'] ??
                   widget.movieData['name'] ??
@@ -368,6 +372,11 @@ class _AddWatchRecordSheetState extends ConsumerState<AddWatchRecordSheet> {
             ),
           );
       debugPrint('Saved watch record #$watchNumber for "$movieTitle"');
+      final analytics = ref.read(productAnalyticsProvider);
+      await analytics.log(ProductEvent.detailWatchRecorded);
+      if (isFirstWatch) {
+        await analytics.log(ProductEvent.firstWatchRecorded);
+      }
 
       if (mounted) {
         Navigator.pop(context, true);
