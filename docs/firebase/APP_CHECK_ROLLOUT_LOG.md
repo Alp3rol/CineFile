@@ -72,3 +72,17 @@ Console API ekranında Authentication **Unenforced** görünüyor. Cloud Firesto
 için henüz App Check tokenlı canlı istek/metrik bulunmuyor; bu nedenle 7 günlük
 ölçüm penceresi başlamış sayılmaz. Pencere, App Check içeren web release canlıya
 alınıp ilk doğrulanmış Firestore isteği görüldüğü gün başlayacaktır.
+
+## 12 Ağustos 2026 — Web release yayını
+
+- `2.0.0+13` sürümü, `e1bbe49` commit'i üzerinden GitHub Pages'a başarıyla
+  yayımlandı.
+- Yayın iş akışında analiz, test, web derleme ve istemci paketinde gizli anahtar
+  bulunmadığı kontrolü başarıyla tamamlandı.
+- Canlı adres `https://alp3rol.github.io/CineFile/` için HTTP `200` yanıtı
+  doğrulandı.
+- App Check token üreten istemci artık canlıdır. Yedi günlük gözlem penceresi
+  başlatıldı; ilk Firestore metrikleri Console'a düştüğünde günlük tabloya
+  işlenecektir.
+- Cloud Firestore ve Authentication enforcement bu gözlem süresince kapalı
+  kalacaktır.
