@@ -410,6 +410,17 @@ describe('logs — privacy and authorship', () => {
     await assertSucceeds(addDoc(collection(asAlice(), 'logs'), log()));
   });
 
+  it('allows optional text fields written as null by the app', async () => {
+    await assertSucceeds(
+      addDoc(collection(asAlice(), 'logs'), log({
+        notes: null,
+        watchPlace: null,
+        watchCompanion: null,
+        tags: null,
+      })),
+    );
+  });
+
   it("rejects a log carrying another user's username", async () => {
     await assertFails(
       addDoc(collection(asAlice(), 'logs'), log({ username: 'Bob' })),

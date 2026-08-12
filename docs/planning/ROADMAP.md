@@ -122,7 +122,7 @@ ve kullanıcı akışlarının ölçülebilirliğini tamamlamak.
     hâle getirildi. Tercih cihazda saklanıyor; geliştirme/test sürümleri izin
     açık olsa bile olay gönderemiyor. Gizlilik Merkezi'ne iki dilde kontrol ve
     açıklama eklendi.
-- [ ] **Ölçüm akışını kontrollü pilotla doğrula.**
+- [x] **Ölçüm akışını kontrollü pilotla doğrula.**
   - Geliştirici/test olaylarının üretim verisine karışmadığını doğrula.
   - Onboarding → ilk kayıt ve arama → detay → kayıt zincirini birkaç kontrollü
     test hesabıyla uçtan uca çalıştır.
@@ -132,6 +132,9 @@ ve kullanıcı akışlarının ölçülebilirliğini tamamlamak.
     bağlandı ve izin davranışı otomatik testlerle doğrulandı. Canlı release
     adımları [`ANALYTICS_PILOT.md`](../privacy/ANALYTICS_PILOT.md) içinde takip
     ediliyor.
+  - **Tamamlandı (13 Ağustos 2026):** Canlı arama → detay → ilk kayıt zinciri
+    başarıyla çalıştırıldı. Özel olaylar Firebase Realtime'da doğrulandı;
+    kişisel içerik taşımadığı ve pilot sonunda iznin kapatıldığı kaydedildi.
 
 ### Yayın sonrasına ertelenen ölçümler
 
@@ -399,9 +402,9 @@ Her görev aşağıdaki sırayla ilerler:
 
 ## Sıradaki iş
 
-**v2.1 / P1 — Ölçüm akışını kontrollü pilotla doğrulama.**
+**v2.2 / P0 — Letterboxd CSV içe aktarma önizleme ve doğrulama.**
 
-App Check gerçek trafik gözlemi yayın sonrasına taşındı. O zamana kadar
-enforcement kapalı kalacak. Olay sözleşmesi ve Gizlilik Merkezi'ndeki izin
-kontrolü tamamlandı. Sonraki aktif iş; birkaç kontrollü hesapla izin kapalı/açık
-davranışını ve temel olay zincirini uçtan uca doğrulamaktır.
+v2.1'in yayın öncesi geliştirme ve kontrollü pilot işleri tamamlandı. App Check
+gerçek trafik gözlemi yayın sonrasında ayrı takip edilecek ve enforcement o
+zamana kadar kapalı kalacak. Sonraki aktif geliştirme, Letterboxd CSV dosyasını
+kalıcı yazmadan önce güvenle önizleyen ve doğrulayan içe aktarma akışıdır.

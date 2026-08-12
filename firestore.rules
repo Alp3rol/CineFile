@@ -52,12 +52,16 @@ service cloud.firestore {
     // Free-text fields are capped so a single document can't be inflated
     // toward Firestore's 1 MB limit, which costs storage and breaks the feed
     // layout for everyone who loads it.
+    function optionalTextWithin(value, limit) {
+      return value == null || (value is string && value.size() <= limit);
+    }
+
     function withinTextLimits() {
-      return request.resource.data.get('caption', '').size() <= 500
-        && request.resource.data.get('notes', '').size() <= 2000
-        && request.resource.data.get('watchPlace', '').size() <= 100
-        && request.resource.data.get('watchCompanion', '').size() <= 100
-        && request.resource.data.get('tags', '').size() <= 200;
+      return optionalTextWithin(request.resource.data.get('caption', null), 500)
+        && optionalTextWithin(request.resource.data.get('notes', null), 2000)
+        && optionalTextWithin(request.resource.data.get('watchPlace', null), 100)
+        && optionalTextWithin(request.resource.data.get('watchCompanion', null), 100)
+        && optionalTextWithin(request.resource.data.get('tags', null), 200);
     }
 
     // Author identity and social proof are established independently from an

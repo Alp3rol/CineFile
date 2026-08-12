@@ -11,15 +11,18 @@
 ## Canlı release doğrulaması
 
 - [x] Gizlilik Merkezi'nde iznin varsayılan kapalı olduğu doğrulandı.
-- [ ] İzin açıldıktan sonra onboarding → arama sonucu → detay → kayıt zinciri
+- [x] İzin açıldıktan sonra arama sonucu → detay → ilk kayıt zinciri
   yalnızca sözleşmedeki özel olayları gösteriyor.
   - **Kısmi doğrulama (12 Ağustos 2026):** İzin açıldı; arama sonucundan Silo
     detayına geçildi ve Firebase Realtime'da `search_result_opened = 1`
     görüldü. Standart `first_visit`, `page_view` ve `session_start` olayları da
     beklendiği gibi göründü.
-  - Tek bölümlük kontrollü günlük kaydı arayüzde “Kayıt kaydedilirken hata
-    oluştu” uyarısı verdi; veri oluşmadı ve işlem tekrar denenmedi. Kayıt
-    zincirinin canlı doğrulaması bu hata araştırılana kadar açık kalır.
+  - **Tam doğrulama (13 Ağustos 2026):** Eksik sorgu indeksi etkinleştirildi.
+    Boş isteğe bağlı alanların `null` yazılmasıyla güvenlik kuralının metin
+    uzunluğu kontrolünün çakıştığı bulundu; kural düzeltmesi 79/79 emülatör
+    testinden geçirilip yayımlandı. Silo için tek bölümlük ilk kayıt başarıyla
+    oluşturuldu. Firebase Realtime'da `detail_watch_recorded = 1` ve
+    `first_watch_recorded = 1` doğrulandı.
 - [ ] İlk koleksiyon ve Wrapped olayları parametresiz görünüyor.
 - [x] Pilot sonunda izin tekrar kapatıldı; arayüz durumu `true → false` olarak
   doğrulandı.
