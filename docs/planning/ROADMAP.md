@@ -93,17 +93,17 @@ ve kullanıcı akışlarının ölçülebilirliğini tamamlamak.
   - Meşru trafik doğrulama oranı belgelenmeli.
   - Web ve desteklenen native platformlar ayrı değerlendirilmelidir.
   - Eşik sağlanmıyorsa enforcement açılmadan neden ve takip işi yazılmalı.
-  - **Başlangıç denetimi (12 Ağustos 2026):** Firebase Console'da App Check'in
-    henüz başlatılmadığı ve ölçüm bulunmadığı doğrulandı. İstemci token
-    üretemediği için Firestore ve Authentication enforcement'ın kapalı kalması
-    kararlaştırıldı. Başlangıç kanıtı, commit ve yedi günlük ölçüm şablonu
+  - **Yayın öncesi karar (12 Ağustos 2026):** Provider kaydı ve token üreten web
+    istemcisi yayımlandı. Uygulamada henüz anlamlı gerçek kullanıcı trafiği
+    olmadığı için yedi günlük oran hesaplamak veya enforcement açmak güvenilir
+    değildir. Firestore ve Authentication enforcement kapalı kalacaktır. Gerçek
+    kullanıcı trafiği başladıktan sonra yedi tam günlük ölçüm alınacak ve karar
     [`APP_CHECK_ROLLOUT_LOG.md`](../firebase/APP_CHECK_ROLLOUT_LOG.md) içine
-    kaydedildi. Görev; provider kaydı, istemci yayını ve 7 tam günlük ölçüm
-    tamamlanana kadar açık kalır.
+    kaydedilecektir. Bu bekleme v2.1 geliştirmelerini engellemez.
 
-### P1 — gizlilik dostu ürün ölçümü
+### P1 — yayın öncesi gizlilik ve ölçüm hazırlığı
 
-- [ ] **Ürün olay sözleşmesini tanımla.**
+- [x] **Ürün olay sözleşmesini tanımla.**
   - Onboarding tamamlandı.
   - İlk izleme kaydı oluşturuldu.
   - Arama → detay → kayıt adımları tamamlandı.
@@ -111,15 +111,33 @@ ve kullanıcı akışlarının ölçülebilirliğini tamamlamak.
   - Wrapped görüntülendi veya paylaşıldı.
   - Olay şemasında yapım adı, TMDb kimliği, not, yorum veya serbest metin
     bulunmamalı.
-- [ ] **Analitik için açık gizlilik kontrolü ekle.**
+  - **Tamamlandı (12 Ağustos 2026):** İzin verilen yedi olay kod seviyesinde
+    sınırlandırıldı ve parametresiz tutuldu. Sözleşme
+    [`PRODUCT_ANALYTICS.md`](../privacy/PRODUCT_ANALYTICS.md) içinde belgelendi.
+- [x] **Analitik için açık gizlilik kontrolü ekle.**
   - Kullanıcı ölçümü kapatabilmeli.
   - Tercih cihazda saklanmalı ve Gizlilik Merkezi'nden değiştirilebilmeli.
   - Geliştirme/test ortamı üretim metriklerini kirletmemeli.
-- [ ] **Temel ürün hunisini raporla.**
-  - Onboarding tamamlama oranı
-  - İlk kayda kadar geçen süre
-  - Arama → detay ve detay → kayıt dönüşümü
-  - 7 ve 30 günlük geri dönüş
+  - **Tamamlandı (12 Ağustos 2026):** Ölçüm varsayılan kapalı ve açık izne bağlı
+    hâle getirildi. Tercih cihazda saklanıyor; geliştirme/test sürümleri izin
+    açık olsa bile olay gönderemiyor. Gizlilik Merkezi'ne iki dilde kontrol ve
+    açıklama eklendi.
+- [ ] **Ölçüm akışını kontrollü pilotla doğrula.**
+  - Geliştirici/test olaylarının üretim verisine karışmadığını doğrula.
+  - Onboarding → ilk kayıt ve arama → detay → kayıt zincirini birkaç kontrollü
+    test hesabıyla uçtan uca çalıştır.
+  - Olayların yalnızca açık izin verildiğinde gönderildiğini kanıtla.
+  - Gerçek kullanıcı trafiği oluşana kadar dönüşüm ve geri dönüş hedefi koyma.
+
+### Yayın sonrasına ertelenen ölçümler
+
+Aşağıdaki metrikler uygulama gerçek kullanıcılarla yayınlandıktan ve yeterli örnek
+oluştuktan sonra etkinleştirilecektir:
+
+- Onboarding tamamlama oranı
+- İlk kayda kadar geçen süre
+- Arama → detay ve detay → kayıt dönüşümü
+- 7 ve 30 günlük geri dönüş
 
 ### v2.1 kabul kriterleri
 
@@ -127,7 +145,10 @@ ve kullanıcı akışlarının ölçülebilirliğini tamamlamak.
 - CI gizli bilgi veya kritik bağımlılık bulgusunda yayını durdurur.
 - Ölçüm kapalıyken hiçbir ürün olayı gönderilmez.
 - Analitik yüklerinde kişisel izleme içeriği bulunmadığı test edilir.
-- İlk ürün hunisi gerçek veya kontrollü pilot veriyle görüntülenebilir.
+- Kontrollü pilot olayları görüntülenebilir ve kişisel içerik taşımadığı
+  doğrulanmıştır.
+- Gerçek kullanıcı metriği gerektiren hedefler ilk genel/kapalı test yayınına
+  kadar yayın kapısı sayılmaz.
 
 ---
 
@@ -316,8 +337,9 @@ az birini iyileştirmelidir:
 | Şikâyet çözüm süresi | Topluluk güvenliği operasyonunun sağlığı |
 | Büyük günlük işlem süresi | Ürünün uzun vadeli kullanıcıyı taşıyabilmesi |
 
-Başlangıç değerleri v2.1 ölçümüyle belirlenecek; veri görülmeden keyfî büyüme
-hedefleri konulmayacaktır.
+Başlangıç değerleri gerçek kullanıcı trafiği oluştuktan sonra belirlenecek; yayın
+öncesinde yalnızca olayların doğruluğu, gizliliği ve izin davranışı test
+edilecektir. Veri görülmeden büyüme hedefi konulmayacaktır.
 
 ## Öncelik ve bağımlılık sırası
 
@@ -373,7 +395,9 @@ Her görev aşağıdaki sırayla ilerler:
 
 ## Sıradaki iş
 
-**v2.1 / P0 — App Check monitoring sonucunu kaydetme ve enforcement kararı.**
+**v2.1 / P1 — Ölçüm akışını kontrollü pilotla doğrulama.**
 
-Bu iş tamamlandıktan sonra App Check kararı ve ürün olay sözleşmesi birbirinden
-bağımsız ilerleyebilir.
+App Check gerçek trafik gözlemi yayın sonrasına taşındı. O zamana kadar
+enforcement kapalı kalacak. Olay sözleşmesi ve Gizlilik Merkezi'ndeki izin
+kontrolü tamamlandı. Sonraki aktif iş; birkaç kontrollü hesapla izin kapalı/açık
+davranışını ve temel olay zincirini uçtan uca doğrulamaktır.

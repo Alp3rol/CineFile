@@ -5642,6 +5642,30 @@ abstract class AppLocalizations {
   /// **'Favori listelerin ve profil bilgilerin Firebase Firestore ile cihazların arasında güvenle senkronize edilir.'**
   String get privacyCloudDesc;
 
+  /// No description provided for @privacyAnalyticsTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Anonim kullanım ölçümüne izin ver'**
+  String get privacyAnalyticsTitle;
+
+  /// No description provided for @privacyAnalyticsDesc.
+  ///
+  /// In tr, this message translates to:
+  /// **'CineFile\'ı geliştirmemize yardımcı olan sınırlı ürün olaylarını gönderir. Film/dizi adı, arama, not, yorum veya kullanıcı kimliği gönderilmez. Varsayılan olarak kapalıdır.'**
+  String get privacyAnalyticsDesc;
+
+  /// No description provided for @privacyAnalyticsEnabled.
+  ///
+  /// In tr, this message translates to:
+  /// **'Anonim kullanım ölçümü açıldı'**
+  String get privacyAnalyticsEnabled;
+
+  /// No description provided for @privacyAnalyticsDisabled.
+  ///
+  /// In tr, this message translates to:
+  /// **'Anonim kullanım ölçümü kapatıldı'**
+  String get privacyAnalyticsDisabled;
+
   /// No description provided for @privacyPublicSection.
   ///
   /// In tr, this message translates to:

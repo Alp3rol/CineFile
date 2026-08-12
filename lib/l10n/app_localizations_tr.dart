@@ -3194,6 +3194,19 @@ class AppLocalizationsTr extends AppLocalizations {
       'Favori listelerin ve profil bilgilerin Firebase Firestore ile cihazların arasında güvenle senkronize edilir.';
 
   @override
+  String get privacyAnalyticsTitle => 'Anonim kullanım ölçümüne izin ver';
+
+  @override
+  String get privacyAnalyticsDesc =>
+      'CineFile\'ı geliştirmemize yardımcı olan sınırlı ürün olaylarını gönderir. Film/dizi adı, arama, not, yorum veya kullanıcı kimliği gönderilmez. Varsayılan olarak kapalıdır.';
+
+  @override
+  String get privacyAnalyticsEnabled => 'Anonim kullanım ölçümü açıldı';
+
+  @override
+  String get privacyAnalyticsDisabled => 'Anonim kullanım ölçümü kapatıldı';
+
+  @override
   String get privacyPublicSection => 'Topluluk ve Gizlilik Modelimiz';
 
   @override

@@ -3399,6 +3399,19 @@ class AppLocalizationsEn extends AppLocalizations {
       'Favorites and profile settings sync securely across your devices via Firebase Firestore.';
 
   @override
+  String get privacyAnalyticsTitle => 'Allow anonymous usage measurement';
+
+  @override
+  String get privacyAnalyticsDesc =>
+      'Sends limited product events that help us improve CineFile. Titles, searches, notes, reviews, and user identifiers are never sent. Off by default.';
+
+  @override
+  String get privacyAnalyticsEnabled => 'Anonymous usage measurement enabled';
+
+  @override
+  String get privacyAnalyticsDisabled => 'Anonymous usage measurement disabled';
+
+  @override
   String get privacyPublicSection => 'Community & Privacy Model';
 
   @override

@@ -31,6 +31,7 @@ final firebaseInitProvider = FutureProvider<void>((ref) async {
       options: DefaultFirebaseOptions.currentPlatform,
     );
     await activateAppCheck();
+    await ref.read(analyticsConsentProvider.notifier).initialize();
   } catch (error, stackTrace) {
     // Reported here rather than from [_FirebaseInitErrorScreen], which rebuilds
     // and would send a duplicate each time. This is the one failure that stops

@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../../../../core/analytics/product_analytics.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/constants/watch_regions.dart';
 import '../../../../core/l10n/l10n_lookup.dart';
@@ -25,6 +26,33 @@ const _secureApiKeyStorageKey = 'tmdb_api_key';
 final appSettingsStoreProvider = Provider<AppSettingsStore>(
   (ref) => AppSettingsStore(),
 );
+
+final productAnalyticsProvider = Provider<ProductAnalytics>((ref) {
+  return ProductAnalytics(
+    client: FirebaseAnalyticsClient(),
+    consentStore: SharedPreferencesAnalyticsConsentStore(),
+  );
+});
+
+final analyticsConsentProvider =
+    StateNotifierProvider<AnalyticsConsentNotifier, bool>((ref) {
+      return AnalyticsConsentNotifier(ref.watch(productAnalyticsProvider));
+    });
+
+class AnalyticsConsentNotifier extends StateNotifier<bool> {
+  AnalyticsConsentNotifier(this._analytics) : super(false);
+
+  final ProductAnalytics _analytics;
+
+  Future<void> initialize() async {
+    state = await _analytics.initialize();
+  }
+
+  Future<void> setEnabled(bool enabled) async {
+    await _analytics.setConsent(enabled);
+    state = enabled;
+  }
+}
 
 /// Base class for the file-backed preferences below. Each subclass only has to
 /// name its key and its default; loading, caching and serialised writing are

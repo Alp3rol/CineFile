@@ -11,6 +11,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../auth/controllers/auth_controller.dart';
 import '../../swipe_discovery/data/swipe_preference_signal.dart';
 import 'widgets/settings_backup_dialogs.dart';
+import 'settings_provider.dart';
 
 class PrivacyCenterScreen extends ConsumerWidget {
   const PrivacyCenterScreen({super.key});
@@ -86,6 +87,51 @@ class PrivacyCenterScreen extends ConsumerWidget {
                       icon: Icons.cloud_sync_rounded,
                       title: l10n.privacyCloudSection,
                       description: l10n.privacyCloudDesc,
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    GlassContainer(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.lg,
+                        vertical: AppSpacing.sm,
+                      ),
+                      borderRadius: AppRadius.lg,
+                      child: SwitchListTile.adaptive(
+                        contentPadding: EdgeInsets.zero,
+                        secondary: const Icon(
+                          Icons.analytics_outlined,
+                          color: AppColors.accent,
+                        ),
+                        title: Text(
+                          l10n.privacyAnalyticsTitle,
+                          style: GoogleFonts.outfit(
+                            color: Colors.white,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        subtitle: Text(
+                          l10n.privacyAnalyticsDesc,
+                          style: GoogleFonts.inter(
+                            color: AppColors.textSecondary,
+                            fontSize: 11,
+                            height: 1.35,
+                          ),
+                        ),
+                        value: ref.watch(analyticsConsentProvider),
+                        onChanged: (enabled) async {
+                          await ref
+                              .read(analyticsConsentProvider.notifier)
+                              .setEnabled(enabled);
+                          if (context.mounted) {
+                            showPremiumToast(
+                              context,
+                              enabled
+                                  ? l10n.privacyAnalyticsEnabled
+                                  : l10n.privacyAnalyticsDisabled,
+                            );
+                          }
+                        },
+                      ),
                     ),
                     const SizedBox(height: AppSpacing.lg),
 
