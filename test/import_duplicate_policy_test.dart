@@ -34,6 +34,7 @@ void main() {
       matches: const {2: matched},
       existingRecords: [
         ExistingImportRecord(
+          recordId: 'log-1',
           tmdbId: 125988,
           isTv: true,
           watchDate: DateTime(2026, 8, 13, 9),
@@ -51,6 +52,7 @@ void main() {
       matches: const {2: matched},
       existingRecords: [
         ExistingImportRecord(
+          recordId: 'log-1',
           tmdbId: 125988,
           isTv: false,
           watchDate: DateTime(2026, 8, 13),

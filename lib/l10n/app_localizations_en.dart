@@ -428,6 +428,31 @@ class AppLocalizationsEn extends AppLocalizations {
       'Conflict decision: Rewatch will be added';
 
   @override
+  String get letterboxdImportConfirmTitle => 'Confirm import';
+
+  @override
+  String letterboxdImportConfirmMessage(int count) {
+    return '$count valid rows will be saved to CineFile using your conflict decisions. The operation is applied in one step.';
+  }
+
+  @override
+  String get letterboxdImportConfirm => 'Import to CineFile';
+
+  @override
+  String letterboxdImportSuccess(int added, int merged, int skipped) {
+    return 'Import complete: $added added, $merged merged, $skipped skipped.';
+  }
+
+  @override
+  String get letterboxdImportFailed =>
+      'Import could not be completed. No partial records were left behind.';
+
+  @override
+  String letterboxdImportTooLarge(int count) {
+    return 'A maximum of $count records can be imported at once. Split the file into smaller parts.';
+  }
+
+  @override
   String get settingsExport => 'Export';
 
   @override

@@ -181,16 +181,17 @@ izleyeceği yapımı daha hızlı seçmesini sağlamak.
     skoruyla TMDb'ye eşleniyor. Güçlü sonuçlar otomatik seçiliyor; belirsiz
     sonuçlar film/dizi ayrımı korunarak kullanıcı onayına sunuluyor. Bu aşama
     hâlâ yalnızca önizleme yapıyor ve kalıcı kayıt oluşturmuyor.
-- [ ] **Yinelenen kayıt politikası ekle.**
+- [x] **Yinelenen kayıt politikası ekle.**
   - Tekrar izlemeler korunmalı.
   - Birebir aynı tarih/yapım kaydı için atla, birleştir veya ekle seçenekleri
     sunulmalı.
   - İçe aktarma işlemi hata durumunda kısmi ve belirsiz bir sonuç bırakmamalı.
-  - **İlerleme (13 Ağustos 2026):** CineFile'daki mevcut kayıtlar ve CSV'nin
+  - **Tamamlandı (13 Ağustos 2026):** CineFile'daki mevcut kayıtlar ve CSV'nin
     kendi içindeki aynı yapım/tarih çakışmaları film/dizi kimliğiyle tespit
     ediliyor. Varsayılan karar güvenli biçimde "atla"; kullanıcı satır bazında
-    birleştir veya tekrar izleme olarak ekle seçeneklerini seçebiliyor. Atomik
-    kalıcı yazma aşaması tamamlanana kadar bu madde açık tutulacak.
+    birleştir veya tekrar izleme olarak ekle seçeneklerini seçebiliyor. En fazla
+    200 kayıtlık plan, son kullanıcı onayından sonra tek atomik Firebase batch'i
+    ile uygulanıyor; hata halinde hiçbir kısmi kayıt bırakılmıyor.
 - [ ] **CineFile CSV dışa aktarma ekle.**
   - İnsan tarafından okunabilir ve yeniden içe aktarılabilir olmalı.
   - JSON yedekleme temel ve eksiksiz kurtarma biçimi olarak korunmalı.
@@ -415,12 +416,12 @@ Her görev aşağıdaki sırayla ilerler:
 
 ## Sıradaki iş
 
-**v2.2 / P0 — Atomik Letterboxd içe aktarma.**
+**v2.2 / P0 — CineFile CSV dışa aktarma.**
 
 v2.1'in yayın öncesi geliştirme ve kontrollü pilot işleri tamamlandı. App Check
 gerçek trafik gözlemi yayın sonrasında ayrı takip edilecek ve enforcement o
 zamana kadar kapalı kalacak. Letterboxd CSV önizleme ve biçim doğrulama
 tamamlandı. TMDb eşleştirme ve kullanıcı düzeltme akışı da hazır. Sonraki aktif
-geliştirmede yinelenen kayıt tespiti ve atla/birleştir/tekrar izleme kararları
-hazırlandı. Sonraki aktif iş, önizlenen planı tek ve geri alınabilir bir işlemle
-kalıcı kayıtlara dönüştürmektir.
+geliştirmede yinelenen kayıt tespiti, kararları ve atomik kalıcı Letterboxd
+aktarımı hazırlandı. Sonraki aktif iş, insan tarafından okunabilir ve yeniden
+içe aktarılabilir CineFile CSV dışa aktarmasıdır.

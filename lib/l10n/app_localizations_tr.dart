@@ -427,6 +427,31 @@ class AppLocalizationsTr extends AppLocalizations {
       'Çakışma kararı: Tekrar izleme eklenecek';
 
   @override
+  String get letterboxdImportConfirmTitle => 'İçe aktarmayı onayla';
+
+  @override
+  String letterboxdImportConfirmMessage(int count) {
+    return '$count geçerli satır, seçtiğin çakışma kararlarıyla CineFile\'a kaydedilecek. İşlem tek seferde uygulanır.';
+  }
+
+  @override
+  String get letterboxdImportConfirm => 'CineFile\'a Aktar';
+
+  @override
+  String letterboxdImportSuccess(int added, int merged, int skipped) {
+    return 'Aktarım tamamlandı: $added eklendi, $merged birleştirildi, $skipped atlandı.';
+  }
+
+  @override
+  String get letterboxdImportFailed =>
+      'Aktarım tamamlanamadı. Hiçbir kısmi kayıt bırakılmadı.';
+
+  @override
+  String letterboxdImportTooLarge(int count) {
+    return 'Tek seferde en fazla $count kayıt aktarılabilir. Dosyayı daha küçük parçalara ayır.';
+  }
+
+  @override
   String get settingsExport => 'Dışa Aktar';
 
   @override

@@ -866,6 +866,42 @@ abstract class AppLocalizations {
   /// **'Çakışma kararı: Tekrar izleme eklenecek'**
   String get letterboxdDuplicateWillRewatch;
 
+  /// No description provided for @letterboxdImportConfirmTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'İçe aktarmayı onayla'**
+  String get letterboxdImportConfirmTitle;
+
+  /// No description provided for @letterboxdImportConfirmMessage.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} geçerli satır, seçtiğin çakışma kararlarıyla CineFile\'a kaydedilecek. İşlem tek seferde uygulanır.'**
+  String letterboxdImportConfirmMessage(int count);
+
+  /// No description provided for @letterboxdImportConfirm.
+  ///
+  /// In tr, this message translates to:
+  /// **'CineFile\'a Aktar'**
+  String get letterboxdImportConfirm;
+
+  /// No description provided for @letterboxdImportSuccess.
+  ///
+  /// In tr, this message translates to:
+  /// **'Aktarım tamamlandı: {added} eklendi, {merged} birleştirildi, {skipped} atlandı.'**
+  String letterboxdImportSuccess(int added, int merged, int skipped);
+
+  /// No description provided for @letterboxdImportFailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Aktarım tamamlanamadı. Hiçbir kısmi kayıt bırakılmadı.'**
+  String get letterboxdImportFailed;
+
+  /// No description provided for @letterboxdImportTooLarge.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tek seferde en fazla {count} kayıt aktarılabilir. Dosyayı daha küçük parçalara ayır.'**
+  String letterboxdImportTooLarge(int count);
+
   /// No description provided for @settingsExport.
   ///
   /// In tr, this message translates to:

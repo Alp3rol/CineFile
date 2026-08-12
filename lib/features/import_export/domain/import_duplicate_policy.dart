@@ -5,12 +5,14 @@ enum ImportDuplicateResolution { skip, merge, addAsRewatch }
 
 class ExistingImportRecord {
   const ExistingImportRecord({
+    required this.recordId,
     required this.tmdbId,
     required this.isTv,
     required this.watchDate,
     this.rating,
   });
 
+  final String recordId;
   final int tmdbId;
   final bool isTv;
   final DateTime watchDate;
@@ -23,6 +25,7 @@ class ImportDuplicateConflict {
     required this.match,
     required this.existingCount,
     required this.csvRowNumbers,
+    this.existingRecordIds = const [],
     this.resolution = ImportDuplicateResolution.skip,
   });
 
@@ -30,6 +33,7 @@ class ImportDuplicateConflict {
   final ImportMatchCandidate match;
   final int existingCount;
   final List<int> csvRowNumbers;
+  final List<String> existingRecordIds;
   final ImportDuplicateResolution resolution;
 
   ImportDuplicateConflict resolve(ImportDuplicateResolution value) =>
@@ -38,6 +42,7 @@ class ImportDuplicateConflict {
         match: match,
         existingCount: existingCount,
         csvRowNumbers: csvRowNumbers,
+        existingRecordIds: existingRecordIds,
         resolution: value,
       );
 }
@@ -64,10 +69,10 @@ class ImportDuplicatePolicy {
           .add(row.rowNumber);
     }
 
-    final existingCounts = <String, int>{};
+    final existingByKey = <String, List<String>>{};
     for (final record in existingRecords) {
       final key = _key(record.tmdbId, record.isTv, record.watchDate);
-      existingCounts[key] = (existingCounts[key] ?? 0) + 1;
+      existingByKey.putIfAbsent(key, () => []).add(record.recordId);
     }
 
     final conflicts = <int, ImportDuplicateConflict>{};
@@ -78,13 +83,15 @@ class ImportDuplicatePolicy {
       }
       final key = _key(candidate.tmdbId, candidate.isTv, row.watchedDate!);
       final csvRows = incoming[key] ?? const <int>[];
-      final existingCount = existingCounts[key] ?? 0;
+      final existingIds = existingByKey[key] ?? const <String>[];
+      final existingCount = existingIds.length;
       if (existingCount == 0 && csvRows.length < 2) continue;
       conflicts[row.rowNumber] = ImportDuplicateConflict(
         row: row,
         match: candidate,
         existingCount: existingCount,
         csvRowNumbers: List.unmodifiable(csvRows),
+        existingRecordIds: List.unmodifiable(existingIds),
       );
     }
     return conflicts;

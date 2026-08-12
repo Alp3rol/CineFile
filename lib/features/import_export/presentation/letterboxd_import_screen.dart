@@ -7,6 +7,7 @@ import '../../../core/database/database_provider.dart';
 import '../../../core/network/tmdb_service.dart';
 import '../../../core/ui/ui.dart';
 import '../../../l10n/app_localizations.dart';
+import '../application/letterboxd_import_service.dart';
 import '../domain/letterboxd_csv_parser.dart';
 import '../domain/import_duplicate_policy.dart';
 import '../domain/tmdb_import_matcher.dart';
@@ -29,6 +30,7 @@ class _LetterboxdImportScreenState
   String? _error;
   bool _loading = false;
   bool _matching = false;
+  bool _importing = false;
 
   Future<void> _chooseFile() async {
     setState(() {
@@ -111,6 +113,7 @@ class _LetterboxdImportScreenState
       existingRecords: existing
           .map(
             (item) => ExistingImportRecord(
+              recordId: item.record.remoteId ?? '',
               tmdbId: item.record.movieId,
               isTv: item.record.isTv,
               watchDate: item.record.watchDate,
@@ -188,12 +191,13 @@ class _LetterboxdImportScreenState
               onTap: () =>
                   Navigator.pop(context, ImportDuplicateResolution.skip),
             ),
-            ListTile(
-              leading: const Icon(Icons.merge_rounded),
-              title: Text(l10n.letterboxdDuplicateMerge),
-              onTap: () =>
-                  Navigator.pop(context, ImportDuplicateResolution.merge),
-            ),
+            if (conflict.existingRecordIds.any((id) => id.isNotEmpty))
+              ListTile(
+                leading: const Icon(Icons.merge_rounded),
+                title: Text(l10n.letterboxdDuplicateMerge),
+                onTap: () =>
+                    Navigator.pop(context, ImportDuplicateResolution.merge),
+              ),
             ListTile(
               leading: const Icon(Icons.replay_rounded),
               title: Text(l10n.letterboxdDuplicateRewatch),
@@ -208,6 +212,59 @@ class _LetterboxdImportScreenState
     );
     if (resolution != null && mounted) {
       setState(() => _conflicts[rowNumber] = conflict.resolve(resolution));
+    }
+  }
+
+  Future<void> _executeImport() async {
+    final preview = _preview;
+    if (preview == null) return;
+    final l10n = AppLocalizations.of(context);
+    final matched = _matches.values
+        .where((match) => match.status == ImportMatchStatus.matched)
+        .length;
+    if (preview.validCount != matched) return;
+    final confirmed = await AppDialog.confirm(
+      context: context,
+      title: l10n.letterboxdImportConfirmTitle,
+      message: l10n.letterboxdImportConfirmMessage(preview.validCount),
+      confirmLabel: l10n.letterboxdImportConfirm,
+      cancelLabel: l10n.commonCancel,
+    );
+    if (confirmed != true || !mounted) return;
+    setState(() {
+      _importing = true;
+      _error = null;
+    });
+    try {
+      final result = await ref
+          .read(letterboxdImportServiceProvider)
+          .execute(
+            rows: preview.rows,
+            matches: _matches,
+            conflicts: _conflicts,
+          );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            l10n.letterboxdImportSuccess(
+              result.added,
+              result.merged,
+              result.skipped,
+            ),
+          ),
+        ),
+      );
+      setState(() {
+        _preview = null;
+        _matches.clear();
+        _conflicts.clear();
+        _fileName = null;
+      });
+    } catch (_) {
+      if (mounted) setState(() => _error = l10n.letterboxdImportFailed);
+    } finally {
+      if (mounted) setState(() => _importing = false);
     }
   }
 
@@ -304,7 +361,7 @@ class _LetterboxdImportScreenState
             ),
             const SizedBox(height: AppSpacing.md),
             ...preview.rows
-                .take(20)
+                .take(LetterboxdImportService.maxRowsPerImport)
                 .map(
                   (row) => _PreviewTile(
                     row: row,
@@ -315,6 +372,35 @@ class _LetterboxdImportScreenState
                         _chooseDuplicateResolution(row.rowNumber, conflict),
                   ),
                 ),
+            if (_matches.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.lg),
+              AppButton(
+                label: l10n.letterboxdImportConfirm,
+                icon: Icons.cloud_upload_rounded,
+                isFullWidth: true,
+                isLoading: _importing,
+                onPressed:
+                    !_matching &&
+                        !_importing &&
+                        preview.validCount <=
+                            LetterboxdImportService.maxRowsPerImport &&
+                        preview.validCount == matched
+                    ? _executeImport
+                    : null,
+              ),
+              if (preview.validCount > LetterboxdImportService.maxRowsPerImport)
+                Padding(
+                  padding: const EdgeInsets.only(top: AppSpacing.sm),
+                  child: Text(
+                    l10n.letterboxdImportTooLarge(
+                      LetterboxdImportService.maxRowsPerImport,
+                    ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: AppColors.error),
+                  ),
+                ),
+            ],
           ],
         ],
       ),
