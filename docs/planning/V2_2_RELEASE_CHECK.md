@@ -1,6 +1,6 @@
 # v2.2 yayın öncesi doğrulama
 
-**Tarih:** 13 Ağustos 2026  
+**Tarih:** 13 Ağustos 2026
 **Sürüm:** `2.0.0+13`
 
 ## Sonuç
