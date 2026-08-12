@@ -44,7 +44,7 @@ dependencies:
   path_provider: ^2.1.6
   path: ^1.9.1
   dio: ^5.10.0
-  dio_cache_interceptor: ^3.5.0
+  dio_cache_interceptor: ^4.0.7
   google_fonts: ^8.1.0
   cached_network_image: ^3.4.1
   # Loosened from ^0.20.3: flutter_localizations pins intl to exactly the
