@@ -63,7 +63,7 @@ dependencies:
   firebase_auth_web: ^6.2.3
   cloud_firestore: ^6.6.0
   cloud_firestore_web: ^5.6.0
-  meta: ^1.11.0
+  meta: ^1.19.0
   flutter_local_notifications: ^22.0.1
   timezone: ^0.11.1
   # Crash reporting. Sentry rather than Crashlytics because the release this
