@@ -1530,4 +1530,12 @@
   "eveningPickerNoResultsHint": "Süreyi artırmayı veya yapım türünü değiştirmeyi dene.",
   "eveningPickerReason": "{mood} ruh hâline ve {minutes} dakikalık sürene uyuyor.",
   "@eveningPickerReason": { "placeholders": { "mood": { "type": "String" }, "minutes": { "type": "int" } } }
+  ,"eveningPickerPlatform": "Yayın platformu",
+  "eveningPickerAnyPlatform": "Tüm platformlar",
+  "eveningFeedbackInterested": "İlgimi çekti",
+  "eveningFeedbackDismiss": "Bunu önerme",
+  "eveningFeedbackAnother": "Başka öner",
+  "eveningFeedbackInterestedSaved": "Bu tercih gelecekteki önerilere eklendi.",
+  "eveningFeedbackDismissedSaved": "Bu yapım tekrar önerilmeyecek.",
+  "eveningFeedbackFailed": "Tercih kaydedilemedi."
 }

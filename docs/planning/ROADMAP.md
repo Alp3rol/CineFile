@@ -203,23 +203,28 @@ izleyeceği yapımı daha hızlı seçmesini sağlamak.
 
 ### P1 — “Bu akşam ne izlesem?”
 
-- [ ] **Kısa tercih akışı oluştur.**
+- [x] **Kısa tercih akışı oluştur.**
   - Ruh hâli, kullanılabilir süre, film/dizi ve yayın platformu seçenekleri
   - Daha önce izlenenleri ve istenmeyen türleri dışlama
   - En fazla üç güçlü sonuç
-  - **İlerleme (13 Ağustos 2026):** Ana ekrandan açılan ilk karar akışı ruh
+  - **Tamamlandı (13 Ağustos 2026):** Ana ekrandan açılan karar akışı ruh
     hâli, kullanılabilir süre ve film/dizi tercihini alıyor; mevcut kişisel öneri
     havuzundaki izlenmiş yapımları dışarıda bırakıp puana göre en fazla üç sonuç
-    gösteriyor. Yayın platformu filtresi eklenene kadar bu madde açık tutulacak.
-- [ ] **Her önerinin nedenini açıkla.**
+    gösteriyor. Kullanıcının bölgesindeki gerçek TMDb/JustWatch uygunluğundan
+    oluşan yayın platformu filtresi de akışa eklendi.
+- [x] **Her önerinin nedenini açıkla.**
   - Tür, oyuncu/yönetmen, süre, platform ve geçmiş tercih sinyalleri
   - Kullanılmayan veya eksik veri açıkça belirtilmeli.
-  - **İlerleme (13 Ağustos 2026):** Sonuçlarda mevcut kişiselleştirme nedeni,
-    seçilen ruh hâli ve süre uyumu birlikte gösteriliyor. Platform bilgisi ve
-    eksik veri açıklaması sonraki dilimde tamamlanacak.
-- [ ] **Sonuç geri bildirimi ekle.**
+  - **Tamamlandı (13 Ağustos 2026):** Sonuçlarda mevcut kişiselleştirme nedeni,
+    seçilen ruh hâli ve süre uyumu birlikte gösteriliyor. Süresi veya platform
+    verisi eksik yapımlar kesin dışlanmıyor; yalnızca doğrulanabilen sinyaller
+    filtreleniyor.
+- [x] **Sonuç geri bildirimi ekle.**
   - “İlgimi çekti”, “bunu önerme” ve “başka öner” sinyalleri
   - Swipe Discovery tercihleriyle aynı veri sözleşmesini kullanmalı.
+  - **Tamamlandı (13 Ağustos 2026):** “İlgimi çekti” ve “bunu önerme” seçimleri
+    Swipe Discovery ile aynı `movie_settings` tercih alanlarına yazılıyor;
+    “başka öner” ise sonucu kalıcı tercih oluşturmadan mevcut oturumda değiştiriyor.
 
 ### v2.2 kabul kriterleri
 
@@ -428,12 +433,13 @@ Her görev aşağıdaki sırayla ilerler:
 
 ## Sıradaki iş
 
-**v2.2 / P1 — “Bu akşam ne izlesem?” kısa tercih akışı.**
+**v2.2 — Kabul kriterleri ve ürün ölçümü doğrulaması.**
 
 v2.1'in yayın öncesi geliştirme ve kontrollü pilot işleri tamamlandı. App Check
 gerçek trafik gözlemi yayın sonrasında ayrı takip edilecek ve enforcement o
 zamana kadar kapalı kalacak. Letterboxd CSV önizleme ve biçim doğrulama
 tamamlandı. TMDb eşleştirme ve kullanıcı düzeltme akışı da hazır. Sonraki aktif
 geliştirmede Letterboxd içe aktarma ve yeniden içe aktarılabilir CineFile CSV
-dışa aktarma tamamlandı. Sonraki aktif iş, ruh hâli, süre, film/dizi ve platform
-tercihlerinden en fazla üç açıklanabilir öneri üreten kısa karar akışıdır.
+dışa aktarma ile ruh hâli, süre, film/dizi ve platform tercihlerinden en fazla üç
+açıklanabilir öneri üreten kısa karar akışı tamamlandı. Sonraki aktif iş, v2.2
+kabul kriterlerini ve gizlilik dostu ürün ölçümü olaylarını doğrulamaktır.

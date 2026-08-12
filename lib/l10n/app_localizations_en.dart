@@ -3678,4 +3678,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String eveningPickerReason(String mood, int minutes) {
     return 'Fits your $mood mood and $minutes-minute window.';
   }
+
+  @override
+  String get eveningPickerPlatform => 'Streaming platform';
+
+  @override
+  String get eveningPickerAnyPlatform => 'All platforms';
+
+  @override
+  String get eveningFeedbackInterested => 'Interested';
+
+  @override
+  String get eveningFeedbackDismiss => 'Don\'t recommend';
+
+  @override
+  String get eveningFeedbackAnother => 'Another pick';
+
+  @override
+  String get eveningFeedbackInterestedSaved =>
+      'This preference was added to future recommendations.';
+
+  @override
+  String get eveningFeedbackDismissedSaved =>
+      'This title will not be recommended again.';
+
+  @override
+  String get eveningFeedbackFailed => 'The preference could not be saved.';
 }

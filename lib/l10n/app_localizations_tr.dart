@@ -3472,4 +3472,29 @@ class AppLocalizationsTr extends AppLocalizations {
   String eveningPickerReason(String mood, int minutes) {
     return '$mood ruh hâline ve $minutes dakikalık sürene uyuyor.';
   }
+
+  @override
+  String get eveningPickerPlatform => 'Yayın platformu';
+
+  @override
+  String get eveningPickerAnyPlatform => 'Tüm platformlar';
+
+  @override
+  String get eveningFeedbackInterested => 'İlgimi çekti';
+
+  @override
+  String get eveningFeedbackDismiss => 'Bunu önerme';
+
+  @override
+  String get eveningFeedbackAnother => 'Başka öner';
+
+  @override
+  String get eveningFeedbackInterestedSaved =>
+      'Bu tercih gelecekteki önerilere eklendi.';
+
+  @override
+  String get eveningFeedbackDismissedSaved => 'Bu yapım tekrar önerilmeyecek.';
+
+  @override
+  String get eveningFeedbackFailed => 'Tercih kaydedilemedi.';
 }

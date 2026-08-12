@@ -9,8 +9,10 @@ void main() {
     int runtime = 100,
     double rating = 7,
     List<int> genres = const [28],
+    Set<String> providers = const {},
   }) => EveningCandidate(
     runtimeMinutes: runtime,
+    providerNames: providers,
     item: RecommendationItem(
       tmdbId: id,
       title: 'Title $id',
@@ -51,5 +53,22 @@ void main() {
     );
 
     expect(results.map((item) => item.item.tmdbId), [2, 3, 4]);
+  });
+
+  test('filters by provider and excluded feedback ids', () {
+    final results = const EveningPicker().select(
+      candidates: [
+        candidate(1, providers: const {'Netflix'}),
+        candidate(2, providers: const {'Netflix'}),
+        candidate(3, providers: const {'MUBI'}),
+      ],
+      mood: EveningMood.exciting,
+      type: EveningTitleType.any,
+      maxMinutes: 180,
+      providerName: 'Netflix',
+      excludedIds: const {1},
+    );
+
+    expect(results.map((item) => item.item.tmdbId), [2]);
   });
 }

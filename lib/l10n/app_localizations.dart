@@ -6121,6 +6121,54 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'{mood} ruh hâline ve {minutes} dakikalık sürene uyuyor.'**
   String eveningPickerReason(String mood, int minutes);
+
+  /// No description provided for @eveningPickerPlatform.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yayın platformu'**
+  String get eveningPickerPlatform;
+
+  /// No description provided for @eveningPickerAnyPlatform.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tüm platformlar'**
+  String get eveningPickerAnyPlatform;
+
+  /// No description provided for @eveningFeedbackInterested.
+  ///
+  /// In tr, this message translates to:
+  /// **'İlgimi çekti'**
+  String get eveningFeedbackInterested;
+
+  /// No description provided for @eveningFeedbackDismiss.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bunu önerme'**
+  String get eveningFeedbackDismiss;
+
+  /// No description provided for @eveningFeedbackAnother.
+  ///
+  /// In tr, this message translates to:
+  /// **'Başka öner'**
+  String get eveningFeedbackAnother;
+
+  /// No description provided for @eveningFeedbackInterestedSaved.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu tercih gelecekteki önerilere eklendi.'**
+  String get eveningFeedbackInterestedSaved;
+
+  /// No description provided for @eveningFeedbackDismissedSaved.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu yapım tekrar önerilmeyecek.'**
+  String get eveningFeedbackDismissedSaved;
+
+  /// No description provided for @eveningFeedbackFailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tercih kaydedilemedi.'**
+  String get eveningFeedbackFailed;
 }
 
 class _AppLocalizationsDelegate

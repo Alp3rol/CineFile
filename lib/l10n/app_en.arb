@@ -1107,4 +1107,12 @@
   "eveningPickerNoResultsHint": "Try increasing the duration or changing the title type.",
   "eveningPickerReason": "Fits your {mood} mood and {minutes}-minute window.",
   "@eveningPickerReason": { "placeholders": { "mood": { "type": "String" }, "minutes": { "type": "int" } } }
+  ,"eveningPickerPlatform": "Streaming platform",
+  "eveningPickerAnyPlatform": "All platforms",
+  "eveningFeedbackInterested": "Interested",
+  "eveningFeedbackDismiss": "Don't recommend",
+  "eveningFeedbackAnother": "Another pick",
+  "eveningFeedbackInterestedSaved": "This preference was added to future recommendations.",
+  "eveningFeedbackDismissedSaved": "This title will not be recommended again.",
+  "eveningFeedbackFailed": "The preference could not be saved."
 }
