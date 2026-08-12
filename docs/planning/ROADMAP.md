@@ -166,9 +166,13 @@ izleyeceği yapımı daha hızlı seçmesini sağlamak.
 
 ### P0 — Letterboxd/CSV içe aktarma
 
-- [ ] **Letterboxd CSV dosyasını önizle ve doğrula.**
+- [x] **Letterboxd CSV dosyasını önizle ve doğrula.**
   - Dosya boyutu, sütunlar, tarih ve puan biçimleri yazmadan önce doğrulanmalı.
-  - Kaç satırın eşleştiği, atlandığı ve belirsiz kaldığı gösterilmeli.
+  - Kaç satırın geçerli veya hatalı olduğu gösterilmeli; eşleşme durumu sonraki
+    TMDb adımında eklenmeli.
+  - **Tamamlandı (13 Ağustos 2026):** Ayarlar'a yazma yapmayan Letterboxd CSV
+    önizlemesi eklendi. UTF-8, 5 MiB/10.000 satır sınırı, zorunlu sütunlar,
+    tarih, yıl ve puan doğrulaması ile satır bazlı hata özeti otomatik testli.
 - [ ] **TMDb eşleştirme ve kullanıcı düzeltme akışı ekle.**
   - Başlık + yıl ile güven skoru üretilmeli.
   - Belirsiz sonuçlar kullanıcı onayı olmadan kaydedilmemeli.
@@ -402,9 +406,10 @@ Her görev aşağıdaki sırayla ilerler:
 
 ## Sıradaki iş
 
-**v2.2 / P0 — Letterboxd CSV içe aktarma önizleme ve doğrulama.**
+**v2.2 / P0 — TMDb eşleştirme ve kullanıcı düzeltme akışı.**
 
 v2.1'in yayın öncesi geliştirme ve kontrollü pilot işleri tamamlandı. App Check
 gerçek trafik gözlemi yayın sonrasında ayrı takip edilecek ve enforcement o
-zamana kadar kapalı kalacak. Sonraki aktif geliştirme, Letterboxd CSV dosyasını
-kalıcı yazmadan önce güvenle önizleyen ve doğrulayan içe aktarma akışıdır.
+zamana kadar kapalı kalacak. Letterboxd CSV önizleme ve biçim doğrulama
+tamamlandı. Sonraki aktif geliştirme, geçerli satırları başlık + yıl ile TMDb'ye
+eşleyip belirsiz sonuçları kullanıcı onayına sunmaktır.

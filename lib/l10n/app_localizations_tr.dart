@@ -330,6 +330,38 @@ class AppLocalizationsTr extends AppLocalizations {
       'Tüm izleme geçmişinizi, koleksiyonlarınızı, favorilerinizi ve notlarınızı JSON formatında yedekleyebilir ve istediğiniz cihazda geri yükleyebilirsiniz. Geri yükleme mevcut verilerin üzerine yazar.';
 
   @override
+  String get letterboxdImportTitle => 'Letterboxd CSV Önizleme';
+
+  @override
+  String get letterboxdImportDescription =>
+      'Letterboxd diary.csv dosyanı güvenle kontrol et. Bu aşama hiçbir kaydı CineFile\'a yazmaz.';
+
+  @override
+  String get letterboxdChooseCsv => 'CSV Dosyası Seç';
+
+  @override
+  String get letterboxdInvalidCsv => 'CSV doğrulanamadı';
+
+  @override
+  String get letterboxdPreviewOnly =>
+      'Yalnızca önizleme: Henüz hiçbir kayıt eklenmedi.';
+
+  @override
+  String letterboxdTotalRows(int count) {
+    return 'Toplam: $count';
+  }
+
+  @override
+  String letterboxdValidRows(int count) {
+    return 'Geçerli: $count';
+  }
+
+  @override
+  String letterboxdInvalidRows(int count) {
+    return 'Hatalı: $count';
+  }
+
+  @override
   String get settingsExport => 'Dışa Aktar';
 
   @override

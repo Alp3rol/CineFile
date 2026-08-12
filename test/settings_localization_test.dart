@@ -45,6 +45,7 @@ void main() {
     expect(find.text('Çıkış Hatırlatıcıları'), findsOneWidget);
     expect(find.text('Veri Yönetimi & Yedekleme'), findsOneWidget);
     expect(find.text('Dışa Aktar'), findsOneWidget);
+    expect(find.text('Letterboxd CSV Önizleme'), findsOneWidget);
   });
 
   testWidgets('renders the same screens in English', (tester) async {
@@ -55,14 +56,18 @@ void main() {
     expect(find.text('Release Reminders'), findsOneWidget);
     expect(find.text('Data & Backup'), findsOneWidget);
     expect(find.text('Export'), findsOneWidget);
+    expect(find.text('Letterboxd CSV Preview'), findsOneWidget);
     expect(find.text('Tercihler'), findsNothing);
   });
 
-  testWidgets('shows the English TMDb attribution once, not twice', (tester) async {
+  testWidgets('shows the English TMDb attribution once, not twice', (
+    tester,
+  ) async {
     // TMDb asks for the attribution in English, so a non-English UI shows both
     // the localized and the English wording. In English they are the same
     // sentence and must not be duplicated.
-    const english = 'This product uses the TMDB API but is not endorsed or certified by TMDB.';
+    const english =
+        'This product uses the TMDB API but is not endorsed or certified by TMDB.';
 
     await tester.pumpWidget(settingsSections(locale: const Locale('en')));
     await tester.pumpAndSettle();
@@ -72,14 +77,22 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text(english), findsOneWidget);
     expect(
-      find.text('Bu uygulama TMDB API\'sini kullanır ancak TMDB tarafından desteklenmez veya onaylanmaz.'),
+      find.text(
+        'Bu uygulama TMDB API\'sini kullanır ancak TMDB tarafından desteklenmez veya onaylanmaz.',
+      ),
       findsOneWidget,
     );
   });
 
   test('notification copy resolves without a BuildContext', () {
-    expect(lookupL10n(const Locale('tr')).notificationEpisodeTitle, 'Yeni Bölüm! 🎬');
-    expect(lookupL10n(const Locale('en')).notificationEpisodeTitle, 'New Episode! 🎬');
+    expect(
+      lookupL10n(const Locale('tr')).notificationEpisodeTitle,
+      'Yeni Bölüm! 🎬',
+    );
+    expect(
+      lookupL10n(const Locale('en')).notificationEpisodeTitle,
+      'New Episode! 🎬',
+    );
 
     // The release body is two separate messages rather than one sentence with
     // a swapped-in noun, so both shapes have to survive translation.

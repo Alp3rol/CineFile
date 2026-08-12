@@ -78,6 +78,8 @@ dependencies:
   sentry_flutter: ^9.26.0
   firebase_app_check: ^0.4.6
   firebase_analytics: ^12.4.6
+  file_picker: ^3.0.4
+  csv: ^8.0.0
 
 dev_dependencies:
   flutter_test:

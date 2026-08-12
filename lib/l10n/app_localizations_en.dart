@@ -329,6 +329,38 @@ class AppLocalizationsEn extends AppLocalizations {
       'Back up your whole watch history, collections, favourites and notes as JSON, and restore it on any device. Restoring overwrites what is already there.';
 
   @override
+  String get letterboxdImportTitle => 'Letterboxd CSV Preview';
+
+  @override
+  String get letterboxdImportDescription =>
+      'Safely check your Letterboxd diary.csv file. This step does not write any records to CineFile.';
+
+  @override
+  String get letterboxdChooseCsv => 'Choose CSV File';
+
+  @override
+  String get letterboxdInvalidCsv => 'CSV could not be validated';
+
+  @override
+  String get letterboxdPreviewOnly =>
+      'Preview only: No records have been added yet.';
+
+  @override
+  String letterboxdTotalRows(int count) {
+    return 'Total: $count';
+  }
+
+  @override
+  String letterboxdValidRows(int count) {
+    return 'Valid: $count';
+  }
+
+  @override
+  String letterboxdInvalidRows(int count) {
+    return 'Invalid: $count';
+  }
+
+  @override
   String get settingsExport => 'Export';
 
   @override

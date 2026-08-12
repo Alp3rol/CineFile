@@ -710,6 +710,54 @@ abstract class AppLocalizations {
   /// **'Tüm izleme geçmişinizi, koleksiyonlarınızı, favorilerinizi ve notlarınızı JSON formatında yedekleyebilir ve istediğiniz cihazda geri yükleyebilirsiniz. Geri yükleme mevcut verilerin üzerine yazar.'**
   String get settingsBackupDescription;
 
+  /// No description provided for @letterboxdImportTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Letterboxd CSV Önizleme'**
+  String get letterboxdImportTitle;
+
+  /// No description provided for @letterboxdImportDescription.
+  ///
+  /// In tr, this message translates to:
+  /// **'Letterboxd diary.csv dosyanı güvenle kontrol et. Bu aşama hiçbir kaydı CineFile\'a yazmaz.'**
+  String get letterboxdImportDescription;
+
+  /// No description provided for @letterboxdChooseCsv.
+  ///
+  /// In tr, this message translates to:
+  /// **'CSV Dosyası Seç'**
+  String get letterboxdChooseCsv;
+
+  /// No description provided for @letterboxdInvalidCsv.
+  ///
+  /// In tr, this message translates to:
+  /// **'CSV doğrulanamadı'**
+  String get letterboxdInvalidCsv;
+
+  /// No description provided for @letterboxdPreviewOnly.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yalnızca önizleme: Henüz hiçbir kayıt eklenmedi.'**
+  String get letterboxdPreviewOnly;
+
+  /// No description provided for @letterboxdTotalRows.
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplam: {count}'**
+  String letterboxdTotalRows(int count);
+
+  /// No description provided for @letterboxdValidRows.
+  ///
+  /// In tr, this message translates to:
+  /// **'Geçerli: {count}'**
+  String letterboxdValidRows(int count);
+
+  /// No description provided for @letterboxdInvalidRows.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hatalı: {count}'**
+  String letterboxdInvalidRows(int count);
+
   /// No description provided for @settingsExport.
   ///
   /// In tr, this message translates to:
