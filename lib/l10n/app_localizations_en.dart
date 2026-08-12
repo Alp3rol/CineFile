@@ -391,6 +391,43 @@ class AppLocalizationsEn extends AppLocalizations {
   String get letterboxdChooseMatch => 'Choose the correct title';
 
   @override
+  String letterboxdDuplicateRows(int count) {
+    return 'Conflicts: $count';
+  }
+
+  @override
+  String get letterboxdDuplicateTitle => 'Duplicate record decision';
+
+  @override
+  String get letterboxdDuplicateDescription =>
+      'Another record exists for the same title and watch date. Choose what should happen.';
+
+  @override
+  String get letterboxdDuplicateCheckFailed =>
+      'Existing records could not be checked. No data was changed.';
+
+  @override
+  String get letterboxdDuplicateSkip => 'Skip this row';
+
+  @override
+  String get letterboxdDuplicateMerge => 'Merge with existing record';
+
+  @override
+  String get letterboxdDuplicateRewatch => 'Add as a rewatch';
+
+  @override
+  String get letterboxdDuplicateWillSkip =>
+      'Conflict decision: Will be skipped';
+
+  @override
+  String get letterboxdDuplicateWillMerge =>
+      'Conflict decision: Will be merged';
+
+  @override
+  String get letterboxdDuplicateWillRewatch =>
+      'Conflict decision: Rewatch will be added';
+
+  @override
   String get settingsExport => 'Export';
 
   @override

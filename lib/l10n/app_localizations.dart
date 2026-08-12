@@ -806,6 +806,66 @@ abstract class AppLocalizations {
   /// **'Doğru yapımı seç'**
   String get letterboxdChooseMatch;
 
+  /// No description provided for @letterboxdDuplicateRows.
+  ///
+  /// In tr, this message translates to:
+  /// **'Çakışan: {count}'**
+  String letterboxdDuplicateRows(int count);
+
+  /// No description provided for @letterboxdDuplicateTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yinelenen kayıt kararı'**
+  String get letterboxdDuplicateTitle;
+
+  /// No description provided for @letterboxdDuplicateDescription.
+  ///
+  /// In tr, this message translates to:
+  /// **'Aynı yapım ve izleme tarihinde başka bir kayıt bulundu. Ne yapılacağını seç.'**
+  String get letterboxdDuplicateDescription;
+
+  /// No description provided for @letterboxdDuplicateCheckFailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Mevcut kayıtlar kontrol edilemedi. Hiçbir veri değiştirilmedi.'**
+  String get letterboxdDuplicateCheckFailed;
+
+  /// No description provided for @letterboxdDuplicateSkip.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu satırı atla'**
+  String get letterboxdDuplicateSkip;
+
+  /// No description provided for @letterboxdDuplicateMerge.
+  ///
+  /// In tr, this message translates to:
+  /// **'Mevcut kayıtla birleştir'**
+  String get letterboxdDuplicateMerge;
+
+  /// No description provided for @letterboxdDuplicateRewatch.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tekrar izleme olarak ekle'**
+  String get letterboxdDuplicateRewatch;
+
+  /// No description provided for @letterboxdDuplicateWillSkip.
+  ///
+  /// In tr, this message translates to:
+  /// **'Çakışma kararı: Atlanacak'**
+  String get letterboxdDuplicateWillSkip;
+
+  /// No description provided for @letterboxdDuplicateWillMerge.
+  ///
+  /// In tr, this message translates to:
+  /// **'Çakışma kararı: Birleştirilecek'**
+  String get letterboxdDuplicateWillMerge;
+
+  /// No description provided for @letterboxdDuplicateWillRewatch.
+  ///
+  /// In tr, this message translates to:
+  /// **'Çakışma kararı: Tekrar izleme eklenecek'**
+  String get letterboxdDuplicateWillRewatch;
+
   /// No description provided for @settingsExport.
   ///
   /// In tr, this message translates to:

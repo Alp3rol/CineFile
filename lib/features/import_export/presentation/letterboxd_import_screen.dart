@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/database/database_provider.dart';
 import '../../../core/network/tmdb_service.dart';
 import '../../../core/ui/ui.dart';
 import '../../../l10n/app_localizations.dart';
 import '../domain/letterboxd_csv_parser.dart';
+import '../domain/import_duplicate_policy.dart';
 import '../domain/tmdb_import_matcher.dart';
 
 class LetterboxdImportScreen extends ConsumerStatefulWidget {
@@ -22,6 +24,7 @@ class _LetterboxdImportScreenState
   static const _parser = LetterboxdCsvParser();
   LetterboxdCsvPreview? _preview;
   final Map<int, ImportRowMatch> _matches = {};
+  final Map<int, ImportDuplicateConflict> _conflicts = {};
   String? _fileName;
   String? _error;
   bool _loading = false;
@@ -50,6 +53,7 @@ class _LetterboxdImportScreenState
         _fileName = file.name;
         _preview = preview;
         _matches.clear();
+        _conflicts.clear();
       });
     } on LetterboxdCsvException catch (error) {
       if (mounted) setState(() => _error = error.message);
@@ -67,7 +71,9 @@ class _LetterboxdImportScreenState
     if (rows == null || rows.isEmpty) return;
     setState(() {
       _matching = true;
+      _error = null;
       _matches.clear();
+      _conflicts.clear();
     });
     final service = ref.read(tmdbServiceProvider);
     final matcher = TmdbImportMatcher((query) => service.searchMovies(query));
@@ -81,7 +87,44 @@ class _LetterboxdImportScreenState
       if (!mounted) return;
       setState(() => _matches.addEntries(results));
     }
+    await _refreshConflicts(rows);
     if (mounted) setState(() => _matching = false);
+  }
+
+  Future<void> _refreshConflicts(List<LetterboxdPreviewRow> rows) async {
+    late final List<WatchRecordWithMovie> existing;
+    try {
+      existing = await ref.read(allWatchRecordsProvider.future);
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _conflicts.clear();
+          _error = AppLocalizations.of(context).letterboxdDuplicateCheckFailed;
+          _matching = false;
+        });
+      }
+      return;
+    }
+    final conflicts = const ImportDuplicatePolicy().detect(
+      rows: rows,
+      matches: _matches,
+      existingRecords: existing
+          .map(
+            (item) => ExistingImportRecord(
+              tmdbId: item.record.movieId,
+              isTv: item.record.isTv,
+              watchDate: item.record.watchDate,
+              rating: item.record.rating,
+            ),
+          )
+          .toList(),
+    );
+    if (mounted) {
+      setState(() {
+        _conflicts.clear();
+        _conflicts.addAll(conflicts);
+      });
+    }
   }
 
   Future<void> _chooseCandidate(int rowNumber, ImportRowMatch match) async {
@@ -117,6 +160,54 @@ class _LetterboxdImportScreenState
     );
     if (candidate != null && mounted) {
       setState(() => _matches[rowNumber] = match.confirm(candidate));
+      await _refreshConflicts(
+        _preview?.rows.where((row) => row.isValid).toList() ?? const [],
+      );
+    }
+  }
+
+  Future<void> _chooseDuplicateResolution(
+    int rowNumber,
+    ImportDuplicateConflict conflict,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    final resolution = await showModalBottomSheet<ImportDuplicateResolution>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              title: Text(l10n.letterboxdDuplicateTitle),
+              subtitle: Text(l10n.letterboxdDuplicateDescription),
+            ),
+            ListTile(
+              leading: const Icon(Icons.skip_next_rounded),
+              title: Text(l10n.letterboxdDuplicateSkip),
+              onTap: () =>
+                  Navigator.pop(context, ImportDuplicateResolution.skip),
+            ),
+            ListTile(
+              leading: const Icon(Icons.merge_rounded),
+              title: Text(l10n.letterboxdDuplicateMerge),
+              onTap: () =>
+                  Navigator.pop(context, ImportDuplicateResolution.merge),
+            ),
+            ListTile(
+              leading: const Icon(Icons.replay_rounded),
+              title: Text(l10n.letterboxdDuplicateRewatch),
+              onTap: () => Navigator.pop(
+                context,
+                ImportDuplicateResolution.addAsRewatch,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (resolution != null && mounted) {
+      setState(() => _conflicts[rowNumber] = conflict.resolve(resolution));
     }
   }
 
@@ -182,6 +273,12 @@ class _LetterboxdImportScreenState
                     label: l10n.letterboxdReviewRows(review),
                     tone: AppBadgeTone.warning,
                   ),
+                  AppBadge(
+                    label: l10n.letterboxdDuplicateRows(_conflicts.length),
+                    tone: _conflicts.isEmpty
+                        ? AppBadgeTone.success
+                        : AppBadgeTone.warning,
+                  ),
                 ],
               ],
             ),
@@ -212,7 +309,10 @@ class _LetterboxdImportScreenState
                   (row) => _PreviewTile(
                     row: row,
                     match: _matches[row.rowNumber],
+                    conflict: _conflicts[row.rowNumber],
                     onReview: (match) => _chooseCandidate(row.rowNumber, match),
+                    onResolve: (conflict) =>
+                        _chooseDuplicateResolution(row.rowNumber, conflict),
                   ),
                 ),
           ],
@@ -226,11 +326,15 @@ class _PreviewTile extends StatelessWidget {
   const _PreviewTile({
     required this.row,
     required this.match,
+    required this.conflict,
     required this.onReview,
+    required this.onResolve,
   });
   final LetterboxdPreviewRow row;
   final ImportRowMatch? match;
+  final ImportDuplicateConflict? conflict;
   final ValueChanged<ImportRowMatch> onReview;
+  final ValueChanged<ImportDuplicateConflict> onResolve;
 
   @override
   Widget build(BuildContext context) {
@@ -251,6 +355,13 @@ class _PreviewTile extends StatelessWidget {
       ImportMatchStatus.failed => l10n.letterboxdMatchFailed,
       null => null,
     };
+    final conflictLabel = switch (conflict?.resolution) {
+      ImportDuplicateResolution.skip => l10n.letterboxdDuplicateWillSkip,
+      ImportDuplicateResolution.merge => l10n.letterboxdDuplicateWillMerge,
+      ImportDuplicateResolution.addAsRewatch =>
+        l10n.letterboxdDuplicateWillRewatch,
+      null => null,
+    };
     return Card(
       child: ListTile(
         leading: Icon(
@@ -262,10 +373,17 @@ class _PreviewTile extends StatelessWidget {
           row.isValid
               ? '${row.year ?? '—'} • $date${row.rewatch ? ' • Rewatch' : ''}'
                     '${matchLabel == null ? '' : '\n$matchLabel'}'
+                    '${conflictLabel == null ? '' : '\n$conflictLabel'}'
               : 'Row ${row.rowNumber}: ${row.issues.join(', ')}',
         ),
-        isThreeLine: matchLabel != null,
-        trailing: match?.status == ImportMatchStatus.needsReview
+        isThreeLine: matchLabel != null || conflictLabel != null,
+        trailing: conflict != null
+            ? IconButton(
+                tooltip: l10n.letterboxdDuplicateTitle,
+                icon: const Icon(Icons.call_split_rounded),
+                onPressed: () => onResolve(conflict!),
+              )
+            : match?.status == ImportMatchStatus.needsReview
             ? IconButton(
                 tooltip: l10n.letterboxdChooseMatch,
                 icon: const Icon(Icons.edit_rounded),

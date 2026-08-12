@@ -392,6 +392,41 @@ class AppLocalizationsTr extends AppLocalizations {
   String get letterboxdChooseMatch => 'Doğru yapımı seç';
 
   @override
+  String letterboxdDuplicateRows(int count) {
+    return 'Çakışan: $count';
+  }
+
+  @override
+  String get letterboxdDuplicateTitle => 'Yinelenen kayıt kararı';
+
+  @override
+  String get letterboxdDuplicateDescription =>
+      'Aynı yapım ve izleme tarihinde başka bir kayıt bulundu. Ne yapılacağını seç.';
+
+  @override
+  String get letterboxdDuplicateCheckFailed =>
+      'Mevcut kayıtlar kontrol edilemedi. Hiçbir veri değiştirilmedi.';
+
+  @override
+  String get letterboxdDuplicateSkip => 'Bu satırı atla';
+
+  @override
+  String get letterboxdDuplicateMerge => 'Mevcut kayıtla birleştir';
+
+  @override
+  String get letterboxdDuplicateRewatch => 'Tekrar izleme olarak ekle';
+
+  @override
+  String get letterboxdDuplicateWillSkip => 'Çakışma kararı: Atlanacak';
+
+  @override
+  String get letterboxdDuplicateWillMerge => 'Çakışma kararı: Birleştirilecek';
+
+  @override
+  String get letterboxdDuplicateWillRewatch =>
+      'Çakışma kararı: Tekrar izleme eklenecek';
+
+  @override
   String get settingsExport => 'Dışa Aktar';
 
   @override

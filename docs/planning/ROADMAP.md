@@ -186,6 +186,11 @@ izleyeceği yapımı daha hızlı seçmesini sağlamak.
   - Birebir aynı tarih/yapım kaydı için atla, birleştir veya ekle seçenekleri
     sunulmalı.
   - İçe aktarma işlemi hata durumunda kısmi ve belirsiz bir sonuç bırakmamalı.
+  - **İlerleme (13 Ağustos 2026):** CineFile'daki mevcut kayıtlar ve CSV'nin
+    kendi içindeki aynı yapım/tarih çakışmaları film/dizi kimliğiyle tespit
+    ediliyor. Varsayılan karar güvenli biçimde "atla"; kullanıcı satır bazında
+    birleştir veya tekrar izleme olarak ekle seçeneklerini seçebiliyor. Atomik
+    kalıcı yazma aşaması tamamlanana kadar bu madde açık tutulacak.
 - [ ] **CineFile CSV dışa aktarma ekle.**
   - İnsan tarafından okunabilir ve yeniden içe aktarılabilir olmalı.
   - JSON yedekleme temel ve eksiksiz kurtarma biçimi olarak korunmalı.
@@ -410,11 +415,12 @@ Her görev aşağıdaki sırayla ilerler:
 
 ## Sıradaki iş
 
-**v2.2 / P0 — Yinelenen kayıt politikası.**
+**v2.2 / P0 — Atomik Letterboxd içe aktarma.**
 
 v2.1'in yayın öncesi geliştirme ve kontrollü pilot işleri tamamlandı. App Check
 gerçek trafik gözlemi yayın sonrasında ayrı takip edilecek ve enforcement o
 zamana kadar kapalı kalacak. Letterboxd CSV önizleme ve biçim doğrulama
 tamamlandı. TMDb eşleştirme ve kullanıcı düzeltme akışı da hazır. Sonraki aktif
-geliştirme, tekrar izlemeleri koruyan ve aynı tarih/yapım çakışmalarında kullanıcıya
-atla, birleştir veya ekle seçeneklerini sunan yinelenen kayıt politikasıdır.
+geliştirmede yinelenen kayıt tespiti ve atla/birleştir/tekrar izleme kararları
+hazırlandı. Sonraki aktif iş, önizlenen planı tek ve geri alınabilir bir işlemle
+kalıcı kayıtlara dönüştürmektir.
