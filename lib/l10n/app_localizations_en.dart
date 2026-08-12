@@ -453,6 +453,18 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get cinefileCsvExport => 'Export CineFile CSV';
+
+  @override
+  String get cinefileCsvEmpty => 'There are no diary records to export.';
+
+  @override
+  String get cinefileCsvShareSubject => 'CineFile watch diary';
+
+  @override
+  String get cinefileCsvExportFailed => 'The CSV file could not be created.';
+
+  @override
   String get settingsExport => 'Export';
 
   @override

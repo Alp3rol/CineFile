@@ -192,9 +192,14 @@ izleyeceği yapımı daha hızlı seçmesini sağlamak.
     birleştir veya tekrar izleme olarak ekle seçeneklerini seçebiliyor. En fazla
     200 kayıtlık plan, son kullanıcı onayından sonra tek atomik Firebase batch'i
     ile uygulanıyor; hata halinde hiçbir kısmi kayıt bırakılmıyor.
-- [ ] **CineFile CSV dışa aktarma ekle.**
+- [x] **CineFile CSV dışa aktarma ekle.**
   - İnsan tarafından okunabilir ve yeniden içe aktarılabilir olmalı.
   - JSON yedekleme temel ve eksiksiz kurtarma biçimi olarak korunmalı.
+  - **Tamamlandı (13 Ağustos 2026):** Günlük kayıtları Letterboxd uyumlu temel
+    sütunlarla ve CineFile'a özgü TMDb kimliği, yapım türü, bölüm, not, etiket
+    ve görünürlük alanlarıyla UTF-8 CSV olarak paylaşılabiliyor. Üretilen dosyanın
+    mevcut CSV ayrıştırıcısıyla yeniden okunabildiği otomatik testli; JSON yedek
+    akışı değiştirilmeden korundu.
 
 ### P1 — “Bu akşam ne izlesem?”
 
@@ -416,12 +421,12 @@ Her görev aşağıdaki sırayla ilerler:
 
 ## Sıradaki iş
 
-**v2.2 / P0 — CineFile CSV dışa aktarma.**
+**v2.2 / P1 — “Bu akşam ne izlesem?” kısa tercih akışı.**
 
 v2.1'in yayın öncesi geliştirme ve kontrollü pilot işleri tamamlandı. App Check
 gerçek trafik gözlemi yayın sonrasında ayrı takip edilecek ve enforcement o
 zamana kadar kapalı kalacak. Letterboxd CSV önizleme ve biçim doğrulama
 tamamlandı. TMDb eşleştirme ve kullanıcı düzeltme akışı da hazır. Sonraki aktif
-geliştirmede yinelenen kayıt tespiti, kararları ve atomik kalıcı Letterboxd
-aktarımı hazırlandı. Sonraki aktif iş, insan tarafından okunabilir ve yeniden
-içe aktarılabilir CineFile CSV dışa aktarmasıdır.
+geliştirmede Letterboxd içe aktarma ve yeniden içe aktarılabilir CineFile CSV
+dışa aktarma tamamlandı. Sonraki aktif iş, ruh hâli, süre, film/dizi ve platform
+tercihlerinden en fazla üç açıklanabilir öneri üreten kısa karar akışıdır.

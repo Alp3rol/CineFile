@@ -452,6 +452,18 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String get cinefileCsvExport => 'CineFile CSV Dışa Aktar';
+
+  @override
+  String get cinefileCsvEmpty => 'Dışa aktarılacak günlük kaydı bulunamadı.';
+
+  @override
+  String get cinefileCsvShareSubject => 'CineFile izleme günlüğü';
+
+  @override
+  String get cinefileCsvExportFailed => 'CSV dosyası oluşturulamadı.';
+
+  @override
   String get settingsExport => 'Dışa Aktar';
 
   @override

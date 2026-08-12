@@ -6,6 +6,7 @@ import 'duplicate_cleanup_screen.dart';
 import 'settings_backup_dialogs.dart';
 import 'settings_section.dart';
 import '../../../import_export/presentation/letterboxd_import_screen.dart';
+import '../../../import_export/presentation/cinefile_csv_export.dart';
 
 // "Veri Yönetimi & Yedekleme" card: export/import JSON backup, plus a link
 // to the duplicate-watch-record cleanup screen.
@@ -54,6 +55,15 @@ class SettingsBackupSection extends ConsumerWidget {
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          AppButton(
+            label: l10n.cinefileCsvExport,
+            icon: Icons.grid_on_rounded,
+            variant: AppButtonVariant.secondary,
+            size: AppButtonSize.small,
+            isFullWidth: true,
+            onPressed: () => exportCineFileCsv(context, ref),
           ),
           const SizedBox(height: AppSpacing.md),
           AppButton(

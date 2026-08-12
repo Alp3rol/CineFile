@@ -902,6 +902,30 @@ abstract class AppLocalizations {
   /// **'Tek seferde en fazla {count} kayıt aktarılabilir. Dosyayı daha küçük parçalara ayır.'**
   String letterboxdImportTooLarge(int count);
 
+  /// No description provided for @cinefileCsvExport.
+  ///
+  /// In tr, this message translates to:
+  /// **'CineFile CSV Dışa Aktar'**
+  String get cinefileCsvExport;
+
+  /// No description provided for @cinefileCsvEmpty.
+  ///
+  /// In tr, this message translates to:
+  /// **'Dışa aktarılacak günlük kaydı bulunamadı.'**
+  String get cinefileCsvEmpty;
+
+  /// No description provided for @cinefileCsvShareSubject.
+  ///
+  /// In tr, this message translates to:
+  /// **'CineFile izleme günlüğü'**
+  String get cinefileCsvShareSubject;
+
+  /// No description provided for @cinefileCsvExportFailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'CSV dosyası oluşturulamadı.'**
+  String get cinefileCsvExportFailed;
+
   /// No description provided for @settingsExport.
   ///
   /// In tr, this message translates to:
