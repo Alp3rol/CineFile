@@ -757,6 +757,24 @@ describe('follows — edge and counters stay atomic', () => {
 });
 
 describe('per-user subcollections stay private', () => {
+  it('keeps notifications private and limits owner updates to readAt', async () => {
+    const path = `users/${ALICE}/notifications/n1`;
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), path), {
+        type: 'comment', target: 'communityPost', targetId: 'p1',
+        createdAt: new Date(), readAt: null,
+      });
+    });
+    await assertSucceeds(getDoc(doc(asAlice(), path)));
+    await assertFails(getDoc(doc(asBob(), path)));
+    await assertSucceeds(updateDoc(doc(asAlice(), path), { readAt: serverTimestamp() }));
+    await assertFails(updateDoc(doc(asAlice(), path), { targetId: 'p2' }));
+    await assertFails(setDoc(doc(asAlice(), `users/${ALICE}/notifications/forged`), {
+      type: 'follow', target: 'userProfile', targetId: BOB,
+      createdAt: serverTimestamp(), readAt: null,
+    }));
+  });
+
   it("rejects reading another user's movie_settings", async () => {
     await env.withSecurityRulesDisabled(async (ctx) => {
       await setDoc(doc(ctx.firestore(), `users/${ALICE}/movie_settings/27205_false`), {

@@ -359,6 +359,17 @@ service cloud.firestore {
       match /graph_overrides/{overrideId} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
       }
+
+      // Private inbox. Creation stays backend-only so a client cannot forge
+      // events in another user's inbox.
+      match /notifications/{notificationId} {
+        allow read, delete: if request.auth != null && request.auth.uid == userId;
+        allow update: if request.auth != null
+          && request.auth.uid == userId
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readAt'])
+          && request.resource.data.readAt == request.time;
+        allow create: if false;
+      }
     }
 
     // Username registry, doc id is the lowercased username, body is
