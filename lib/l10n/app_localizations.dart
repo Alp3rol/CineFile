@@ -6169,6 +6169,60 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Tercih kaydedilemedi.'**
   String get eveningFeedbackFailed;
+
+  /// No description provided for @notificationsTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bildirimler'**
+  String get notificationsTitle;
+
+  /// No description provided for @notificationsMarkAllRead.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tümünü Okundu İşaretle'**
+  String get notificationsMarkAllRead;
+
+  /// No description provided for @notificationsClearRead.
+  ///
+  /// In tr, this message translates to:
+  /// **'Okunanları Temizle'**
+  String get notificationsClearRead;
+
+  /// No description provided for @notificationsEmptyTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bildiriminiz Yok'**
+  String get notificationsEmptyTitle;
+
+  /// No description provided for @notificationsEmptySubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni yorum, beğeni ve takipleriniz burada görünecek.'**
+  String get notificationsEmptySubtitle;
+
+  /// No description provided for @notificationComment.
+  ///
+  /// In tr, this message translates to:
+  /// **'{actor} gönderine yorum yaptı.'**
+  String notificationComment(String actor);
+
+  /// No description provided for @notificationStar.
+  ///
+  /// In tr, this message translates to:
+  /// **'{actor} gönderini beğendi.'**
+  String notificationStar(String actor);
+
+  /// No description provided for @notificationFollow.
+  ///
+  /// In tr, this message translates to:
+  /// **'{actor} seni takip etmeye başladı.'**
+  String notificationFollow(String actor);
+
+  /// No description provided for @notificationNewEpisode.
+  ///
+  /// In tr, this message translates to:
+  /// **'Takip ettiğin dizi için yeni bölüm yayında.'**
+  String get notificationNewEpisode;
 }
 
 class _AppLocalizationsDelegate

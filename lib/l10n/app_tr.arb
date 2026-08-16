@@ -1537,5 +1537,23 @@
   "eveningFeedbackAnother": "Başka öner",
   "eveningFeedbackInterestedSaved": "Bu tercih gelecekteki önerilere eklendi.",
   "eveningFeedbackDismissedSaved": "Bu yapım tekrar önerilmeyecek.",
-  "eveningFeedbackFailed": "Tercih kaydedilemedi."
+  "eveningFeedbackFailed": "Tercih kaydedilemedi.",
+  "notificationsTitle": "Bildirimler",
+  "notificationsMarkAllRead": "Tümünü Okundu İşaretle",
+  "notificationsClearRead": "Okunanları Temizle",
+  "notificationsEmptyTitle": "Bildiriminiz Yok",
+  "notificationsEmptySubtitle": "Yeni yorum, beğeni ve takipleriniz burada görünecek.",
+  "notificationComment": "{actor} gönderine yorum yaptı.",
+  "@notificationComment": {
+    "placeholders": { "actor": { "type": "String" } }
+  },
+  "notificationStar": "{actor} gönderini beğendi.",
+  "@notificationStar": {
+    "placeholders": { "actor": { "type": "String" } }
+  },
+  "notificationFollow": "{actor} seni takip etmeye başladı.",
+  "@notificationFollow": {
+    "placeholders": { "actor": { "type": "String" } }
+  },
+  "notificationNewEpisode": "Takip ettiğin dizi için yeni bölüm yayında."
 }

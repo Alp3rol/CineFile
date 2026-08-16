@@ -3704,4 +3704,39 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get eveningFeedbackFailed => 'The preference could not be saved.';
+
+  @override
+  String get notificationsTitle => 'Notifications';
+
+  @override
+  String get notificationsMarkAllRead => 'Mark All Read';
+
+  @override
+  String get notificationsClearRead => 'Clear Read';
+
+  @override
+  String get notificationsEmptyTitle => 'No Notifications';
+
+  @override
+  String get notificationsEmptySubtitle =>
+      'New comments, likes, and follows will show up here.';
+
+  @override
+  String notificationComment(String actor) {
+    return '$actor commented on your post.';
+  }
+
+  @override
+  String notificationStar(String actor) {
+    return '$actor liked your post.';
+  }
+
+  @override
+  String notificationFollow(String actor) {
+    return '$actor started following you.';
+  }
+
+  @override
+  String get notificationNewEpisode =>
+      'A new episode is out for a show you follow.';
 }

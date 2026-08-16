@@ -1114,5 +1114,23 @@
   "eveningFeedbackAnother": "Another pick",
   "eveningFeedbackInterestedSaved": "This preference was added to future recommendations.",
   "eveningFeedbackDismissedSaved": "This title will not be recommended again.",
-  "eveningFeedbackFailed": "The preference could not be saved."
+  "eveningFeedbackFailed": "The preference could not be saved.",
+  "notificationsTitle": "Notifications",
+  "notificationsMarkAllRead": "Mark All Read",
+  "notificationsClearRead": "Clear Read",
+  "notificationsEmptyTitle": "No Notifications",
+  "notificationsEmptySubtitle": "New comments, likes, and follows will show up here.",
+  "notificationComment": "{actor} commented on your post.",
+  "@notificationComment": {
+    "placeholders": { "actor": { "type": "String" } }
+  },
+  "notificationStar": "{actor} liked your post.",
+  "@notificationStar": {
+    "placeholders": { "actor": { "type": "String" } }
+  },
+  "notificationFollow": "{actor} started following you.",
+  "@notificationFollow": {
+    "placeholders": { "actor": { "type": "String" } }
+  },
+  "notificationNewEpisode": "A new episode is out for a show you follow."
 }

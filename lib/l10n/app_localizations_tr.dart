@@ -3497,4 +3497,39 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get eveningFeedbackFailed => 'Tercih kaydedilemedi.';
+
+  @override
+  String get notificationsTitle => 'Bildirimler';
+
+  @override
+  String get notificationsMarkAllRead => 'Tümünü Okundu İşaretle';
+
+  @override
+  String get notificationsClearRead => 'Okunanları Temizle';
+
+  @override
+  String get notificationsEmptyTitle => 'Bildiriminiz Yok';
+
+  @override
+  String get notificationsEmptySubtitle =>
+      'Yeni yorum, beğeni ve takipleriniz burada görünecek.';
+
+  @override
+  String notificationComment(String actor) {
+    return '$actor gönderine yorum yaptı.';
+  }
+
+  @override
+  String notificationStar(String actor) {
+    return '$actor gönderini beğendi.';
+  }
+
+  @override
+  String notificationFollow(String actor) {
+    return '$actor seni takip etmeye başladı.';
+  }
+
+  @override
+  String get notificationNewEpisode =>
+      'Takip ettiğin dizi için yeni bölüm yayında.';
 }

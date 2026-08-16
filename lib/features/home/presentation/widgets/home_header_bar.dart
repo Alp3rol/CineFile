@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../core/ui/ui.dart';
 import '../../../auth/presentation/widgets/user_profile_avatar_button.dart';
+import '../../../notifications/presentation/widgets/notification_bell_button.dart';
 import '../../../settings/presentation/settings_screen.dart';
 
 class HomeHeaderBar extends StatelessWidget {
@@ -84,6 +85,8 @@ class HomeHeaderBar extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
+              const NotificationBellButton(),
+              const SizedBox(width: AppSpacing.sm),
               Container(
                 decoration: BoxDecoration(
                   color: AppColors.textPrimary
