@@ -3532,4 +3532,18 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get notificationNewEpisode =>
       'Takip ettiğin dizi için yeni bölüm yayında.';
+
+  @override
+  String get swipeMatchTitle => 'Eşleştiniz! 🎉';
+
+  @override
+  String swipeMatchSubtitle(String actor) {
+    return '$actor ile ikiniz de bu yapımı izlemek istiyorsunuz.';
+  }
+
+  @override
+  String get swipeMatchCTA => 'İzleme Listeme Ekle';
+
+  @override
+  String get swipeMatchShare => 'Paylaş';
 }

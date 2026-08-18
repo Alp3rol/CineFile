@@ -149,3 +149,28 @@ final swipeTasteSharingProvider = StreamProvider<bool>((ref) {
         (document) => document.data()?['shareSwipeTasteForMatching'] == true,
       );
 });
+
+List<Map<String, dynamic>> rankRemainingItemsBySessionPreference(
+  List<Map<String, dynamic>> items,
+  Map<int, int> sessionGenreScores,
+) {
+  if (sessionGenreScores.isEmpty || items.length <= 1) return items;
+  final copy = List<Map<String, dynamic>>.from(items);
+  copy.sort((a, b) {
+    final aGenres =
+        (a['genre_ids'] as List<dynamic>? ?? const []).whereType<num>().map((id) => id.toInt());
+    final bGenres =
+        (b['genre_ids'] as List<dynamic>? ?? const []).whereType<num>().map((id) => id.toInt());
+    var aScore = 0;
+    for (final g in aGenres) {
+      aScore += sessionGenreScores[g] ?? 0;
+    }
+    var bScore = 0;
+    for (final g in bGenres) {
+      bScore += sessionGenreScores[g] ?? 0;
+    }
+    return bScore.compareTo(aScore);
+  });
+  return copy;
+}
+

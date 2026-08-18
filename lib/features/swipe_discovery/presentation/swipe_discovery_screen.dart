@@ -22,6 +22,7 @@ import '../../movie_detail/presentation/movie_detail_screen.dart';
 import '../../movie_detail/presentation/widgets/movie_detail_watch_providers_section.dart';
 import '../../settings/presentation/settings_provider.dart';
 import '../data/swipe_preference_signal.dart';
+import 'widgets/cine_twin_match_dialog.dart';
 
 enum _SwipeChoice { interested, notInterested }
 
@@ -48,6 +49,7 @@ class _SwipeDiscoveryScreenState extends ConsumerState<SwipeDiscoveryScreen> {
 
   late List<Map<String, dynamic>> _remaining;
   final List<_SwipeAction> _history = [];
+  final Map<int, int> _sessionGenreScores = {};
   bool _isWriting = false;
   bool _showGestureGuide = false;
   int _sessionWatched = 0;
@@ -99,15 +101,30 @@ class _SwipeDiscoveryScreenState extends ConsumerState<SwipeDiscoveryScreen> {
   Future<void> _choose(Map<String, dynamic> item, _SwipeChoice choice) async {
     if (_isWriting) return;
     _dismissGestureGuide();
+
+    final itemGenres = (item['genre_ids'] as List<dynamic>? ?? const [])
+        .whereType<num>()
+        .map((id) => id.toInt());
+    final delta = choice == _SwipeChoice.interested ? 3 : -1;
+    for (final g in itemGenres) {
+      _sessionGenreScores.update(g, (val) => val + delta, ifAbsent: () => delta);
+    }
+
     setState(() {
       _isWriting = true;
       _remaining.remove(item);
+      _remaining = rankRemainingItemsBySessionPreference(_remaining, _sessionGenreScores);
       _history.add(_SwipeAction(item, choice));
     });
 
     try {
       await _writeChoice(item, choice);
       if (!mounted) return;
+
+      if (choice == _SwipeChoice.interested) {
+        unawaited(_checkCineTwinMatch(item));
+      }
+
       final l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -140,6 +157,47 @@ class _SwipeDiscoveryScreenState extends ConsumerState<SwipeDiscoveryScreen> {
       );
     } finally {
       if (mounted) setState(() => _isWriting = false);
+    }
+  }
+
+  Future<void> _checkCineTwinMatch(Map<String, dynamic> item) async {
+    final key = _keyFor(item);
+    final user = ref.currentUser;
+    if (user == null) return;
+
+    try {
+      final firestore = ref.read(firestoreProvider);
+      final snapshot = await firestore
+          .collection('users')
+          .where('shareSwipeTasteForMatching', isEqualTo: true)
+          .limit(10)
+          .get();
+
+      for (final doc in snapshot.docs) {
+        if (doc.id == user.uid) continue;
+        final movieDoc = await firestore
+            .collection('users')
+            .doc(doc.id)
+            .collection('movie_settings')
+            .doc('${key.tmdbId}_${key.isTv}')
+            .get();
+
+        if (movieDoc.exists && movieDoc.data()?['swipeDecision'] == 'interested') {
+          final matchedUsername = doc.data()['username'] as String? ?? 'Bir kullanıcı';
+          if (!mounted) return;
+          unawaited(
+            CineTwinMatchDialog.show(
+              context,
+              item: item,
+              matchedUsername: matchedUsername,
+              onAddToWatchlist: () {},
+            ),
+          );
+          break;
+        }
+      }
+    } catch (error) {
+      debugPrint('CineTwin match check error: $error');
     }
   }
 
@@ -271,6 +329,18 @@ class _SwipeDiscoveryScreenState extends ConsumerState<SwipeDiscoveryScreen> {
       ),
     );
     if (reason == null || !mounted) return;
+
+    if (reason == 'dislikeGenre') {
+      final itemGenres = (item['genre_ids'] as List<dynamic>? ?? const [])
+          .whereType<num>()
+          .map((id) => id.toInt());
+      for (final g in itemGenres) {
+        _sessionGenreScores.update(g, (val) => val - 4, ifAbsent: () => -4);
+      }
+      setState(() {
+        _remaining = rankRemainingItemsBySessionPreference(_remaining, _sessionGenreScores);
+      });
+    }
 
     final user = ref.currentUser;
     if (user == null) return;

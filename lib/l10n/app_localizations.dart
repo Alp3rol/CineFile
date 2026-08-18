@@ -6223,6 +6223,30 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Takip ettiğin dizi için yeni bölüm yayında.'**
   String get notificationNewEpisode;
+
+  /// No description provided for @swipeMatchTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Eşleştiniz! 🎉'**
+  String get swipeMatchTitle;
+
+  /// No description provided for @swipeMatchSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'{actor} ile ikiniz de bu yapımı izlemek istiyorsunuz.'**
+  String swipeMatchSubtitle(String actor);
+
+  /// No description provided for @swipeMatchCTA.
+  ///
+  /// In tr, this message translates to:
+  /// **'İzleme Listeme Ekle'**
+  String get swipeMatchCTA;
+
+  /// No description provided for @swipeMatchShare.
+  ///
+  /// In tr, this message translates to:
+  /// **'Paylaş'**
+  String get swipeMatchShare;
 }
 
 class _AppLocalizationsDelegate

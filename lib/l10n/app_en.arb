@@ -1132,5 +1132,12 @@
   "@notificationFollow": {
     "placeholders": { "actor": { "type": "String" } }
   },
-  "notificationNewEpisode": "A new episode is out for a show you follow."
+  "notificationNewEpisode": "A new episode is out for a show you follow.",
+  "swipeMatchTitle": "It's a Match! 🎉",
+  "swipeMatchSubtitle": "You and {actor} both want to watch this title.",
+  "@swipeMatchSubtitle": {
+    "placeholders": { "actor": { "type": "String" } }
+  },
+  "swipeMatchCTA": "Add to My Watchlist",
+  "swipeMatchShare": "Share"
 }

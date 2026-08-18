@@ -1555,5 +1555,12 @@
   "@notificationFollow": {
     "placeholders": { "actor": { "type": "String" } }
   },
-  "notificationNewEpisode": "Takip ettiğin dizi için yeni bölüm yayında."
+  "notificationNewEpisode": "Takip ettiğin dizi için yeni bölüm yayında.",
+  "swipeMatchTitle": "Eşleştiniz! 🎉",
+  "swipeMatchSubtitle": "{actor} ile ikiniz de bu yapımı izlemek istiyorsunuz.",
+  "@swipeMatchSubtitle": {
+    "placeholders": { "actor": { "type": "String" } }
+  },
+  "swipeMatchCTA": "İzleme Listeme Ekle",
+  "swipeMatchShare": "Paylaş"
 }

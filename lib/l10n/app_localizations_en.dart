@@ -3739,4 +3739,18 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get notificationNewEpisode =>
       'A new episode is out for a show you follow.';
+
+  @override
+  String get swipeMatchTitle => 'It\'s a Match! 🎉';
+
+  @override
+  String swipeMatchSubtitle(String actor) {
+    return 'You and $actor both want to watch this title.';
+  }
+
+  @override
+  String get swipeMatchCTA => 'Add to My Watchlist';
+
+  @override
+  String get swipeMatchShare => 'Share';
 }
