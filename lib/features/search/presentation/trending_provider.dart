@@ -17,29 +17,53 @@ final trendingProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async 
   final category = ref.watch(discoverCategoryProvider);
   final timeWindow = ref.watch(discoverTimeWindowProvider);
 
-  List<Map<String, dynamic>> movies;
-  List<Map<String, dynamic>> tv;
+  List<Map<String, dynamic>> movies = const [];
+  List<Map<String, dynamic>> tv = const [];
   var shouldShuffle = false;
 
-  switch (category) {
-    case DiscoverCategory.trend:
-      shouldShuffle = true;
-      if (timeWindow == DiscoverTimeWindow.today) {
-        movies = await tmdbService.getTrendingMoviesToday();
-        tv = await tmdbService.getTrendingTvShowsToday();
-      } else {
-        movies = await tmdbService.getTrendingMoviesThisWeek();
-        tv = await tmdbService.getTrendingTvShowsThisWeek();
-      }
-      break;
-    case DiscoverCategory.popular:
-      movies = await tmdbService.getPopularMovies();
-      tv = await tmdbService.getPopularTvShows();
-      break;
-    case DiscoverCategory.topRated:
-      movies = await tmdbService.getTopRatedMovies();
-      tv = await tmdbService.getTopRatedTvShows();
-      break;
+  try {
+    switch (category) {
+      case DiscoverCategory.trend:
+        shouldShuffle = true;
+        if (timeWindow == DiscoverTimeWindow.today) {
+          final results = await Future.wait([
+            tmdbService.getTrendingMoviesToday().catchError((_) => <Map<String, dynamic>>[]),
+            tmdbService.getTrendingTvShowsToday().catchError((_) => <Map<String, dynamic>>[]),
+          ]);
+          movies = results[0];
+          tv = results[1];
+        } else {
+          final results = await Future.wait([
+            tmdbService.getTrendingMoviesThisWeek().catchError((_) => <Map<String, dynamic>>[]),
+            tmdbService.getTrendingTvShowsThisWeek().catchError((_) => <Map<String, dynamic>>[]),
+          ]);
+          movies = results[0];
+          tv = results[1];
+        }
+        break;
+      case DiscoverCategory.popular:
+        final results = await Future.wait([
+          tmdbService.getPopularMovies().catchError((_) => <Map<String, dynamic>>[]),
+          tmdbService.getPopularTvShows().catchError((_) => <Map<String, dynamic>>[]),
+        ]);
+        movies = results[0];
+        tv = results[1];
+        break;
+      case DiscoverCategory.topRated:
+        final results = await Future.wait([
+          tmdbService.getTopRatedMovies().catchError((_) => <Map<String, dynamic>>[]),
+          tmdbService.getTopRatedTvShows().catchError((_) => <Map<String, dynamic>>[]),
+        ]);
+        movies = results[0];
+        tv = results[1];
+        break;
+    }
+  } catch (_) {
+    // Graceful fallback below
+  }
+
+  if (movies.isEmpty && tv.isEmpty) {
+    return tmdbService.mockMovies;
   }
 
   if (shouldShuffle) {

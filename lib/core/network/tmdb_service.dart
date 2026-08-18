@@ -136,4 +136,7 @@ class TmdbService extends _TmdbCore
         _TmdbPeopleResource,
         _TmdbSeasonResource {
   TmdbService(super.dio, {super.language});
+
+  List<Map<String, dynamic>> get mockMovies =>
+      List<Map<String, dynamic>>.from(_TmdbCore._mockMovies);
 }
