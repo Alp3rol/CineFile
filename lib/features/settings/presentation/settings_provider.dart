@@ -356,3 +356,48 @@ class FirstSessionChecklistDismissedNotifier
 
   Future<void> setDismissed(bool dismissed) => _save(dismissed);
 }
+
+final socialNotificationsEnabledProvider =
+    StateNotifierProvider<SocialNotificationsEnabledNotifier, bool>((ref) {
+      return SocialNotificationsEnabledNotifier(
+        ref.watch(appSettingsStoreProvider),
+      );
+    });
+
+class SocialNotificationsEnabledNotifier
+    extends _StoredPreferenceNotifier<bool> {
+  SocialNotificationsEnabledNotifier(AppSettingsStore store)
+    : super(store, 'social_notifications_enabled', true);
+
+  Future<void> setEnabled(bool enabled) => _save(enabled);
+}
+
+final episodeNotificationsEnabledProvider =
+    StateNotifierProvider<EpisodeNotificationsEnabledNotifier, bool>((ref) {
+      return EpisodeNotificationsEnabledNotifier(
+        ref.watch(appSettingsStoreProvider),
+      );
+    });
+
+class EpisodeNotificationsEnabledNotifier
+    extends _StoredPreferenceNotifier<bool> {
+  EpisodeNotificationsEnabledNotifier(AppSettingsStore store)
+    : super(store, 'episode_notifications_enabled', true);
+
+  Future<void> setEnabled(bool enabled) => _save(enabled);
+}
+
+final recommendationNotificationsEnabledProvider =
+    StateNotifierProvider<RecommendationNotificationsEnabledNotifier, bool>((ref) {
+      return RecommendationNotificationsEnabledNotifier(
+        ref.watch(appSettingsStoreProvider),
+      );
+    });
+
+class RecommendationNotificationsEnabledNotifier
+    extends _StoredPreferenceNotifier<bool> {
+  RecommendationNotificationsEnabledNotifier(AppSettingsStore store)
+    : super(store, 'recommendation_notifications_enabled', true);
+
+  Future<void> setEnabled(bool enabled) => _save(enabled);
+}

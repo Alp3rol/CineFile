@@ -360,15 +360,17 @@ service cloud.firestore {
         allow read, write: if request.auth != null && request.auth.uid == userId;
       }
 
-      // Private inbox. Creation stays backend-only so a client cannot forge
-      // events in another user's inbox.
+      // Private inbox. Allow create when actorId is the caller's own uid.
       match /notifications/{notificationId} {
         allow read, delete: if request.auth != null && request.auth.uid == userId;
         allow update: if request.auth != null
           && request.auth.uid == userId
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readAt'])
           && request.resource.data.readAt == request.time;
-        allow create: if false;
+        allow create: if request.auth != null
+          && request.resource.data.get('actorId', '') == request.auth.uid
+          && request.resource.data.type in ['comment', 'star', 'follow', 'newEpisode']
+          && request.resource.data.target in ['communityPost', 'userProfile', 'tvShow'];
       }
     }
 

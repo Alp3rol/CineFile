@@ -78,6 +78,23 @@ Future<void> toggleFollow(
   }
 
   await batch.commit();
+
+  if (!currentlyFollowing && currentUserId != targetUserId) {
+    try {
+      final currentUserDoc = await currentUserRef.get();
+      final username = currentUserDoc.data()?['username'] as String?;
+      await ref.read(notificationRepositoryProvider).sendNotification(
+        recipientUserId: targetUserId,
+        type: AppNotificationType.follow,
+        target: AppNotificationTarget.userProfile,
+        targetId: currentUserId,
+        actorId: currentUserId,
+        actorName: username,
+      );
+    } catch (_) {
+      // Notification failure should not fail follow toggle
+    }
+  }
 }
 
 // Stream provider to get a set of favorite movie IDs

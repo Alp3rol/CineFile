@@ -680,6 +680,24 @@ abstract class AppLocalizations {
   /// **'Çıkış Hatırlatıcıları'**
   String get settingsReleaseReminders;
 
+  /// No description provided for @settingsSocialNotifications.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sosyal Bildirimler'**
+  String get settingsSocialNotifications;
+
+  /// No description provided for @settingsEpisodeNotifications.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni Bölüm Bildirimleri'**
+  String get settingsEpisodeNotifications;
+
+  /// No description provided for @settingsRecommendationNotifications.
+  ///
+  /// In tr, this message translates to:
+  /// **'Öneri ve Hatırlatıcılar'**
+  String get settingsRecommendationNotifications;
+
   /// No description provided for @settingsDynamicBackground.
   ///
   /// In tr, this message translates to:

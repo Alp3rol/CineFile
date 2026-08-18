@@ -43,6 +43,9 @@ void main() {
 
     expect(find.text('Tercihler'), findsOneWidget);
     expect(find.text('Çıkış Hatırlatıcıları'), findsOneWidget);
+    expect(find.text('Sosyal Bildirimler'), findsOneWidget);
+    expect(find.text('Yeni Bölüm Bildirimleri'), findsOneWidget);
+    expect(find.text('Öneri ve Hatırlatıcılar'), findsOneWidget);
     expect(find.text('Veri Yönetimi & Yedekleme'), findsOneWidget);
     expect(find.text('Dışa Aktar'), findsOneWidget);
     expect(find.text('Letterboxd CSV Önizleme'), findsOneWidget);
@@ -54,6 +57,9 @@ void main() {
 
     expect(find.text('Preferences'), findsOneWidget);
     expect(find.text('Release Reminders'), findsOneWidget);
+    expect(find.text('Social Notifications'), findsOneWidget);
+    expect(find.text('New Episode Notifications'), findsOneWidget);
+    expect(find.text('Recommendations & Reminders'), findsOneWidget);
     expect(find.text('Data & Backup'), findsOneWidget);
     expect(find.text('Export'), findsOneWidget);
     expect(find.text('Letterboxd CSV Preview'), findsOneWidget);

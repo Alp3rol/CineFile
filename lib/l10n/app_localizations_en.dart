@@ -312,6 +312,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsReleaseReminders => 'Release Reminders';
 
   @override
+  String get settingsSocialNotifications => 'Social Notifications';
+
+  @override
+  String get settingsEpisodeNotifications => 'New Episode Notifications';
+
+  @override
+  String get settingsRecommendationNotifications =>
+      'Recommendations & Reminders';
+
+  @override
   String get settingsDynamicBackground => 'Dynamic Background';
 
   @override

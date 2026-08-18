@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart'; // For kIsWeb
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../features/auth/controllers/auth_controller.dart';
 import '../../features/journal/models/diary_log_model.dart';
+import '../../features/notifications/data/notification_repository.dart';
+import '../../features/notifications/domain/app_notification.dart';
 import '../utils/safe_parsers.dart';
 import 'app_database.dart';
 import 'movie_repository.dart';

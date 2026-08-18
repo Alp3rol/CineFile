@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../notifications/data/notification_repository.dart';
+import '../../notifications/domain/app_notification.dart';
 import '../../auth/controllers/auth_controller.dart';
 import '../models/community_post_model.dart';
 import '../presentation/comments_provider.dart';
@@ -97,11 +99,32 @@ class FirestoreSocialRepository implements SocialRepository {
     required bool currentlyStarred,
   }) async {
     final user = _requireUser();
-    await _posts.doc(postId).update({
+    final identity = _identity(user);
+    final postRef = _posts.doc(postId);
+    await postRef.update({
       'starredBy': currentlyStarred
           ? FieldValue.arrayRemove([user.uid])
           : FieldValue.arrayUnion([user.uid]),
     });
+
+    if (!currentlyStarred) {
+      try {
+        final postSnapshot = await postRef.get();
+        final targetUserId = postSnapshot.data()?['userId'] as String?;
+        if (targetUserId != null && targetUserId != user.uid) {
+          await _ref.read(notificationRepositoryProvider).sendNotification(
+            recipientUserId: targetUserId,
+            type: AppNotificationType.star,
+            target: AppNotificationTarget.communityPost,
+            targetId: postId,
+            actorId: user.uid,
+            actorName: identity.username,
+          );
+        }
+      } catch (_) {
+        // Notification failure should not fail star toggle
+      }
+    }
   }
 
   @override
@@ -130,6 +153,23 @@ class FirestoreSocialRepository implements SocialRepository {
       'lastCommentMutationId': commentRef.id,
     });
     await batch.commit();
+
+    try {
+      final postSnapshot = await postRef.get();
+      final targetUserId = postSnapshot.data()?['userId'] as String?;
+      if (targetUserId != null && targetUserId != user.uid) {
+        await _ref.read(notificationRepositoryProvider).sendNotification(
+          recipientUserId: targetUserId,
+          type: AppNotificationType.comment,
+          target: AppNotificationTarget.communityPost,
+          targetId: postId,
+          actorId: user.uid,
+          actorName: identity.username,
+        );
+      }
+    } catch (_) {
+      // Notification failure should not fail comment addition
+    }
 
     return comment;
   }

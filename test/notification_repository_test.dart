@@ -59,4 +59,33 @@ void main() {
     addTearDown(signedOut.dispose);
     expect(() => signedOut.read(notificationRepositoryProvider).markAllRead(), throwsA(isA<NotSignedInException>()));
   });
+
+  test('sendNotification creates a notification for recipient', () async {
+    await repository.sendNotification(
+      recipientUserId: 'charlie-uid',
+      type: AppNotificationType.star,
+      target: AppNotificationTarget.communityPost,
+      targetId: 'post-99',
+      actorId: uid,
+      actorName: 'Alice',
+    );
+    final docs = await firestore.collection('users/charlie-uid/notifications').get();
+    expect(docs.docs.length, 1);
+    expect(docs.docs.first.data()['type'], 'star');
+    expect(docs.docs.first.data()['targetId'], 'post-99');
+    expect(docs.docs.first.data()['actorName'], 'Alice');
+  });
+
+  test('sendNotification does not create self-notification', () async {
+    await repository.sendNotification(
+      recipientUserId: uid,
+      type: AppNotificationType.star,
+      target: AppNotificationTarget.communityPost,
+      targetId: 'post-99',
+      actorId: uid,
+      actorName: 'Alice',
+    );
+    final docs = await firestore.collection('users/$uid/notifications').get();
+    expect(docs.docs.isEmpty, isTrue);
+  });
 }

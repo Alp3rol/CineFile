@@ -58,4 +58,24 @@ class NotificationRepository {
     }
     await batch.commit();
   }
+
+  Future<void> sendNotification({
+    required String recipientUserId,
+    required AppNotificationType type,
+    required AppNotificationTarget target,
+    required String targetId,
+    String? actorId,
+    String? actorName,
+  }) async {
+    if (actorId != null && actorId == recipientUserId) return;
+    await _collection(recipientUserId).add({
+      'type': type.name,
+      'target': target.name,
+      'targetId': targetId,
+      'createdAt': FieldValue.serverTimestamp(),
+      'actorId': actorId,
+      'actorName': actorName,
+      'readAt': null,
+    });
+  }
 }

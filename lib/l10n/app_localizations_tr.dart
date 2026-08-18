@@ -313,6 +313,15 @@ class AppLocalizationsTr extends AppLocalizations {
   String get settingsReleaseReminders => 'Çıkış Hatırlatıcıları';
 
   @override
+  String get settingsSocialNotifications => 'Sosyal Bildirimler';
+
+  @override
+  String get settingsEpisodeNotifications => 'Yeni Bölüm Bildirimleri';
+
+  @override
+  String get settingsRecommendationNotifications => 'Öneri ve Hatırlatıcılar';
+
+  @override
   String get settingsDynamicBackground => 'Dinamik Arka Plan';
 
   @override
