@@ -199,24 +199,35 @@ class _EveningPickerScreenState extends ConsumerState<EveningPickerScreen> {
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: AppSpacing.sm),
-            DropdownButtonFormField<String?>(
-              initialValue: _provider,
-              items: [
-                DropdownMenuItem<String?>(
-                  value: null,
-                  child: Text(l10n.eveningPickerAnyPlatform),
-                ),
-                ...(_providers.toList()..sort()).map(
-                  (provider) => DropdownMenuItem<String?>(
-                    value: provider,
-                    child: Text(provider),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: AppSpacing.xs),
+                    child: ChoiceChip(
+                      label: Text(l10n.eveningPickerAnyPlatform),
+                      selected: _provider == null,
+                      onSelected: (_) => setState(() {
+                        _provider = null;
+                        _applyFilters();
+                      }),
+                    ),
                   ),
-                ),
-              ],
-              onChanged: (value) => setState(() {
-                _provider = value;
-                _applyFilters();
-              }),
+                  for (final provider in (_providers.toList()..sort()))
+                    Padding(
+                      padding: const EdgeInsets.only(right: AppSpacing.xs),
+                      child: ChoiceChip(
+                        label: Text(provider),
+                        selected: _provider == provider,
+                        onSelected: (selected) => setState(() {
+                          _provider = selected ? provider : null;
+                          _applyFilters();
+                        }),
+                      ),
+                    ),
+                ],
+              ),
             ),
           ],
           const SizedBox(height: AppSpacing.lg),
