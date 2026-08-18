@@ -63,7 +63,7 @@ class LeadersCard extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    '${item.value} Kez',
+                    AppLocalizations.of(context).insightsWatchesCount(item.value),
                     style: Theme.of(context).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w600, color: AppColors.textSecondary),
                   ),
                 ],

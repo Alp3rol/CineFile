@@ -17,6 +17,7 @@ import 'widgets/share_options_sheet.dart';
 import 'widgets/user_search_result_tile.dart';
 import 'user_search_provider.dart';
 import 'user_search_screen.dart';
+import 'cine_twin_room_screen.dart';
 import '../../../../core/widgets/scroll_to_top_button.dart';
 
 
@@ -188,6 +189,31 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
                     ),
                     Row(
                       children: [
+                        // CineTwin Room Button
+                        GestureDetector(
+                          key: const Key('communityCineTwinRoomButton'),
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => const CineTwinRoomScreen(),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            width: 36,
+                            height: 36,
+                            decoration: const BoxDecoration(
+                              color: AppColors.border,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.group_work_rounded,
+                              color: AppColors.accent,
+                              size: 18,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
                         // Search toggle button — mirrors journal_screen.dart's
                         // inline search toggle (no separate route).
                         GestureDetector(

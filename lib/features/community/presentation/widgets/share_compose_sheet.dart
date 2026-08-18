@@ -65,6 +65,7 @@ class ShareComposeSheet extends ConsumerStatefulWidget {
 class _ShareComposeSheetState extends ConsumerState<ShareComposeSheet> {
   final TextEditingController _captionController = TextEditingController();
   bool _submitting = false;
+  bool _isSpoiler = false;
 
   @override
   void dispose() {
@@ -109,7 +110,31 @@ class _ShareComposeSheetState extends ConsumerState<ShareComposeSheet> {
             ),
             onChanged: (_) => setState(() {}),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
+          Theme(
+            data: Theme.of(context).copyWith(
+              splashColor: Colors.transparent,
+              highlightColor: Colors.transparent,
+            ),
+            child: CheckboxListTile(
+              contentPadding: EdgeInsets.zero,
+              dense: true,
+              value: _isSpoiler,
+              activeColor: AppColors.accent,
+              title: Row(
+                children: [
+                  const Icon(Icons.warning_amber_rounded, color: Colors.amberAccent, size: 18),
+                  const SizedBox(width: 6),
+                  Text(
+                    AppLocalizations.of(context).communitySpoilerToggle,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+                  ),
+                ],
+              ),
+              onChanged: (val) => setState(() => _isSpoiler = val ?? false),
+            ),
+          ),
+          const SizedBox(height: 12),
           Align(
             alignment: Alignment.centerRight,
             child: AppButton(
@@ -172,7 +197,7 @@ class _ShareComposeSheetState extends ConsumerState<ShareComposeSheet> {
 
     return Text(
       AppLocalizations.of(context).shareEntriesCount(widget.entries.length),
-      style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.textSecondary),
+      style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
     );
   }
 
@@ -210,6 +235,7 @@ class _ShareComposeSheetState extends ConsumerState<ShareComposeSheet> {
           rating: (widget.moviePayload!['rating'] as num?)?.toDouble(),
           mood: widget.moviePayload!['mood'] as String?,
           watchDate: widget.moviePayload!['watchDate'] as DateTime?,
+          isSpoiler: _isSpoiler,
         );
       } else if (_isCollection) {
         final listId = widget.collectionPayload!['listId'] as int;
@@ -229,6 +255,7 @@ class _ShareComposeSheetState extends ConsumerState<ShareComposeSheet> {
           starredBy: const [],
           commentCount: 0,
           collectionRefId: '${currentUser.uid}_$listId',
+          isSpoiler: _isSpoiler,
         );
       } else {
         post = CommunityPost(
@@ -242,6 +269,7 @@ class _ShareComposeSheetState extends ConsumerState<ShareComposeSheet> {
           starredBy: const [],
           commentCount: 0,
           entries: widget.entries,
+          isSpoiler: _isSpoiler,
         );
       }
 

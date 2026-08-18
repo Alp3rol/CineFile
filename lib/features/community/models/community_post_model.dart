@@ -43,6 +43,7 @@ class CommunityPost {
 
   // 'collection' type only — see class doc comment above.
   final String? collectionRefId;
+  final bool isSpoiler;
 
   CommunityPost({
     required this.id,
@@ -64,6 +65,7 @@ class CommunityPost {
     this.watchDate,
     this.entries = const [],
     this.collectionRefId,
+    this.isSpoiler = false,
   });
 
   Map<String, dynamic> toMap() {
@@ -91,6 +93,7 @@ class CommunityPost {
               })
           .toList(),
       'collectionRefId': collectionRefId,
+      'isSpoiler': isSpoiler,
     };
   }
 
@@ -123,6 +126,7 @@ class CommunityPost {
           })
           .toList(),
       collectionRefId: map['collectionRefId'] as String?,
+      isSpoiler: parseBool(map['isSpoiler']),
     );
   }
 }

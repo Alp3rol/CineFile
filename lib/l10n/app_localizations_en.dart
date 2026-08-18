@@ -2290,6 +2290,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cineTwinSeeMatch => 'See Your CineTwin Match';
 
   @override
+  String get communitySpoilerWarning => 'This post contains spoilers';
+
+  @override
+  String get communitySpoilerReveal => 'Tap to reveal';
+
+  @override
+  String get communitySpoilerToggle => 'Contains Spoilers';
+
+  @override
+  String get communityCineTwinRoomTitle => 'CineTwin Room';
+
+  @override
+  String get communityCineTwinRoomSubtitle =>
+      'Discover what to watch together with a friend';
+
+  @override
+  String communityCineTwinMatchScore(int score) {
+    return '$score% CineTwin Match';
+  }
+
+  @override
+  String get communityCineTwinCommonWatchlist => 'Shared Watchlist';
+
+  @override
+  String get communityCineTwinNoMatches => 'No shared titles found yet.';
+
+  @override
+  String get communityCineTwinSelectFriend => 'Select a Friend';
+
+  @override
   String get commentsTitle => 'Comments';
 
   @override

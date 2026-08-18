@@ -20,7 +20,7 @@ import '../../../../core/constants/api_constants.dart';
 // card layouts (movie/tv log, diary snapshot, shared collection). Extracted
 // from community_feed_screen.dart, which just does ListView.builder(itemBuilder:
 // (context, index) => CommunityPostCard(post: ..., currentUser: ...)).
-class CommunityPostCard extends ConsumerWidget {
+class CommunityPostCard extends ConsumerStatefulWidget {
   final CommunityPost post;
   final User? currentUser;
 
@@ -31,7 +31,17 @@ class CommunityPostCard extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CommunityPostCard> createState() => _CommunityPostCardState();
+}
+
+class _CommunityPostCardState extends ConsumerState<CommunityPostCard> {
+  bool _revealed = false;
+
+  CommunityPost get post => widget.post;
+  User? get currentUser => widget.currentUser;
+
+  @override
+  Widget build(BuildContext context) {
     switch (post.type) {
       case 'diary_snapshot':
         return _buildDiarySnapshotCard(context, ref);
@@ -68,7 +78,12 @@ class CommunityPostCard extends ConsumerWidget {
           child: CircleAvatar(
             radius: 18,
             backgroundColor: AppColors.surface,
-            backgroundImage: NetworkImage(post.userAvatarUrl),
+            backgroundImage: post.userAvatarUrl.isNotEmpty
+                ? NetworkImage(post.userAvatarUrl)
+                : null,
+            child: post.userAvatarUrl.isEmpty
+                ? const Icon(Icons.person_rounded, size: 18, color: AppColors.textSecondary)
+                : null,
           ),
         ),
         const SizedBox(width: 10),
@@ -90,11 +105,34 @@ class CommunityPostCard extends ConsumerWidget {
                   ),
                 ),
               ),
-              Text(
-                formatRelativeTime(context, post.createdAt),
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
+              Row(
+                children: [
+                  Text(
+                    formatRelativeTime(context, post.createdAt),
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  if (post.isSpoiler) ...[
+                    const SizedBox(width: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(color: Colors.amberAccent.withValues(alpha: 0.4), width: 0.5),
+                      ),
+                      child: Text(
+                        'SPOILER',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          fontSize: 8,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.amberAccent,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ],
           ),
@@ -337,33 +375,102 @@ class CommunityPostCard extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 14),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColors.shadow.withValues(alpha: AppOpacity.soft),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: AppColors.textPrimary.withValues(
-                    alpha: AppOpacity.faint,
-                  ),
-                  width: 0.5,
-                ),
-              ),
-              child: Text(
-                '"${post.caption}"',
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: AppColors.textSecondary,
-                  fontStyle: FontStyle.italic,
-                  height: 1.4,
-                ),
-              ),
-            ),
+            _buildCaption(context),
             const SizedBox(height: 14),
             const Divider(color: AppColors.border, height: 1),
             const SizedBox(height: 10),
             _buildInteractionRow(context, ref, isStarred),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCaption(BuildContext context, {bool quote = true}) {
+    if (post.caption.isEmpty) return const SizedBox.shrink();
+
+    if (post.isSpoiler && !_revealed) {
+      return GestureDetector(
+        onTap: () => setState(() => _revealed = true),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.amber.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Colors.amberAccent.withValues(alpha: 0.35),
+              width: 0.8,
+            ),
+          ),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.warning_amber_rounded,
+                color: Colors.amberAccent,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      AppLocalizations.of(context).communitySpoilerWarning,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.amberAccent,
+                      ),
+                    ),
+                    Text(
+                      AppLocalizations.of(context).communitySpoilerReveal,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.visibility_rounded,
+                color: AppColors.textSecondary,
+                size: 18,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (!quote) {
+      return Text(
+        post.caption,
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: AppColors.textSecondary,
+          height: 1.4,
+        ),
+      );
+    }
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.shadow.withValues(alpha: AppOpacity.soft),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AppColors.textPrimary.withValues(
+            alpha: AppOpacity.faint,
+          ),
+          width: 0.5,
+        ),
+      ),
+      child: Text(
+        '"${post.caption}"',
+        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+          color: AppColors.textSecondary,
+          fontStyle: FontStyle.italic,
+          height: 1.4,
         ),
       ),
     );
@@ -402,13 +509,7 @@ class CommunityPostCard extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    post.caption,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
-                      height: 1.4,
-                    ),
-                  ),
+                  _buildCaption(context, quote: false),
                   const SizedBox(height: 6),
                   Text(
                     AppLocalizations.of(
@@ -519,13 +620,7 @@ class CommunityPostCard extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        post.caption,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
-                          height: 1.4,
-                        ),
-                      ),
+                      _buildCaption(context, quote: false),
                       const SizedBox(height: 6),
                       Text(
                         '$name · ${movies.length} film/dizi',

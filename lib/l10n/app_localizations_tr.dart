@@ -2209,6 +2209,36 @@ class AppLocalizationsTr extends AppLocalizations {
   String get cineTwinSeeMatch => 'CineTwin Uyumunu Gör';
 
   @override
+  String get communitySpoilerWarning => 'Bu gönderi spoiler içeriyor';
+
+  @override
+  String get communitySpoilerReveal => 'Görmek için dokunun';
+
+  @override
+  String get communitySpoilerToggle => 'Spoiler Uyarısı Ekle';
+
+  @override
+  String get communityCineTwinRoomTitle => 'CineTwin Odası';
+
+  @override
+  String get communityCineTwinRoomSubtitle =>
+      'Arkadaşınla ortak ne izleyeceğini keşfet';
+
+  @override
+  String communityCineTwinMatchScore(int score) {
+    return '%$score Sinefil Uyumu';
+  }
+
+  @override
+  String get communityCineTwinCommonWatchlist => 'Ortak İzleme Listesi';
+
+  @override
+  String get communityCineTwinNoMatches => 'Henüz ortak bir yapım bulunamadı.';
+
+  @override
+  String get communityCineTwinSelectFriend => 'Bir Arkadaş Seç';
+
+  @override
   String get commentsTitle => 'Yorumlar';
 
   @override

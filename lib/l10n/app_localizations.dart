@@ -4028,6 +4028,60 @@ abstract class AppLocalizations {
   /// **'CineTwin Uyumunu Gör'**
   String get cineTwinSeeMatch;
 
+  /// No description provided for @communitySpoilerWarning.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu gönderi spoiler içeriyor'**
+  String get communitySpoilerWarning;
+
+  /// No description provided for @communitySpoilerReveal.
+  ///
+  /// In tr, this message translates to:
+  /// **'Görmek için dokunun'**
+  String get communitySpoilerReveal;
+
+  /// No description provided for @communitySpoilerToggle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Spoiler Uyarısı Ekle'**
+  String get communitySpoilerToggle;
+
+  /// No description provided for @communityCineTwinRoomTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'CineTwin Odası'**
+  String get communityCineTwinRoomTitle;
+
+  /// No description provided for @communityCineTwinRoomSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Arkadaşınla ortak ne izleyeceğini keşfet'**
+  String get communityCineTwinRoomSubtitle;
+
+  /// No description provided for @communityCineTwinMatchScore.
+  ///
+  /// In tr, this message translates to:
+  /// **'%{score} Sinefil Uyumu'**
+  String communityCineTwinMatchScore(int score);
+
+  /// No description provided for @communityCineTwinCommonWatchlist.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ortak İzleme Listesi'**
+  String get communityCineTwinCommonWatchlist;
+
+  /// No description provided for @communityCineTwinNoMatches.
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz ortak bir yapım bulunamadı.'**
+  String get communityCineTwinNoMatches;
+
+  /// No description provided for @communityCineTwinSelectFriend.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bir Arkadaş Seç'**
+  String get communityCineTwinSelectFriend;
+
   /// No description provided for @commentsTitle.
   ///
   /// In tr, this message translates to:
