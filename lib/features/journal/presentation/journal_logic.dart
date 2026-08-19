@@ -1,9 +1,47 @@
 import '../../../core/constants/tmdb_genres.dart';
 import '../../../core/database/database_provider.dart';
 
-// Filtering, insights-stat calculation, table-view sorting and drag-reorder
-// rank recomputation for JournalScreen — pulled out of the widget because
-// none of it touches BuildContext/State, only plain data in/data out.
+enum JournalSortOption {
+  watchDate,
+  rating,
+  title,
+  runtime,
+  releaseYear,
+}
+
+List<WatchRecordWithMovie> sortJournalRecords(
+  List<WatchRecordWithMovie> records, {
+  required JournalSortOption sortBy,
+  required bool ascending,
+}) {
+  final list = List<WatchRecordWithMovie>.from(records);
+  list.sort((a, b) {
+    int cmp;
+    switch (sortBy) {
+      case JournalSortOption.watchDate:
+        cmp = a.record.watchDate.compareTo(b.record.watchDate);
+        break;
+      case JournalSortOption.rating:
+        cmp = a.record.rating.compareTo(b.record.rating);
+        break;
+      case JournalSortOption.title:
+        cmp = a.movie.title.toLowerCase().compareTo(b.movie.title.toLowerCase());
+        break;
+      case JournalSortOption.runtime:
+        final rA = (a.movie.runtime ?? 0) * a.record.episodeCount;
+        final rB = (b.movie.runtime ?? 0) * b.record.episodeCount;
+        cmp = rA.compareTo(rB);
+        break;
+      case JournalSortOption.releaseYear:
+        final yA = a.movie.releaseYear ?? 0;
+        final yB = b.movie.releaseYear ?? 0;
+        cmp = yA.compareTo(yB);
+        break;
+    }
+    return ascending ? cmp : -cmp;
+  });
+  return list;
+}
 
 List<WatchRecordWithMovie> filterJournalRecords({
   required List<WatchRecordWithMovie> records,

@@ -6319,6 +6319,114 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Paylaş'**
   String get swipeMatchShare;
+
+  /// No description provided for @movieDetailSimilarTitles.
+  ///
+  /// In tr, this message translates to:
+  /// **'Benzer Yapımlar'**
+  String get movieDetailSimilarTitles;
+
+  /// No description provided for @movieDetailNoSimilar.
+  ///
+  /// In tr, this message translates to:
+  /// **'Benzer yapım bulunamadı.'**
+  String get movieDetailNoSimilar;
+
+  /// No description provided for @searchFilterAll.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tümü'**
+  String get searchFilterAll;
+
+  /// No description provided for @searchFilterMovies.
+  ///
+  /// In tr, this message translates to:
+  /// **'Filmler'**
+  String get searchFilterMovies;
+
+  /// No description provided for @searchFilterTv.
+  ///
+  /// In tr, this message translates to:
+  /// **'Diziler'**
+  String get searchFilterTv;
+
+  /// No description provided for @searchFilterMinRating.
+  ///
+  /// In tr, this message translates to:
+  /// **'{rating}+ ★'**
+  String searchFilterMinRating(String rating);
+
+  /// No description provided for @searchFilterDecade2020s.
+  ///
+  /// In tr, this message translates to:
+  /// **'2020\'ler'**
+  String get searchFilterDecade2020s;
+
+  /// No description provided for @searchFilterDecade2010s.
+  ///
+  /// In tr, this message translates to:
+  /// **'2010\'lar'**
+  String get searchFilterDecade2010s;
+
+  /// No description provided for @searchFilterDecade2000s.
+  ///
+  /// In tr, this message translates to:
+  /// **'2000\'ler'**
+  String get searchFilterDecade2000s;
+
+  /// No description provided for @searchFilterDecadeClassics.
+  ///
+  /// In tr, this message translates to:
+  /// **'Klasikler'**
+  String get searchFilterDecadeClassics;
+
+  /// No description provided for @journalSortTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sıralama'**
+  String get journalSortTitle;
+
+  /// No description provided for @journalSortWatchDate.
+  ///
+  /// In tr, this message translates to:
+  /// **'İzleme Tarihi'**
+  String get journalSortWatchDate;
+
+  /// No description provided for @journalSortRating.
+  ///
+  /// In tr, this message translates to:
+  /// **'Puan'**
+  String get journalSortRating;
+
+  /// No description provided for @journalSortTitleAlpha.
+  ///
+  /// In tr, this message translates to:
+  /// **'Alfabetik'**
+  String get journalSortTitleAlpha;
+
+  /// No description provided for @journalSortRuntime.
+  ///
+  /// In tr, this message translates to:
+  /// **'Süre'**
+  String get journalSortRuntime;
+
+  /// No description provided for @journalSortReleaseYear.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yapım Yılı'**
+  String get journalSortReleaseYear;
+
+  /// No description provided for @journalSortAscending.
+  ///
+  /// In tr, this message translates to:
+  /// **'Artan (A→Z / Düşük→Yüksek)'**
+  String get journalSortAscending;
+
+  /// No description provided for @journalSortDescending.
+  ///
+  /// In tr, this message translates to:
+  /// **'Azalan (Z→A / Yüksek→Düşük)'**
+  String get journalSortDescending;
 }
 
 class _AppLocalizationsDelegate

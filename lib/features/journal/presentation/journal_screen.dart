@@ -12,6 +12,7 @@ import 'widgets/journal_empty_state.dart';
 import 'widgets/journal_filter_bar.dart';
 import 'widgets/journal_record_list.dart';
 import 'widgets/journal_search_field.dart';
+import 'widgets/journal_sort_sheet.dart';
 import 'widgets/journal_table_list.dart';
 import 'widgets/journal_top_banner.dart';
 import '../../insights/presentation/insights_screen.dart';
@@ -31,7 +32,8 @@ class _JournalScreenState extends ConsumerState<JournalScreen>
   String _searchQuery = '';
   final String _activeFilter = 'all'; // all, favorites, cinema, notes
   String _sortColumn = 'personal_ranking'; // table view only
-  bool _sortAscending = true;
+  bool _sortAscending = false;
+  JournalSortOption _activeSortOption = JournalSortOption.watchDate;
   bool _showSearch = false; // search bar toggled by search icon
 
   final _searchController = TextEditingController();
@@ -177,6 +179,19 @@ class _JournalScreenState extends ConsumerState<JournalScreen>
             JournalTopBanner(
               showSearch: _showSearch,
               isTableView: isTableView,
+              onTapSort: () {
+                JournalSortSheet.show(
+                  context: context,
+                  currentSort: _activeSortOption,
+                  ascending: _sortAscending,
+                  onSortChanged: (sortOption, ascending) {
+                    setState(() {
+                      _activeSortOption = sortOption;
+                      _sortAscending = ascending;
+                    });
+                  },
+                );
+              },
               onToggleSearch: () {
                 setState(() {
                   _showSearch = !_showSearch;
@@ -268,9 +283,15 @@ class _JournalScreenState extends ConsumerState<JournalScreen>
 
                             final stats = computeJournalInsights(filtered);
 
+                            final sortedList = sortJournalRecords(
+                              filtered,
+                              sortBy: _activeSortOption,
+                              ascending: _sortAscending,
+                            );
+
                             if (isTableView) {
                               sortJournalRecordsForTableView(
-                                filtered,
+                                sortedList,
                                 sortColumn: _sortColumn,
                                 sortAscending: _sortAscending,
                               );
@@ -312,7 +333,7 @@ class _JournalScreenState extends ConsumerState<JournalScreen>
                                   const Divider(height: 1, indent: AppSpacing.lg, endIndent: AppSpacing.lg),
                                   Expanded(
                                     child: JournalRecordsTable(
-                                      items: filtered,
+                                      items: sortedList,
                                       onReorderItem: _onReorder,
                                       onUpdateRanking: _updateRankingsInDatabase,
                                       scrollController: _scrollController2,
@@ -322,7 +343,7 @@ class _JournalScreenState extends ConsumerState<JournalScreen>
                                   // Month-grouped record cards
                                   Expanded(
                                     child: JournalRecordsList(
-                                      items: filtered,
+                                      items: sortedList,
                                       onUpdateRanking: _updateRankingsInDatabase,
                                       scrollController: _scrollController1,
                                     ),

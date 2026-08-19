@@ -1575,5 +1575,26 @@
     "placeholders": { "actor": { "type": "String" } }
   },
   "swipeMatchCTA": "İzleme Listeme Ekle",
-  "swipeMatchShare": "Paylaş"
+  "swipeMatchShare": "Paylaş",
+  "movieDetailSimilarTitles": "Benzer Yapımlar",
+  "movieDetailNoSimilar": "Benzer yapım bulunamadı.",
+  "searchFilterAll": "Tümü",
+  "searchFilterMovies": "Filmler",
+  "searchFilterTv": "Diziler",
+  "searchFilterMinRating": "{rating}+ ★",
+  "@searchFilterMinRating": {
+    "placeholders": { "rating": { "type": "String" } }
+  },
+  "searchFilterDecade2020s": "2020'ler",
+  "searchFilterDecade2010s": "2010'lar",
+  "searchFilterDecade2000s": "2000'ler",
+  "searchFilterDecadeClassics": "Klasikler",
+  "journalSortTitle": "Sıralama",
+  "journalSortWatchDate": "İzleme Tarihi",
+  "journalSortRating": "Puan",
+  "journalSortTitleAlpha": "Alfabetik",
+  "journalSortRuntime": "Süre",
+  "journalSortReleaseYear": "Yapım Yılı",
+  "journalSortAscending": "Artan (A→Z / Düşük→Yüksek)",
+  "journalSortDescending": "Azalan (Z→A / Yüksek→Düşük)"
 }

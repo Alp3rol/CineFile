@@ -9,12 +9,14 @@ class JournalTopBanner extends StatelessWidget {
   final bool showSearch;
   final bool isTableView;
   final VoidCallback onToggleSearch;
+  final VoidCallback? onTapSort;
 
   const JournalTopBanner({
     super.key,
     required this.showSearch,
     required this.isTableView,
     required this.onToggleSearch,
+    this.onTapSort,
   });
 
   static const double _toggleDiameter = 36;
@@ -37,6 +39,29 @@ class JournalTopBanner extends StatelessWidget {
               style: Theme.of(context).textTheme.displayLarge),
           Row(
             children: [
+              // Sort button
+              if (onTapSort != null) ...[
+                AppPressable(
+                  onTap: onTapSort!,
+                  borderRadius: AppRadius.pill,
+                  semanticLabel: l10n.journalSortTitle,
+                  child: Container(
+                    width: _toggleDiameter,
+                    height: _toggleDiameter,
+                    decoration: BoxDecoration(
+                      color: AppColors.textPrimary
+                          .withValues(alpha: AppOpacity.subtle),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.sort_rounded,
+                      color: AppColors.textSecondary,
+                      size: AppSize.iconSm,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+              ],
               // Search toggle button
               AppPressable(
                 onTap: onToggleSearch,

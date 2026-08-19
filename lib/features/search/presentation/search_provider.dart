@@ -16,6 +16,9 @@ class SearchState {
   final TmdbFailure? failure;
   final int? selectedGenreId;
   final int? selectedYear;
+  final double? minRating;
+  final String mediaTypeFilter; // 'all', 'movie', 'tv'
+  final String? decadeFilter; // '2020s', '2010s', '2000s', 'classics'
 
   SearchState({
     required this.query,
@@ -24,6 +27,9 @@ class SearchState {
     this.failure,
     this.selectedGenreId,
     this.selectedYear,
+    this.minRating,
+    this.mediaTypeFilter = 'all',
+    this.decadeFilter,
   });
 
   SearchState.initial()
@@ -32,7 +38,10 @@ class SearchState {
         isLoading = false,
         failure = null,
         selectedGenreId = null,
-        selectedYear = null;
+        selectedYear = null,
+        minRating = null,
+        mediaTypeFilter = 'all',
+        decadeFilter = null;
 
   SearchState copyWith({
     String? query,
@@ -41,6 +50,9 @@ class SearchState {
     Object? failure = _sentinel,
     Object? selectedGenreId = _sentinel,
     Object? selectedYear = _sentinel,
+    Object? minRating = _sentinel,
+    String? mediaTypeFilter,
+    Object? decadeFilter = _sentinel,
   }) {
     return SearchState(
       query: query ?? this.query,
@@ -49,6 +61,9 @@ class SearchState {
       failure: failure == _sentinel ? this.failure : (failure as TmdbFailure?),
       selectedGenreId: selectedGenreId == _sentinel ? this.selectedGenreId : (selectedGenreId as int?),
       selectedYear: selectedYear == _sentinel ? this.selectedYear : (selectedYear as int?),
+      minRating: minRating == _sentinel ? this.minRating : (minRating as double?),
+      mediaTypeFilter: mediaTypeFilter ?? this.mediaTypeFilter,
+      decadeFilter: decadeFilter == _sentinel ? this.decadeFilter : (decadeFilter as String?),
     );
   }
 }
@@ -107,6 +122,18 @@ class SearchNotifier extends StateNotifier<SearchState> {
 
   void setYear(int? year) {
     state = state.copyWith(selectedYear: year);
+  }
+
+  void setMinRating(double? minRating) {
+    state = state.copyWith(minRating: minRating);
+  }
+
+  void setMediaTypeFilter(String filter) {
+    state = state.copyWith(mediaTypeFilter: filter);
+  }
+
+  void setDecadeFilter(String? decade) {
+    state = state.copyWith(decadeFilter: decade);
   }
 
   void reset() {

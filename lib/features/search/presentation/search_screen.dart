@@ -7,8 +7,8 @@ import '../../../../core/constants/api_constants.dart';
 import '../../../../core/constants/tmdb_genres.dart';
 import 'search_provider.dart';
 import '../../../../l10n/app_localizations.dart';
+import 'widgets/search_advanced_filter_bar.dart';
 import 'widgets/search_api_key_warning_banner.dart';
-import 'widgets/search_genre_chips.dart';
 import 'widgets/search_results_view.dart';
 import '../../auth/presentation/widgets/user_profile_avatar_button.dart';
 import '../../../../core/widgets/scroll_to_top_button.dart';
@@ -98,11 +98,47 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
     // Filter results locally
     var displayResults = searchState.results;
+
     if (searchState.selectedGenreId != null) {
       displayResults = displayResults.where((movie) {
         final genreIds = movie['genre_ids'] as List<dynamic>?;
         return genreIds != null &&
             genreIds.contains(searchState.selectedGenreId);
+      }).toList();
+    }
+
+    if (searchState.mediaTypeFilter != 'all') {
+      displayResults = displayResults.where((movie) {
+        final isTv = movie['media_type'] == 'tv' ||
+            movie['first_air_date'] != null ||
+            movie['name'] != null;
+        if (searchState.mediaTypeFilter == 'tv') return isTv;
+        if (searchState.mediaTypeFilter == 'movie') return !isTv;
+        return true;
+      }).toList();
+    }
+
+    if (searchState.minRating != null) {
+      displayResults = displayResults.where((movie) {
+        final vote = (movie['vote_average'] as num?)?.toDouble() ?? 0.0;
+        return vote >= searchState.minRating!;
+      }).toList();
+    }
+
+    if (searchState.decadeFilter != null) {
+      displayResults = displayResults.where((movie) {
+        final dateStr = (movie['release_date'] ??
+            movie['first_air_date'] ??
+            '') as String;
+        final year = int.tryParse(dateStr.split('-').first);
+        if (year == null) return false;
+        return switch (searchState.decadeFilter) {
+          '2020s' => year >= 2020,
+          '2010s' => year >= 2010 && year < 2020,
+          '2000s' => year >= 2000 && year < 2010,
+          'classics' => year < 2000,
+          _ => true,
+        };
       }).toList();
     }
 
@@ -181,10 +217,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             // inside SearchResultsView instead, avoiding stacked chip rows)
             if (searchState.query.trim().isNotEmpty) ...[
               const SizedBox(height: 4),
-              SearchGenreChips(
+              SearchAdvancedFilterBar(
+                state: searchState,
                 genreIds: _genreIds,
-                selectedGenreId: searchState.selectedGenreId,
                 onGenreSelected: searchNotifier.setGenre,
+                onMediaTypeChanged: searchNotifier.setMediaTypeFilter,
+                onMinRatingChanged: searchNotifier.setMinRating,
+                onDecadeChanged: searchNotifier.setDecadeFilter,
               ),
               const SizedBox(height: 12),
             ],

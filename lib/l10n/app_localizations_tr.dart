@@ -3585,4 +3585,60 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get swipeMatchShare => 'Paylaş';
+
+  @override
+  String get movieDetailSimilarTitles => 'Benzer Yapımlar';
+
+  @override
+  String get movieDetailNoSimilar => 'Benzer yapım bulunamadı.';
+
+  @override
+  String get searchFilterAll => 'Tümü';
+
+  @override
+  String get searchFilterMovies => 'Filmler';
+
+  @override
+  String get searchFilterTv => 'Diziler';
+
+  @override
+  String searchFilterMinRating(String rating) {
+    return '$rating+ ★';
+  }
+
+  @override
+  String get searchFilterDecade2020s => '2020\'ler';
+
+  @override
+  String get searchFilterDecade2010s => '2010\'lar';
+
+  @override
+  String get searchFilterDecade2000s => '2000\'ler';
+
+  @override
+  String get searchFilterDecadeClassics => 'Klasikler';
+
+  @override
+  String get journalSortTitle => 'Sıralama';
+
+  @override
+  String get journalSortWatchDate => 'İzleme Tarihi';
+
+  @override
+  String get journalSortRating => 'Puan';
+
+  @override
+  String get journalSortTitleAlpha => 'Alfabetik';
+
+  @override
+  String get journalSortRuntime => 'Süre';
+
+  @override
+  String get journalSortReleaseYear => 'Yapım Yılı';
+
+  @override
+  String get journalSortAscending => 'Artan (A→Z / Düşük→Yüksek)';
+
+  @override
+  String get journalSortDescending => 'Azalan (Z→A / Yüksek→Düşük)';
 }

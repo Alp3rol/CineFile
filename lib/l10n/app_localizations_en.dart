@@ -3793,4 +3793,60 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get swipeMatchShare => 'Share';
+
+  @override
+  String get movieDetailSimilarTitles => 'Similar Titles';
+
+  @override
+  String get movieDetailNoSimilar => 'No similar titles found.';
+
+  @override
+  String get searchFilterAll => 'All';
+
+  @override
+  String get searchFilterMovies => 'Movies';
+
+  @override
+  String get searchFilterTv => 'TV Shows';
+
+  @override
+  String searchFilterMinRating(String rating) {
+    return '$rating+ ★';
+  }
+
+  @override
+  String get searchFilterDecade2020s => '2020s';
+
+  @override
+  String get searchFilterDecade2010s => '2010s';
+
+  @override
+  String get searchFilterDecade2000s => '2000s';
+
+  @override
+  String get searchFilterDecadeClassics => 'Classics';
+
+  @override
+  String get journalSortTitle => 'Sort';
+
+  @override
+  String get journalSortWatchDate => 'Watch Date';
+
+  @override
+  String get journalSortRating => 'Rating';
+
+  @override
+  String get journalSortTitleAlpha => 'Alphabetical';
+
+  @override
+  String get journalSortRuntime => 'Runtime';
+
+  @override
+  String get journalSortReleaseYear => 'Release Year';
+
+  @override
+  String get journalSortAscending => 'Ascending (A→Z / Low→High)';
+
+  @override
+  String get journalSortDescending => 'Descending (Z→A / High→Low)';
 }

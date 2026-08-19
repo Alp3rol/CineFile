@@ -28,11 +28,18 @@ mixin _TmdbDetailsResource on _TmdbCore {
             .map((id) => {'id': id, 'name': genreMap[id] ?? 'Genel'})
             .toList();
 
+        final otherMockMovies = _TmdbCore._mockMovies
+            .where((m) => m['id'] != tmdbId)
+            .map((m) => {...m, 'media_type': 'movie'})
+            .toList();
+
         return {
           ...basicMovie,
           'runtime': 148,
           'genres': genresList,
           'tagline': 'Gerçeküstü bir yolculuk.',
+          'recommendations': {'results': otherMockMovies},
+          'similar': {'results': otherMockMovies},
           'credits': {
             'cast': [
               {
@@ -107,7 +114,7 @@ mixin _TmdbDetailsResource on _TmdbCore {
       queryParameters: {
         'api_key': _apiKey,
         'language': language ?? this.language,
-        'append_to_response': 'credits,release_dates',
+        'append_to_response': 'credits,release_dates,recommendations,similar',
       },
     );
     final data = response.data as Map<String, dynamic>;
@@ -124,7 +131,7 @@ mixin _TmdbDetailsResource on _TmdbCore {
       queryParameters: {
         'api_key': _apiKey,
         'language': language ?? this.language,
-        'append_to_response': 'credits,aggregate_credits,content_ratings',
+        'append_to_response': 'credits,aggregate_credits,content_ratings,recommendations,similar',
       },
     );
     final data = response.data as Map<String, dynamic>;

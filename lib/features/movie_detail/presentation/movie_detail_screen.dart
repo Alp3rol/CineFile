@@ -15,6 +15,7 @@ import 'add_watch_record_sheet.dart';
 import 'widgets/movie_detail_action_widgets.dart';
 import 'widgets/movie_detail_backdrop.dart';
 import 'widgets/movie_detail_cast_list.dart';
+import 'widgets/movie_detail_similar_section.dart';
 import 'widgets/movie_detail_watch_providers_section.dart';
 import 'widgets/movie_detail_floating_header.dart';
 import 'widgets/movie_detail_header_row.dart';
@@ -581,6 +582,12 @@ class _MovieDetailScreenState extends ConsumerState<MovieDetailScreen> {
                                   _openAddWatchRecordSheet(context, movieData),
                             ),
                           ],
+
+                          const SizedBox(height: AppSpacing.lg),
+                          MovieDetailSimilarSection(
+                            movieData: movieData,
+                            isTv: isTv,
+                          ),
 
                           MovieDetailTimelineSection(
                             watchRecordsAsync: watchRecordsAsync,

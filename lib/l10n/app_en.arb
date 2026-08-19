@@ -1152,5 +1152,26 @@
     "placeholders": { "actor": { "type": "String" } }
   },
   "swipeMatchCTA": "Add to My Watchlist",
-  "swipeMatchShare": "Share"
+  "swipeMatchShare": "Share",
+  "movieDetailSimilarTitles": "Similar Titles",
+  "movieDetailNoSimilar": "No similar titles found.",
+  "searchFilterAll": "All",
+  "searchFilterMovies": "Movies",
+  "searchFilterTv": "TV Shows",
+  "searchFilterMinRating": "{rating}+ ★",
+  "@searchFilterMinRating": {
+    "placeholders": { "rating": { "type": "String" } }
+  },
+  "searchFilterDecade2020s": "2020s",
+  "searchFilterDecade2010s": "2010s",
+  "searchFilterDecade2000s": "2000s",
+  "searchFilterDecadeClassics": "Classics",
+  "journalSortTitle": "Sort",
+  "journalSortWatchDate": "Watch Date",
+  "journalSortRating": "Rating",
+  "journalSortTitleAlpha": "Alphabetical",
+  "journalSortRuntime": "Runtime",
+  "journalSortReleaseYear": "Release Year",
+  "journalSortAscending": "Ascending (A→Z / Low→High)",
+  "journalSortDescending": "Descending (Z→A / High→Low)"
 }
